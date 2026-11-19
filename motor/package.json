@@ -1,0 +1,27 @@
+{
+  "name": "giz-motor",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "studio": "remotion studio src/index.ts",
+    "typecheck": "tsc --noEmit",
+    "lesson": "node scripts/lesson.ts build",
+    "tts": "node scripts/tts.ts",
+    "render": "node scripts/render.ts"
+  },
+  "dependencies": {
+    "@echogarden/espeak-ng-emscripten": "^0.3.5",
+    "@remotion/cli": "^4.0.545",
+    "@remotion/google-fonts": "^4.0.545",
+    "@remotion/media-utils": "^4.0.545",
+    "kokoro-js": "^1.2.1",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "remotion": "^4.0.545"
+  },
+  "devDependencies": {
+    "@types/node": "^22.20.5",
+    "@types/react": "^18.3.31",
+    "typescript": "^5.9.3"
+  }
+}

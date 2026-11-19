@@ -1,0 +1,8 @@
+id: "NN"
+slug: nome-da-aula
+course: nome-do-curso
+title: "Título da aula"
+status: planejada
+target_minutes: 8
+teachers: [lia, teo]
+prerequisites: []

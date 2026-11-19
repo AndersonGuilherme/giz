@@ -1,0 +1,11 @@
+node_modules/
+.tools/
+motor/public/
+cursos/*/aulas/*/audio/
+cursos/*/aulas/*/render/
+personagens/3d/
+personagens/comparativo.html
+producao-log.md
+*.wav
+!motor/assets/sfx/*.wav
+*.mp4

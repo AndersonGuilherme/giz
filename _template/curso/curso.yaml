@@ -1,0 +1,13 @@
+slug: nome-do-curso
+title: "Título do curso"
+level: iniciante | intermediario | avancado
+audience: "Para quem é (pré-requisitos em uma linha)"
+language_of_examples: ""        # ex.: typescript, python; vazio se não houver código
+teachers: [lia, teo]            # ver personagens/guia-editorial.md
+style: 2d                       # 2d | 2.5d | 3d (decisão em personagens/comparativo.html)
+voice:
+  provider: ""                  # elevenlabs | openai | azure | gravacao-propria
+  menina: ""                    # id da voz
+  menino: ""
+target_minutes_per_lesson: [5, 10]
+publish: [youtube]

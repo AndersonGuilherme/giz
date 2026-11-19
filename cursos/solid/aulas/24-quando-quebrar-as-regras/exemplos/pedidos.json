@@ -1,0 +1,5 @@
+[
+  { "id": "P-101", "customer": "ana@exemplo.com", "total": 21000, "createdAt": "2026-11-27T10:12:00" },
+  { "id": "P-102", "customer": "bia@exemplo.com", "total": 8000, "createdAt": "2026-11-27T11:40:00" },
+  { "id": "P-103", "customer": "caio@exemplo.com", "total": 16800, "createdAt": "2026-11-28T09:05:00" }
+]

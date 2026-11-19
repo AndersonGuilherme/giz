@@ -1,0 +1,4 @@
+instanceof [A-Za-z]+
+não suporta [a-z]+
+ATENÇÃO
+constructor\.name

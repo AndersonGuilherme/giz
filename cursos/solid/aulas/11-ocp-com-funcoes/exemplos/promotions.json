@@ -1,0 +1,7 @@
+[
+  { "name": "VIP", "percent": 10, "customer": "vip" },
+  { "name": "Funcionário", "percent": 30, "customer": "employee" },
+  { "name": "Black Friday", "percent": 20, "from": "2026-11-24", "to": "2026-11-30" },
+  { "name": "Cupom BEMVINDO", "fixed": 2500, "coupon": "BEMVINDO" },
+  { "name": "Dia das Mães", "percent": 15, "from": "2026-05-04", "to": "2026-05-10" }
+]

@@ -1,0 +1,4 @@
+[
+  { "name": "VIP", "percent": 10, "customer": "vip" },
+  { "name": "Dia das Mães", "percent": 150, "from": "2026-05-04", "to": "2026-05-10" }
+]
