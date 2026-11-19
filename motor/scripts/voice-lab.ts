@@ -1,6 +1,6 @@
 // Laboratório de vozes: sintetiza as mesmas frases com cada voz do Qwen3-TTS e mede, com o Whisper local,
 // quantas palavras ele entende (WER menor = pronúncia mais clara em pt-BR). Também mede o tempo de geração.
-// Uso: node scripts/voice-lab.ts [pasta-de-saida] [voz1,voz2,...]
+// Uso: node scripts/voice-lab.ts [pasta-de-saida] [voz1,voz2,...] ["instrução de estilo (só 1.7B)"]
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { Qwen3TTS, QWEN_RATE } from './qwen3-tts.ts';
@@ -22,7 +22,7 @@ for (const v of voices) {
   const heard: string[] = [];
   for (const [i, f] of FRASES.entries()) {
     const t = performance.now();
-    const a = await tts.generate(f, { speaker: v, seed: 7 + i });
+    const a = await tts.generate(f, { speaker: v, instruct: process.argv[4] || undefined, seed: 7 + i });
     gen += (performance.now() - t) / 1000; dur += a.length / QWEN_RATE;
     const x = new Float32Array(Math.floor((a.length * 16000) / QWEN_RATE));
     for (let k = 0; k < x.length; k++) x[k] = a[Math.floor((k * QWEN_RATE) / 16000)];

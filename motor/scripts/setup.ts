@@ -65,7 +65,7 @@ console.log(G(`✔ Node ${process.versions.node}`));
 
 // 2 · pasta dos modelos
 step(2, TOTAL, 'Onde guardar os modelos de IA');
-console.log('A voz usa o modelo aberto Qwen3-TTS (~5,9 GB), baixado uma única vez. Com GPU, mais ~2,6 GB de bibliotecas CUDA.');
+console.log('A voz usa o modelo aberto Qwen3-TTS (5,9 GB ou 13,4 GB, você escolhe no passo 4), baixado uma única vez. Com GPU, mais ~1,8 GB de bibliotecas CUDA.');
 cfg.modelsDir = await ask('Pasta dos modelos', prev.modelsDir);
 mkdirSync(cfg.modelsDir, { recursive: true });
 const free = freeGB(cfg.modelsDir);
@@ -80,7 +80,7 @@ const nv = gpu.detectNvidia();
 cfg.device = 'cpu';
 if (nv) {
   console.log(G(`✔ GPU NVIDIA encontrada: ${nv.name} (${(nv.memoryMiB / 1024).toFixed(0)} GB, driver ${nv.driver})`));
-  if (await yes('Usar a GPU para gerar as vozes? Bem mais rápido; baixa ~2,6 GB de bibliotecas da NVIDIA (sem sudo)', true)) {
+  if (await yes('Usar a GPU para gerar as vozes? Bem mais rápido; baixa ~1,8 GB de bibliotecas da NVIDIA (sem sudo)', true)) {
     try {
       await gpu.installGpu();
       cfg.device = 'cuda';
@@ -97,13 +97,28 @@ if (cfg.device === 'cpu') {
   cfg.threads = Math.max(0, Number(t) || 0);
 }
 
-// 4 · idioma e vozes
-step(4, TOTAL, 'Seu canal, idioma e vozes de Lia e Téo');
+// 4 · modelo, canal, idioma, vozes e estilos
+step(4, TOTAL, 'Modelo de voz, seu canal, idioma e vozes de Lia e Téo');
+const { QWEN_MODELS } = await import('./qwen3-tts.ts');
+const bigOk = cfg.device === 'cuda' ? (nv?.memoryMiB ?? 0) >= 14000 : ramGB >= 24;
+console.log(`Há dois tamanhos do modelo de voz (as mesmas 9 vozes):
+  0.6b — ${QWEN_MODELS['0.6b'].gb} GB, mais leve e rápido
+  1.7b — ${QWEN_MODELS['1.7b'].gb} GB, fala mais natural e aceita INSTRUÇÕES DE ESTILO ("fale empolgado", "mais grave")
+         precisa de ~13 GB de memória de vídeo (GPU) ou ~20 GB de RAM (CPU, bem mais lento)`);
+cfg.model = await choose('Qual modelo?', [
+  { value: '0.6b', label: '0.6b (leve)' },
+  { value: '1.7b', label: `1.7b (melhor)${bigOk ? '' : '  ⚠ seu hardware pode não ter memória suficiente'}` },
+], existsSync(CONFIG_PATH) ? prev.model : bigOk ? '1.7b' : '0.6b');
 cfg.brand = await ask('Nome do seu canal ou marca (aparece no canto dos vídeos)', prev.brand);
 cfg.language = await choose('Idioma da narração:', LANGS.map((l) => ({ value: l, label: l })), prev.language);
 console.log(D('As vozes prontas do modelo são nativas de outros idiomas, mas falam todos os 10. Dá para ouvir amostras no passo 7.'));
 cfg.voices.lia = await choose('Voz da Lia (mentora):', VOICES.filter((v) => v.gender === 'f'), prev.voices.lia);
 cfg.voices.teo = await choose('Voz do Téo (dev curioso):', VOICES.filter((v) => v.gender === 'm'), prev.voices.teo);
+if (cfg.model === '1.7b') {
+  console.log(D('Instrução de estilo: como cada personagem fala, em linguagem natural (pode ser em português). Vazio = sem instrução.'));
+  cfg.styles.lia = await ask('Estilo da Lia', prev.styles.lia || 'Fale de forma calorosa, confiante e didática, como uma professora experiente');
+  cfg.styles.teo = await ask('Estilo do Téo', prev.styles.teo || 'Fale com energia e curiosidade, como um jovem desenvolvedor animado');
+}
 
 // 5 · controle de qualidade
 step(5, TOTAL, 'Controle de qualidade da pronúncia (opcional)');
@@ -138,7 +153,7 @@ let tts: Awaited<ReturnType<typeof Qwen3TTS.load>>;
 const test = async () => {
   tts = await Qwen3TTS.load();
   const t = performance.now();
-  const a = await tts.generate('Olá! Eu sou a Lia, e este é o Téo.', { speaker: cfg.voices.lia, language: cfg.language, seed: 7 });
+  const a = await tts.generate('Olá! Eu sou a Lia, e este é o Téo.', { speaker: cfg.voices.lia, language: cfg.language, instruct: cfg.styles.lia || undefined, seed: 7 });
   return { a, secs: (performance.now() - t) / 1000 };
 };
 let r: Awaited<ReturnType<typeof test>>;
@@ -156,7 +171,8 @@ const ratio = r.secs / (r.a.length / QWEN_RATE);
 console.log(G(`✔ voz funcionando em ${cfg.device === 'cuda' ? 'GPU' : 'CPU'}: ${ratio.toFixed(1)} s para gerar cada 1 s de fala`));
 if (await yes('Gerar amostras de TODAS as vozes para você ouvir e comparar? (~1 min por voz em CPU)', false)) {
   for (const v of VOICES) {
-    const a = await tts!.generate('Então como uma consulta de frete disparou três mil e-mails?', { speaker: v.value, language: cfg.language, seed: 7 });
+    const style = v.gender === 'f' ? cfg.styles.lia : cfg.styles.teo;
+    const a = await tts!.generate('Então como uma consulta de frete disparou três mil e-mails?', { speaker: v.value, language: cfg.language, instruct: style || undefined, seed: 7 });
     writeFileSync(join(sampleDir, `${v.value}.wav`), wav(a));
     console.log(`  ${v.value}.wav`);
   }

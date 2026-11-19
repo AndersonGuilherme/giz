@@ -53,6 +53,7 @@ export type Cue = {
   look?: Look; // para onde quem fala olha (padrão: 'content' em cena de conteúdo, 'other' em 'talk')
   react?: { expr?: Expression; pose?: Pose; look?: Look }; // quem ESCUTA, durante esta fala
   speed?: number; // (sem efeito com o Qwen3-TTS, que não tem controle de velocidade; use <pausa> no say)
+  style?: string; // instrução de estilo SÓ desta fala (modelo 1.7B), ex.: 'Fale surpreso, quase gritando'
   hold?: { seconds: number; label: string }; // pausa APÓS a fala, com contagem (aluno pensa)
   read?: number | false; // pausa de leitura (s) quando a fala abre um código novo; padrão automático, false desliga
   sfx?: Sfx; // efeito no início da fala

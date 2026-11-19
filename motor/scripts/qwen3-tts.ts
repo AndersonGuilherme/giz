@@ -1,6 +1,6 @@
-// Qwen3-TTS (Alibaba Qwen, Apache-2.0) rodando LOCAL em CPU, só com Node + ONNX Runtime (sem Python, sem GPU).
-// Pesos: export ONNX do modelo 12Hz-0.6B-CustomVoice (huggingface.co/elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX),
-// baixados uma única vez para ~/.cache/giz/ (ou GIZ_MODELS_DIR). Pipeline:
+// Qwen3-TTS (Alibaba Qwen, Apache-2.0) rodando LOCAL (CPU ou GPU NVIDIA), só com Node + ONNX Runtime (sem Python).
+// Pesos: export ONNX dos modelos 12Hz CustomVoice 0.6B ou 1.7B (huggingface.co/elbruno/Qwen3-TTS-12Hz-*-CustomVoice-ONNX),
+// baixados uma única vez para <modelsDir> (giz.config.json). O 1.7B aceita instruções de estilo ("fale empolgado"). Pipeline:
 //   texto → tokens (BPE do Qwen) → talker (LM, 1 quadro de áudio a cada 80 ms, grupo 0)
 //   → code predictor (grupos 1–15 do quadro) → vocoder (16 códigos/quadro → 24 kHz)
 // Referência da arquitetura: github.com/QwenLM/Qwen3-TTS e github.com/elbruno/qwen-labs-cs (C#).
@@ -12,16 +12,21 @@ import * as ort from 'onnxruntime-node';
 import { loadConfig } from './config.ts';
 
 export const QWEN_RATE = 24000;
-export const QWEN_REPO = process.env.QWEN_TTS_REPO ?? 'elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX';
+export const QWEN_MODELS = {
+  '0.6b': { repo: 'elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX', gb: 5.9, instruct: false },
+  '1.7b': { repo: 'elbruno/Qwen3-TTS-12Hz-1.7B-CustomVoice-ONNX', gb: 13.4, instruct: true },
+} as const;
+export type QwenModel = keyof typeof QWEN_MODELS;
+export const configuredRepo = () => process.env.QWEN_TTS_REPO ?? QWEN_MODELS[loadConfig().model].repo;
 export const QWEN_SPEAKERS = ['serena', 'vivian', 'uncle_fu', 'ryan', 'aiden', 'ono_anna', 'sohee', 'eric', 'dylan'] as const;
 const SAMPLES_PER_FRAME = 1920;
 
-export function modelDir(repo = QWEN_REPO) {
+export function modelDir(repo = configuredRepo()) {
   return join(loadConfig().modelsDir, repo.replace('/', '__'));
 }
 
 // ── download (uma vez, com retomada) ────────────────────────────────────────────────────────────────
-export async function ensureModel(repo = QWEN_REPO): Promise<string> {
+export async function ensureModel(repo = configuredRepo()): Promise<string> {
   const dir = modelDir(repo);
   const done = join(dir, '.completo');
   if (existsSync(done)) return dir;
@@ -153,7 +158,14 @@ type Config = {
   language_ids: Record<string, number>;
 };
 
-export type GenerateOptions = { speaker: string; language?: string; seed?: number; temperature?: number; topK?: number; repetitionPenalty?: number; maxFrames?: number };
+// QWEN_PROFILE=1 imprime onde o tempo de cada geração foi gasto
+const PROF = process.env.QWEN_PROFILE ? new Map<string, number>() : null;
+async function timed<T>(k: string, f: () => Promise<T> | T): Promise<T> {
+  if (!PROF) return f();
+  const t = performance.now(); const r = await f(); PROF.set(k, (PROF.get(k) ?? 0) + performance.now() - t); return r;
+}
+
+export type GenerateOptions = { speaker: string; language?: string; instruct?: string; seed?: number; temperature?: number; topK?: number; repetitionPenalty?: number; maxFrames?: number };
 
 export class Qwen3TTS {
   // campos atribuídos no construtor (Node só remove tipos: sem "parameter properties")
@@ -164,18 +176,31 @@ export class Qwen3TTS {
   private fc1!: { w: Float32Array; b: Float32Array; out: number };
   private fc2!: { w: Float32Array; b: Float32Array; out: number };
   private codecEmb!: Float32Array; // talker: grupo 0 e tokens de controle (vocab_size × hidden)
-  private cpEmb!: Float32Array[]; // grupos 1..15 (cp_vocab × cp_hidden)
-  private prefill!: ort.InferenceSession;
+  private cpEmb!: Float32Array[]; // grupos 1..15 (cp_vocab × hidden do talker)
+  private cpProj!: { w: Float32Array; b: Float32Array; out: number } | null; // 1.7B: talker (2048) → code predictor (1024)
+  private projCache = new Map<string, Float32Array>();
+  private prefill!: ort.InferenceSession | null; // null: prefill feito pelo próprio decode (economiza a 2ª cópia dos pesos)
   private decode!: ort.InferenceSession;
   private cp!: ort.InferenceSession;
   private vocoder!: ort.InferenceSession;
+  private vocoderPath!: string;
+  private cpuOpts!: ort.InferenceSession.SessionOptions;
+  private vocoderCpu: ort.InferenceSession | null = null;
+  private async vocode(codes: ort.Tensor): Promise<Float32Array> {
+    const run = async (v: ort.InferenceSession) => (await v.run({ [v.inputNames[0]]: codes }))[v.outputNames[0]].data as Float32Array;
+    if (this.vocoderCpu) return run(this.vocoderCpu);
+    try { return await run(this.vocoder); } catch (e) {
+      if (!/Pad|shape/i.test(String((e as Error).message))) throw e;
+      this.vocoderCpu = await ort.InferenceSession.create(this.vocoderPath, this.cpuOpts);
+      return run(this.vocoderCpu);
+    }
+  }
   private constructor(parts: Record<string, unknown>) { Object.assign(this, parts); }
 
   static async load(dir?: string): Promise<Qwen3TTS> {
     dir ??= await ensureModel();
     const e = (f: string) => join(dir!, 'embeddings', f);
     const cfg = JSON.parse(readFileSync(e('config.json'), 'utf8')) as Config;
-    if (cfg.code_predictor.hidden_size !== cfg.talker.hidden_size) throw new Error('modelo 1.7B (com projeção do code predictor) ainda não suportado; use o 0.6B');
     const fc1w = readNpy(e('text_projection_fc1_weight.npy')), fc2w = readNpy(e('text_projection_fc2_weight.npy'));
     const cfg0 = loadConfig();
     if (cfg0.device === 'cuda') (await import('./gpu.ts')).preloadCuda();
@@ -185,9 +210,10 @@ export class Qwen3TTS {
       executionProviders: cfg0.device === 'cuda' ? [{ name: 'cuda', deviceId: 0 }, 'cpu'] : ['cpu'],
     };
     const s = (f: string) => ort.InferenceSession.create(join(dir!, f), opts);
-    // o vocoder roda sempre na CPU: na GPU, o nó Pad dele falha com formas dinâmicas (problema conhecido do export)
-    const [prefill, decode, cp, vocoder] = await Promise.all([s('talker_prefill.onnx'), s('talker_decode.onnx'), s('code_predictor.onnx'),
-      ort.InferenceSession.create(join(dir!, 'vocoder.onnx'), { ...opts, executionProviders: ['cpu'] })]);
+    // vocoder: tenta a GPU; se o nó Pad falhar com alguma forma (problema conhecido do export), refaz na CPU
+    // QWEN_PREFILL=1 usa o grafo de prefill separado (mais memória: os pesos do talker ficam carregados duas vezes)
+    const [prefill, decode, cp, vocoder] = await Promise.all([process.env.QWEN_PREFILL ? s('talker_prefill.onnx') : null, s('talker_decode.onnx'), s('code_predictor.onnx'),
+      ort.InferenceSession.create(join(dir!, 'vocoder.onnx'), { ...opts, logSeverityLevel: 4 })]); // 4: a falha esperada do Pad não polui o terminal
     return new Qwen3TTS({
       cfg, tok: new BpeTokenizer(join(dir, 'tokenizer')), speakers: JSON.parse(readFileSync(e('speaker_ids.json'), 'utf8')),
       textEmb: readNpy(e('text_embedding.npy')).data,
@@ -195,7 +221,10 @@ export class Qwen3TTS {
       fc2: { w: fc2w.data, b: readNpy(e('text_projection_fc2_bias.npy')).data, out: fc2w.shape[0] },
       codecEmb: readNpy(e('talker_codec_embedding.npy')).data,
       cpEmb: Array.from({ length: 15 }, (_, g) => readNpy(e(`cp_codec_embedding_${g}.npy`)).data),
-      prefill, decode, cp, vocoder,
+      cpProj: existsSync(e('cp_projection_weight.npy'))
+        ? (() => { const w = readNpy(e('cp_projection_weight.npy')); return { w: w.data, b: readNpy(e('cp_projection_bias.npy')).data, out: w.shape[0] }; })()
+        : null,
+      prefill, decode, cp, vocoder, vocoderPath: join(dir, 'vocoder.onnx'), cpuOpts: { ...opts, executionProviders: ['cpu'] },
     });
   }
 
@@ -220,7 +249,18 @@ export class Qwen3TTS {
     return y;
   }
   private codecVec(id: number) { const H = this.cfg.talker.hidden_size; return this.codecEmb.subarray(id * H, (id + 1) * H); }
-  private cpVec(group: number, id: number) { const H = this.cfg.code_predictor.hidden_size; return this.cpEmb[group].subarray(id * H, (id + 1) * H); }
+  private cpVec(group: number, id: number) { const H = this.cfg.talker.hidden_size; return this.cpEmb[group].subarray(id * H, (id + 1) * H); }
+  get supportsInstruct() { return this.cpProj !== null; }
+  // entrada do code predictor: no 1.7B, projeta do espaço do talker (2048) para o do code predictor (1024)
+  private toCp(v: Float32Array, cacheKey?: string): Float32Array {
+    const P = this.cpProj;
+    if (!P) return v;
+    if (cacheKey) { const hit = this.projCache.get(cacheKey); if (hit) return hit; }
+    const D = v.length, y = new Float32Array(P.out);
+    for (let o = 0; o < P.out; o++) { let s = P.b[o]; const row = o * D; for (let i = 0; i < D; i++) s += P.w[row + i] * v[i]; y[o] = s; }
+    if (cacheKey) this.projCache.set(cacheKey, y);
+    return y;
+  }
   private static add(...v: ArrayLike<number>[]) { const o = new Float32Array(v[0].length); for (const a of v) for (let i = 0; i < o.length; i++) o[i] += a[i]; return o; }
 
   async generate(text: string, o: GenerateOptions): Promise<Float32Array> {
@@ -240,7 +280,10 @@ export class Qwen3TTS {
       ? [T.codec_nothink_id, T.codec_think_bos_id, T.codec_think_eos_id]
       : [T.codec_think_id, T.codec_think_bos_id, this.cfg.language_ids[lang] ?? (() => { throw new Error(`idioma "${lang}" não suportado`); })(), T.codec_think_eos_id];
     codec.push(spk, T.codec_pad_id, T.codec_bos_id);
-    const rows: Float32Array[] = [0, 1, 2].map((i) => this.textVec(ids[i]));
+    const rows: Float32Array[] = [];
+    // instrução de estilo (só 1.7B): turno "user" antes de tudo, só texto (sem codec)
+    if (o.instruct && this.supportsInstruct) for (const id of this.tok.encode(`<|im_start|>user\n${o.instruct}<|im_end|>\n`)) rows.push(this.textVec(id));
+    rows.push(...[0, 1, 2].map((i) => this.textVec(ids[i])));
     for (let i = 0; i < codec.length - 2; i++) rows.push(Qwen3TTS.add(ttsPad, this.codecVec(codec[i])));
     rows.push(Qwen3TTS.add(ttsBos, this.codecVec(codec[codec.length - 2])));
     rows.push(Qwen3TTS.add(this.textVec(ids[3]), this.codecVec(T.codec_bos_id)));
@@ -251,24 +294,45 @@ export class Qwen3TTS {
     const L = rows.length;
     const embeds = new Float32Array(L * H);
     rows.forEach((r, i) => embeds.set(r, i * H));
-    const pos = new BigInt64Array(3 * L);
-    for (let a = 0; a < 3; a++) for (let i = 0; i < L; i++) pos[a * L + i] = BigInt(i);
-    const pre = await this.prefill.run({
-      inputs_embeds: new ort.Tensor('float32', embeds, [1, L, H]),
-      attention_mask: new ort.Tensor('int64', new BigInt64Array(L).fill(1n), [1, L]),
-      position_ids: new ort.Tensor('int64', pos, [3, 1, L]),
-    });
-    // KV do prefill vem por camada; o decode quer tudo empilhado (camadas, 1, kv, T, hd)
-    const NL = T.num_hidden_layers, layer = T.num_key_value_heads * L * T.head_dim;
-    const keys = new Float32Array(NL * layer), vals = new Float32Array(NL * layer);
-    for (let l = 0; l < NL; l++) {
-      keys.set(pre[`present_key_${l}`].data as Float32Array, l * layer);
-      vals.set(pre[`present_value_${l}`].data as Float32Array, l * layer);
+    const NL = T.num_hidden_layers, KV = T.num_key_value_heads, HD = T.head_dim;
+    let pastK: ort.Tensor, pastV: ort.Tensor, logits: Float32Array, hidden: Float32Array;
+    if (this.prefill) {
+      const pos = new BigInt64Array(3 * L);
+      for (let a = 0; a < 3; a++) for (let i = 0; i < L; i++) pos[a * L + i] = BigInt(i);
+      const pre = await timed('prefill', () => this.prefill!.run({
+        inputs_embeds: new ort.Tensor('float32', embeds, [1, L, H]),
+        attention_mask: new ort.Tensor('int64', new BigInt64Array(L).fill(1n), [1, L]),
+        position_ids: new ort.Tensor('int64', pos, [3, 1, L]),
+      }));
+      // KV do prefill vem por camada; o decode quer tudo empilhado (camadas, 1, kv, T, hd)
+      const layer = KV * L * HD;
+      const keys = new Float32Array(NL * layer), vals = new Float32Array(NL * layer);
+      for (let l = 0; l < NL; l++) {
+        keys.set(pre[`present_key_${l}`].data as Float32Array, l * layer);
+        vals.set(pre[`present_value_${l}`].data as Float32Array, l * layer);
+      }
+      pastK = new ort.Tensor('float32', keys, [NL, 1, KV, L, HD]);
+      pastV = new ort.Tensor('float32', vals, [NL, 1, KV, L, HD]);
+      logits = pre.logits.data as Float32Array;
+      hidden = pre.hidden_states.data as Float32Array;
+    } else {
+      // prefill com o grafo de decode, uma posição por vez (mesmo resultado, metade da memória)
+      pastK = new ort.Tensor('float32', new Float32Array(0), [NL, 1, KV, 0, HD]);
+      pastV = new ort.Tensor('float32', new Float32Array(0), [NL, 1, KV, 0, HD]);
+      let out!: ort.InferenceSession.OnnxValueMapType;
+      for (let i = 0; i < L; i++) {
+        const p = BigInt(i);
+        out = await timed('prefill', () => this.decode.run({
+          inputs_embeds: new ort.Tensor('float32', embeds.subarray(i * H, (i + 1) * H), [1, 1, H]),
+          attention_mask: new ort.Tensor('int64', new BigInt64Array(i + 1).fill(1n), [1, i + 1]),
+          position_ids: new ort.Tensor('int64', BigInt64Array.from([p, p, p]), [3, 1, 1]),
+          past_keys: pastK, past_values: pastV,
+        }));
+        pastK = out.present_keys; pastV = out.present_values;
+      }
+      logits = out.logits.data as Float32Array;
+      hidden = out.hidden_states.data as Float32Array;
     }
-    let pastK: ort.Tensor = new ort.Tensor('float32', keys, [NL, 1, T.num_key_value_heads, L, T.head_dim]);
-    let pastV: ort.Tensor = new ort.Tensor('float32', vals, [NL, 1, T.num_key_value_heads, L, T.head_dim]);
-    let logits = pre.logits.data as Float32Array;
-    let hidden = pre.hidden_states.data as Float32Array;
 
     const CP = this.cfg.code_predictor;
     const frames: number[][] = [];
@@ -280,28 +344,28 @@ export class Qwen3TTS {
       for (const t of history) l0[t] = l0[t] > 0 ? l0[t] / rep : l0[t] * rep;
       for (let i = CP.vocab_size; i < T.vocab_size; i++) if (i !== T.codec_eos_token_id) l0[i] = -Infinity;
       if (step < 2) l0[T.codec_eos_token_id] = -Infinity;
-      const g0 = sample(l0, temperature, topK, rand);
+      const g0 = await timed('sample', () => sample(l0, temperature, topK, rand));
       if (g0 === T.codec_eos_token_id) break;
       history.push(g0);
 
       // grupos 1..15 do mesmo quadro
       const codes = [g0];
-      let cpIn = new Float32Array(2 * H);
-      cpIn.set(hidden.subarray(hidden.length - H), 0);
-      cpIn.set(this.codecVec(g0), H);
+      const CH = this.cpProj ? this.cpProj.out : H;
+      let cpIn = new Float32Array(2 * CH);
+      await timed('proj', () => { cpIn.set(this.toCp(hidden.slice(hidden.length - H)), 0); cpIn.set(this.toCp(new Float32Array(this.codecVec(g0)), `t${g0}`), CH); });
       let cpK: ort.Tensor = emptyCp(), cpV: ort.Tensor = emptyCp();
       for (let g = 1; g < 16; g++) {
         const seq = g === 1 ? 2 : 1;
-        const out = await this.cp.run({
-          inputs_embeds: new ort.Tensor('float32', cpIn, [1, seq, H]),
+        const out = await timed('code_predictor', () => this.cp.run({
+          inputs_embeds: new ort.Tensor('float32', cpIn, [1, seq, CH]),
           generation_steps: new ort.Tensor('int64', BigInt64Array.from([BigInt(g - 1)]), [1]),
           past_keys: cpK, past_values: cpV,
-        });
+        }));
         const cl = out.logits.data as Float32Array;
         const c = sample(cl.slice(cl.length - CP.vocab_size), temperature, topK, rand);
         codes.push(c);
         cpK = out.present_keys; cpV = out.present_values;
-        cpIn = new Float32Array(this.cpVec(g - 1, c));
+        cpIn = await timed('proj', () => new Float32Array(this.toCp(new Float32Array(this.cpVec(g - 1, c)), `${g - 1}:${c}`)));
       }
       frames.push(codes);
 
@@ -312,12 +376,12 @@ export class Qwen3TTS {
       for (let i = 0; i < H; i++) next[i] += tv[i];
       const len = L + step + 1;
       const p = BigInt(L + step);
-      const dec = await this.decode.run({
+      const dec = await timed('decode', () => this.decode.run({
         inputs_embeds: new ort.Tensor('float32', next, [1, 1, H]),
         attention_mask: new ort.Tensor('int64', new BigInt64Array(len).fill(1n), [1, len]),
         position_ids: new ort.Tensor('int64', BigInt64Array.from([p, p, p]), [3, 1, 1]),
         past_keys: pastK, past_values: pastV,
-      });
+      }));
       logits = dec.logits.data as Float32Array;
       hidden = dec.hidden_states.data as Float32Array;
       pastK = dec.present_keys; pastV = dec.present_values;
@@ -327,21 +391,21 @@ export class Qwen3TTS {
     const N = frames.length;
     const flat = new BigInt64Array(16 * N);
     for (let t = 0; t < N; t++) for (let g = 0; g < 16; g++) flat[g * N + t] = BigInt(frames[t][g]);
-    const wav = await this.vocoder.run({ [this.vocoder.inputNames[0]]: new ort.Tensor('int64', flat, [1, 16, N]) });
-    const audio = wav[this.vocoder.outputNames[0]].data as Float32Array;
+    const audio = await timed('vocoder', () => this.vocode(new ort.Tensor('int64', flat, [1, 16, N])));
+    if (PROF) { console.log(`  perfil (${N} quadros): ` + [...PROF].map(([k, v]) => `${k} ${(v / 1000).toFixed(1)}s`).join(' · ')); PROF.clear(); }
     if (audio.length !== N * SAMPLES_PER_FRAME) console.warn(`aviso: vocoder devolveu ${audio.length} amostras (esperado ${N * SAMPLES_PER_FRAME})`);
     return audio;
   }
 }
 
-// teste rápido: node scripts/qwen3-tts.ts "Olá, tudo bem?" serena saida.wav
+// teste rápido: node scripts/qwen3-tts.ts "Olá, tudo bem?" vivian saida.wav ["instrução de estilo (1.7B)"]
 if (process.argv[1] === import.meta.filename) {
-  const [text = 'Olá! Eu sou a Lia.', speaker = 'serena', out = 'qwen-teste.wav'] = process.argv.slice(2);
+  const [text = 'Olá! Eu sou a Lia.', speaker = 'vivian', out = 'qwen-teste.wav', instruct] = process.argv.slice(2);
   const t0 = performance.now();
   const tts = await Qwen3TTS.load();
   console.log(`modelo carregado em ${((performance.now() - t0) / 1000).toFixed(1)} s`);
   const t1 = performance.now();
-  const a = await tts.generate(text, { speaker, seed: 7 });
+  const a = await tts.generate(text, { speaker, instruct, seed: 7 });
   const secs = (performance.now() - t1) / 1000;
   const buf = Buffer.alloc(44 + a.length * 2);
   buf.write('RIFF', 0); buf.writeUInt32LE(36 + a.length * 2, 4); buf.write('WAVE', 8); buf.write('fmt ', 12);

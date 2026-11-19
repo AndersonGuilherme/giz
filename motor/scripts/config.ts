@@ -8,6 +8,8 @@ import { join, resolve } from 'node:path';
 export type GizConfig = {
   /** nome do canal/marca que aparece no canto dos vídeos */
   brand: string;
+  /** modelo de voz: '0.6b' (5,9 GB, mais leve) ou '1.7b' (13,4 GB, melhor e aceita instruções de estilo) */
+  model: '0.6b' | '1.7b';
   /** onde a voz roda: 'cuda' (GPU NVIDIA) ou 'cpu' */
   device: 'cpu' | 'cuda';
   /** núcleos da CPU para a voz (0 = automático) */
@@ -18,6 +20,8 @@ export type GizConfig = {
   language: string;
   /** voz do Qwen3-TTS de cada personagem */
   voices: { lia: string; teo: string };
+  /** instrução de estilo de cada personagem (só no modelo 1.7B), ex.: "Fale com energia, como um jovem curioso" */
+  styles: { lia: string; teo: string };
   /** controle de qualidade da pronúncia com Whisper no `npm run produce` */
   qa: boolean;
   /** render do vídeo (Remotion): quadros em paralelo (null = padrão do Remotion) */
@@ -31,11 +35,13 @@ export const CONFIG_PATH = join(ROOT, 'giz.config.json');
 
 export const DEFAULTS: GizConfig = {
   brand: 'giz',
+  model: '0.6b',
   device: 'cpu',
   threads: 0,
   modelsDir: join(homedir(), '.cache', 'giz'),
   language: 'portuguese',
   voices: { lia: 'vivian', teo: 'dylan' },
+  styles: { lia: '', teo: '' },
   qa: false,
   render: { concurrency: null },
   remotionLicense: 'nao-informado',
@@ -47,7 +53,7 @@ export function loadConfig(): GizConfig {
   let file: Partial<GizConfig> = {};
   if (existsSync(CONFIG_PATH)) file = JSON.parse(readFileSync(CONFIG_PATH, 'utf8'));
   else if (!process.env.GIZ_QUIET) console.warn('aviso: giz.config.json não encontrado; usando padrões (CPU). Rode `npm run setup` para configurar.');
-  cached = { ...DEFAULTS, ...file, voices: { ...DEFAULTS.voices, ...file.voices }, render: { ...DEFAULTS.render, ...file.render } };
+  cached = { ...DEFAULTS, ...file, voices: { ...DEFAULTS.voices, ...file.voices }, styles: { ...DEFAULTS.styles, ...file.styles }, render: { ...DEFAULTS.render, ...file.render } };
   // variáveis de ambiente têm prioridade (útil para testes pontuais)
   if (process.env.GIZ_MODELS_DIR) cached.modelsDir = process.env.GIZ_MODELS_DIR;
   if (process.env.GIZ_DEVICE === 'cpu' || process.env.GIZ_DEVICE === 'cuda') cached.device = process.env.GIZ_DEVICE;

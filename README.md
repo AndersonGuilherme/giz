@@ -16,7 +16,7 @@ e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela
 | Parte | O que usa | É IA? | Custo |
 |---|---|---|---|
 | **Escrever o roteiro** | Você. Opcionalmente, uma IA de texto (Claude, ChatGPT, Gemini…) | opcional | o da IA que você escolher, se escolher |
-| **Voz** | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 0.6B, modelo aberto da Alibaba, na CPU ou na GPU NVIDIA | sim | grátis (Apache-2.0, uso comercial livre) |
+| **Voz** | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 0.6B ou 1.7B, modelo aberto da Alibaba, na CPU ou na GPU NVIDIA | sim | grátis (Apache-2.0, uso comercial livre) |
 | **Animação e vídeo** | [Remotion](https://remotion.dev): desenha cada quadro com código React | **não** | grátis para pessoa física e empresa de até 3 pessoas; acima disso, licença paga do Remotion |
 | **Boca dos personagens** | espeak-ng: converte o texto em fonemas e cada fonema vira uma forma de boca | não | grátis |
 | **Conferir a pronúncia** (opcional) | Whisper small, modelo aberto da OpenAI, roda local | sim | grátis (MIT) |
@@ -26,7 +26,7 @@ e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela
   desenha sempre do mesmo jeito. Por isso o visual é consistente e não "alucina".
 - **Voz e vídeo são etapas separadas.** O Qwen3-TTS gera os arquivos de áudio de cada fala; depois o Remotion
   monta o vídeo, desenhando os personagens e as cenas no ritmo desses áudios. O Remotion não gera voz.
-- **Os modelos de IA são baixados sozinhos** do Hugging Face no `npm run setup` (~5,9 GB para a voz; ~250 MB
+- **Os modelos de IA são baixados sozinhos** do Hugging Face no `npm run setup` (5,9 GB ou 13,4 GB para a voz, conforme o modelo escolhido; ~250 MB
   para o Whisper, se usar). Depois disso, tudo funciona offline.
 - **Você não precisa do Claude** nem de nenhuma IA paga. O roteiro é um arquivo TypeScript que você pode
   escrever à mão a partir do modelo. Uma IA de texto só acelera essa etapa (veja a dica no passo 4).
@@ -34,11 +34,12 @@ e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela
 ## Requisitos
 
 - **Node.js 22.18 ou mais novo** (roda TypeScript direto, sem build)
-- **~10 GB de disco** (≈2 GB de dependências + 5,9 GB do modelo de voz; +2,6 GB com GPU) e **8 GB de RAM livres**
+- **Disco:** ≈2 GB de dependências + 5,9 GB (modelo 0.6b) ou 13,4 GB (modelo 1.7b); +1,8 GB com GPU
+- **Memória:** modelo 0.6b: 8 GB de RAM; modelo 1.7b: GPU com 16 GB de memória de vídeo, ou ~20 GB de RAM na CPU
 - Linux, macOS ou Windows com WSL
 - GPU é **opcional**: com uma NVIDIA (Linux ou WSL) a voz fica bem mais rápida. O `npm run setup` configura.
 
-Tempo de máquina: a voz leva ~4 s para cada 1 s de fala na CPU (6 núcleos) e ~2 s na GPU (RTX 5060 Ti); uma aula de 6 min ≈ 25 min na CPU,
+Tempo de máquina para cada 1 s de fala: modelo 0.6b ≈ 4 s na CPU (6 núcleos) e ≈ 2 s na GPU (RTX 5060 Ti); modelo 1.7b ≈ 3 s na GPU. Uma aula de 6 min leva de 12 a 25 min de voz,
 só na primeira vez; falas que não mudaram não são regravadas). O vídeo leva ~2 min.
 
 ## Passo a passo: criando seu curso
@@ -58,7 +59,9 @@ O `npm run setup` é um **onboarding guiado no terminal**. Ele pergunta e prepar
 2. pergunta onde guardar os modelos de IA (e mostra o espaço livre);
 3. detecta sua placa de vídeo. Com **GPU NVIDIA**, oferece usá-la e baixa sozinho as bibliotecas CUDA
    (sem sudo e sem instalar o CUDA Toolkit; basta o driver da NVIDIA). Sem GPU, pergunta quantos núcleos da CPU usar;
-4. pergunta o nome do seu canal (aparece no canto dos vídeos), o idioma da narração e as vozes de Lia e Téo;
+4. pergunta o tamanho do modelo de voz (**0.6b**, leve, ou **1.7b**, mais natural e com instruções de estilo; ele
+   recomenda conforme a sua memória), o nome do seu canal (aparece no canto dos vídeos), o idioma, as vozes de
+   Lia e Téo e, no 1.7b, o **estilo** de cada um ("fale com energia e curiosidade, como um jovem desenvolvedor");
 5. pergunta se você quer o controle de qualidade da pronúncia (Whisper);
 6. pergunta quem vai usar (pessoa física ou empresa), por causa da licença do Remotion;
 7. baixa o modelo de voz, gera uma fala de teste, mede a velocidade e, se você quiser, gera amostras de todas
@@ -151,6 +154,8 @@ Para ver e ajustar no navegador, quadro a quadro: `npm run studio`.
   (`"deploy": "diplói"`). Só a voz muda; a legenda continua com o texto original.
 - **Mudou uma fala?** Rode o `render` de novo: só as falas alteradas são regravadas.
 - **Não gostou da entonação de uma fala?** Sorteie outra versão: `SEED=2 npm run tts -- <aula> 007`.
+- **Uma fala precisa de outro tom?** No modelo 1.7b, dê uma instrução só para ela no roteiro:
+  `style: 'Fale surpreso, quase sem acreditar'`. O estilo padrão de cada personagem fica no `npm run setup`.
 - **Várias aulas de uma vez**, com controle de qualidade da pronúncia (Whisper):
   `npm run produce -- ../cursos/logica/aulas/*`
 
@@ -181,7 +186,7 @@ giz/
 
 ## Limitações conhecidas
 
-- As vozes prontas do Qwen3-TTS 0.6B são nativas de outros idiomas (chinês, inglês, japonês, coreano). Elas falam
+- As vozes prontas do Qwen3-TTS são nativas de outros idiomas (chinês, inglês, japonês, coreano). Elas falam
   português, mas podem ter um leve sotaque. Use o `pronuncia.json` e o Whisper (`npm run produce`) para achar e
   corrigir palavras problemáticas.
 - Gerar voz em CPU é lento (veja "Requisitos"). Fica rápido nas rodadas seguintes, porque só as falas alteradas são regravadas.

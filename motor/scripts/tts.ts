@@ -112,7 +112,7 @@ export const spokenText = (raw: string) => raw.replace(PAUSE, '').replace(MARK, 
 function voiceFor(who: Speaker) {
   const cfg = loadConfig();
   const o = process.env.VOICE_OVERRIDE?.split(',').map((s) => s.split(':')).find(([w]) => w === who);
-  return { id: o ? o[1] : cfg.voices[who] ?? CAST[who].voice.id, language: CAST[who].voice.language ?? cfg.language };
+  return { id: o ? o[1] : cfg.voices[who] ?? CAST[who].voice.id, language: CAST[who].voice.language ?? cfg.language, model: cfg.model };
 }
 
 // O modelo pode deixar silêncio no começo/fim da frase: corta, deixando uma margem curta.
@@ -261,10 +261,12 @@ async function main() {
   for (const cue of lesson.cues) {
     if (only.length && !only.includes(cue.id)) continue;
     const voice = voiceFor(cue.speaker);
+    // estilo (só 1.7B): o da fala (cue.style) ou o do personagem (giz.config.json → styles)
+    const style = loadConfig().model === '1.7b' ? (cue.style ?? loadConfig().styles[cue.speaker] ?? '') : '';
     const raw = cue.say ?? cue.text;
     // o hash usa o texto JÁ com o dicionário aplicado: mudar o dicionário só regrava as falas que ele afeta
     let lexed = raw; for (const [re, rep] of lexicon) lexed = lexed.replace(re, rep);
-    const hash = createHash('sha1').update(JSON.stringify(['qwen3-0.6b', voice, lexed, SEED, QRISE_YN, QRISE_WH, DSP_VERSION])).digest('hex').slice(0, 12);
+    const hash = createHash('sha1').update(JSON.stringify(['qwen3', voice, style, lexed, SEED, QRISE_YN, QRISE_WH, DSP_VERSION])).digest('hex').slice(0, 12);
     const file = `cue-${cue.id}${suffix}.wav`;
     if (!only.length && timings[cue.id]?.hash === hash && existsSync(join(audioDir, file))) continue;
     tts ??= await Qwen3TTS.load();
@@ -282,7 +284,7 @@ async function main() {
       for (const [re, rep] of lexicon) spoken = spoken.replace(re, rep);
       const phon = await phonemizePtBr(spoken);
       if (process.env.TTS_DEBUG) console.log(`  ${spoken}  →  ${phon}`);
-      const gen = await tts.generate(spoken, { speaker: voice.id, language: voice.language, seed: seedOf(`${SEED}|${cue.id}|${k}|${spoken}`) });
+      const gen = await tts.generate(spoken, { speaker: voice.id, language: voice.language, instruct: style || undefined, seed: seedOf(`${SEED}|${cue.id}|${k}|${spoken}`) });
       const audio = questionRise(trimSilence(gen), p.text);
       const f0 = Math.floor(samplesSoFar / (RATE / FPS));
       push(audio);

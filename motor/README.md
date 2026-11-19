@@ -6,7 +6,7 @@ Tudo roda local, sem GPU e sem serviço pago.
 | Peça | Ferramenta | Licença |
 |---|---|---|
 | Animação e render | [Remotion](https://remotion.dev) 4 (React → MP4) | grátis para pessoa física ou empresa de até 3 pessoas; acima disso, Company License (~US$ 25/mês por assento) |
-| Voz | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 12Hz-0.6B-CustomVoice, export ONNX ([elbruno](https://huggingface.co/elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX)), rodando em CPU com `onnxruntime-node` (`scripts/qwen3-tts.ts`) | Apache-2.0 (uso comercial livre) |
+| Voz | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 12Hz CustomVoice 0.6B ou 1.7B, export ONNX ([0.6B](https://huggingface.co/elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX), [1.7B](https://huggingface.co/elbruno/Qwen3-TTS-12Hz-1.7B-CustomVoice-ONNX)), rodando em CPU com `onnxruntime-node` (`scripts/qwen3-tts.ts`) | Apache-2.0 (uso comercial livre) |
 | Boca dos personagens | fonética do espeak-ng (`@echogarden/espeak-ng-emscripten`) | GPL-3.0 (só usado como ferramenta, não vai no vídeo) |
 | Controle de qualidade (opcional) | Whisper small via `@huggingface/transformers` | MIT |
 | Fontes | Nunito + JetBrains Mono | OFL |
@@ -28,7 +28,8 @@ node scripts/voice-lab.ts <saida> # compara as vozes do Qwen3-TTS em pt-BR (Whis
 
 ## Configuração individual
 
-`npm run setup` grava `../giz.config.json` (fora do git), lido por `scripts/config.ts`: `device` (`cuda`/`cpu`),
+`npm run setup` grava `../giz.config.json` (fora do git), lido por `scripts/config.ts`: `model` (`0.6b`/`1.7b`),
+`styles` (instrução de estilo por personagem, só 1.7b), `brand`, `device` (`cuda`/`cpu`),
 `threads`, `modelsDir`, `language`, `voices`, `qa`, `render.concurrency`. Variáveis de ambiente pontuais:
 `GIZ_DEVICE=cpu`, `GIZ_MODELS_DIR=...`, `VOICE_OVERRIDE=teo:aiden`.
 
@@ -66,5 +67,5 @@ linha em `../padrao/catalogo-de-cenas.md`.
 - Velocidade da voz em CPU: o Qwen3-TTS leva ~4 s para gerar 1 s de fala (6 núcleos); uma aula de 6 min leva
   ~25 min de voz na primeira vez. Usa ~7 GB de RAM durante a geração.
 - As 9 vozes prontas do modelo 0.6B são nativas de chinês, inglês, japonês e coreano; falam português, mas
-  podem ter leve sotaque. O modelo 0.6B não aceita instruções de estilo/emoção (o 1.7B aceita, ainda não suportado aqui).
+  podem ter leve sotaque. Só o modelo 1.7B aceita instruções de estilo (`styles` no config, `style` por fala).
 - Trocar por outro motor de voz (ElevenLabs, Azure, Kokoro…) é mexer só em `scripts/tts.ts`.

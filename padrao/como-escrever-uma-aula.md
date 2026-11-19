@@ -47,6 +47,7 @@ Cada fala (cue):
 | `beats` | um objeto por `[trecho]`: campos da cena + `sfx` + `expr`/`pose` de quem fala |
 | `hold` | `{ seconds, label }` pausa com contagem DEPOIS da fala (ex.: "Ache o bug") |
 | `read` | pausa de leitura de código (automática em cena de código nova); número = segundos; `false` desliga |
+| `style` | só no modelo de voz 1.7b: instrução de tom SÓ desta fala ('Fale surpreso, quase sem acreditar'); o padrão de cada personagem vem do `npm run setup` |
 | `sfx` | efeito no início: pop · ding · dings · error · success · tick (whoosh é automático na troca de cena) |
 
 O número de `[trechos]` tem que ser igual ao de `beats` (o build acusa).
