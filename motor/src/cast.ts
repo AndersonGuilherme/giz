@@ -4,7 +4,7 @@ import type { Expression, Speaker } from './types';
 export type CastMember = {
   name: string;
   role: string;
-  voice: { id: string; speed: number }; // Kokoro
+  voice: { id: string; language?: string }; // voz PADRÃO do Qwen3-TTS; cada instalação escolhe a sua no `npm run setup`
   defaultExpr: Expression; // quando o roteiro não diz
   idleExpr: Expression; // quando está ouvindo
   look: {
@@ -20,7 +20,7 @@ export const CAST: Record<Speaker, CastMember> = {
   lia: {
     name: 'Lia',
     role: 'mentora de tecnologia',
-    voice: { id: 'pf_dora', speed: 1.04 },
+    voice: { id: 'vivian' },
     defaultExpr: 'happy',
     idleExpr: 'neutral',
     look: { hoodie: '#8B3FF5', hoodieShade: '#6A22D6', emblem: 'star', brow: { width: 7, arch: 7 }, smile: 30 },
@@ -28,7 +28,7 @@ export const CAST: Record<Speaker, CastMember> = {
   teo: {
     name: 'Téo',
     role: 'desenvolvedor curioso',
-    voice: { id: 'pm_alex', speed: 1.12 },
+    voice: { id: 'dylan' },
     defaultExpr: 'neutral',
     idleExpr: 'neutral',
     look: { hoodie: '#4F35D9', hoodieShade: '#3A22B0', emblem: 'code', brow: { width: 10, arch: 2 }, smile: 24 },

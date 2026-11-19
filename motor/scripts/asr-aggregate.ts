@@ -1,10 +1,12 @@
 // Junta os relatórios do ouvido automático de todas as aulas e lista as palavras erradas em VÁRIAS aulas
-// (problema sistemático de pronúncia, não acaso). Uso: node scripts/asr-aggregate.ts
+// (problema sistemático de pronúncia, não acaso). Uso: node scripts/asr-aggregate.ts <slug-do-curso>
 import { readFileSync, readdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { norm, wer } from './asr-check.ts';
 
-const root = resolve(import.meta.dirname, '..', '..', 'cursos', 'solid', 'aulas');
+const curso = process.argv[2];
+if (!curso) { console.error('uso: node scripts/asr-aggregate.ts <slug-do-curso>'); process.exit(2); }
+const root = resolve(import.meta.dirname, '..', '..', 'cursos', curso, 'aulas');
 const byWord = new Map<string, { n: number; lessons: Set<string>; heard: string[] }>();
 for (const d of readdirSync(root).sort()) {
   const asr = join(root, d, 'audio', 'asr.txt'), tim = join(root, d, 'audio', 'timings.json');

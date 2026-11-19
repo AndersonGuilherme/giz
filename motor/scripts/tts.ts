@@ -1,29 +1,33 @@
-// Voz sintética LOCAL e gratuita: Kokoro-82M (pesos Apache-2.0) com vozes pt-BR, fonética do espeak-ng (pt-br).
+// Voz sintética LOCAL e gratuita: Qwen3-TTS 0.6B (pesos Apache-2.0) em CPU via ONNX Runtime (scripts/qwen3-tts.ts).
+// A fonética do espeak-ng (pt-br) é usada só para a BOCA dos personagens (visemas), não para a voz.
 // Para cada fala: audio/cue-<id>.wav + duração + volume por frame + visema por frame + posição de cada frase
-// → audio/timings.json. Falas com texto/voz/velocidade inalterados não são regravadas (hash).
+// → audio/timings.json. Falas com texto/voz inalterados não são regravadas (hash). O sorteio do modelo usa uma
+// semente derivada do texto: a mesma fala gera sempre o mesmo áudio.
 // Uso: node scripts/tts.ts <pasta-da-aula> [ids...]
-//      VOICE_OVERRIDE=teo:pm_santa:1.0  (opcional, para comparar vozes)  OUT_SUFFIX=-santa (não sobrescreve)
-import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync } from 'node:fs';
+//      VOICE_OVERRIDE=teo:aiden  (opcional, para comparar vozes)  OUT_SUFFIX=-aiden (não sobrescreve)
+//      SEED=3 muda o sorteio de todas as falas (regrava tudo); regravar só algumas: npm run tts -- <aula> 012 013
+import { readFileSync, writeFileSync, mkdirSync, existsSync } from 'node:fs';
 import { join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
-import { KokoroTTS } from 'kokoro-js';
+import { Qwen3TTS, QWEN_RATE } from './qwen3-tts.ts';
 import type { Lesson, Speaker } from '../src/types.ts';
 import { CAST } from '../src/cast.ts';
+import { loadConfig } from './config.ts';
 
 const FPS = 30;
-const RATE = 24000;
+const RATE = QWEN_RATE;
 const SENTENCE_PAUSE = 0.14; // s entre frases dentro da mesma fala
-const DSP_VERSION = 4; // muda quando o pós-processamento de áudio muda (força regravar)
+const DSP_VERSION = 5; // muda quando o pós-processamento de áudio muda (força regravar)
 
-// ENTONAÇÃO DE PERGUNTA. O Kokoro termina toda pergunta com o tom CAINDO (medido: −0,8 a −5,3 semitons nas 9
-// perguntas da aula 01), igual a uma afirmação. Em pt-BR, pergunta de sim/não só se distingue pela subida final.
-// Aqui o fim da pergunta tem o tom elevado por TD-PSOLA (ciclos da voz reaproximados, SEM mudar a duração):
-// até +QRISE_YN semitons (sim/não) ou +QRISE_WH (como/por que/qual...). Conferido com scripts/pitch-check.ts.
-const QRISE_YN = Number(process.env.QRISE_YN ?? 10);
-const QRISE_WH = Number(process.env.QRISE_WH ?? 3);
-const PSOLA_CONF = Number(process.env.PSOLA_CONF ?? 0.4); // final de frase do Kokoro é soprado: critério de "tem voz" mais tolerante
+// ENTONAÇÃO DE PERGUNTA (opcional). Em pt-BR, pergunta de sim/não só se distingue pela subida final do tom.
+// Se a voz terminar perguntas caindo, o fim pode ser elevado por TD-PSOLA (ciclos da voz reaproximados, SEM
+// mudar a duração): até +QRISE_YN semitons (sim/não) ou +QRISE_WH (como/por que/qual...). Meça antes com
+// scripts/pitch-check.ts. Desligado por padrão: o Qwen3-TTS já entoa perguntas.
+const QRISE_YN = Number(process.env.QRISE_YN ?? 0);
+const QRISE_WH = Number(process.env.QRISE_WH ?? 0);
+const PSOLA_CONF = Number(process.env.PSOLA_CONF ?? 0.4); // final de frase costuma ser soprado: critério de "tem voz" mais tolerante
 const QRISE_TAIL = Number(process.env.QRISE_TAIL ?? 0.6); // s finais com voz que recebem a subida
 const WH = /^(e\s+|mas\s+|então\s+|e\s+aí\s+)?(como|por\s*que|porque|o\s+que|que|qual|quais|quem|onde|quando|quanto|quantos|quantas|pra\s+que|cadê)\b/i;
 
@@ -104,19 +108,23 @@ const MARK = /\[([^\]]+)\]/g;
 const PAUSE = /<pausa\s+([\d.]+)>/g;
 export const spokenText = (raw: string) => raw.replace(PAUSE, '').replace(MARK, '$1').replace(/\s{2,}/g, ' ').trim();
 
-function voiceFor(who: Speaker, cueSpeed = 1) {
+// voz: VOICE_OVERRIDE > giz.config.json (onboarding) > padrão do elenco (src/cast.ts)
+function voiceFor(who: Speaker) {
+  const cfg = loadConfig();
   const o = process.env.VOICE_OVERRIDE?.split(',').map((s) => s.split(':')).find(([w]) => w === who);
-  const v = o ? { id: o[1], speed: Number(o[2] ?? CAST[who].voice.speed) } : CAST[who].voice;
-  return { id: v.id, speed: Math.round(v.speed * cueSpeed * 100) / 100 };
+  return { id: o ? o[1] : cfg.voices[who] ?? CAST[who].voice.id, language: CAST[who].voice.language ?? cfg.language };
 }
 
-function ensureVoices(ids: string[]) {
-  const dst = resolve(import.meta.dirname, '..', 'node_modules', 'kokoro-js', 'voices');
-  for (const id of ids) {
-    const src = resolve(import.meta.dirname, '..', 'assets', 'voices', `${id}.bin`);
-    if (!existsSync(join(dst, `${id}.bin`)) && existsSync(src)) copyFileSync(src, join(dst, `${id}.bin`));
-  }
+// O modelo pode deixar silêncio no começo/fim da frase: corta, deixando uma margem curta.
+function trimSilence(x: Float32Array, threshold = 0.012, keepSec = 0.04): Float32Array {
+  let a = 0, b = x.length - 1;
+  while (a < b && Math.abs(x[a]) < threshold) a++;
+  while (b > a && Math.abs(x[b]) < threshold) b--;
+  const keep = Math.round(keepSec * RATE);
+  return x.subarray(Math.max(0, a - keep), Math.min(x.length, b + keep + 1));
 }
+
+const seedOf = (s: string) => parseInt(createHash('sha1').update(s).digest('hex').slice(0, 8), 16);
 
 // Pronúncia: só para a voz. A legenda mantém o texto original.
 function loadLexicon(lessonDir: string): Array<[RegExp, string]> {
@@ -131,7 +139,7 @@ function loadLexicon(lessonDir: string): Array<[RegExp, string]> {
   return out;
 }
 
-// Fonética pt-BR com o espeak-ng completo (o 'phonemizer' do kokoro-js só traz inglês).
+// Fonética pt-BR com o espeak-ng completo: vira a forma da boca (visema) de cada momento da fala.
 type EspeakWorker = { set_voice(v: string): void; synthesize_ipa(t: string): { ipa: string } };
 let espeak: EspeakWorker | null = null;
 async function phonemizePtBr(text: string): Promise<string> {
@@ -247,18 +255,20 @@ async function main() {
   const valid = new Set(lesson.cues.map((c) => c.id));
   for (const id of Object.keys(timings)) if (!valid.has(id)) delete timings[id];
 
-  ensureVoices([...new Set(lesson.cues.map((c) => voiceFor(c.speaker).id))]);
-  const tts = await KokoroTTS.from_pretrained('onnx-community/Kokoro-82M-v1.0-ONNX', { dtype: 'q8', device: 'cpu' });
+  let tts: Qwen3TTS | null = null; // carregado só se alguma fala precisar ser gravada
+  const SEED = process.env.SEED ?? '';
 
   for (const cue of lesson.cues) {
     if (only.length && !only.includes(cue.id)) continue;
-    const voice = voiceFor(cue.speaker, cue.speed);
+    const voice = voiceFor(cue.speaker);
     const raw = cue.say ?? cue.text;
     // o hash usa o texto JÁ com o dicionário aplicado: mudar o dicionário só regrava as falas que ele afeta
     let lexed = raw; for (const [re, rep] of lexicon) lexed = lexed.replace(re, rep);
-    const hash = createHash('sha1').update(JSON.stringify([voice, lexed, PHON_VARIANT, DSP_VERSION])).digest('hex').slice(0, 12);
+    const hash = createHash('sha1').update(JSON.stringify(['qwen3-0.6b', voice, lexed, SEED, QRISE_YN, QRISE_WH, DSP_VERSION])).digest('hex').slice(0, 12);
     const file = `cue-${cue.id}${suffix}.wav`;
     if (!only.length && timings[cue.id]?.hash === hash && existsSync(join(audioDir, file))) continue;
+    tts ??= await Qwen3TTS.load();
+    const t0 = performance.now();
 
     const chunks: Float32Array[] = [];
     const segments: Segment[] = [];
@@ -271,9 +281,9 @@ async function main() {
       let spoken = p.text;
       for (const [re, rep] of lexicon) spoken = spoken.replace(re, rep);
       const phon = await phonemizePtBr(spoken);
-      if (process.env.TTS_DEBUG) console.log(`  ${phon}`);
-      const { input_ids } = tts.tokenizer(phon, { truncation: true });
-      const audio = questionRise((await tts.generate_from_ids(input_ids, { voice: voice.id as never, speed: voice.speed })).audio as Float32Array, p.text);
+      if (process.env.TTS_DEBUG) console.log(`  ${spoken}  →  ${phon}`);
+      const gen = await tts.generate(spoken, { speaker: voice.id, language: voice.language, seed: seedOf(`${SEED}|${cue.id}|${k}|${spoken}`) });
+      const audio = questionRise(trimSilence(gen), p.text);
       const f0 = Math.floor(samplesSoFar / (RATE / FPS));
       push(audio);
       const f1 = Math.ceil(samplesSoFar / (RATE / FPS));
@@ -298,7 +308,7 @@ async function main() {
     writeFileSync(join(audioDir, file), toWav(samples));
     timings[cue.id] = { file, durationSec: samples.length / RATE, envelope: env, visemes: vis.join(''), segments, spoken: spokenText(raw), hash };
     writeFileSync(timingsPath, JSON.stringify(timings));
-    console.log(`${cue.id} ${voice.id}@${voice.speed} ${(samples.length / RATE).toFixed(1)}s`);
+    console.log(`${cue.id} ${voice.id} ${(samples.length / RATE).toFixed(1)}s (gerado em ${((performance.now() - t0) / 1000).toFixed(0)}s)`);
   }
 }
 

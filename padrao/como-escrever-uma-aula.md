@@ -6,22 +6,24 @@ Exemplos completos: `cursos/solid/aulas/01-*` a `04-*` (leia pelo menos um `rote
 
 ## Pasta de uma aula
 
+Crie com `cd motor && npm run nova-aula -- <curso> <slug> "Título"` (número automático, roteiro de exemplo incluso).
+
 ```
-cursos/solid/aulas/NN-slug/
+cursos/<curso>/aulas/NN-slug/
 ├── plano.md          objetivo, mistério, regra de negócio, exemplo, erro comum, desafio
 ├── roteiro.ts        export const lesson: Lesson (tipos em motor/src/types.ts)
 └── exemplos/         código que aparece na tela: *.ts com testes (*.test.ts) que PASSAM;
                       *.demo.ts = testes que falham DE PROPÓSITO para mostrar na tela
 ```
-Cada aula é autocontida: copie `infra.ts` e o que precisar de aulas anteriores para dentro de `exemplos/`.
-Imports com extensão `.ts` (Node 22 roda TypeScript direto). Valores em centavos.
+Cada aula é autocontida: copie o que precisar de aulas anteriores para dentro de `exemplos/`.
+Imports com extensão `.ts` (Node 22 roda TypeScript direto).
 
 ## O roteiro (`roteiro.ts`)
 
 ```ts
 import type { Lesson } from '../../../../motor/src/types.ts';
 export const lesson: Lesson = {
-  course: 'solid', number: 'NN', slug: '...', title: 'Título-gancho da aula',
+  course: '<curso>', number: 'NN', slug: '...', title: 'Título-gancho da aula',
   chapters: ['…', '…'],            // 6–8 nomes curtos (aparecem na barra de progresso)
   cues: [ /* falas */ ],
 };
@@ -53,7 +55,7 @@ O número de `[trechos]` tem que ser igual ao de `beats` (o build acusa).
 
 | `kind` | campos |
 |---|---|
-| `title` | `eyebrow`, `title`, `subtitle?` — use `eyebrow: 'Téo e Lia explicam SOLID · Aula NN'` |
+| `title` | `eyebrow`, `title`, `subtitle?` — ex.: `eyebrow: 'Téo e Lia explicam SOLID · Aula NN'` |
 | `talk` | (nenhum) — Lia e Téo grandes no centro |
 | `inbox` | `count`, `subject`, `note?` (use `note: 'Cenário simulado para fins didáticos'` se o caso é inventado) |
 | `card` | `variant` (objective · summary · challenge · next · ticket · rule), `title`, `items[]`, `shown?` |
@@ -71,9 +73,9 @@ Código na tela: até ~26 linhas (use `from` para pular imports/comentários). L
 ## Validar (obrigatório, nesta ordem)
 
 ```bash
-cd cursos/solid/aulas/NN-slug/exemplos && node --test *.test.ts      # tudo passa
-cd ../../../../motor && npx tsc --noEmit                                  # roteiro tipa
-node scripts/lesson.ts build ../cursos/solid/aulas/NN-slug               # monta; duração estimada 5–7 min
+cd motor
+npm run check -- ../cursos/<curso>/aulas/NN-slug    # testes dos exemplos + tipos + linha do tempo (5–7 min)
+npm run render -- ../cursos/<curso>/aulas/NN-slug   # voz + vídeo
 ```
-O build sem áudio usa duração estimada (aviso "sem áudio atualizado" é esperado). Voz, controle de qualidade
-(Whisper) e render são feitos depois, em lote.
+O check não gera voz: a duração é estimada. Para várias aulas com controle de qualidade (Whisper):
+`npm run produce -- ../cursos/<curso>/aulas/*`.

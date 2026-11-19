@@ -52,7 +52,7 @@ export type Cue = {
   expr?: Expression;
   look?: Look; // para onde quem fala olha (padrão: 'content' em cena de conteúdo, 'other' em 'talk')
   react?: { expr?: Expression; pose?: Pose; look?: Look }; // quem ESCUTA, durante esta fala
-  speed?: number; // multiplica a velocidade do perfil de voz
+  speed?: number; // (sem efeito com o Qwen3-TTS, que não tem controle de velocidade; use <pausa> no say)
   hold?: { seconds: number; label: string }; // pausa APÓS a fala, com contagem (aluno pensa)
   read?: number | false; // pausa de leitura (s) quando a fala abre um código novo; padrão automático, false desliga
   sfx?: Sfx; // efeito no início da fala
@@ -107,6 +107,7 @@ export type SfxEvent = { frame: number; sfx: Sfx };
 
 export type LessonProps = {
   fps: number;
+  brand?: string; // nome do canal no canto do vídeo (giz.config.json → brand)
   title: string;
   chapters: string[];
   totalFrames: number;

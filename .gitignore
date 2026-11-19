@@ -9,3 +9,5 @@ producao-log.md
 *.wav
 !motor/assets/sfx/*.wav
 *.mp4
+giz.config.json
+amostras-de-voz/

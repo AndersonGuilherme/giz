@@ -12,7 +12,7 @@ Configuração técnica (voz, ritmo, visual): [`motor/src/cast.ts`](../motor/src
 | Personalidade | Carismática, segura, didática. Explica o difícil com exemplos simples e surpreendentes. | Prático, bem-humorado, questionador. Traz os problemas do dia a dia e as dúvidas do aluno. |
 | Posição na tela | Esquerda | Direita (mais perto do conteúdo) |
 | Visual próprio | Coque, moletom violeta com broche de estrela, sobrancelha fina e arqueada, tênis roxo | Cabelo arrepiado, moletom índigo com `</>`, sobrancelha grossa e reta, tênis branco |
-| Voz (Kokoro) | `pf_dora`, 1,04× (voz C, escolhida em 2026-11-19) — confiante, acolhedora, pausas para o aluno absorver | `pm_alex`, 1,12× — expressivo, espontâneo, um pouco mais rápido quando empolgado |
+| Voz (Qwen3-TTS) | `vivian` (padrão) — clara e marcante; cada instalação pode trocar no `npm run setup` | `dylan` (padrão) — jovem e natural |
 | Expressões típicas | explicando, sorrindo, pensando, desconfiada, preocupada | empolgado, desconfiado, confuso, surpreso, comemorando |
 
 Por que esses nomes: curtos, fáceis de lembrar e de pronunciar no TTS; **Téo** soa leve e amigável, **Lia**

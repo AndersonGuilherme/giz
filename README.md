@@ -1,141 +1,168 @@
 # giz ✏️
 
-**Transforme um roteiro em videoaula animada.** O giz gera aulas de 5–10 minutos apresentadas por dois
+**Transforme um roteiro em videoaula animada.** O giz gera aulas de 5 a 10 minutos apresentadas por dois
 personagens 2D, **Lia** (mentora) e **Téo** (dev curioso), com voz sintética, legendas, código na tela e
-animação sincronizada com a fala. Tudo roda **local, sem GPU e sem serviço pago**.
+animação sincronizada com a fala.
 
-Você escreve o roteiro (um arquivo TypeScript com as falas e as cenas); o giz grava as vozes, mede a duração
-de cada fala e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela segue o áudio.
+Você escreve o roteiro (um arquivo com as falas e as cenas). O giz grava as vozes, mede quanto dura cada fala
+e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela segue o áudio.
 
 > Exemplo completo no repositório: o curso **SOLID** (24 aulas) em [`cursos/solid`](cursos/solid).
 
-## Como funciona
+## Preciso pagar alguma IA?
 
-```
-roteiro.ts ──► voz (Kokoro, uma faixa por fala) ──► linha do tempo ──► Remotion ──► aula-NN.mp4 + legendas.srt
-   └── exemplos/ (código mostrado na tela, com testes)
-```
+**Não.** Tudo roda no seu computador, sem GPU, sem conta e sem chave de API. Veja o que cada parte usa:
 
-| Peça | Ferramenta | Licença |
-|---|---|---|
-| Animação e render | [Remotion](https://remotion.dev) 4 | grátis para pessoa física ou empresa de até 3 pessoas; acima disso, licença paga |
-| Voz | Kokoro-82M (`kokoro-js`, CPU) | Apache-2.0 |
-| Fonética pt-BR | espeak-ng (`@echogarden/espeak-ng-emscripten`) | GPL-3.0 (ferramenta) |
+| Parte | O que usa | É IA? | Custo |
+|---|---|---|---|
+| **Escrever o roteiro** | Você. Opcionalmente, uma IA de texto (Claude, ChatGPT, Gemini…) | opcional | o da IA que você escolher, se escolher |
+| **Voz** | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 0.6B, modelo aberto da Alibaba, na CPU ou na GPU NVIDIA | sim | grátis (Apache-2.0, uso comercial livre) |
+| **Animação e vídeo** | [Remotion](https://remotion.dev): desenha cada quadro com código React | **não** | grátis para pessoa física e empresa de até 3 pessoas; acima disso, licença paga do Remotion |
+| **Boca dos personagens** | espeak-ng: converte o texto em fonemas e cada fonema vira uma forma de boca | não | grátis |
+| **Conferir a pronúncia** (opcional) | Whisper small, modelo aberto da OpenAI, roda local | sim | grátis (MIT) |
+
+- **A animação não é gerada por IA.** Os personagens, as poses, as expressões e as cenas (código, terminal,
+  gráficos, cartões) são componentes programados em [`motor/src`](motor/src). O roteiro diz *o que* acontece; o motor
+  desenha sempre do mesmo jeito. Por isso o visual é consistente e não "alucina".
+- **Voz e vídeo são etapas separadas.** O Qwen3-TTS gera os arquivos de áudio de cada fala; depois o Remotion
+  monta o vídeo, desenhando os personagens e as cenas no ritmo desses áudios. O Remotion não gera voz.
+- **Os modelos de IA são baixados sozinhos** do Hugging Face no `npm run setup` (~5,9 GB para a voz; ~250 MB
+  para o Whisper, se usar). Depois disso, tudo funciona offline.
+- **Você não precisa do Claude** nem de nenhuma IA paga. O roteiro é um arquivo TypeScript que você pode
+  escrever à mão a partir do modelo. Uma IA de texto só acelera essa etapa (veja a dica no passo 4).
 
 ## Requisitos
 
 - **Node.js 22.18 ou mais novo** (roda TypeScript direto, sem build)
-- ~2 GB de disco para as dependências; Linux, macOS ou WSL
+- **~10 GB de disco** (≈2 GB de dependências + 5,9 GB do modelo de voz; +2,6 GB com GPU) e **8 GB de RAM livres**
+- Linux, macOS ou Windows com WSL
+- GPU é **opcional**: com uma NVIDIA (Linux ou WSL) a voz fica bem mais rápida. O `npm run setup` configura.
+
+Tempo de máquina: a voz leva ~4 s para cada 1 s de fala na CPU (6 núcleos) e ~2 s na GPU (RTX 5060 Ti); uma aula de 6 min ≈ 25 min na CPU,
+só na primeira vez; falas que não mudaram não são regravadas). O vídeo leva ~2 min.
 
 ## Passo a passo: criando seu curso
 
-### 1. Instale
+### 1. Instale e configure
 
 ```bash
 git clone https://github.com/AndersonGuilherme/giz.git
 cd giz/motor
-ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install
+ONNXRUNTIME_NODE_INSTALL=skip npm install
+npm run setup
 ```
 
-Teste com uma aula pronta (a primeira execução baixa o modelo de voz, ~90 MB):
+O `npm run setup` é um **onboarding guiado no terminal**. Ele pergunta e prepara tudo para a SUA máquina:
+
+1. confere a versão do Node;
+2. pergunta onde guardar os modelos de IA (e mostra o espaço livre);
+3. detecta sua placa de vídeo. Com **GPU NVIDIA**, oferece usá-la e baixa sozinho as bibliotecas CUDA
+   (sem sudo e sem instalar o CUDA Toolkit; basta o driver da NVIDIA). Sem GPU, pergunta quantos núcleos da CPU usar;
+4. pergunta o nome do seu canal (aparece no canto dos vídeos), o idioma da narração e as vozes de Lia e Téo;
+5. pergunta se você quer o controle de qualidade da pronúncia (Whisper);
+6. pergunta quem vai usar (pessoa física ou empresa), por causa da licença do Remotion;
+7. baixa o modelo de voz, gera uma fala de teste, mede a velocidade e, se você quiser, gera amostras de todas
+   as vozes em `amostras-de-voz/` para você ouvir.
+
+As respostas ficam em `giz.config.json`, na raiz. Esse arquivo é **individual**: não vai para o git, então cada
+instalação tem a sua configuração. Para mudar algo, rode `npm run setup` de novo
+(ou `npm run setup -- --padrao` para aceitar todas as respostas padrão sem perguntar).
+
+### 2. Crie o curso
 
 ```bash
-npm run render -- ../cursos/solid/aulas/01-por-que-codigo-apodrece
+npm run novo-curso -- logica "Lógica de programação do zero"
 ```
 
-O vídeo sai em `cursos/solid/aulas/01-por-que-codigo-apodrece/render/aula-01.mp4`.
+Isso cria `cursos/logica/` com `curso.yaml`, `plano-do-curso.md` e `pronuncia.json`. Preencha o
+`plano-do-curso.md`: resultado final, público, **projeto-fio** (um exemplo que atravessa o curso inteiro) e a
+lista de aulas.
 
-### 2. Leia os padrões (10 minutos que economizam horas)
+### 3. Crie a primeira aula
+
+```bash
+npm run nova-aula -- logica cupom-negativo "O cupom que deixou o preço negativo"
+```
+
+Isso cria `cursos/logica/aulas/01-cupom-negativo/` (o número é automático) com:
+
+```
+01-cupom-negativo/
+├── plano.md      objetivo, mistério, exemplo, erro comum, desafio
+├── roteiro.ts    as falas e as cenas: um exemplo COMPLETO que já renderiza
+└── exemplos/     código que aparece na tela, com testes
+```
+
+**Dica:** renderize o exemplo antes de mudar qualquer coisa (passo 6). Assim você vê como cada linha do
+roteiro vira vídeo.
+
+### 4. Escreva o roteiro
+
+Leia os padrões antes (10 minutos que economizam horas):
 
 | Arquivo | O que ensina |
 |---|---|
-| [`padrao/estrutura-da-aula.md`](padrao/estrutura-da-aula.md) | os 8 capítulos fixos de toda aula (formato "investigação") |
+| [`padrao/estrutura-da-aula.md`](padrao/estrutura-da-aula.md) | os capítulos fixos de toda aula (formato "investigação") |
 | [`padrao/como-escrever-uma-aula.md`](padrao/como-escrever-uma-aula.md) | todos os campos do roteiro e as cenas disponíveis |
 | [`personagens/guia-editorial.md`](personagens/guia-editorial.md) | personalidade e regras de diálogo de Lia e Téo |
 | [`padrao/licoes-aprendidas.md`](padrao/licoes-aprendidas.md) | erros que já aconteceram e como evitá-los |
 
-### 3. Crie a pasta do curso
-
-```bash
-cp -r _template/curso cursos/meu-curso
-mkdir -p cursos/meu-curso/aulas
-echo '{}' > cursos/meu-curso/pronuncia.json
-```
-
-Preencha `curso.yaml` e `plano-do-curso.md`: resultado final, público, **projeto-fio** (um exemplo que
-atravessa o curso inteiro) e a lista de aulas.
-
-### 4. Crie cada aula
-
-Cada aula fica em `cursos/<curso>/aulas/NN-slug/`:
-
-```
-cursos/meu-curso/aulas/01-minha-primeira-aula/
-├── plano.md      objetivo, mistério, exemplo, erro comum, desafio (modelo em _template/aula/plano.md)
-├── roteiro.ts    as falas + as cenas (fonte única da narração E da animação)
-└── exemplos/     código que aparece na tela, com testes que passam
-```
-
-O jeito mais rápido é copiar um roteiro existente e adaptar:
-
-```bash
-mkdir -p cursos/meu-curso/aulas/01-minha-primeira-aula/exemplos
-cp _template/aula/plano.md cursos/meu-curso/aulas/01-minha-primeira-aula/
-cp cursos/solid/aulas/01-por-que-codigo-apodrece/roteiro.ts cursos/meu-curso/aulas/01-minha-primeira-aula/
-```
-
-No `roteiro.ts`, ajuste `course: 'meu-curso'`, `number: '01'`, `slug`, `title`, `chapters` e reescreva as `cues`.
-Uma fala tem esta cara:
+Cada fala do `roteiro.ts` tem esta cara:
 
 ```ts
 {
-  id: '003', chapter: 1, speaker: 'teo',
-  text: 'Três mil e-mails [em dez minutos]. Alguém sabe o que aconteceu?',
-  say:  'Três mil iméios [em dez minutos]. <pausa 0.3> Alguém sabe o que aconteceu?', // opcional: só para a voz
-  pose: 'shrug', expr: 'surprised', look: 'viewer',
-  react: { expr: 'thinking', look: 'other' },          // reação de quem escuta
-  scene: { kind: 'inbox', count: 3000, subject: 'Pedido confirmado!' },
-  beats: [{ count: 3000, sfx: 'pop' }],                 // um beat por [trecho]
+  id: '001', chapter: 1, speaker: 'teo',
+  text: 'Um cliente [usou um cupom de desconto]... e [pagou mais caro].',   // legenda; [trecho] dispara uma ação
+  say:  'Um cliente [usou um cupom de desconto]... <pausa 0.3> e [pagou mais caro].', // opcional: só para a voz
+  pose: 'raise', expr: 'surprised', look: 'viewer',
+  react: { expr: 'concerned' },                      // reação de quem está ouvindo
+  scene: { kind: 'card', variant: 'ticket', title: 'Reclamação #4521', items: ['Usei o cupom', 'Paguei mais'], shown: 0 },
+  beats: [{ shown: 1, sfx: 'pop' }, { shown: 2, sfx: 'error' }],   // uma ação por [trecho]
 }
 ```
 
-> **Dica:** peça para uma IA (Claude, por exemplo) escrever o `plano.md` e o `roteiro.ts` passando
-> `padrao/como-escrever-uma-aula.md`, o guia editorial e um roteiro de exemplo. Você revisa o conteúdo técnico.
+Coloque o código que vai aparecer na tela em `exemplos/`, com testes que passam (o aluno pode rodar).
 
-### 5. Valide antes de gerar voz
+> **Escrevendo com uma IA (opcional):** dê a ela os quatro arquivos da tabela acima, um roteiro pronto
+> (por exemplo `cursos/solid/aulas/01-por-que-codigo-apodrece/roteiro.ts`) e o seu `plano.md`, e peça:
+> *"Escreva o roteiro.ts desta aula seguindo esses padrões"*. Revise o conteúdo técnico antes de renderizar.
 
-```bash
-cd cursos/meu-curso/aulas/01-minha-primeira-aula/exemplos && node --test   # exemplos passam
-cd ~/giz/motor                                                             # ajuste para onde clonou
-npx tsc --noEmit                                                           # o roteiro tipa
-node scripts/lesson.ts build ../cursos/meu-curso/aulas/01-minha-primeira-aula   # duração estimada
-```
-
-O aviso "sem áudio atualizado" é esperado nesta etapa.
-
-### 6. Pré-visualize e renderize
+### 5. Valide (sem gerar voz)
 
 ```bash
-npm run studio                                                    # editor visual no navegador
-npm run render -- ../cursos/meu-curso/aulas/01-minha-primeira-aula   # voz + build + MP4
+npm run check -- ../cursos/logica/aulas/01-cupom-negativo
 ```
 
-Saídas em `render/`: `aula-NN.mp4` e `legendas.srt` (pronta para o YouTube).
+O comando roda os testes dos exemplos, confere os tipos do roteiro e monta a linha do tempo com a duração
+estimada. Ele aponta erros como "3 [marcas] no texto, mas 2 beats".
+
+### 6. Gere o vídeo
+
+```bash
+npm run render -- ../cursos/logica/aulas/01-cupom-negativo
+```
+
+Saídas em `render/`: `aula-01.mp4` e `legendas.srt` (pronta para o YouTube).
+Para ver e ajustar no navegador, quadro a quadro: `npm run studio`.
 
 ### 7. Ajuste e regrave só o que mudou
 
-- Palavra pronunciada errado? Adicione em `cursos/<curso>/pronuncia.json` (`"Postgres": "pôust grés"`).
-- Mudou uma fala? `npm run render` regrava **apenas** as falas alteradas (hash por fala).
-- Regravar falas específicas: `npm run tts -- <pasta-da-aula> 012 013`.
+- **Palavra pronunciada errado?** Adicione a grafia que soa certo em `cursos/<curso>/pronuncia.json`
+  (`"deploy": "diplói"`). Só a voz muda; a legenda continua com o texto original.
+- **Mudou uma fala?** Rode o `render` de novo: só as falas alteradas são regravadas.
+- **Não gostou da entonação de uma fala?** Sorteie outra versão: `SEED=2 npm run tts -- <aula> 007`.
+- **Várias aulas de uma vez**, com controle de qualidade da pronúncia (Whisper):
+  `npm run produce -- ../cursos/logica/aulas/*`
 
 ## Personalizando
 
 | Quero… | Onde |
 |---|---|
-| mudar voz, ritmo ou cores dos personagens | [`motor/src/cast.ts`](motor/src/cast.ts) |
-| mudar cores/tema dos vídeos | [`motor/src/theme.ts`](motor/src/theme.ts) |
+| trocar a voz, o idioma, a GPU ou a pasta dos modelos | `npm run setup` (grava no seu `giz.config.json`) |
+| mudar as cores dos personagens | `look` em [`motor/src/cast.ts`](motor/src/cast.ts) |
+| mudar as cores e fontes dos vídeos | [`motor/src/theme.ts`](motor/src/theme.ts) |
 | criar um tipo de cena novo | `motor/src/types.ts` → `motor/src/scenes.tsx` → `SCENES` em `motor/src/Lesson.tsx` → [`padrao/catalogo-de-cenas.md`](padrao/catalogo-de-cenas.md) |
-| trocar o motor de voz (ElevenLabs, Azure…) | [`motor/scripts/tts.ts`](motor/scripts/tts.ts) |
+| usar outra voz (ElevenLabs, Azure, Kokoro…) | [`motor/scripts/tts.ts`](motor/scripts/tts.ts) |
 
 Detalhes técnicos do motor: [`motor/README.md`](motor/README.md).
 
@@ -143,20 +170,23 @@ Detalhes técnicos do motor: [`motor/README.md`](motor/README.md).
 
 ```
 giz/
-├── motor/          motor de vídeo (Remotion + voz Kokoro)
+├── motor/          motor de vídeo (Remotion + voz Qwen3-TTS local)
 ├── padrao/         formato da aula, catálogo de cenas, guia de escrita
 ├── personagens/    Lia e Téo: guia editorial e ficha visual
-├── _template/      modelos de curso e de aula
+├── _template/      modelos usados por novo-curso e nova-aula
 └── cursos/solid/   curso de exemplo (24 aulas)
 ```
 
-Áudios e vídeos gerados não vão para o git (são regenerados pelo `npm run render`).
+Áudios e vídeos gerados não vão para o git: o `render` gera tudo de novo.
 
 ## Limitações conhecidas
 
-- Vozes do Kokoro em pt-BR são boas, mas não de estúdio; não há controle de emoção na voz.
+- As vozes prontas do Qwen3-TTS 0.6B são nativas de outros idiomas (chinês, inglês, japonês, coreano). Elas falam
+  português, mas podem ter um leve sotaque. Use o `pronuncia.json` e o Whisper (`npm run produce`) para achar e
+  corrigir palavras problemáticas.
+- Gerar voz em CPU é lento (veja "Requisitos"). Fica rápido nas rodadas seguintes, porque só as falas alteradas são regravadas.
 - Personagens 2D não demonstram movimentos físicos com fidelidade (para isso, grave vídeo real).
 
 ## Licença
 
-Código sob [MIT](LICENSE). Respeite também as licenças das dependências (veja a tabela acima, em especial a do Remotion).
+Código sob [MIT](LICENSE). Respeite também as licenças das ferramentas usadas (tabela no começo, em especial a do Remotion).

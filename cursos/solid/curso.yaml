@@ -4,7 +4,5 @@ level: intermediario
 audience: "Quem já programa orientado a objetos (classes, interfaces) e quer código fácil de mudar"
 language_of_examples: typescript
 teachers: [lia, teo]
-style: 2d
-voice: { provider: kokoro-local, lia: "pf_dora@0.97", teo: "pm_alex@1.04" }
 target_minutes_per_lesson: [5, 10]
 publish: [youtube]

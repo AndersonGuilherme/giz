@@ -135,7 +135,7 @@ export const LessonVideo: React.FC<{ lesson: string; data?: LessonProps; caption
       ))}
 
       <div style={{ position: 'absolute', left: 60, top: 52 }}>
-        <div style={{ font: `900 58px ${fonts.sans}`, background: THEME.gradient, WebkitBackgroundClip: 'text', color: 'transparent', lineHeight: 1 }}>t.chr</div>
+        <div style={{ font: `900 58px ${fonts.sans}`, background: THEME.gradient, WebkitBackgroundClip: 'text', color: 'transparent', lineHeight: 1 }}>{data.brand ?? 'giz'}</div>
         <div style={{ font: `700 26px/1.25 ${fonts.sans}`, color: THEME.muted, marginTop: 12, maxWidth: 470 }}>{data.title}</div>
         {!stage && <div style={{ font: `900 32px ${fonts.sans}`, color: THEME.brand, marginTop: 10 }}>{data.chapters[cue.chapter - 1]}</div>}
       </div>

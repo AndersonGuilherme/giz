@@ -14,9 +14,9 @@ Toda aula nova começa lendo este arquivo. Cada item veio de um problema real, m
    desafio ("qual dessas duas classes é melhor?"), um número surpreendente, uma decisão de produto, um "e se…".
 5. **Mistério fechado explicitamente** no fim ("agora os três mil e-mails fazem sentido").
 
-## Voz (Kokoro + ouvido automático)
-6. **Perguntas de sim/não**: o Kokoro termina tudo caindo. O motor agora sobe o tom no fim de toda frase com "?"
-   (medido: −2,8 → −0,3 semitons). Mesmo assim, **ajude pelo texto**: perguntas curtas, com a palavra-chave no fim
+## Voz (Qwen3-TTS + ouvido automático)
+6. **Perguntas de sim/não**: confira com `scripts/pitch-check.ts` se a voz sobe o tom no fim. Se cair, o motor pode
+   elevar o final por PSOLA (`QRISE_YN=10 QRISE_WH=3`). Mesmo assim, **ajude pelo texto**: perguntas curtas, com a palavra-chave no fim
    ("Tudo isso num método só?"), ou com marcador ("Será que…?", "…, né?", "E se…?"). Evite pergunta longa com
    vírgulas no meio.
 7. **Palavras em inglês**: prefira o termo em português quando existir. Se precisar do inglês, use `say` com a grafia

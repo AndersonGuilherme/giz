@@ -1,10 +1,11 @@
 // Build de uma aula: roteiro.ts + exemplos/ + audio/timings.json  →  public/<aula>/props.json + roteiro.md + legendas.srt
-// Uso: node scripts/lesson.ts build ../cursos/solid/aulas/01-por-que-codigo-apodrece
+// Uso: node scripts/lesson.ts build ../cursos/<curso>/aulas/<NN-slug>
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, readdirSync } from 'node:fs';
 import { resolve, join, basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import { captionChunks } from '../src/captions.ts';
 import { CAST, OTHER } from '../src/cast.ts';
+import { loadConfig } from './config.ts';
 import type { Lesson, Cue, Scene, ResolvedCue, ResolvedScene, LessonProps, Speaker, SfxEvent, CharacterState } from '../src/types.ts';
 import { spokenText, type Timings, type Segment } from './tts.ts';
 
@@ -157,8 +158,9 @@ export async function build(lessonDirArg: string) {
     frame += durationInFrames;
   }
 
-  const props: LessonProps = { fps: FPS, title: lesson.title, chapters: lesson.chapters, totalFrames: frame + FPS, cues, sfx };
+  const props: LessonProps = { fps: FPS, brand: loadConfig().brand, title: lesson.title, chapters: lesson.chapters, totalFrames: frame + FPS, cues, sfx };
   writeFileSync(join(publicDir, 'props.json'), JSON.stringify(props));
+  writeFileSync(join(publicRoot, 'ultima-aula.json'), JSON.stringify({ lesson: outKey }));
   writeFileSync(join(lessonDir, 'roteiro.md'), toMarkdown(lesson, cues, FPS));
   mkdirSync(join(lessonDir, 'render'), { recursive: true });
   writeFileSync(join(lessonDir, 'render', 'legendas.srt'), toSrt(cues, FPS));
