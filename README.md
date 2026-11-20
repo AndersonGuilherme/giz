@@ -162,14 +162,42 @@ Para ver e ajustar no navegador, quadro a quadro: `npm run studio`.
 ### 8. Publique no YouTube (opcional)
 
 `npm run youtube` envia a aula renderizada com título, descrição com capítulos, legendas, capa e playlist do curso.
-A credencial OAuth é sua e fica fora do repositório (`~/.config/giz/youtube/`); o passo a passo está no topo de
-`motor/scripts/youtube.ts`.
+A credencial é SUA e fica fora do repositório, em `~/.config/giz/youtube/`.
+
+**Preparação (uma vez):**
+
+1. No [Google Cloud Console](https://console.cloud.google.com/), crie um projeto (ou use um existente).
+2. Em **APIs e serviços → Biblioteca**, ative a **YouTube Data API v3**.
+3. Em **Tela de consentimento OAuth** (Google Auth Platform), configure o app como **Externo** e, em
+   **Público-alvo → Usuários de teste**, adicione a conta Google dona do canal. Sem isso o login dá "acesso negado".
+4. Em **Credenciais → Criar credenciais → ID do cliente OAuth**, escolha **App para computador** e baixe o JSON.
+5. Salve o JSON exatamente neste caminho (crie a pasta com `mkdir -p ~/.config/giz/youtube`):
+   `~/.config/giz/youtube/client_secret.json`
+   - No Windows com WSL, a pasta aparece em `\\wsl.localhost\<distro>\home\<usuário>\.config\giz\youtube\`.
+     Cuidado com dois tropeços comuns: o Windows pode salvar como `client_secret.json.json` (extensão escondida)
+     e criar um arquivo `...:Zone.Identifier` ao lado; renomeie o primeiro e apague o segundo.
+   - Proteja o arquivo: `chmod 600 ~/.config/giz/youtube/client_secret.json`.
+6. Faça o login. O comando mostra um link; abra no navegador e autorize com a conta do canal:
+   ```bash
+   npm run youtube -- login
+   ```
+   - "O Google não verificou este app" é esperado em projeto pessoal: **Avançado → Acessar (não seguro)**.
+   - No fim aparece "Pronto! Pode fechar esta aba." e o token fica em `~/.config/giz/youtube/token.json`.
+   - Com o app em modo de **teste**, o Google expira o token em 7 dias: rode o `login` de novo quando o envio
+     disser que não conseguiu renovar o token (ou publique o app na tela de consentimento para não expirar).
+7. Para capa personalizada, o canal precisa estar verificado (verificação por telefone no YouTube).
+
+**Uso:**
 
 ```bash
-npm run youtube -- login
-npm run youtube -- simular ../cursos/logica/aulas/01-cupom-negativo      # mostra o que seria enviado
+npm run youtube -- simular ../cursos/logica/aulas/01-cupom-negativo      # mostra o que seria enviado, sem enviar
+npm run youtube -- publicar ../cursos/logica/aulas/01-cupom-negativo --privacidade unlisted
 npm run youtube -- pendentes ../cursos/logica --privacidade unlisted --vigiar   # publica cada aula assim que fica pronta
+npm run youtube -- status ../cursos/logica                                 # o que já foi publicado
 ```
+
+O resultado de cada envio fica em `render/youtube.json` da aula (aula com esse arquivo não é reenviada; `--forcar`
+reenvia). A privacidade padrão é `private`.
 
 As capas ficam em `cursos/<curso>/capas/` (ou na pasta `capas:` do `curso.yaml`), com nome `Aula 01 - título.png`.
 Atenção: a cota padrão da API permite umas 4 aulas por dia, e projetos de API não verificados pelo Google têm

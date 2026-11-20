@@ -1,11 +1,12 @@
 // Publica as aulas renderizadas no YouTube: vídeo, capa, legendas e playlist do curso.
 // Sem dependências: fala direto com a YouTube Data API v3 (OAuth de app instalado, com redirecionamento local).
 //
-// Preparação (uma vez por pessoa, nada disso vai para o repositório):
-//   1. No Google Cloud Console: crie um projeto, ative a "YouTube Data API v3", crie uma credencial OAuth do tipo
-//      "App para computador" e baixe o JSON para ~/.config/giz/youtube/client_secret.json
-//      (ou aponte GIZ_YOUTUBE_CLIENT_SECRET para ele).
-//   2. npm run youtube -- login            → abre a autorização no navegador e guarda o token em ~/.config/giz/youtube/
+// Preparação (uma vez por pessoa, nada disso vai para o repositório) — passo a passo completo no README, seção
+// "Publique no YouTube":
+//   1. Google Cloud Console: ative a "YouTube Data API v3", configure a tela de consentimento OAuth (Externo) com a
+//      conta do canal em "Usuários de teste", crie um ID do cliente OAuth do tipo "App para computador" e salve o
+//      JSON em ~/.config/giz/youtube/client_secret.json (ou aponte GIZ_YOUTUBE_CLIENT_SECRET para ele).
+//   2. npm run youtube -- login            → mostra o link de autorização e guarda o token em ~/.config/giz/youtube/
 //
 // Uso:
 //   npm run youtube -- publicar <pasta-da-aula> [--privacidade private|unlisted|public] [--forcar]
