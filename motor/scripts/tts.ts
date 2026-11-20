@@ -18,8 +18,10 @@ import { loadConfig } from './config.ts';
 
 const FPS = 30;
 const RATE = QWEN_RATE;
-const SENTENCE_PAUSE = 0.14; // s entre frases dentro da mesma fala
-const DSP_VERSION = 5; // muda quando o pós-processamento de áudio muda (força regravar)
+// A fala inteira é gerada de uma vez: gerar frase a frase dava entonação de fim de frase no meio da fala
+// ("picotado", "bêbado"). <pausa> no roteiro não vira mais silêncio artificial; a pontuação conduz o ritmo.
+const TEMPERATURE = Number(process.env.TTS_TEMP ?? 0.7); // 0.9 variava demais a entonação; 0.7 escolhido de ouvido (2026-11-19)
+const DSP_VERSION = 6; // muda quando o pós-processamento de áudio muda (força regravar)
 
 // ENTONAÇÃO DE PERGUNTA (opcional). Em pt-BR, pergunta de sim/não só se distingue pela subida final do tom.
 // Se a voz terminar perguntas caindo, o fim pode ser elevado por TD-PSOLA (ciclos da voz reaproximados, SEM
@@ -221,24 +223,32 @@ function normalizeLoudness(x: Float32Array, targetRms = 0.085): Float32Array {
   return x.map((v) => v * gain);
 }
 
-// Divide o texto falado em frases e pausas explícitas, guardando a posição de cada frase no texto limpo.
-type Piece = { kind: 'text'; text: string; c0: number; c1: number } | { kind: 'pause'; seconds: number };
+// Frases do texto falado limpo (posição de cada uma), para legenda e destaques [trecho].
+type Piece = { text: string; c0: number; c1: number };
 function pieces(raw: string): Piece[] {
+  const clean = spokenText(raw);
   const out: Piece[] = [];
-  let clean = '';
-  for (const part of raw.replace(MARK, '$1').split(/(<pausa\s+[\d.]+>)/)) {
-    const p = part.match(/<pausa\s+([\d.]+)>/);
-    if (p) { out.push({ kind: 'pause', seconds: Number(p[1]) }); continue; }
-    for (const s of part.match(/[^.!?:…]+[.!?:…]*\s*/g) ?? []) {
-      const text = s.replace(/\s{2,}/g, ' ').trim();
-      if (!text) continue;
-      if (clean.length) clean += ' ';
-      const c0 = clean.length;
-      clean += text;
-      out.push({ kind: 'text', text, c0, c1: clean.length });
-    }
+  for (const m of clean.matchAll(/[^.!?:…]+[.!?:…]*\s*/g)) {
+    const text = m[0].trim();
+    if (!text) continue;
+    const c0 = m.index! + (m[0].length - m[0].trimStart().length);
+    out.push({ text, c0, c1: c0 + text.length });
   }
   return out;
+}
+
+// Caractere → frame: os caracteres (sem espaços) são espalhados pelos frames com voz, em ordem.
+function charToFrame(env: number[], clean: string) {
+  const voiced: number[] = [];
+  env.forEach((v, f) => { if (v > 0) voiced.push(f); });
+  const weight: number[] = [0];
+  for (const ch of clean) weight.push(weight[weight.length - 1] + (/\s/.test(ch) ? 0 : /[,;:.!?…]/.test(ch) ? 3 : 1));
+  const total = weight[weight.length - 1] || 1;
+  return (c: number, end = false) => {
+    if (!voiced.length) return 0;
+    const k = Math.min(voiced.length - 1, Math.floor((weight[Math.min(c, clean.length)] / total) * voiced.length));
+    return end ? voiced[k] + 1 : voiced[k];
+  };
 }
 
 async function main() {
@@ -266,46 +276,28 @@ async function main() {
     const raw = cue.say ?? cue.text;
     // o hash usa o texto JÁ com o dicionário aplicado: mudar o dicionário só regrava as falas que ele afeta
     let lexed = raw; for (const [re, rep] of lexicon) lexed = lexed.replace(re, rep);
-    const hash = createHash('sha1').update(JSON.stringify(['qwen3', voice, style, lexed, SEED, QRISE_YN, QRISE_WH, DSP_VERSION])).digest('hex').slice(0, 12);
+    const hash = createHash('sha1').update(JSON.stringify(['qwen3', voice, style, lexed, SEED, QRISE_YN, QRISE_WH, DSP_VERSION, TEMPERATURE])).digest('hex').slice(0, 12);
     const file = `cue-${cue.id}${suffix}.wav`;
     if (!only.length && timings[cue.id]?.hash === hash && existsSync(join(audioDir, file))) continue;
     tts ??= await Qwen3TTS.load();
     const t0 = performance.now();
 
-    const chunks: Float32Array[] = [];
-    const segments: Segment[] = [];
-    const visemePlan: Array<{ f0: number; f1: number; v: string[] }> = [];
-    let samplesSoFar = 0;
-    const push = (a: Float32Array) => { chunks.push(a); samplesSoFar += a.length; };
-    const ps = pieces(raw);
-    for (const [k, p] of ps.entries()) {
-      if (p.kind === 'pause') { push(new Float32Array(Math.round(p.seconds * RATE))); continue; }
-      let spoken = p.text;
-      for (const [re, rep] of lexicon) spoken = spoken.replace(re, rep);
-      const phon = await phonemizePtBr(spoken);
-      if (process.env.TTS_DEBUG) console.log(`  ${spoken}  →  ${phon}`);
-      const gen = await tts.generate(spoken, { speaker: voice.id, language: voice.language, instruct: style || undefined, seed: seedOf(`${SEED}|${cue.id}|${k}|${spoken}`) });
-      const audio = questionRise(trimSilence(gen), p.text);
-      const f0 = Math.floor(samplesSoFar / (RATE / FPS));
-      push(audio);
-      const f1 = Math.ceil(samplesSoFar / (RATE / FPS));
-      segments.push({ c0: p.c0, c1: p.c1, f0, f1 });
-      visemePlan.push({ f0, f1, v: phonemesToVisemes(phon) });
-      if (k < ps.length - 1 && ps[k + 1].kind === 'text') push(new Float32Array(Math.round(SENTENCE_PAUSE * RATE)));
-    }
-    let samples: Float32Array = new Float32Array(samplesSoFar);
-    let o = 0;
-    for (const c of chunks) { samples.set(c, o); o += c.length; }
-    samples = normalizeLoudness(samples);
+    const clean = spokenText(raw);
+    let spoken = clean;
+    for (const [re, rep] of lexicon) spoken = spoken.replace(re, rep);
+    const phon = await phonemizePtBr(spoken);
+    if (process.env.TTS_DEBUG) console.log(`  ${spoken}  →  ${phon}`);
+    const gen = await tts.generate(spoken, { speaker: voice.id, language: voice.language, instruct: style || undefined, temperature: TEMPERATURE, seed: seedOf(`${SEED}|${cue.id}|${spoken}`) });
+    const samples = normalizeLoudness(questionRise(trimSilence(gen), clean));
     const env = envelope(rmsFrames(samples));
+    const at = charToFrame(env, clean);
+    const segments: Segment[] = pieces(raw).map((p) => ({ c0: p.c0, c1: p.c1, f0: at(p.c0), f1: at(p.c1, true) }));
 
-    // visemas: os fonemas de cada frase espalhados pelos frames com voz daquela frase
+    // visemas: os fonemas da fala espalhados pelos frames com voz
+    const v = phonemesToVisemes(phon);
     const vis = env.map(() => 'X');
-    for (const { f0, f1, v } of visemePlan) {
-      const voiced: number[] = [];
-      for (let f = f0; f < Math.min(f1, env.length); f++) if (env[f] > 0) voiced.push(f);
-      voiced.forEach((f, n) => { vis[f] = v[Math.min(v.length - 1, Math.floor((n / voiced.length) * v.length))] ?? 'C'; });
-    }
+    const voiced = env.flatMap((e, f) => (e > 0 ? [f] : []));
+    voiced.forEach((f, n) => { vis[f] = v[Math.min(v.length - 1, Math.floor((n / voiced.length) * v.length))] ?? 'C'; });
 
     writeFileSync(join(audioDir, file), toWav(samples));
     timings[cue.id] = { file, durationSec: samples.length / RATE, envelope: env, visemes: vis.join(''), segments, spoken: spokenText(raw), hash };

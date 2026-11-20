@@ -47,3 +47,22 @@ Toda aula nova começa lendo este arquivo. Cada item veio de um problema real, m
 18. **Caractere invisível** (espaço inseparável depois de "R$") não casa com destaque escrito como `u00a0`.
 19. **Tabela longa** (8+ linhas) estourava o painel: a cena agora encolhe as linhas para caber.
 20. **Duração**: com a regra dos 700–950 palavras, todas as aulas 05–24 ficaram entre 5:13 e 7:08.
+
+## Do curso "IA para Criar Software de Verdade" (2026-11-19)
+21. **Siglas soltas no meio da frase embolam** ("Hoje a IA planeja" virou "Ouja aí a planeja"). Ponha a forma falada
+    no `pronuncia.json` do curso ("IA" → "inteligência artificial"). Cuidado: o dicionário ignora maiúsculas, então
+    "IA" também casa com o verbo "ia" ("não ia pro ar") — reescreva essas frases.
+22. **Tabela: `columns` são só as colunas das células.** A coluna do `label` não tem cabeçalho; um nome a mais
+    desloca todos os títulos.
+23. **Grafo: nós alinhados na vertical e próximos escondem a seta** (só a ponta aparece). Prefira vizinhos à
+    esquerda/direita ou na diagonal do nó central.
+24. **Pergunta com palavra-chave no meio perde a entonação.** "Então a IA não serve?" saiu como afirmação;
+    "Será que…?" e "…, é isso?" ajudam, mas ainda falham às vezes — confira no `asr-check`.
+
+25. **Gere cada fala inteira, nunca frase a frase.** Gerar cada frase (ou cada trecho entre `<pausa>`) separadamente e colar deixa entonação de fim de frase no meio da fala — soa picotado, "bêbado". Agora o motor gera a fala de uma vez (temperatura 0.7), e `<pausa>` não insere mais silêncio: o ritmo vem da pontuação. Quer uma pausa? Termine a frase com ponto ou use vírgula.
+
+26. **Personagens contidos: gesto forte só em pico de emoção.** Trocar de pose a cada fala, mão pro alto em toda pergunta e cara de euforia por nada deixam a Lia e o Téo "animados demais", sem sentido. Padrão: `explain`/`point`/`think`/`neutral` e expressão `happy`/`neutral`/`thinking`. `surprised`, `concerned` e `confused` só quando a fala pede. `celebrate` e `excited` quase nunca. No motor, `raise` virou mão na altura do ombro ("peraí"), `celebrate` abre os braços sem erguer, e a transição entre poses não tem mais quique de mola.
+
+27. **Abertura silenciosa de 1,5 s.** Quando a primeira fala começa colada no play, a pessoa perde o começo. O build agora abre a primeira cena 1,5 s antes da primeira fala (`LEAD_IN_SEC`, pode mudar por variável de ambiente). As legendas e o `legendas.srt` acompanham o deslocamento.
+
+28. **Sotaque brasileiro vem da instrução de estilo.** As vozes do Qwen3-TTS não são nativas de português, e `language: portuguese` não diferencia Brasil de Portugal: sem instrução, a fala puxa para o português de Portugal. No modelo 1.7B, começar o estilo com "Fale em português do Brasil, com sotaque brasileiro de São Paulo, ..." deixa a fala brasileira e natural (comparado de ouvido com 3 alternativas, inclusive instruções em inglês). Virou o padrão do `npm run setup`.

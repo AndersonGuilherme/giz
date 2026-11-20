@@ -4,7 +4,7 @@ import { LessonVideo } from './Lesson';
 import { CharacterSheet } from './CharacterSheet';
 import type { LessonProps } from './types';
 
-type Props = { lesson: string; data?: LessonProps; captions?: boolean };
+type Props = { lesson: string; data?: LessonProps; captions?: boolean; characters?: 'rig' | 'sprite' };
 
 // A aula a renderizar vem por --props='{"lesson":"<curso>-<NN>"}'; os dados são lidos de public/<aula>/props.json.
 // Sem --props (ex.: npm run studio), abre a última aula montada pelo build (public/ultima-aula.json).

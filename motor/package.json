@@ -13,7 +13,8 @@
     "studio": "remotion studio src/index.ts",
     "produce": "node scripts/produce.ts",
     "baixar-modelos": "node scripts/baixar-modelos.ts",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "youtube": "node scripts/youtube.ts"
   },
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "^0.3.5",

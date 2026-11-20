@@ -116,8 +116,8 @@ cfg.voices.lia = await choose('Voz da Lia (mentora):', VOICES.filter((v) => v.ge
 cfg.voices.teo = await choose('Voz do Téo (dev curioso):', VOICES.filter((v) => v.gender === 'm'), prev.voices.teo);
 if (cfg.model === '1.7b') {
   console.log(D('Instrução de estilo: como cada personagem fala, em linguagem natural (pode ser em português). Vazio = sem instrução.'));
-  cfg.styles.lia = await ask('Estilo da Lia', prev.styles.lia || 'Fale de forma calorosa, confiante e didática, como uma professora experiente');
-  cfg.styles.teo = await ask('Estilo do Téo', prev.styles.teo || 'Fale com energia e curiosidade, como um jovem desenvolvedor animado');
+  cfg.styles.lia = await ask('Estilo da Lia', prev.styles.lia || 'Fale em português do Brasil, com sotaque brasileiro de São Paulo, de forma calorosa e natural, como uma professora conversando');
+  cfg.styles.teo = await ask('Estilo do Téo', prev.styles.teo || 'Fale em português do Brasil, com sotaque brasileiro de São Paulo, com curiosidade e naturalidade, como um jovem desenvolvedor conversando');
 }
 
 // 5 · controle de qualidade

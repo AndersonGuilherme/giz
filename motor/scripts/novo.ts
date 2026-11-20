@@ -46,8 +46,12 @@ if (cmd === 'curso') {
   if (!existsSync(cursoDir)) fail(`curso "${curso}" não existe; crie com: npm run novo-curso -- ${curso} "Título do curso"`);
   const aulas = join(cursoDir, 'aulas');
   mkdirSync(aulas, { recursive: true });
-  const nums = readdirSync(aulas).map((d) => Number(d.slice(0, 2))).filter((n) => Number.isFinite(n));
-  const numero = String((nums.length ? Math.max(...nums) : 0) + 1).padStart(2, '0');
+  // número = maior existente + 1; largura vem de curso.yaml (lesson_digits: 3 para cursos com 100+ aulas) ou das pastas
+  const prefixes = readdirSync(aulas).map((d) => /^(\d+)-/.exec(d)?.[1]).filter((p): p is string => !!p);
+  const yaml = existsSync(join(cursoDir, 'curso.yaml')) ? readFileSync(join(cursoDir, 'curso.yaml'), 'utf8') : '';
+  const digits = Number(/^lesson_digits:\s*(\d+)/m.exec(yaml)?.[1] ?? Math.max(2, ...prefixes.map((p) => p.length)));
+  const nums = prefixes.map(Number);
+  const numero = String((nums.length ? Math.max(...nums) : 0) + 1).padStart(digits, '0');
   const dir = join(aulas, `${numero}-${slug}`);
   copyFilled(join(template, 'aula'), dir, { CURSO: curso, NUMERO: numero, SLUG: slug, TITULO: titulo });
   const rel = relative(root, dir);

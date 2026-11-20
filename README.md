@@ -159,6 +159,22 @@ Para ver e ajustar no navegador, quadro a quadro: `npm run studio`.
 - **Várias aulas de uma vez**, com controle de qualidade da pronúncia (Whisper):
   `npm run produce -- ../cursos/logica/aulas/*`
 
+### 8. Publique no YouTube (opcional)
+
+`npm run youtube` envia a aula renderizada com título, descrição com capítulos, legendas, capa e playlist do curso.
+A credencial OAuth é sua e fica fora do repositório (`~/.config/giz/youtube/`); o passo a passo está no topo de
+`motor/scripts/youtube.ts`.
+
+```bash
+npm run youtube -- login
+npm run youtube -- simular ../cursos/logica/aulas/01-cupom-negativo      # mostra o que seria enviado
+npm run youtube -- pendentes ../cursos/logica --privacidade unlisted --vigiar   # publica cada aula assim que fica pronta
+```
+
+As capas ficam em `cursos/<curso>/capas/` (ou na pasta `capas:` do `curso.yaml`), com nome `Aula 01 - título.png`.
+Atenção: a cota padrão da API permite umas 4 aulas por dia, e projetos de API não verificados pelo Google têm
+os vídeos travados como privados até passarem pela auditoria da API.
+
 ## Personalizando
 
 | Quero… | Onde |

@@ -2,6 +2,7 @@ import React from 'react';
 import { AbsoluteFill, Html5Audio, Sequence, spring, staticFile, useCurrentFrame, useVideoConfig, interpolate } from 'remotion';
 import type { LessonProps, ResolvedCue, ResolvedScene, Speaker, CharacterState, Look } from './types';
 import { Character, POSES, EXPRESSIONS, frontFor, type Rig } from './Character';
+import { SpriteCharacter, type SpriteState } from './SpriteCharacter';
 import { CAST, SIDE } from './cast';
 import { THEME, fonts } from './theme';
 import * as S from './scenes';
@@ -29,7 +30,7 @@ function sceneState(cues: ResolvedCue[], i: number, frame: number) {
   while (first > 0 && cues[first - 1].sceneKey === cue.sceneKey) first--;
   for (let j = first; j <= i; j++) {
     const c = cues[j];
-    if (j === first || c.resetsAtStart) lastChange = Math.max(lastChange, c.startFrame);
+    if (j === first || c.resetsAtStart) lastChange = Math.max(lastChange, j === 0 ? 0 : c.startFrame);
     c.beatFrames.forEach((bf, k) => {
       const sceneKeys = Object.keys(c.beats[k]).filter((key) => !['expr', 'pose', 'sfx'].includes(key));
       if (sceneKeys.length && c.startFrame + bf <= frame) lastChange = Math.max(lastChange, c.startFrame + bf);
@@ -40,7 +41,7 @@ function sceneState(cues: ResolvedCue[], i: number, frame: number) {
     const { expr: _e, pose: _p, sfx: _s, ...rest } = b;
     state = { ...state, ...rest };
   });
-  return { state: state as ResolvedScene, age: frame - lastChange, sceneAge: frame - cues[first].startFrame };
+  return { state: state as ResolvedScene, age: frame - lastChange, sceneAge: frame - (first === 0 ? 0 : cues[first].startFrame) };
 }
 
 // Estado de um personagem no frame (com beats de expressão/pose aplicados) e quando ele começou.
@@ -60,13 +61,23 @@ function charState(cue: ResolvedCue, who: Speaker, local: number): { st: Charact
 
 const finalState = (cue: ResolvedCue, who: Speaker) => charState(cue, who, Number.MAX_SAFE_INTEGER).st;
 
+// quadro absoluto em que a expressão atual do personagem começou (atravessa falas com a mesma expressão)
+function exprStart(cues: ResolvedCue[], i: number, who: Speaker, local: number, key: 'expr' | 'pose' = 'expr'): number {
+  const { st, since } = charState(cues[i], who, local);
+  let start = cues[i].startFrame + since;
+  if (since > 0) return start;
+  for (let j = i - 1; j >= 0 && finalState(cues[j], who)[key] === st[key]; j--) start = cues[j].startFrame;
+  return start;
+}
+
 function eyeTarget(who: Speaker, look: Look, stage: boolean): number {
   if (look === 'viewer' || (look === 'content' && stage)) return 0;
   if (look === 'content') return 7; // o conteúdo fica à direita
   return SIDE[who] === -1 ? 7 : -7; // olhar para o colega
 }
 
-export const LessonVideo: React.FC<{ lesson: string; data?: LessonProps; captions?: boolean }> = ({ data, captions = true }) => {
+// characters: 'rig' (boneco vetorial articulado, padrão) ou 'sprite' (pacote de sprites em personagens/2d/assets)
+export const LessonVideo: React.FC<{ lesson: string; data?: LessonProps; captions?: boolean; characters?: 'rig' | 'sprite' }> = ({ data, captions = true, characters = 'rig' }) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
   if (!data) return null;
@@ -77,13 +88,13 @@ export const LessonVideo: React.FC<{ lesson: string; data?: LessonProps; caption
   const { state, age, sceneAge } = sceneState(cues, i, frame);
   const Scene = SCENES[state.kind] as React.FC<S.SceneProps<typeof state.kind>>;
   const stage = state.kind === 'talk';
-  const talking = local < cue.speechFrames;
-  const holding = !talking && local < cue.speechFrames + cue.holdFrames;
+  const talking = local >= 0 && local < cue.speechFrames; // local < 0: abertura silenciosa antes da 1ª fala
+  const holding = !talking && local >= 0 && local < cue.speechFrames + cue.holdFrames;
 
   const rigFor = (who: Speaker): Rig => {
     const { st, since } = charState(cue, who, local);
     const prev = since > 0 ? charState(cue, who, since - 1).st : i > 0 ? finalState(cues[i - 1], who) : st;
-    const t = spring({ frame: local - since, fps, config: { damping: 13, mass: 0.7 } });
+    const t = spring({ frame: local - since, fps, config: { damping: 22, mass: 1.1 } }); // sem quique: gesto de gente, não de mola
     const mix = (a: number[], b: number[]) => a.map((v, k) => v + (b[k] - v) * t);
     const ea = EXPRESSIONS[prev.expr], eb = EXPRESSIONS[st.expr];
     const prevStage = since === 0 && i > 0 ? cues[i - 1].scene.kind === 'talk' : stage;
@@ -118,6 +129,13 @@ export const LessonVideo: React.FC<{ lesson: string; data?: LessonProps; caption
 
   const order: Speaker[] = ['lia', 'teo'];
   const charW = stage ? 440 : 270;
+  const sprite = characters === 'sprite';
+  const spriteH = stage ? 620 : 470;
+  const spriteFor = (who: Speaker): SpriteState => {
+    const { st } = charState(cue, who, local);
+    const speaking = who === cue.speaker && talking;
+    return { expr: st.expr, pose: st.pose, exprSince: frame - exprStart(cues, i, who, local), poseSince: frame - exprStart(cues, i, who, local, 'pose'), speaking, listener: who !== cue.speaker, open: speaking ? (cue.envelope?.[local] ?? 0.5) : 0, side: SIDE[who] };
+  };
   const caption = cue.captions.reduce((acc, c) => (c.frame <= local ? c : acc), cue.captions[0]);
   const holdLeft = Math.ceil((cue.speechFrames + cue.holdFrames - local) / fps);
 
@@ -154,11 +172,13 @@ export const LessonVideo: React.FC<{ lesson: string; data?: LessonProps; caption
         </div>
       )}
 
-      <div style={{ position: 'absolute', bottom: stage ? 170 : 150, left: stage ? 0 : 20, width: stage ? 1920 : 560, display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: stage ? 140 : 0 }}>
+      <div style={{ position: 'absolute', bottom: stage ? (sprite ? 240 : 170) : 150, left: stage ? 0 : 20, width: stage ? 1920 : 560, display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: stage ? (sprite ? 320 : 140) : sprite ? 40 : 0 }}>
         {order.map((who) => (
           <div key={who} style={{ position: 'relative' }}>
-            <Character who={who} uid={`c-${who}`} width={charW} frame={frame} fps={fps} rig={rigFor(who)} />
-            <div style={{ position: 'absolute', left: 0, right: 0, bottom: -8, textAlign: 'center', font: `900 ${stage ? 30 : 22}px ${fonts.sans}`, color: who === cue.speaker && talking ? THEME.brand : '#b3a8cc' }}>
+            {sprite
+              ? <SpriteCharacter who={who} height={spriteH} frame={frame} fps={fps} s={spriteFor(who)} compact={!stage} />
+              : <Character who={who} uid={`c-${who}`} width={charW} frame={frame} fps={fps} rig={rigFor(who)} />}
+            <div style={{ position: 'absolute', left: 0, right: 0, bottom: sprite ? -44 : -8, textAlign: 'center', font: `900 ${stage ? 30 : 22}px ${fonts.sans}`, color: who === cue.speaker && talking ? THEME.brand : '#b3a8cc' }}>
               {CAST[who].name}
             </div>
           </div>

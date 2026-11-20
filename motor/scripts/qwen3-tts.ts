@@ -70,7 +70,7 @@ function readNpy(path: string): { data: Float32Array; shape: number[] } {
 }
 
 // ── tokenizador BPE em nível de byte (Qwen2) ─────────────────────────────────────────────────────
-class BpeTokenizer {
+export class BpeTokenizer {
   private vocab: Map<string, number>;
   private ranks = new Map<string, number>();
   private byteMap: string[] = [];

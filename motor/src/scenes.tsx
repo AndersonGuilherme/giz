@@ -325,14 +325,23 @@ export const VersusScene: React.FC<SceneProps<'versus'>> = ({ state, sceneAge, f
 // ───────────────────────── table (linhas × colunas; "●" vira marca colorida)
 export const TableScene: React.FC<SceneProps<'table'>> = ({ state, age, sceneAge, fps, width, height }) => {
   const shown = state.shownRows ?? state.rows.length;
-  const few = state.columns.length <= 2;
-  const labelW = few ? 420 : 300;
-  const colW = Math.min(few ? 360 : 220, (width - 112 - labelW) / state.columns.length);
-  const hl = (state.highlightCol !== undefined || state.highlightRow !== undefined) ? interpolate(age, [0, 10], [0, 1], clamp) : 0;
-  // linhas encolhem para caber no painel (tabelas longas não podem estourar)
+  // largura: o painel inteiro é dividido entre a coluna dos rótulos e as colunas de células (sem sobra vazia)
+  const inner = width - 112;
   const avail = height - 112 - (state.title ? 92 : 0) - 64;
   const rowH = Math.min(84, avail / Math.max(1, state.rows.length));
-  const fontCell = Math.min(colW < 150 ? 26 : 32, Math.max(20, rowH * 0.42));
+  // estimativa de linhas que um texto ocupa numa largura (fonte sans 800 ≈ 0,56 em por caractere)
+  const lines = (text: string, w: number, font: number) => Math.max(1, Math.ceil((text.length * font * 0.56) / Math.max(1, w - 16)));
+  const longestLabel = Math.max(...state.rows.map((r) => r.label.length), 1);
+  let fontCell = Math.max(20, Math.min(32, rowH * 0.42));
+  let labelW = 0, colW = 0;
+  // diminui a fonte até cada célula e rótulo caberem na altura da linha (nada de texto sobreposto)
+  for (; fontCell > 16; fontCell -= 1) {
+    labelW = Math.min(inner * 0.42, Math.max(220, longestLabel * (fontCell + 2) * 0.56 + 24));
+    colW = (inner - labelW) / Math.max(1, state.columns.length);
+    const fits = (t: string, w: number, f: number) => lines(t, w, f) * f * 1.2 <= rowH - 6;
+    if (state.rows.every((r) => fits(r.label, labelW, fontCell + 2) && r.cells.every((c) => fits(c, colW, fontCell)))) break;
+  }
+  const hl = (state.highlightCol !== undefined || state.highlightRow !== undefined) ? interpolate(age, [0, 10], [0, 1], clamp) : 0;
   return (
     <Panel style={fadeUp(pop(sceneAge, fps))}>
       {state.title && <div style={{ font: `900 50px ${fonts.sans}`, color: THEME.ink, marginBottom: 28 }}>{state.title}</div>}

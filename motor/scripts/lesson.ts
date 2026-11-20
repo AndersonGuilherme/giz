@@ -10,6 +10,7 @@ import type { Lesson, Cue, Scene, ResolvedCue, ResolvedScene, LessonProps, Speak
 import { spokenText, type Timings, type Segment } from './tts.ts';
 
 const FPS = 30;
+const LEAD_IN_SEC = Number(process.env.LEAD_IN_SEC ?? 1.5);
 const WORDS_PER_SECOND = 2.45; // estimativa usada só enquanto não há áudio
 const GAP_SECONDS = 0.3; // respiro entre falas
 // Código novo na tela ganha pausa de leitura: ~0,35 s por linha, entre 4 e 9 s (+1 s se houver diff).
@@ -69,8 +70,15 @@ export async function build(lessonDirArg: string) {
   mkdirSync(join(publicRoot, 'sfx'), { recursive: true });
   const sfxSrc = resolve(import.meta.dirname, '..', 'assets', 'sfx');
   if (existsSync(sfxSrc)) for (const f of readdirSync(sfxSrc)) copyFileSync(join(sfxSrc, f), join(publicRoot, 'sfx', f));
+  // sprites dos personagens (personagens/2d/assets), usados quando o vídeo é renderizado com characters: 'sprite'
+  const spriteSrc = resolve(import.meta.dirname, '..', '..', 'personagens', '2d', 'assets');
+  if (existsSync(spriteSrc)) {
+    mkdirSync(join(publicRoot, 'sprites'), { recursive: true });
+    for (const f of readdirSync(spriteSrc)) if (f.endsWith('.png')) copyFileSync(join(spriteSrc, f), join(publicRoot, 'sprites', f));
+  }
 
-  let frame = 0;
+  // Abertura: a primeira cena aparece um pouco antes da primeira fala. Falar logo no play atropela o começo.
+  let frame = Math.round(LEAD_IN_SEC * FPS);
   let state: Record<string, unknown> | null = null;
   let sceneKey = -1;
   const cues: ResolvedCue[] = [];

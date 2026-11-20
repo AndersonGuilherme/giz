@@ -17,10 +17,10 @@ export const POSES: Record<Pose, number[]> = {
   explain: [24, 62, -24, -62, 0, 0],
   point: [6, -12, -78, -18, 3, 1.5],
   wave: [4, -10, -100, -55, -3, 0],
-  raise: [4, -10, -140, -25, -4, 0],
+  raise: [4, -10, -30, -100, -3, 0], // mão na altura do peito ("peraí"), não braço esticado pro alto
   think: [10, -14, 32, 122, 6, 0],
-  shrug: [36, 58, -36, -58, 7, 0],
-  celebrate: [112, 10, -112, -10, 0, 0],
+  shrug: [26, 50, -26, -50, 5, 0],
+  celebrate: [58, 34, -58, -34, 0, 0], // braços abertos, sem euforia
 };
 const FRONT_R: Pose[] = ['wave', 'raise', 'think', 'celebrate'];
 const FRONT_L: Pose[] = ['celebrate'];
@@ -30,7 +30,7 @@ type MouthShape = 'smile' | 'grin' | 'big' | 'o' | 'wavy' | 'flat' | 'smirk' | '
 export const EXPRESSIONS: Record<Expression, { brows: number[]; lids: number[]; eyeDy: number; mouth: MouthShape }> = {
   neutral: { brows: [0, 0, 0, 0], lids: [0.08, 0], eyeDy: 0, mouth: 'smile' },
   happy: { brows: [-5, 0, -5, 0], lids: [0, 0.22], eyeDy: 0, mouth: 'grin' },
-  excited: { brows: [-11, 0, -11, 0], lids: [0, 0.12], eyeDy: 0, mouth: 'big' },
+  excited: { brows: [-8, 0, -8, 0], lids: [0, 0.18], eyeDy: 0, mouth: 'grin' },
   surprised: { brows: [-17, 0, -17, 0], lids: [0, 0], eyeDy: 0, mouth: 'o' },
   confused: { brows: [-12, 0, 3, -10], lids: [0.1, 0], eyeDy: 0, mouth: 'wavy' },
   thinking: { brows: [-6, 0, 2, -8], lids: [0.3, 0], eyeDy: -6, mouth: 'flat' },
