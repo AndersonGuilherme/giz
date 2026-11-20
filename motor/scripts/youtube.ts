@@ -11,7 +11,8 @@
 // Uso:
 //   npm run youtube -- publicar <pasta-da-aula> [--privacidade private|unlisted|public] [--forcar]
 //   npm run youtube -- pendentes <pasta-do-curso> [--privacidade ...] [--vigiar]
-//       publica, em ordem, toda aula com render pronto e ainda não publicada; --vigiar repete a cada 5 min
+//       publica, em ordem, as aulas com render pronto ainda não publicadas (para na primeira que não está pronta);
+//       --vigiar repete a cada 5 min
 //   npm run youtube -- status <pasta-do-curso>
 //   npm run youtube -- simular <pasta-da-aula>       → mostra título, descrição e capa, sem enviar nada
 //
@@ -249,20 +250,33 @@ async function publicar(aulaDir: string, privacidade: Privacidade, forcar = fals
 }
 
 // aula "pronta": tem vídeo e legendas, e o vídeo não muda há 2 minutos (não está sendo escrito)
-function prontas(cursoDir: string): string[] {
+function pronta(d: string): boolean {
+  const r = join(d, 'render');
+  if (!existsSync(r)) return false;
+  const mp4 = readdirSync(r).find((f) => /^aula-.*\.mp4$/.test(f) && !f.includes('celular'));
+  return !!mp4 && existsSync(join(r, 'legendas.srt')) && Date.now() - statSync(join(r, mp4)).mtimeMs > 120_000;
+}
+const aulasDo = (cursoDir: string) => {
   const aulas = join(resolve(cursoDir), 'aulas');
-  return readdirSync(aulas).filter((d) => /^\d+-/.test(d)).sort().map((d) => join(aulas, d)).filter((d) => {
-    const r = join(d, 'render');
-    if (!existsSync(r)) return false;
-    const mp4 = readdirSync(r).find((f) => /^aula-.*\.mp4$/.test(f) && !f.includes('celular'));
-    return !!mp4 && existsSync(join(r, 'legendas.srt')) && Date.now() - statSync(join(r, mp4)).mtimeMs > 120_000;
-  });
+  return readdirSync(aulas).filter((d) => /^\d+-/.test(d)).sort().map((d) => join(aulas, d));
+};
+const prontas = (cursoDir: string) => aulasDo(cursoDir).filter(pronta);
+
+// Publica EM ORDEM: para na primeira aula ainda não publicada que não está pronta, para a playlist não sair embaralhada.
+function proximas(cursoDir: string): string[] {
+  const out: string[] = [];
+  for (const d of aulasDo(cursoDir)) {
+    if (existsSync(join(d, 'render', 'youtube.json'))) continue;
+    if (!pronta(d)) break;
+    out.push(d);
+  }
+  return out;
 }
 
 async function pendentes(cursoDir: string, privacidade: Privacidade, vigiar: boolean) {
   for (;;) {
     try {
-      for (const d of prontas(cursoDir)) if (!existsSync(join(d, 'render', 'youtube.json'))) await publicar(d, privacidade);
+      for (const d of proximas(cursoDir)) await publicar(d, privacidade);
     } catch (e) {
       if (!(e instanceof Cota)) throw e;
       console.log(`cota do YouTube esgotada; ${vigiar ? 'tento de novo em 1 h' : 'rode de novo amanhã'}.`);
