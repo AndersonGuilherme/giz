@@ -131,7 +131,11 @@ const yamlValue = (yaml: string, key: string) => /^\s*"?(.*?)"?\s*$/.exec(new Re
 function cursoDe(aulaDir: string) {
   const dir = resolve(aulaDir, '..', '..');
   const yaml = existsSync(join(dir, 'curso.yaml')) ? readFileSync(join(dir, 'curso.yaml'), 'utf8') : '';
-  return { dir, titulo: yamlValue(yaml, 'title') || basename(dir), capas: join(dir, yamlValue(yaml, 'capas') || 'capas'), tags: yamlValue(yaml, 'youtube_tags') };
+  return {
+    dir, titulo: yamlValue(yaml, 'title') || basename(dir), capas: join(dir, yamlValue(yaml, 'capas') || 'capas'), tags: yamlValue(yaml, 'youtube_tags'),
+    // modelo do título do vídeo: {curso}, {numero}, {titulo}
+    modeloTitulo: yamlValue(yaml, 'youtube_titulo') || '{titulo} | Aula {numero}',
+  };
 }
 
 const mmss = (frames: number) => { const s = Math.floor(frames / FPS); return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`; };
@@ -155,7 +159,7 @@ async function metadados(aulaDir: string) {
   linhas.push(`Curso: ${curso.titulo} · Aula ${lesson.number}`, '', 'Vozes e personagens desta aula são gerados por computador.');
   return {
     lesson, curso,
-    title: `${lesson.title} | Aula ${lesson.number}`.slice(0, 100),
+    title: curso.modeloTitulo.replace('{curso}', curso.titulo).replace('{numero}', lesson.number).replace('{titulo}', lesson.title).slice(0, 100),
     description: linhas.join('\n').slice(0, 4900),
     tags: curso.tags ? curso.tags.split(',').map((t) => t.trim()).filter(Boolean) : [],
   };
@@ -166,6 +170,9 @@ function capa(capasDir: string, numero: string): string | undefined {
   const f = readdirSync(capasDir).find((n) => n.startsWith(`Aula ${numero}`) && /\.(png|jpe?g)$/i.test(n));
   return f && join(capasDir, f);
 }
+
+// número da aula no título de um vídeo da playlist: "#007", "Aula 007" ou "Aula 7"
+const numeroNoTitulo = (t: string) => Number(/(?:#|\bAula\s*)(\d+)/i.exec(t)?.[1] ?? NaN);
 
 // ── envio ────────────────────────────────────────────────────────────────────
 async function playlistDoCurso(titulo: string): Promise<string> {
@@ -228,11 +235,34 @@ async function publicar(aulaDir: string, privacidade: Privacidade, forcar = fals
       await api(`${UPLOAD}/thumbnails/set?videoId=${id}`, { method: 'POST', headers: { 'content-type': /\.png$/i.test(c) ? 'image/png' : 'image/jpeg' }, body: readFileSync(c) });
     }],
     ['playlist', async () => {
+      // Entra na posição do número da aula. Se a playlist já tem uma versão anterior desta aula, ela sai da playlist
+      // e vira PRIVADA (não é apagada: apagar no YouTube não tem volta).
       const pl = await playlistDoCurso(m.curso.titulo);
-      await api(`${API}/playlistItems?part=snippet`, {
+      const itens: Array<{ itemId: string; videoId: string; numero: number }> = [];
+      let pageToken = '';
+      do {
+        const j = await (await api(`${API}/playlistItems?part=snippet&playlistId=${pl}&maxResults=50${pageToken ? `&pageToken=${pageToken}` : ''}`)).json();
+        for (const i of j.items ?? []) itens.push({ itemId: i.id, videoId: i.snippet.resourceId.videoId, numero: numeroNoTitulo(i.snippet.title) });
+        pageToken = j.nextPageToken ?? '';
+      } while (pageToken);
+      const nosso = Number(m.lesson.number);
+      const antigos = itens.filter((i) => i.numero === nosso && i.videoId !== id);
+      for (const a of antigos) {
+        await api(`${API}/playlistItems?id=${a.itemId}`, { method: 'DELETE' });
+        await api(`${API}/videos?part=status`, { method: 'PUT', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ id: a.videoId, status: { privacyStatus: 'private' } }) });
+      }
+      if (antigos.length) feito.substituiu = antigos.map((a) => `https://youtu.be/${a.videoId} (agora privado)`);
+      const position = itens.filter((i) => !antigos.includes(i) && i.videoId !== id && i.numero < nosso).length;
+      const inserir = (comPosicao: boolean) => api(`${API}/playlistItems?part=snippet`, {
         method: 'POST', headers: { 'content-type': 'application/json' },
-        body: JSON.stringify({ snippet: { playlistId: pl, resourceId: { kind: 'youtube#video', videoId: id } } }),
+        body: JSON.stringify({ snippet: { playlistId: pl, resourceId: { kind: 'youtube#video', videoId: id }, ...(comPosicao ? { position } : {}) } }),
       });
+      try { await inserir(true); } catch (e) {
+        if (!/manualSortRequired/.test((e as Error).message)) throw e;
+        await inserir(false); // playlist sem ordem manual: entra no fim
+        return 'ok (no fim: a playlist não está em ordem manual)';
+      }
+      return antigos.length ? `ok, posição ${position + 1}; versão anterior virou privada` : `ok, posição ${position + 1}`;
     }],
   ];
   for (const [nome, passo] of passos) {

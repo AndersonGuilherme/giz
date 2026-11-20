@@ -9,3 +9,4 @@ target_minutes_per_lesson: [5, 8]
 # lesson_digits: 3              # aulas numeradas 001, 002… (cursos com mais de 99 aulas)
 # capas: capas            # pasta das capas do YouTube ("Aula NNN - título.png"), relativa ao curso
 # youtube_tags: "tag1, tag2"
+# youtube_titulo: "{titulo} | Aula {numero}"   # modelo do título do vídeo: {curso}, {numero}, {titulo}

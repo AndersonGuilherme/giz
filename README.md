@@ -197,7 +197,10 @@ npm run youtube -- status ../cursos/logica                                 # o q
 ```
 
 O resultado de cada envio fica em `render/youtube.json` da aula (aula com esse arquivo não é reenviada; `--forcar`
-reenvia). A privacidade padrão é `private`.
+reenvia). A privacidade padrão é `private`. As aulas são publicadas em ordem e cada uma entra na playlist do curso
+(mesmo título do `curso.yaml`) na posição do seu número. Se a playlist já tiver uma versão anterior da mesma aula
+(título com `#007` ou `Aula 007`), ela sai da playlist e vira privada — nunca é apagada. O formato do título é
+configurável no `curso.yaml`: `youtube_titulo: "{curso} #{numero} - {titulo}"`.
 
 As capas ficam em `cursos/<curso>/capas/` (ou na pasta `capas:` do `curso.yaml`), com nome `Aula 01 - título.png`.
 Atenção: a cota padrão da API permite umas 4 aulas por dia, e projetos de API não verificados pelo Google têm
