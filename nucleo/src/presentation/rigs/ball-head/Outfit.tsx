@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { FEET } from './measures.ts';
 import type { Look, Outfit as OutfitName } from './parameters.ts';
-import { shade, useSvgId } from './svg.ts';
+import { shade, useSvgId } from '../svg.ts';
 
 type Clothes = Readonly<{ hem: number; legs: string; shoes: string; Torso: FC<Readonly<{ look: Look }>> }>;
 

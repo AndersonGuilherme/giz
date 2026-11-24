@@ -1,6 +1,6 @@
 import type { FC } from 'react';
 import type { Hair as HairName, Look } from './parameters.ts';
-import { shade } from './svg.ts';
+import { shade } from '../svg.ts';
 
 type Layer = 'back' | 'front';
 type Piece = FC<Readonly<{ look: Look }>>;

@@ -1,4 +1,5 @@
 import { ballHeadDefinition } from './ball-head/parameters.ts';
+import { liaStyleDefinition } from './lia-style/parameters.ts';
 import type { RigDefinition } from './RigModel.ts';
 
 /** Rigs by id. The same registry serves the definitions (Node) and the models with a component (Remotion). */
@@ -30,4 +31,4 @@ export class RigRegistry<Rig extends RigDefinition> {
 }
 
 /** The definitions, in plain `.ts`: the CLI imports this module without loading React or `.tsx`. */
-export const rigRegistry = RigRegistry.with<RigDefinition>([ballHeadDefinition]);
+export const rigRegistry = RigRegistry.with<RigDefinition>([ballHeadDefinition, liaStyleDefinition]);

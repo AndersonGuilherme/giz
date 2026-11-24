@@ -1,0 +1,22 @@
+{
+  "id": "teo",
+  "name": "Téo",
+  "rig": "lia-style",
+  "parameters": {
+    "skin": "#FDD6B0",
+    "hairColor": "#E817DF",
+    "hairColor2": "#6D1AE6",
+    "hair": "short",
+    "hoodieColor": "#4F35D9",
+    "hoodieShade": "#3A22B0",
+    "emblem": "code",
+    "glasses": true,
+    "glassesColor": "#6D1AE6",
+    "browWidth": 10,
+    "browArch": 2,
+    "smile": 24
+  },
+  "voice": { "id": "dylan" },
+  "personality": "desenvolvedor curioso",
+  "defaultExpression": "neutral"
+}

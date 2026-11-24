@@ -30,3 +30,20 @@ test('registering the same id twice is an error', () => {
   const registry = RigRegistry.with<RigDefinition>([{ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {} }]);
   assert.throws(() => registry.register({ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {} }), /já registrado/);
 });
+
+test('the lia-style comes registered with the parameters, ranges and options from the brief', () => {
+  const { parameters, name } = rigRegistry.get('lia-style');
+  assert.equal(name['pt-BR'], 'Estilo Lia');
+  assert.deepEqual(parameters.hair, { type: 'option', defaultValue: 'bun', options: ['long', 'short', 'shaved', 'bun'] });
+  assert.deepEqual(parameters.emblem, { type: 'option', defaultValue: 'star', options: ['star', 'code', 'none'] });
+  assert.deepEqual(parameters.glasses, { type: 'boolean', defaultValue: true });
+  assert.deepEqual(parameters.browWidth, { type: 'number', defaultValue: 7, min: 5, max: 12 });
+  assert.deepEqual(parameters.browArch, { type: 'number', defaultValue: 7, min: 0, max: 9 });
+  assert.deepEqual(parameters.smile, { type: 'number', defaultValue: 30, min: 18, max: 34 });
+  for (const color of ['skin', 'hairColor', 'hairColor2', 'hoodieColor', 'hoodieShade', 'glassesColor']) {
+    assert.equal(parameters[color]!.type, 'color', color);
+  }
+  assert.deepEqual(Object.keys(parameters).sort(), [
+    'browArch', 'browWidth', 'emblem', 'glasses', 'glassesColor', 'hair', 'hairColor', 'hairColor2', 'hoodieColor', 'hoodieShade', 'skin', 'smile',
+  ]);
+});

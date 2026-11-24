@@ -6,7 +6,7 @@ import { Eyes, Glasses } from './Eyes.tsx';
 import { HEAD } from './measures.ts';
 import { Mouth } from './Mouth.tsx';
 import type { Look } from './parameters.ts';
-import { shade, useSvgId } from './svg.ts';
+import { shade, useSvgId } from '../svg.ts';
 
 /** The ball: flat color, a soft light from the upper left and, with `shine`, a glossy highlight. */
 export const Ball: FC<Readonly<{ look: Look }>> = ({ look }) => {

@@ -1,0 +1,22 @@
+{
+  "id": "lia",
+  "name": "Lia",
+  "rig": "lia-style",
+  "parameters": {
+    "skin": "#FDD6B0",
+    "hairColor": "#E817DF",
+    "hairColor2": "#6D1AE6",
+    "hair": "bun",
+    "hoodieColor": "#8B3FF5",
+    "hoodieShade": "#6A22D6",
+    "emblem": "star",
+    "glasses": true,
+    "glassesColor": "#6D1AE6",
+    "browWidth": 7,
+    "browArch": 7,
+    "smile": 30
+  },
+  "voice": { "id": "vivian" },
+  "personality": "mentora de tecnologia",
+  "defaultExpression": "happy"
+}

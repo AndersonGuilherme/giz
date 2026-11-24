@@ -2,7 +2,7 @@ import type { FC } from 'react';
 import type { Arm as ArmShape, Hand as HandShape } from '../../../domain/character/ArmGeometry.ts';
 import { ARM, SHOULDERS } from './measures.ts';
 import type { Look } from './parameters.ts';
-import { shade } from './svg.ts';
+import { shade } from '../svg.ts';
 
 type ArmProps = Readonly<{ arm: ArmShape; side: -1 | 1; look: Look }>;
 

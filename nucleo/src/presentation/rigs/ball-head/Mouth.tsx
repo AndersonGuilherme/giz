@@ -3,7 +3,7 @@ import type { CharacterState } from '../../../domain/character/CharacterState.ts
 import { MouthLayout, type MouthOutline, type MouthParts, type Oval, type Rect } from '../../../domain/character/MouthLayout.ts';
 import { HEAD, MOUTH } from './measures.ts';
 import type { Look } from './parameters.ts';
-import { contrast, useSvgId } from './svg.ts';
+import { contrast, useSvgId } from '../svg.ts';
 
 const INSIDE = '#4a1119';
 const TONGUE = '#e2707d';

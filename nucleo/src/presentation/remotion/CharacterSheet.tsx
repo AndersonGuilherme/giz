@@ -74,7 +74,7 @@ const Variations: FC<Sheet> = ({ model, parameters }) => {
   const scale = scaleOf(height);
   return (
     <Section title="VARIAÇÕES (PARÂMETROS)" style={{ width: 920 }}>
-      {VARIATIONS.map((variation) => (
+      {(VARIATIONS[model.id] ?? []).map((variation) => (
         <Card key={variation.label} {...card} label={variation.label}>
           <Placed left={card.width / 2 - 260 * scale} top={card.height - 620 * scale - 4}>
             <model.Component state={stillState(variation)} parameters={{ ...parameters, ...variation.parameters }} height={height} side={variation.side} />
