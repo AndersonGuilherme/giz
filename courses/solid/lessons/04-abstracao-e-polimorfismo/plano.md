@@ -5,7 +5,7 @@ mexeu no expresso.
 
 **Objetivo**: trocar um `switch` que cresce por abstração + interface + polimorfismo, e saber quando NÃO fazer isso.
 
-**Exemplo** (`exemplos/`, `node --test shipping.test.ts` → 3 testes): `shipping-switch.ts` (case sem `break`:
+**Exemplo** (`examples/`, `node --test shipping.test.ts` → 3 testes): `shipping-switch.ts` (case sem `break`:
 locker cai no expresso; `tsc --noFallthroughCasesInSwitch` acusa TS7029), `shipping.ts` (interface `ShippingMethod`
 + 5 métodos), `checkout.ts` (só chama `method.price`), `drone.ts` (método novo sem alterar nada),
 `locker.demo.ts` (falha de propósito: `3500 !== 900`).

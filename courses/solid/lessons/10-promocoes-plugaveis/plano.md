@@ -10,7 +10,7 @@ calculadora** (a política comum) e **o que vira peça** (cada promoção).
 cupom BEMVINDO R$ 25 (valor fixo) · Dia das Mães 15% para todos de 4 a 10/05/2026 (domingo, dia 10) · **não
 acumula: vale o maior** · **desconto nunca passa do subtotal** · **empate fica com a primeira da lista**.
 
-**Exemplo** (`exemplos/`, `node --test promotions.test.ts` → 6 testes):
+**Exemplo** (`examples/`, `node --test promotions.test.ts` → 6 testes):
 - `discount-rule.ts` — contrato: `name` + `amount(ctx)` em centavos; `coupon?` opcional no contexto;
 - `rules.ts` — VIP, funcionário, Black Friday e a fábrica `coupon(code, cents)`;
 - `price-calculator.nocap.ts` → `price-calculator.ts` — o teto (`Math.min`) entra na parte estável;

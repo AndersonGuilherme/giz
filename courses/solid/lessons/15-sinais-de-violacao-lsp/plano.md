@@ -14,7 +14,7 @@ quando `instanceof` NÃO é sinal (na borda: tipos de erro, dado vindo de fora).
 **Regras de negócio explícitas**: boleto é confirmado pelo banco (não tem captura); Pix estorna em até 90 dias;
 estorno de cartão-presente é manual (financeiro). Recusa de cartão faz parte do contrato da base (não é sinal).
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 5 testes):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 5 testes):
 - `loja/` — o código "consertado às pressas" das aulas 13–14: `payment.ts` (comentários ATENÇÃO), `methods.ts`
   (Pix com prazo, boleto que lança "não suporta captura", cartão-presente com `refund` vazio), `orders.ts` e
   `support.ts` (`instanceof`), `receipt.ts` (`switch (payment.constructor.name)`), e dois códigos NOVOS escritos só

@@ -190,6 +190,6 @@ ${G(B('Pronto!'))} Configuração salva em giz.config.json. Amostras de voz em a
 Próximos passos:
   npm run novo-curso -- meu-curso "Título do curso"
   npm run nova-aula  -- meu-curso primeira-aula "Título da aula"
-  npm run render     -- ../cursos/meu-curso/aulas/01-primeira-aula
+  npm run render     -- ../courses/meu-curso/lessons/01-primeira-aula
 
 Para trocar vozes, GPU ou pastas: npm run setup`);

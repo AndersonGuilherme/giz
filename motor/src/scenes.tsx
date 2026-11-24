@@ -1,4 +1,4 @@
-// Catálogo de cenas (padrao/catalogo-de-cenas.md). Cada cena recebe o ESTADO atual (cena + beats já
+// Catálogo de cenas (docs/guides/scene-catalog.md). Cada cena recebe o ESTADO atual (cena + beats já
 // aplicados), `age` (frames desde a última mudança de estado) e `sceneAge` (frames desde que a cena entrou).
 import React from 'react';
 import { interpolate, spring, Easing } from 'remotion';

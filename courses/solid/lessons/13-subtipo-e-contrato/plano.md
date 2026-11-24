@@ -13,7 +13,7 @@ que o subtipo é definido pelo **contrato de comportamento** da base, não pela 
 `capture` cobra quando o pedido é enviado; `refund` devolve o que foi cobrado. Por isso cancelar antes do envio não
 devolve nada: a reserva expira.
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 8 testes):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 8 testes):
 - `rectangle.ts` — `Rectangle` com setters (promessa: largura e altura independentes), `Square` que muda os dois
   lados, `stretch()` escrito para o retângulo; `rectangle.demo.ts` falha de propósito (`16 !== 20`);
 - `fixed-rectangle.ts` — retângulo imutável: o quadrado vira subtipo perfeito (contraexemplo: depende do contrato);

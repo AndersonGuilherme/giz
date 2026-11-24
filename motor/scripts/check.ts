@@ -10,7 +10,7 @@ const dir = process.argv[2];
 if (!dir) { console.error('uso: npm run check -- <pasta-da-aula>'); process.exit(2); }
 const lessonDir = resolve(dir);
 const motor = resolve(import.meta.dirname, '..');
-const ex = join(lessonDir, 'exemplos');
+const ex = join(lessonDir, 'examples');
 const step = (what: string, f: () => void) => {
   try { f(); } catch { console.error(`\n✖ falhou: ${what} (veja a mensagem acima)`); process.exit(1); }
 };
@@ -18,7 +18,7 @@ const tests = existsSync(ex) ? readdirSync(ex).filter((f) => f.endsWith('.test.t
 if (tests.length) {
   console.log(`1/3 testes dos exemplos (${tests.join(', ')})`);
   step('testes dos exemplos', () => execFileSync(process.execPath, ['--test', '--test-reporter=spec', ...tests], { cwd: ex, stdio: 'inherit' }));
-} else console.log('1/3 sem testes em exemplos/ (recomendado ter: o código da tela precisa rodar)');
+} else console.log('1/3 sem testes em examples/ (recomendado ter: o código da tela precisa rodar)');
 console.log('2/3 tipos do roteiro (tsc)');
 step('tipos do roteiro', () => execFileSync(process.execPath, [join(motor, 'node_modules', 'typescript', 'bin', 'tsc'), '--noEmit', '-p', motor], { stdio: 'inherit' }));
 console.log('3/3 linha do tempo');

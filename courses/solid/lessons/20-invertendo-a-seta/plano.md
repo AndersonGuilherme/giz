@@ -10,7 +10,7 @@ código (banco → porta).
 
 **Frase-chave** (uma vez, no final): "A política define a porta. O detalhe se encaixa nela."
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 2 testes; rodar `deps.ts` de dentro de `antes/` ou `depois/`):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 2 testes; rodar `deps.ts` de dentro de `antes/` ou `depois/`):
 - `antes/` — o estado da aula 19 (`domain/order-service.ts` → 6 dependências, 4 de infra);
 - `depois/domain/ports.ts` — `OrderRepository.save(order)` e `Notifier.orderConfirmed(...)`, na língua do domínio;
 - `depois/domain/order-service.ts` — recebe as portas no construtor (diff contra `antes/`) → 3 dependências, todas do domínio;

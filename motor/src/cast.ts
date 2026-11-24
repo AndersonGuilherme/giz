@@ -1,4 +1,4 @@
-// Elenco fixo do giz. O guia editorial (personagens/guia-editorial.md) explica o PORQUÊ de cada valor.
+// Elenco fixo do giz. O guia editorial (core/casts/example/editorial-guide.md) explica o PORQUÊ de cada valor.
 import type { Expression, Speaker } from './types';
 
 export type CastMember = {

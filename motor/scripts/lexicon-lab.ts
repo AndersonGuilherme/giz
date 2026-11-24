@@ -1,5 +1,5 @@
 // Laboratório de pronúncia: sintetiza cada grafia candidata dentro de uma frase e pergunta ao Whisper o que ouviu.
-// A grafia vencedora vai para cursos/<curso>/pronuncia.json.
+// A grafia vencedora vai para courses/<curso>/pronuncia.json.
 // Uso: LAB_TESTS='[{"word":"deploy","frame":"Fiz o X ontem.","candidates":["deploy","diplói"]}]' node scripts/lexicon-lab.ts
 //      LAB_VOICE=serena (padrão: a voz da Lia em src/cast.ts)
 import { Qwen3TTS, QWEN_RATE } from './qwen3-tts.ts';

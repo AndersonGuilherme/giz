@@ -1,4 +1,4 @@
-/** Layer rules of the nucleo. The only exception is src/presentation/cli/composition.ts. */
+/** Layer rules of core. The only exception is src/presentation/cli/composition.ts. */
 const DOMAIN = '^src/domain/';
 const APPLICATION = '^src/application/';
 const INFRASTRUCTURE = '^src/infrastructure/';

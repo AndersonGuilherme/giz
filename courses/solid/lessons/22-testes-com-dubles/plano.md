@@ -11,7 +11,7 @@ ganho real de tempo e manter o fake honesto com um teste de contrato. Saber o ri
 **Regras de negócio usadas nos testes** (no código): pedido sem itens é recusado; VIP 10%; Black Friday 20%,
 não acumula (vale o maior); frete grátis sobre o SUBTOTAL ≥ R$ 200, antes do desconto (R$ 200 VIP → R$ 180).
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 16 testes, ~5 s por causa da suíte "antes"):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 16 testes, ~5 s por causa da suíte "antes"):
 - `infra/latency.ts` — latência SIMULADA (120 ms por ida ao banco, 800 ms por e-mail), dita na tela como simulada;
 - `checkout-infra.test.ts` — ANTES: 6 testes pela infra simulada → `duration_ms 4887` (saída real);
 - `doubles.ts` — dummy (explode se usado), stub (resposta pronta), fake (`InMemoryOrderRepository`);

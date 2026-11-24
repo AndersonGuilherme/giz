@@ -6,7 +6,7 @@ foi estimado em 5 minutos e levou 2 dias. Por quê?
 **Objetivo**: medir a coesão de uma classe (tabela pedaços × dados) e o acoplamento de um trecho (o que ele precisa
 saber para rodar sozinho), incluindo acoplamento temporal.
 
-**Exemplo** (`exemplos/`, `node --test shipping.test.ts` → 4 testes): `order-service.before.ts` (checkout da aula 01),
+**Exemplo** (`examples/`, `node --test shipping.test.ts` → 4 testes): `order-service.before.ts` (checkout da aula 01),
 `shipping.ts` (regra extraída: `shippingFor(método, subtotal)`), `cart-preview.ts` (carrinho sem pedido nem e-mail),
 `order-service.after.ts` (checkout usando a regra — o bug da Black Friday da aula 01 desaparece).
 

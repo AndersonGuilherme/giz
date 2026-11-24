@@ -13,7 +13,7 @@ e tem um `if/else` de descontos.
 todos (24 a 30/11) · **não acumula: vale o maior** (escondida no `Math.max`) · pedido novo: aniversário 15% no mês
 do aniversário, também sem acumular.
 
-**Exemplo** (`exemplos/`, `node --test price-calculator.test.ts` → 6 testes):
+**Exemplo** (`examples/`, `node --test price-calculator.test.ts` → 6 testes):
 - `price-calculator.ts` — estado do fim do módulo 1 (if/else de descontos);
 - `price-calculator.v2.ts` — o `else if` do aniversário: o VIP para no primeiro `if` e nunca vê os 15%;
 - `birthday.demo.ts` — falha de propósito (`1000 !== 1500`), mostrado na tela;

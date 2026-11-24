@@ -7,7 +7,7 @@ animação sincronizada com a fala.
 Você escreve o roteiro (um arquivo com as falas e as cenas). O giz grava as vozes, mede quanto dura cada fala
 e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela segue o áudio.
 
-> Exemplo completo no repositório: o curso **SOLID** (24 aulas) em [`cursos/solid`](cursos/solid).
+> Exemplo completo no repositório: o curso **SOLID** (24 aulas) em [`courses/solid`](courses/solid).
 
 ## Preciso pagar alguma IA?
 
@@ -77,7 +77,7 @@ instalação tem a sua configuração. Para mudar algo, rode `npm run setup` de 
 npm run novo-curso -- logica "Lógica de programação do zero"
 ```
 
-Isso cria `cursos/logica/` com `curso.yaml`, `plano-do-curso.md` e `pronuncia.json`. Preencha o
+Isso cria `courses/logica/` com `curso.yaml`, `plano-do-curso.md` e `pronuncia.json`. Preencha o
 `plano-do-curso.md`: resultado final, público, **projeto-fio** (um exemplo que atravessa o curso inteiro) e a
 lista de aulas.
 
@@ -87,13 +87,13 @@ lista de aulas.
 npm run nova-aula -- logica cupom-negativo "O cupom que deixou o preço negativo"
 ```
 
-Isso cria `cursos/logica/aulas/01-cupom-negativo/` (o número é automático) com:
+Isso cria `courses/logica/lessons/01-cupom-negativo/` (o número é automático) com:
 
 ```
 01-cupom-negativo/
 ├── plano.md      objetivo, mistério, exemplo, erro comum, desafio
 ├── roteiro.ts    as falas e as cenas: um exemplo COMPLETO que já renderiza
-└── exemplos/     código que aparece na tela, com testes
+└── examples/     código que aparece na tela, com testes
 ```
 
 **Dica:** renderize o exemplo antes de mudar qualquer coisa (passo 6). Assim você vê como cada linha do
@@ -105,10 +105,10 @@ Leia os padrões antes (10 minutos que economizam horas):
 
 | Arquivo | O que ensina |
 |---|---|
-| [`padrao/estrutura-da-aula.md`](padrao/estrutura-da-aula.md) | os capítulos fixos de toda aula (formato "investigação") |
-| [`padrao/como-escrever-uma-aula.md`](padrao/como-escrever-uma-aula.md) | todos os campos do roteiro e as cenas disponíveis |
-| [`personagens/guia-editorial.md`](personagens/guia-editorial.md) | personalidade e regras de diálogo de Lia e Téo |
-| [`padrao/licoes-aprendidas.md`](padrao/licoes-aprendidas.md) | erros que já aconteceram e como evitá-los |
+| [`docs/guides/lesson-structure.md`](docs/guides/lesson-structure.md) | os capítulos fixos de toda aula (formato "investigação") |
+| [`docs/guides/writing-a-lesson.md`](docs/guides/writing-a-lesson.md) | todos os campos do roteiro e as cenas disponíveis |
+| [`core/casts/example/editorial-guide.md`](core/casts/example/editorial-guide.md) | personalidade e regras de diálogo de Lia e Téo |
+| [`docs/guides/lessons-learned.md`](docs/guides/lessons-learned.md) | erros que já aconteceram e como evitá-los |
 
 Cada fala do `roteiro.ts` tem esta cara:
 
@@ -124,16 +124,16 @@ Cada fala do `roteiro.ts` tem esta cara:
 }
 ```
 
-Coloque o código que vai aparecer na tela em `exemplos/`, com testes que passam (o aluno pode rodar).
+Coloque o código que vai aparecer na tela em `examples/`, com testes que passam (o aluno pode rodar).
 
 > **Escrevendo com uma IA (opcional):** dê a ela os quatro arquivos da tabela acima, um roteiro pronto
-> (por exemplo `cursos/solid/aulas/01-por-que-codigo-apodrece/roteiro.ts`) e o seu `plano.md`, e peça:
+> (por exemplo `courses/solid/lessons/01-por-que-codigo-apodrece/roteiro.ts`) e o seu `plano.md`, e peça:
 > *"Escreva o roteiro.ts desta aula seguindo esses padrões"*. Revise o conteúdo técnico antes de renderizar.
 
 ### 5. Valide (sem gerar voz)
 
 ```bash
-npm run check -- ../cursos/logica/aulas/01-cupom-negativo
+npm run check -- ../courses/logica/lessons/01-cupom-negativo
 ```
 
 O comando roda os testes dos exemplos, confere os tipos do roteiro e monta a linha do tempo com a duração
@@ -142,7 +142,7 @@ estimada. Ele aponta erros como "3 [marcas] no texto, mas 2 beats".
 ### 6. Gere o vídeo
 
 ```bash
-npm run render -- ../cursos/logica/aulas/01-cupom-negativo
+npm run render -- ../courses/logica/lessons/01-cupom-negativo
 ```
 
 Saídas em `render/`: `aula-01.mp4` e `legendas.srt` (pronta para o YouTube).
@@ -150,14 +150,14 @@ Para ver e ajustar no navegador, quadro a quadro: `npm run studio`.
 
 ### 7. Ajuste e regrave só o que mudou
 
-- **Palavra pronunciada errado?** Adicione a grafia que soa certo em `cursos/<curso>/pronuncia.json`
+- **Palavra pronunciada errado?** Adicione a grafia que soa certo em `courses/<curso>/pronuncia.json`
   (`"deploy": "diplói"`). Só a voz muda; a legenda continua com o texto original.
 - **Mudou uma fala?** Rode o `render` de novo: só as falas alteradas são regravadas.
 - **Não gostou da entonação de uma fala?** Sorteie outra versão: `SEED=2 npm run tts -- <aula> 007`.
 - **Uma fala precisa de outro tom?** No modelo 1.7b, dê uma instrução só para ela no roteiro:
   `style: 'Fale surpreso, quase sem acreditar'`. O estilo padrão de cada personagem fica no `npm run setup`.
 - **Várias aulas de uma vez**, com controle de qualidade da pronúncia (Whisper):
-  `npm run produce -- ../cursos/logica/aulas/*`
+  `npm run produce -- ../courses/logica/lessons/*`
 
 ### 8. Publique no YouTube (opcional)
 
@@ -190,10 +190,10 @@ A credencial é SUA e fica fora do repositório, em `~/.config/giz/youtube/`.
 **Uso:**
 
 ```bash
-npm run youtube -- simular ../cursos/logica/aulas/01-cupom-negativo      # mostra o que seria enviado, sem enviar
-npm run youtube -- publicar ../cursos/logica/aulas/01-cupom-negativo --privacidade unlisted
-npm run youtube -- pendentes ../cursos/logica --privacidade unlisted --vigiar   # publica cada aula assim que fica pronta
-npm run youtube -- status ../cursos/logica                                 # o que já foi publicado
+npm run youtube -- simular ../courses/logica/lessons/01-cupom-negativo      # mostra o que seria enviado, sem enviar
+npm run youtube -- publicar ../courses/logica/lessons/01-cupom-negativo --privacidade unlisted
+npm run youtube -- pendentes ../courses/logica --privacidade unlisted --vigiar   # publica cada aula assim que fica pronta
+npm run youtube -- status ../courses/logica                                 # o que já foi publicado
 ```
 
 O resultado de cada envio fica em `render/youtube.json` da aula (aula com esse arquivo não é reenviada; `--forcar`
@@ -202,7 +202,7 @@ reenvia). A privacidade padrão é `private`. As aulas são publicadas em ordem 
 (título com `#007` ou `Aula 007`), ela sai da playlist e vira privada — nunca é apagada. O formato do título é
 configurável no `curso.yaml`: `youtube_titulo: "{curso} #{numero} - {titulo}"`.
 
-As capas ficam em `cursos/<curso>/capas/` (ou na pasta `capas:` do `curso.yaml`), com nome `Aula 01 - título.png`.
+As capas ficam em `courses/<curso>/capas/` (ou na pasta `capas:` do `curso.yaml`), com nome `Aula 01 - título.png`.
 Atenção: a cota padrão da API permite umas 4 aulas por dia, e projetos de API não verificados pelo Google têm
 os vídeos travados como privados até passarem pela auditoria da API.
 
@@ -213,7 +213,7 @@ os vídeos travados como privados até passarem pela auditoria da API.
 | trocar a voz, o idioma, a GPU ou a pasta dos modelos | `npm run setup` (grava no seu `giz.config.json`) |
 | mudar as cores dos personagens | `look` em [`motor/src/cast.ts`](motor/src/cast.ts) |
 | mudar as cores e fontes dos vídeos | [`motor/src/theme.ts`](motor/src/theme.ts) |
-| criar um tipo de cena novo | `motor/src/types.ts` → `motor/src/scenes.tsx` → `SCENES` em `motor/src/Lesson.tsx` → [`padrao/catalogo-de-cenas.md`](padrao/catalogo-de-cenas.md) |
+| criar um tipo de cena novo | `motor/src/types.ts` → `motor/src/scenes.tsx` → `SCENES` em `motor/src/Lesson.tsx` → [`docs/guides/scene-catalog.md`](docs/guides/scene-catalog.md) |
 | usar outra voz (ElevenLabs, Azure, Kokoro…) | [`motor/scripts/tts.ts`](motor/scripts/tts.ts) |
 
 Detalhes técnicos do motor: [`motor/README.md`](motor/README.md).
@@ -222,11 +222,11 @@ Detalhes técnicos do motor: [`motor/README.md`](motor/README.md).
 
 ```
 giz/
-├── motor/          motor de vídeo (Remotion + voz Qwen3-TTS local)
-├── padrao/         formato da aula, catálogo de cenas, guia de escrita
-├── personagens/    Lia e Téo: guia editorial e ficha visual
-├── _template/      modelos usados por novo-curso e nova-aula
-└── cursos/solid/   curso de exemplo (24 aulas)
+├── core/           motor novo (roteiro em JSON → vídeo); Lia e Téo em core/casts/example/ (guia editorial e ficha)
+├── motor/          motor antigo das aulas (Remotion + voz Qwen3-TTS local)
+├── docs/guides/    formato da aula, catálogo de cenas, guia de escrita, lições aprendidas
+├── templates/      modelos usados por novo-curso e nova-aula (course/ e lesson/)
+└── courses/solid/  curso de exemplo (24 aulas em lessons/)
 ```
 
 Áudios e vídeos gerados não vão para o git: o `render` gera tudo de novo.

@@ -8,7 +8,7 @@ Fechado no fim: "com a rede armada e passos pequenos, pode; sem rede, nem na seg
 porta da frente, copiando a saída real), uma extração por vez, testes a cada passo, mudança de comportamento em
 passo separado.
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 17 testes): `order-service.step0.ts` → `step1` (PriceCalculator)
+**Exemplo** (`examples/`, `node --test *.test.ts` → 17 testes): `order-service.step0.ts` → `step1` (PriceCalculator)
 → `step2` (OrderRepository) → `step3` (OrderNotifier; o serviço só orquestra). `characterization.ts` define os 4 testes
 (preço VIP R$ 188,82; Black Friday R$ 210 → R$ 168 com frete grátis; linha gravada; texto exato do e-mail com
 ` `). `characterization.test.ts` roda em todos os passos (`STEP=n` roda um só — saídas reais na tela).

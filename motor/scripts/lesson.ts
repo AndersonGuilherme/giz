@@ -1,5 +1,5 @@
-// Build de uma aula: roteiro.ts + exemplos/ + audio/timings.json  →  public/<aula>/props.json + roteiro.md + legendas.srt
-// Uso: node scripts/lesson.ts build ../cursos/<curso>/aulas/<NN-slug>
+// Build de uma aula: roteiro.ts + examples/ + audio/timings.json  →  public/<aula>/props.json + roteiro.md + legendas.srt
+// Uso: node scripts/lesson.ts build ../courses/<curso>/lessons/<NN-slug>
 import { readFileSync, writeFileSync, mkdirSync, existsSync, copyFileSync, readdirSync } from 'node:fs';
 import { resolve, join, basename } from 'node:path';
 import { pathToFileURL } from 'node:url';
@@ -89,7 +89,7 @@ export async function build(lessonDirArg: string) {
     if (!lesson.chapters[cue.chapter - 1]) throw new Error(`cue ${cue.id}: capítulo ${cue.chapter} não existe`);
     const newScene = !!cue.scene;
     if (cue.scene) {
-      state = (cue.scene.kind === 'code' ? resolveCode(cue.scene, join(lessonDir, 'exemplos')) : { ...cue.scene }) as Record<string, unknown>;
+      state = (cue.scene.kind === 'code' ? resolveCode(cue.scene, join(lessonDir, 'examples')) : { ...cue.scene }) as Record<string, unknown>;
       sceneKey++;
     } else if (!state) throw new Error(`cue ${cue.id}: primeira fala precisa de cena`);
     if (cue.set) state = { ...state, ...cue.set };

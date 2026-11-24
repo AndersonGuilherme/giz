@@ -15,7 +15,7 @@ aula de inversão de dependência. Esta aula mostra o mesmo problema no `OrderSe
 **Regras de negócio explícitas** (no código, em `domain/`): VIP 10% · funcionário 30% · Black Friday 20%,
 não acumulam (vale o maior); frete grátis sobre o SUBTOTAL a partir de R$ 200, antes de descontos.
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 4 testes):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 4 testes):
 - `domain/order-service.ts` — o serviço fino que importa e dá `new` em `PostgresOrderRepository` e `SmtpNotifier`;
 - `infra/pg-pool.ts` (exige `DATABASE_URL` ao carregar) e `infra/mail-provider.ts` (exige `MAIL_API_KEY`, da aula 03);
 - `deps.ts` — o script da aula 03, agora aceitando pastas: `domain/order-service.ts` → 6 dependências, 4 de infra;

@@ -1,7 +1,7 @@
 # Estrutura fixa de toda aula
 
 Toda aula é um **episódio de investigação** de 5 a 10 minutos com Lia e Téo (ver
-[`personagens/guia-editorial.md`](../personagens/guia-editorial.md)). Vale para SOLID, matemática do fundamental,
+[`core/casts/example/editorial-guide.md`](../../core/casts/example/editorial-guide.md)). Vale para SOLID, matemática do fundamental,
 Python ou jiu-jitsu: muda o mistério, não o formato.
 
 | # | Capítulo | Tempo (aula de ~5 min) | Função pedagógica | Cena típica |
@@ -23,4 +23,4 @@ Os nomes dos capítulos são definidos pela aula (`chapters` no `roteiro.ts`) e 
 - O mistério aberto no capítulo 1 é respondido aos poucos e fechado explicitamente ("agora os três mil e-mails
   fazem sentido").
 - Uma descoberta a cada 10–20 s; tela nunca parada mais de ~6 s sem uma ação (destaque, reação, revelação).
-- Código na tela roda de verdade e tem teste em `exemplos/`; saídas de terminal na tela são copiadas de execuções reais.
+- Código na tela roda de verdade e tem teste em `examples/`; saídas de terminal na tela são copiadas de execuções reais.

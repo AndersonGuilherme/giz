@@ -1,6 +1,6 @@
 # Plano: Aula 24 · Quando quebrar as regras
 
-**Formato**: episódio de investigação com Lia e Téo (ver `padrao/estrutura-da-aula.md`). Última aula do curso.
+**Formato**: episódio de investigação com Lia e Téo (ver `docs/guides/lesson-structure.md`). Última aula do curso.
 **Gancho** (decisão polêmica, não incidente): empolgado com a aula 23, Téo aplicou os cinco princípios no script do
 relatório do financeiro: de 12 linhas em 1 arquivo para 51 linhas em 7. Lia pergunta quantas vezes o script mudou no
 último ano. Resposta: nenhuma. **Mistério**: se ele fez tudo "certo", por que esse código ficou pior?
@@ -14,7 +14,7 @@ ela custa?** — e sabe que, no caso de desempenho, o primeiro passo é medir.
 **Regras explícitas**: o script tem um dono (financeiro), roda toda noite e não mudou em um ano (cenário simulado);
 descontos não acumulam, vale o maior (mesma regra da loja, usada no laço quente).
 
-**Exemplo concreto** (`exemplos/`, `node --test *.test.ts` → 8 testes):
+**Exemplo concreto** (`examples/`, `node --test *.test.ts` → 8 testes):
 - `relatorio.ts` — o script original (12 linhas de código, função pura `toCsv` + 3 linhas de execução);
 - `relatorio-solid/` — a versão "com os cinco princípios": 4 portas, 5 classes, raiz de composição (51 linhas, 7 arquivos);
 - `relatorio.test.ts` — as duas versões dão o MESMO CSV (`pedidos.json`);

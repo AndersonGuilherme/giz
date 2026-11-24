@@ -29,7 +29,7 @@ function resampled(audio: Audio): Float32Array {
 }
 
 // Late import: the Qwen onnxruntime (with CUDA, from the motor) must load first in the process;
-// if the nucleo one (CPU only) loads first, its native library is reused and Qwen does not find CUDA.
+// if the core one (CPU only) loads first, its native library is reused and Qwen does not find CUDA.
 async function load(): Promise<AutomaticSpeechRecognitionPipeline> {
   const transformers = await import('@huggingface/transformers');
   const create = transformers.pipeline as CreateRecognizer;

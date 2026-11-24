@@ -16,7 +16,7 @@ todas as subclasses com **um único teste de contrato**.
 - Pix: devolução só em até 90 dias (`pix.ts`);
 - boleto: estorno é uma transferência em até 3 dias úteis (`boleto.ts`, que só agenda).
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 7 testes):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 7 testes):
 - `payment.ts` (base + `CreditCardPayment`), `pix.ts` (pré mais forte), `boleto.ts` (pós mais fraca → invariante
   quebrada: dois cliques agendam R$ 160 de R$ 80), `support.ts` (tela do atendimento, escrita para qualquer `Payment`);
 - `contract.ts` — `paymentContract(name, make)`: 3 testes (pré, pós, invariante) aplicáveis a qualquer subtipo;

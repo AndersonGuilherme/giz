@@ -13,7 +13,7 @@ export type Sfx = 'pop' | 'whoosh' | 'ding' | 'dings' | 'error' | 'success' | 't
 
 export type CodeSource = {
   kind: 'code';
-  file: string; // relativo a exemplos/
+  file: string; // relativo a examples/
   from?: string; // primeira linha que contém este texto (padrão: início do arquivo)
   title?: string;
   diffAgainst?: string; // linhas novas em relação a este arquivo ganham marca verde

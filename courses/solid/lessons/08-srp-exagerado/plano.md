@@ -10,7 +10,7 @@ uma classe pelo ator, não pelas linhas.
 **Continuidade**: parte do `PriceCalculator` extraído na aula 07. Fecha o módulo 1 e aponta para o módulo 2 (OCP):
 as classes de desconto voltam quando promoção virar um eixo próprio, com a regra do maior desconto num lugar só.
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 6 testes): `price-calculator.ts` (versão A), `fragmentado/`
+**Exemplo** (`examples/`, `node --test *.test.ts` → 6 testes): `price-calculator.ts` (versão A), `fragmentado/`
 (versão B: SubtotalCalculator, VipDiscount, EmployeeDiscount, BlackFridayDiscount, RateSum, DiscountApplier,
 PriceCalculator; "vale o maior" só existe como exceções comentadas em VIP e Black Friday + uma soma),
 `pedido-bf35/` (o pedido hipotético "Black Friday passa a 35%" aplicado nas duas: uma linha em cada),

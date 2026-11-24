@@ -15,7 +15,7 @@ o que sabe fazer."
 90 dias; boleto devolve por transferência agendada (o estorno é registrado na hora); cartão-presente não devolve
 dinheiro (vira crédito na loja); carteira digital estorna em até 180 dias (pedido simulado).
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 24 testes):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 24 testes):
 - `payment.ts` — `Payment { method; amount; capture?; refunds? }`, contratos de `Capturable` e `Refundable`
   (pré/pós/invariante escritos);
 - `capabilities.ts` — peças: `TwoStepCapture`, `RefundLedger` (trava do valor + prazo + como devolver);

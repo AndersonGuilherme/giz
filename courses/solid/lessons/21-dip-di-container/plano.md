@@ -10,7 +10,7 @@ composição à mão e saber quando um container se paga.
 
 **Frase-chave** (uma vez, no final): "Inversão decide a direção. Injeção entrega a peça. Contêiner é só o entregador."
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 4 testes):
+**Exemplo** (`examples/`, `node --test *.test.ts` → 4 testes):
 - `domain/` e `infra/` — o estado do fim da aula 20 (portas no domínio, infra implementando);
 - `quiz/a-cria-sozinho.ts` (nem injeção nem inversão), `quiz/b-recebe-concreto.ts` (injeção sem inversão),
   `quiz/c-recebe-porta.ts` (as duas), `quiz/d-busca-porta.ts` + `domain/registry.ts` (inversão sem injeção);

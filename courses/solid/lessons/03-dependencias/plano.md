@@ -5,7 +5,7 @@
 **Objetivo**: desenhar o grafo de dependências de um módulo seguindo os imports, reconhecer dependência transitiva
 e saber para que lado as setas devem apontar (do volátil para o estável).
 
-**Exemplo** (`exemplos/`): `mail-provider.ts` exige `MAIL_API_KEY` ao carregar; `shipping-via-checkout.test.ts` cai
+**Exemplo** (`examples/`): `mail-provider.ts` exige `MAIL_API_KEY` ao carregar; `shipping-via-checkout.test.ts` cai
 sem a chave (teste → checkout → infra → provedor); `shipping.test.ts` (função da aula 02) passa;
 `deps.ts` imprime a trilha real de imports (3 dependências × 1).
 

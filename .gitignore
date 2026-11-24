@@ -1,14 +1,19 @@
 node_modules/
 .tools/
 motor/public/
+courses/*/lessons/*/audio/
+courses/*/lessons/*/render/
+# Folders from before the English rename that older checkouts may still hold (generated audio and renders,
+# local character art): keep them out of the index until they are moved or deleted.
 cursos/*/aulas/*/audio/
 cursos/*/aulas/*/render/
 personagens/3d/
 personagens/comparativo.html
 producao-log.md
+producao-stats.tsv
 *.wav
 !motor/assets/sfx/*.wav
-!nucleo/public/sounds/*.wav
+!core/public/sounds/*.wav
 *.mp4
 giz.config.json
 amostras-de-voz/

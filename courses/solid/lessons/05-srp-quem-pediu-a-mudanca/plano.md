@@ -9,7 +9,7 @@ coisa", o que é uma responsabilidade? Fechado no fim: é perante alguém, um at
 
 **Continuidade**: abre o módulo 1. O checkout da aula 02 ainda faz tudo (só o frete saiu para `shippingFor`).
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 3 testes): `order-service.ts` (checkout da aula 02),
+**Exemplo** (`examples/`, `node --test *.test.ts` → 3 testes): `order-service.ts` (checkout da aula 02),
 `change-requests.ts` (8 pedidos de mudança simulados de um trimestre, com ator e trecho; `byActor`,
 `actorsPerSection`), `report.ts` (`node report.ts` → saída real mostrada no terminal: 4 atores, 1 ator por trecho).
 

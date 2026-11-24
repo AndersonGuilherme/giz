@@ -287,7 +287,7 @@ function pronta(d: string): boolean {
   return !!mp4 && existsSync(join(r, 'legendas.srt')) && Date.now() - statSync(join(r, mp4)).mtimeMs > 120_000;
 }
 const aulasDo = (cursoDir: string) => {
-  const aulas = join(resolve(cursoDir), 'aulas');
+  const aulas = join(resolve(cursoDir), 'lessons');
   return readdirSync(aulas).filter((d) => /^\d+-/.test(d)).sort().map((d) => join(aulas, d));
 };
 const prontas = (cursoDir: string) => aulasDo(cursoDir).filter(pronta);

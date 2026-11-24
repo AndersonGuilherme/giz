@@ -1,6 +1,6 @@
 # Plano: Aula 18 · Quem usa decide o tamanho
 
-**Formato**: episódio de investigação com Lia e Téo (ver `padrao/estrutura-da-aula.md`). Fecha o módulo 4 (ISP).
+**Formato**: episódio de investigação com Lia e Téo (ver `docs/guides/lesson-structure.md`). Fecha o módulo 4 (ISP).
 **Gancho** (escolha, não incidente): "uma interface com nove métodos ou nove interfaces com um método cada?"
 com pausa de 3 s "Escolha". Lia: nenhuma das duas.
 **Mistério**: se contar métodos não diz onde cortar, o que diz? Fechado no capítulo 6 ("depende de quem usa: nem
@@ -18,7 +18,7 @@ NÃO separar (mesmo cliente usa junto, mudam juntos, um cliente e uma implementa
 - Parcelado: de 2 a 12 vezes. Pix nasce pendente com o QR (gerado pelo próprio adaptador) e vira pago no webhook.
 - Valores em centavos.
 
-**Exemplo concreto** (`exemplos/`, `node --test *.test.ts` → 9 testes passando):
+**Exemplo concreto** (`examples/`, `node --test *.test.ts` → 9 testes passando):
 - `roles.ts` — `Charges` (checkout), `Captures` (despacho), `Refunds` (atendimento), `Installments` (parcelado),
   `Disputes` (financeiro); `issueBoleto`/`createPixQrCode` saem da interface (detalhe de implementação);
 - `checkout.ts` (diff contra `checkout.v1.ts`, a versão da aula 17) — pede só `Charges`;

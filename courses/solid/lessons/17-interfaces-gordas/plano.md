@@ -1,6 +1,6 @@
 # Plano: Aula 17 · Nove métodos para usar um
 
-**Formato**: episódio de investigação com Lia e Téo (ver `padrao/estrutura-da-aula.md`).
+**Formato**: episódio de investigação com Lia e Téo (ver `docs/guides/lesson-structure.md`).
 **Gancho** (número surpreendente, não incidente): `node measure.ts` mostra que o dublê do teste do checkout
 implementa 9 métodos e o checkout usa 1; o adaptador do cartão finge 2 métodos e o do Pix, 5.
 **Mistério**: um teste e dois adaptadores que não se conhecem estão inchados do mesmo jeito. De onde vem isso?
@@ -20,7 +20,7 @@ dependência de métodos que não chama, que traz mudanças alheias).
   não parcela, não tem contestação de cartão e não emite boleto.
 - Valores em centavos.
 
-**Exemplo concreto** (`exemplos/`, `node --test *.test.ts` → 6 testes passando):
+**Exemplo concreto** (`examples/`, `node --test *.test.ts` → 6 testes passando):
 - `payment-gateway.ts` — a interface gorda: 9 métodos, comentados por provedor de origem;
 - `card-gateway.ts` / `pix-gateway.ts` — adaptadores em memória; cartão finge 2 métodos, Pix finge 5;
 - `checkout.ts` — `payOrder` só chama `gateway.charge`;

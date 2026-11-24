@@ -10,7 +10,7 @@ de código compartilhado entre atores, e a "duplicação acidental".
 **Continuidade**: parte dos quatro atores da aula 05 e da pista "o número é do financeiro, a aparência é da
 comunicação". Termina com o desenho-alvo do módulo; a aula 07 mostra como chegar lá sem quebrar nada.
 
-**Exemplo** (`exemplos/`, `node --test *.test.ts` → 5 testes): `order-service.ts` (checkout com o helper
+**Exemplo** (`examples/`, `node --test *.test.ts` → 5 testes): `order-service.ts` (checkout com o helper
 `roundMoney` em `money.ts`), `money.changed.ts` (o commit da comunicação: arredonda para real inteiro),
 `order-service.changed.ts` (mesmo checkout, só o helper mudou), `rounding.demo.ts` (falha de propósito:
 `18880 !== 18882`), `price-calculator.ts` (financeiro, arredonda ao centavo), `order-notifier.ts` (comunicação,

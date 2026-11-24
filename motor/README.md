@@ -1,6 +1,6 @@
 # Motor de vídeo das aulas
 
-Transforma `roteiro.ts` + `exemplos/` de uma aula em `render/aula-NN.mp4` + `render/legendas.srt`.
+Transforma `roteiro.ts` + `examples/` de uma aula em `render/aula-NN.mp4` + `render/legendas.srt`.
 Tudo roda local, sem GPU e sem serviço pago.
 
 | Peça | Ferramenta | Licença |
@@ -41,11 +41,11 @@ GPU NVIDIA (`scripts/gpu.ts`): baixa o provider CUDA do ONNX Runtime e as biblio
 
 1. `roteiro.ts` lista as falas (cues) de Lia e Téo em três camadas: `text` (legenda), `say` (voz, opcional:
    pausas `<pausa 0.3>`) e o visual (`scene`, `beats`, `pose`, `expr`, `look`, `react`, `hold`, `sfx`).
-   `[trecho]` no texto dispara o beat correspondente. Regras de escrita: `../personagens/guia-editorial.md`.
+   `[trecho]` no texto dispara o beat correspondente. Regras de escrita: `../core/casts/example/editorial-guide.md`.
 2. `scripts/tts.ts` gera um WAV por fala com o Qwen3-TTS (voz de cada personagem em `src/cast.ts`), uma frase
    por vez, mede volume e converte a fonética (espeak-ng) em visema por frame. Guarda onde cada frase cai no áudio.
    Fala inalterada não é regravada (hash); a semente do sorteio vem do texto, então o resultado é reproduzível.
-   Pronúncia: `cursos/<curso>/pronuncia.json`. Não gostou de uma fala? `SEED=2 npm run tts -- <aula> 012`.
+   Pronúncia: `courses/<curso>/pronuncia.json`. Não gostou de uma fala? `SEED=2 npm run tts -- <aula> 012`.
 3. `scripts/lesson.ts` monta a linha do tempo: duração da cena = duração do áudio (+ pausa "pense"). O beat cai
    na frase certa do áudio. Áudio desatualizado em relação ao texto é detectado (não toca fora de sincronia).
 4. Remotion desenha cada quadro: `src/Lesson.tsx` (orquestra), `src/scenes.tsx` (catálogo),
@@ -58,7 +58,7 @@ Ficha de revisão dos personagens: composição `CharacterSheet`
 ## Adicionar um tipo de cena
 
 Tipo em `src/types.ts` → componente em `src/scenes.tsx` → registro em `SCENES` (`src/Lesson.tsx`) →
-linha em `../padrao/catalogo-de-cenas.md`.
+linha em `../docs/guides/scene-catalog.md`.
 
 ## Limitações conhecidas
 

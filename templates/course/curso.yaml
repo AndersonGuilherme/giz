@@ -4,7 +4,7 @@ title: "{{CURSO_TITULO}}"
 level: iniciante                # iniciante | intermediario | avancado
 audience: "Para quem é (pré-requisitos em uma linha)"
 language_of_examples: typescript  # linguagem do código mostrado na tela; vazio se não houver código
-teachers: [lia, teo]            # ver personagens/guia-editorial.md
+teachers: [lia, teo]            # ver core/casts/example/editorial-guide.md
 target_minutes_per_lesson: [5, 8]
 # lesson_digits: 3              # aulas numeradas 001, 002… (cursos com mais de 99 aulas)
 # capas: capas            # pasta das capas do YouTube ("Aula NNN - título.png"), relativa ao curso

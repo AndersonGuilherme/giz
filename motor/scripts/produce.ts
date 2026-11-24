@@ -1,6 +1,6 @@
 // Produção em lote, para QUALQUER curso: para cada aula → voz → build → controle de qualidade (Whisper + tom)
-// → render → cópia leve (celular). Grava uma linha por aula em cursos/<curso>/producao-stats.tsv.
-// Uso: npm run produce -- <pasta-aula> [<pasta-aula>...]      ex.: npm run produce -- ../cursos/meu-curso/aulas/*
+// → render → cópia leve (celular). Grava uma linha por aula em courses/<curso>/producao-stats.tsv.
+// Uso: npm run produce -- <pasta-aula> [<pasta-aula>...]      ex.: npm run produce -- ../courses/meu-curso/lessons/*
 //      O controle de qualidade (Whisper) roda se estiver ligado no `npm run setup`; SKIP_QA=1 pula.
 import { execFileSync } from 'node:child_process';
 import { appendFileSync, existsSync, readdirSync, writeFileSync } from 'node:fs';

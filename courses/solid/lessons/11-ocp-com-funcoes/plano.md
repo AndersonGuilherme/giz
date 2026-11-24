@@ -11,7 +11,7 @@ e era aberto e fechado o tempo todo").
 R$ 25, Dia das Mães 15% de 4 a 10/05, vale o maior, nunca passa do subtotal) + pedido novo do financeiro: **na
 Black Friday, o cupom acumula** (o resto continua "vale o maior").
 
-**Exemplo** (`exemplos/`, `node --test functions.test.ts` → 5 testes):
+**Exemplo** (`examples/`, `node --test functions.test.ts` → 5 testes):
 - `rules-fn.ts` — `type Rule = (ctx) => number`; fábricas `percentOff`/`fixedOff`; condições `isVip`, `couponIs`,
   `between`…;
 - `combinators.ts` — `bestOf` (vale o maior), `sumOf` (acumula), `capped` (teto);

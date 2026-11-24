@@ -47,4 +47,4 @@ mexe em um pedaço dele, então o aluno vê a evolução em vez de exemplos solt
 
 ## Decisões
 - Exemplos: **TypeScript** · Estilo: **2D** · Voz: **sintética local (Kokoro)** — 2026-11-19.
-- Professores: **Lia** (mentora) e **Téo** (desenvolvedor curioso) — 2026-11-19. Guia: `personagens/guia-editorial.md`.
+- Professores: **Lia** (mentora) e **Téo** (desenvolvedor curioso) — 2026-11-19. Guia: `core/casts/example/editorial-guide.md`.

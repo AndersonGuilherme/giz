@@ -1,6 +1,6 @@
 # Plano: Aula 23 · Cinco refatorações, nenhum teste vermelho
 
-**Formato**: episódio de investigação com Lia e Téo (ver `padrao/estrutura-da-aula.md`).
+**Formato**: episódio de investigação com Lia e Téo (ver `docs/guides/lesson-structure.md`).
 **Gancho** (aposta, não incidente): Téo aposta um café que o checkout da aula 01 não sobrevive a cinco refatorações
 seguidas sem quebrar. **Mistério**: dá para mudar o desenho inteiro sem mudar nenhum resultado? E o que melhora de
 verdade, em números? Fecha de vez o caso dos três mil e-mails.
@@ -16,7 +16,7 @@ antes de descontos; padrão R$ 20; expresso R$ 35; descontos VIP 10%, funcionár
 (vale o maior); e-mail "Pedido confirmado! Total: R$ X (você economizou R$ Y)". Novo: o frete no mesmo dia (aula 04)
 só atende até 15 km da loja.
 
-**Exemplo concreto** (`exemplos/`, `node --test *.test.ts` → 53 testes):
+**Exemplo concreto** (`examples/`, `node --test *.test.ts` → 53 testes):
 - `order-service.v3.ts`, `order-service.v4.ts`, `cart-preview.antes.ts` — copiados da aula 01;
 - `infra.ts` — a da aula 01, simulando a rede (20 ms por gravação, 40 ms por e-mail; aviso no código e na fala);
 - `contrato.ts` — a rede de proteção: 7 regras da loja como testes, rodadas contra cada versão;

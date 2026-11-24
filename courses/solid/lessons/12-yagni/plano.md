@@ -11,7 +11,7 @@ de um ponto de extensão especulativo (leitura, manutenção, eixo errado).
 **Regras de negócio explícitas**: imposto estimado na nota = 5% do valor (alíquota **fictícia**); mudança que veio:
 por estado de destino — SP 7%, RJ 8%, demais 5% (**fictícias**, escritas na tela e no código).
 
-**Exemplo** (`exemplos/`, `node --test tax.test.ts` → 4 testes):
+**Exemplo** (`examples/`, `node --test tax.test.ts` → 4 testes):
 - `plugins/v1/` — 6 arquivos: `tax-plugin.ts` (contrato recebe só o item), `registry.ts` (duplicado, prioridade),
   `loader.ts`, `config.ts`, `default.ts` (5%), `tax-service.ts`;
 - `tax.ts` — a mesma regra em 6 linhas;

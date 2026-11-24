@@ -8,7 +8,7 @@ Ao terminar o curso, o aluno consegue: <verbo observável + contexto>.
 
 ## Projeto-fio (exemplo que atravessa o curso)
 Um único sistema/problema que evolui de aula em aula, para o aluno não reaprender o contexto a cada vídeo.
-Ex.: no curso SOLID é o checkout de uma loja online (`cursos/solid/plano-do-curso.md`).
+Ex.: no curso SOLID é o checkout de uma loja online (`courses/solid/plano-do-curso.md`).
 
 ## Módulos e aulas
 | # | Aula | O aluno consegue… | Min | Status |

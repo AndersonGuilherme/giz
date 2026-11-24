@@ -1,8 +1,8 @@
 # Guia editorial — Lia e Téo
 
 A dupla que apresenta todas as aulas feitas com o giz, em qualquer curso. O aluno precisa reconhecê-los, gostar de
-acompanhá-los e querer encontrá-los na próxima aula. Ficha visual: [ficha-lia-teo.png](ficha-lia-teo.png).
-Configuração técnica (voz, ritmo, visual): [`motor/src/cast.ts`](../motor/src/cast.ts).
+acompanhá-los e querer encontrá-los na próxima aula. Ficha visual: [lia-teo-sheet.png](lia-teo-sheet.png).
+Configuração técnica (voz, ritmo, visual): [`motor/src/cast.ts`](../../../motor/src/cast.ts).
 
 ## Quem são
 
@@ -53,7 +53,7 @@ dupla a um curso.
 | Camada | Campo | Para quê |
 |---|---|---|
 | Pedagógica | `text` | O que é dito. Vira a legenda. |
-| Voz | `say` | Opcional. Versão para o TTS: pausas `<pausa 0.3>`, grafia que soa melhor. Pronúncia de termos fica em `cursos/<curso>/pronuncia.json`. |
+| Voz | `say` | Opcional. Versão para o TTS: pausas `<pausa 0.3>`, grafia que soa melhor. Pronúncia de termos fica em `courses/<curso>/pronuncia.json`. |
 | Visual | `scene`, `beats`, `pose`, `expr`, `look`, `react`, `hold`, `sfx` | O que se vê e ouve além da voz. |
 
 Trocar de motor de voz não exige reescrever cursos: muda `cast.ts` e, se preciso, alguns `say`.

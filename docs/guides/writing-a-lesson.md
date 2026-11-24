@@ -1,21 +1,21 @@
 # Como escrever uma aula (kit de autoria)
 
-Leia antes: `personagens/guia-editorial.md` (Lia e Téo), `padrao/estrutura-da-aula.md` (capítulos),
-`padrao/licoes-aprendidas.md` (o que já deu errado), `padrao/projeto-fio.md` (estado do código da loja).
-Exemplos completos: `cursos/solid/aulas/01-*` a `04-*` (leia pelo menos um `roteiro.ts` inteiro).
+Leia antes: `core/casts/example/editorial-guide.md` (Lia e Téo), `docs/guides/lesson-structure.md` (capítulos),
+`docs/guides/lessons-learned.md` (o que já deu errado), `docs/guides/running-project.md` (estado do código da loja).
+Exemplos completos: `courses/solid/lessons/01-*` a `04-*` (leia pelo menos um `roteiro.ts` inteiro).
 
 ## Pasta de uma aula
 
 Crie com `cd motor && npm run nova-aula -- <curso> <slug> "Título"` (número automático, roteiro de exemplo incluso).
 
 ```
-cursos/<curso>/aulas/NN-slug/
+courses/<curso>/lessons/NN-slug/
 ├── plano.md          objetivo, mistério, regra de negócio, exemplo, erro comum, desafio
 ├── roteiro.ts        export const lesson: Lesson (tipos em motor/src/types.ts)
-└── exemplos/         código que aparece na tela: *.ts com testes (*.test.ts) que PASSAM;
+└── examples/         código que aparece na tela: *.ts com testes (*.test.ts) que PASSAM;
                       *.demo.ts = testes que falham DE PROPÓSITO para mostrar na tela
 ```
-Cada aula é autocontida: copie o que precisar de aulas anteriores para dentro de `exemplos/`.
+Cada aula é autocontida: copie o que precisar de aulas anteriores para dentro de `examples/`.
 Imports com extensão `.ts` (Node 22 roda TypeScript direto).
 
 ## O roteiro (`roteiro.ts`)
@@ -63,7 +63,7 @@ O número de `[trechos]` tem que ser igual ao de `beats` (o build acusa).
 | `quote` | `text` (use `\n` para quebrar) |
 | `chart` | `xLabel`, `yLabel`, `curves: ('healthy'\|'rotten')[]` |
 | `symptoms` | `items: {name, desc}[]` (4 itens, grade 2×2), `shown`, `focus?` |
-| `code` | `file` (em exemplos/), `from?` (texto da 1ª linha), `title?`, `diffAgainst?` (linhas novas em verde), `highlight?: string[]` (destaca linhas que CONTÊM o texto) |
+| `code` | `file` (em examples/), `from?` (texto da 1ª linha), `title?`, `diffAgainst?` (linhas novas em verde), `highlight?: string[]` (destaca linhas que CONTÊM o texto) |
 | `terminal` | `command`, `lines: {text, tone?: 'fail'\|'ok'\|'muted'}[]` — saída REAL, linhas de até ~52 caracteres |
 | `graph` | `nodes: {id,label,x,y,tone?}[]` (x,y em % 0–100; tone core·infra·ui·soft), `edges: {from,to,bad?}[]`, `focusBad?` |
 | `versus` | `wrong: {title,text}`, `right: {title,text}` |
@@ -75,8 +75,8 @@ Código na tela: até ~26 linhas (use `from` para pular imports/comentários). L
 
 ```bash
 cd motor
-npm run check -- ../cursos/<curso>/aulas/NN-slug    # testes dos exemplos + tipos + linha do tempo (5–7 min)
-npm run render -- ../cursos/<curso>/aulas/NN-slug   # voz + vídeo
+npm run check -- ../courses/<curso>/lessons/NN-slug    # testes dos exemplos + tipos + linha do tempo (5–7 min)
+npm run render -- ../courses/<curso>/lessons/NN-slug   # voz + vídeo
 ```
 O check não gera voz: a duração é estimada. Para várias aulas com controle de qualidade (Whisper):
-`npm run produce -- ../cursos/<curso>/aulas/*`.
+`npm run produce -- ../courses/<curso>/lessons/*`.

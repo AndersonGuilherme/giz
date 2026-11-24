@@ -1,6 +1,6 @@
 # Plano: Aula 01 · Como uma linha de código causou um desastre
 
-**Formato**: episódio de investigação com Lia e Téo (ver `padrao/estrutura-da-aula.md`).
+**Formato**: episódio de investigação com Lia e Téo (ver `docs/guides/lesson-structure.md`).
 **Mistério**: como uma simples consulta de frete disparou três mil e-mails de "Pedido confirmado"?
 (cenário simulado — sinalizado na tela)
 
@@ -12,7 +12,7 @@
 **Regra de negócio explícita** (dita na aula e escrita no código): frete grátis para **subtotal** a partir de
 R$ 200, calculado **antes** de qualquer desconto. Sem ela, cobrar frete sobre R$ 168 poderia estar correto.
 
-**Exemplo concreto** (`exemplos/`, `node --test order-service.test.ts` → 7 testes):
+**Exemplo concreto** (`examples/`, `node --test order-service.test.ts` → 7 testes):
 - `order-service.v1.ts` — original: frete calculado antes do desconto, como manda a regra;
 - `order-service.v2.ts` — pedido 1, frete expresso (2 linhas, tranquilo);
 - `order-service.v3.ts` — pedido 2, Black Friday: 4 pontos de mudança (**rigidez**); para mostrar a economia, o

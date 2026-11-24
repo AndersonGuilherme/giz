@@ -6,7 +6,7 @@ import { norm, wer } from './asr-check.ts';
 
 const curso = process.argv[2];
 if (!curso) { console.error('uso: node scripts/asr-aggregate.ts <slug-do-curso>'); process.exit(2); }
-const root = resolve(import.meta.dirname, '..', '..', 'cursos', curso, 'aulas');
+const root = resolve(import.meta.dirname, '..', '..', 'courses', curso, 'lessons');
 const byWord = new Map<string, { n: number; lessons: Set<string>; heard: string[] }>();
 for (const d of readdirSync(root).sort()) {
   const asr = join(root, d, 'audio', 'asr.txt'), tim = join(root, d, 'audio', 'timings.json');

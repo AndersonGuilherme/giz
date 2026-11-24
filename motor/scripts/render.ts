@@ -1,5 +1,5 @@
 // Pipeline completo de UMA aula: voz (só falas novas/alteradas) → build → MP4.
-// Uso: npm run render -- ../cursos/<curso>/aulas/<NN-slug>
+// Uso: npm run render -- ../courses/<curso>/lessons/<NN-slug>
 import { execFileSync } from 'node:child_process';
 import { resolve, join } from 'node:path';
 import { build } from './lesson.ts';

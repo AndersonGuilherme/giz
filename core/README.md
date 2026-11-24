@@ -1,4 +1,4 @@
-# giz nucleo
+# giz core
 
 Motor de vídeos animados: você escreve um roteiro em JSON e o `giz` gera as vozes, anima os personagens, monta as
 cenas e grava um MP4 com legendas. Este guia mostra como criar um projeto, explica cada campo do roteiro e dá um
@@ -21,7 +21,7 @@ Use qualquer uma dessas pastas como ponto de partida: copie a pasta, troque os t
 Precisa de Node 22.18 ou mais novo.
 
 ```bash
-cd nucleo
+cd core
 ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install
 ```
 
@@ -67,7 +67,7 @@ Passo a passo (os projetos ficam fora do repositório, em `~/giz/projetos/<nome>
 
 ## 3. Comandos
 
-Todos rodam dentro de `nucleo/`: `npx giz <comando> <pasta-do-projeto>` (o mesmo que `npm run giz -- <comando> ...`
+Todos rodam dentro de `core/`: `npx giz <comando> <pasta-do-projeto>` (o mesmo que `npm run giz -- <comando> ...`
 ou `node src/presentation/cli/giz.ts <comando> ...`).
 
 | Comando | O que faz |
@@ -226,7 +226,9 @@ tem as criaturas (nome, personalidade e voz do Qwen). Copie o arquivo para o `ca
 
 ### `lia-style` (estilo Lia)
 
-Personagem de moletom com cabelo em degradê, como os apresentadores das aulas.
+Personagem de moletom com cabelo em degradê, como os apresentadores das aulas. Lia e Téo prontos ficam em
+`casts/example/` (`lia.json`, `teo.json`), com o guia editorial (`editorial-guide.md`: personalidade e regras de
+diálogo) e a ficha visual (`lia-teo-sheet.png`).
 
 | Parâmetro | Tipo | Padrão | Valores |
 |---|---|---|---|
@@ -693,7 +695,7 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
   Uma cena pronta com personagens: monte as props do `ScenePreview` com a `scene` do preset, os `characters` e o
   `cast` (os `parameters` dos arquivos de `casts/presets/`), e rode
   `npx remotion still src/presentation/remotion/index.ts ScenePreview output/preview.png --frame=80 --props=<arquivo>.json`.
-- O zod do nucleo é a mesma versão que o Remotion fixa (4.6.7): com versões diferentes, o `remotion still` simples falha
+- O zod do core é a mesma versão que o Remotion fixa (4.6.7): com versões diferentes, o `remotion still` simples falha
   na verificação de versão.
 - Um fundo novo: um arquivo em `src/presentation/scenes/scenario/backgrounds/` com as três camadas, a paleta em
   `src/domain/scenario/palettes/`, o nome em `VECTOR_BACKGROUNDS` (domínio) e no `backgroundRegistry`. Desenhe sobre o `backdrop` das camadas (horizonte,

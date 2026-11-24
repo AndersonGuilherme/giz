@@ -1,5 +1,5 @@
 {
-  "name": "giz-nucleo",
+  "name": "giz-core",
   "private": true,
   "type": "module",
   "bin": {
