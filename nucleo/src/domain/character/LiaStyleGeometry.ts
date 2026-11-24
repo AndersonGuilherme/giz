@@ -22,8 +22,11 @@ export type LiaFace = Readonly<{
   eyeDrop: number;
   mouth: LiaMouthShape;
 }>;
-/** Pupil offset (positive x = the facing side), how far the face features turn that way, the lids and the lid line. */
-export type LiaEyes = Readonly<{ pupil: Point; faceTurn: number; upper: number; lower: number; lidLine: boolean }>;
+/**
+ * Pupil offset (positive x = the facing side), how far the face features turn that way, how far the ears move
+ * against the turn (the 3/4 feel), the lids and the lid line.
+ */
+export type LiaEyes = Readonly<{ pupil: Point; faceTurn: number; earShift: number; upper: number; lower: number; lidLine: boolean }>;
 
 type Angles = readonly [number, number, number, number, number, number];
 
@@ -78,6 +81,8 @@ function faceOf([brows, lids, eyeDrop, mouth]: RawFace): LiaFace {
 // The motor moves the pupils 7 units toward the target and turns the face features 0.9 of that.
 const EYE_TRAVEL = 7;
 const FACE_TURN = 0.9;
+// The ears move against the face turn, 0.4 of it (the motor's 3/4 feel).
+const EAR_SHIFT = 0.4;
 // A lid line marks the upper lid only once it covers enough of the eye to read as a lid.
 const LID_LINE_FROM = 0.15;
 // The brow ends drop 0.3 of the arch.
@@ -104,7 +109,8 @@ export class LiaStyleGeometry {
     const target = FaceGeometry.gaze(gaze);
     const upper = Math.max(lids.upper, blink);
     const pupil = { x: target.x * EYE_TRAVEL, y: target.y * EYE_TRAVEL + eyeDrop };
-    return { pupil, faceTurn: pupil.x * FACE_TURN, upper, lower: lids.lower, lidLine: upper > LID_LINE_FROM };
+    const faceTurn = pupil.x * FACE_TURN;
+    return { pupil, faceTurn, earShift: -faceTurn * EAR_SHIFT, upper, lower: lids.lower, lidLine: upper > LID_LINE_FROM };
   }
 
   /** The brow is a curve from end to end through a middle control point; `arch` is the character's parameter. */

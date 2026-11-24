@@ -11,7 +11,7 @@ import type { Look } from './parameters.ts';
 
 type HeadProps = Readonly<{ state: CharacterState; look: Look; tilt: number }>;
 
-// The ears move against the face turn (0.4 of it), which gives the 3/4 feel.
+// The ears, moved against the face turn by the domain's `earShift`.
 const Ears: FC<Readonly<{ look: Look; shift: number }>> = ({ look, shift }) => (
   <g>
     {[EARS.left, EARS.right].map((x) => (
@@ -50,7 +50,7 @@ export const Head: FC<HeadProps> = ({ state, look, tilt }) => {
     <g transform={`rotate(${tilt} ${NECK.x} ${NECK.y})`}>
       <defs><HairGradient id={gradient} look={look} /></defs>
       <Hair hair={look.hair} layer="back" fill={fill} />
-      <Ears look={look} shift={-eyes.faceTurn * 0.4} />
+      <Ears look={look} shift={eyes.earShift} />
       <ellipse cx={HEAD.x} cy={HEAD.y} rx={HEAD.radiusX} ry={HEAD.radiusY} fill={look.skin} />
       <path fill={warmShade(look.skin)} d="M92,200 C100,260 140,292 200,296 C150,280 112,250 92,200 Z" />
       <Face state={state} look={look} eyes={eyes} />

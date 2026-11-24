@@ -100,6 +100,13 @@ test('eyes: looking at the other moves the pupils 7 units to the facing side and
   assert.equal(LiaStyleGeometry.eyes('neutral', 'camera', 0).faceTurn, 0);
 });
 
+test('eyes: the ears move against the face turn, 0.4 of it', () => {
+  const eyes = LiaStyleGeometry.eyes('neutral', 'other', 0);
+  assert.equal(eyes.earShift, -(7 * 0.9) * 0.4);
+  assert.ok(eyes.earShift < 0, 'opposite to the turn');
+  assert.equal(Math.abs(LiaStyleGeometry.eyes('neutral', 'camera', 0).earShift), 0, 'no turn, no shift');
+});
+
 test('eyes: the expression eye drop moves the pupils vertically', () => {
   assert.equal(LiaStyleGeometry.eyes('thinking', 'camera', 0).pupil.y, -6);
 });
