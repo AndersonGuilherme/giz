@@ -37,3 +37,13 @@ export const box = (center: Point, size: Readonly<{ width: number; height: numbe
 /** A closed shape with straight sides through the points (spikes, zigzags). */
 export const polygon = (points: readonly Point[]): Silhouette =>
   Silhouette.parse(`M${points.map(({ x, y }) => `${x.toFixed(2)},${y.toFixed(2)}`).join(' L')} Z`);
+
+/** A straight strip `thickness` wide from one point to another (stitches, seams, bandages, antenna stalks). */
+export function bar(from: Point, to: Point, thickness: number): Silhouette {
+  const length = Math.hypot(to.x - from.x, to.y - from.y) || 1;
+  const across = { x: (-(to.y - from.y) / length) * (thickness / 2), y: ((to.x - from.x) / length) * (thickness / 2) };
+  return polygon([
+    { x: from.x + across.x, y: from.y + across.y }, { x: to.x + across.x, y: to.y + across.y },
+    { x: to.x - across.x, y: to.y - across.y }, { x: from.x - across.x, y: from.y - across.y },
+  ]);
+}

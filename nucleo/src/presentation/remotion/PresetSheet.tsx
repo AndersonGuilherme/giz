@@ -40,7 +40,8 @@ export const presetSheetMetadata: CalculateMetadataFunction<PresetSheetProps> = 
 };
 
 const details = (parameters: ValidatedParameters) =>
-  [parameters.outfit, parameters.headwear, parameters.hair, parameters.facialHair].filter((value) => value && value !== 'none').join(' · ');
+  [parameters.species, parameters.outfit, parameters.headwear, parameters.hair, parameters.facialHair]
+    .filter((value) => value && value !== 'none' && value !== 'human').join(' · ');
 
 const Card: FC<Readonly<{ card: PresetCard; index: number; size: Readonly<{ width: number; height: number }> }>> = ({ card, index, size }) => {
   const model = rigModels.get(card.rig);

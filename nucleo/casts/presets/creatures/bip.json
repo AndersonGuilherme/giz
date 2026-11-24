@@ -1,0 +1,19 @@
+{
+  "id": "bip",
+  "name": "Bip",
+  "rig": "giz",
+  "parameters": {
+    "species": "robot",
+    "outfit": "robot-armor",
+    "hair": "bald",
+    "headShape": "soft-square",
+    "eyeColor": "#4fe6ff",
+    "cheeks": false,
+    "hairColor": "#3f4a55"
+  },
+  "voice": {
+    "id": "aiden"
+  },
+  "personality": "robô educado que conta piadas em código binário",
+  "defaultExpression": "happy"
+}

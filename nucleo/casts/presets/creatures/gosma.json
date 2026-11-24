@@ -1,0 +1,17 @@
+{
+  "id": "gosma",
+  "name": "Gosma",
+  "rig": "giz",
+  "parameters": {
+    "species": "slime-monster",
+    "hair": "bald",
+    "headShape": "round",
+    "eyeColor": "#3a5a1a",
+    "hairColor": "#355a17"
+  },
+  "voice": {
+    "id": "dylan"
+  },
+  "personality": "monstro de gosma alegre, grudento e sempre com fome",
+  "defaultExpression": "excited"
+}

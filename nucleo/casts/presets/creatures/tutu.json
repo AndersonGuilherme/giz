@@ -1,0 +1,17 @@
+{
+  "id": "tutu",
+  "name": "Tutu",
+  "rig": "giz",
+  "parameters": {
+    "species": "mummy",
+    "hair": "bald",
+    "headShape": "bean",
+    "eyeColor": "#3f7fc4",
+    "hairColor": "#6a5532"
+  },
+  "voice": {
+    "id": "ryan"
+  },
+  "personality": "múmia de três mil anos ainda aprendendo a usar o celular",
+  "defaultExpression": "neutral"
+}

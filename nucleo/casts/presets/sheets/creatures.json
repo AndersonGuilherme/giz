@@ -1,0 +1,13 @@
+{
+  "title": "criaturas",
+  "characters": [
+    "creatures/zuzu.json",
+    "creatures/lua.json",
+    "creatures/tufo.json",
+    "creatures/tutu.json",
+    "creatures/bru.json",
+    "creatures/bip.json",
+    "creatures/zyx.json",
+    "creatures/gosma.json"
+  ]
+}

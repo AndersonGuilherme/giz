@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { SKIN_TONES, SkinTone } from '../../../src/domain/character/SkinTone.ts';
+import { CREATURE_TONES, SKIN_TONES, SkinTone } from '../../../src/domain/character/SkinTone.ts';
 
 const luminance = (hex: string) => {
   const [red, green, blue] = [1, 3, 5].map((start) => parseInt(hex.slice(start, start + 2), 16) / 255);
@@ -32,4 +32,16 @@ test('shade and line are darker than the base; the line reads on the skin', () =
 test('every color is a #rrggbb', () => {
   const colors = SKIN_TONES.flatMap((tone) => Object.values(SkinTone.colors(tone)));
   colors.forEach((color) => assert.match(color, /^#[0-9a-f]{6}$/));
+});
+
+test('creature skins: one per species idea, never black, the line still reads on them', () => {
+  assert.deepEqual([...CREATURE_TONES], ['grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime']);
+  assert.deepEqual(SkinTone.ALL, [...SKIN_TONES, ...CREATURE_TONES]);
+  for (const tone of CREATURE_TONES) {
+    const { base, shade, line } = SkinTone.colors(tone);
+    assert.ok(SkinTone.isCreature(tone) && luminance(base) > 0.3, tone);
+    assert.ok(luminance(shade) < luminance(base) && luminance(base) - luminance(line) > 0.12, tone);
+    Object.values(SkinTone.colors(tone)).forEach((color) => assert.match(color, /^#[0-9a-f]{6}$/));
+  }
+  SKIN_TONES.forEach((tone) => assert.equal(SkinTone.isCreature(tone), false, tone));
 });

@@ -10,7 +10,13 @@ test('the registry refuses an unknown rig listing the valid ones', () => assert.
 test('the giz rig comes registered with the house-style parameters: skin tones, head shapes, eyes and chalk', () => {
   const { parameters, name } = rigRegistry.get('giz');
   assert.equal(name['pt-BR'], 'Giz');
-  assert.deepEqual(parameters.skin, { type: 'option', defaultValue: 'medium', options: ['light', 'fair', 'medium', 'tan', 'brown', 'deep'] });
+  assert.deepEqual(parameters.skin, {
+    type: 'option', defaultValue: 'medium',
+    options: ['light', 'fair', 'medium', 'tan', 'brown', 'deep', 'grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime'],
+  });
+  assert.deepEqual(parameters.species, {
+    type: 'option', defaultValue: 'human', options: ['human', 'zombie', 'vampire', 'werewolf', 'mummy', 'ghost', 'robot', 'alien', 'slime-monster'],
+  });
   assert.deepEqual(parameters.headShape, { type: 'option', defaultValue: 'round', options: ['round', 'oval', 'soft-square', 'bean'] });
   assert.deepEqual(parameters.eyeColor, { type: 'color', defaultValue: '#7a4a26' });
   assert.deepEqual(parameters.hairColor, { type: 'color', defaultValue: '#3a2418' });
@@ -32,7 +38,7 @@ test('the giz rig comes registered with the house-style parameters: skin tones, 
   assert.deepEqual(parameters.eyeScale, { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 });
   assert.deepEqual(Object.keys(parameters).sort(), [
     'accessoryColor', 'chalk', 'cheeks', 'eyeColor', 'eyeScale', 'facialHair', 'freckles', 'glasses', 'hair', 'hairColor', 'headShape', 'headwear',
-    'headwearColor', 'outfit', 'outfitColor', 'skin',
+    'headwearColor', 'outfit', 'outfitColor', 'skin', 'species',
   ]);
 });
 

@@ -1,0 +1,17 @@
+{
+  "id": "bru",
+  "name": "Bru",
+  "rig": "giz",
+  "parameters": {
+    "species": "ghost",
+    "hair": "bald",
+    "headShape": "round",
+    "eyeColor": "#4a5f9e",
+    "hairColor": "#56688a"
+  },
+  "voice": {
+    "id": "ono_anna"
+  },
+  "personality": "fantasminha que assusta sem querer e logo pede desculpas",
+  "defaultExpression": "happy"
+}

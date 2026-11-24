@@ -1,0 +1,19 @@
+{
+  "id": "zuzu",
+  "name": "Zuzu",
+  "rig": "giz",
+  "parameters": {
+    "species": "zombie",
+    "outfit": "casual",
+    "outfitColor": "#5a7fa8",
+    "hair": "short",
+    "hairColor": "#4a3b2a",
+    "headShape": "round",
+    "eyeColor": "#8a6a3a"
+  },
+  "voice": {
+    "id": "eric"
+  },
+  "personality": "zumbi sonolento que só quer um café, um cochilo e um abraço",
+  "defaultExpression": "happy"
+}

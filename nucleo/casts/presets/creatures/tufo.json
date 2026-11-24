@@ -1,0 +1,20 @@
+{
+  "id": "tufo",
+  "name": "Tufo",
+  "rig": "giz",
+  "parameters": {
+    "species": "werewolf",
+    "outfit": "commoner",
+    "outfitColor": "#b5533c",
+    "hair": "curly",
+    "hairColor": "#5e4630",
+    "headShape": "soft-square",
+    "eyeColor": "#d09a2e",
+    "cheeks": false
+  },
+  "voice": {
+    "id": "uncle_fu"
+  },
+  "personality": "lobisomem fofo que pede desculpas toda vez que uiva",
+  "defaultExpression": "excited"
+}

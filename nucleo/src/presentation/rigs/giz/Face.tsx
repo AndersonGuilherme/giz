@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { CharacterState } from '../../../domain/character/CharacterState.ts';
 import { FaceGeometry } from '../../../domain/character/FaceGeometry.ts';
+import { Species } from '../../../domain/character/species/Species.ts';
 import { Brows } from './Brows.tsx';
 import { Eyes, Glasses } from './Eyes.tsx';
 import { CHEEKS, FRECKLES, HEAD, NOSE } from './measures.ts';
@@ -38,7 +39,7 @@ const Details: FC<Readonly<{ look: Look }>> = ({ look }) => {
 /** Eyes, brows and mouth from the domain geometry of the state's expression, plus the nose and cheeks. */
 export const Face: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }) => {
   const face = FaceGeometry.for(state.expression());
-  const eyes = FaceGeometry.eyes(state.expression(), state.gaze(), state.eyeClosure());
+  const eyes = Species.eyes(look.species, FaceGeometry.eyes(state.expression(), state.gaze(), state.eyeClosure()));
   return (
     <g>
       <Details look={look} />

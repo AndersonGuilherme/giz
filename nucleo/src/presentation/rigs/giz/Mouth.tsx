@@ -1,14 +1,15 @@
 import type { FC, ReactNode } from 'react';
 import type { CharacterState } from '../../../domain/character/CharacterState.ts';
-import { MouthLayout, type MouthOutline, type MouthParts, type Oval, type Rect } from '../../../domain/character/MouthLayout.ts';
+import type { MouthOutline, MouthParts, Oval, Rect } from '../../../domain/character/MouthLayout.ts';
+import type { Fang } from '../../../domain/character/species/Fangs.ts';
+import { Species } from '../../../domain/character/species/Species.ts';
 import { HEAD, MOUTH } from './measures.ts';
 import { skinOf, type Look } from './parameters.ts';
+import { SPECIES_OVERLAYS } from './species/speciesOverlays.ts';
+import type { MouthPaint } from './species/SpeciesOverlay.ts';
 import { useSvgId } from '../svg.ts';
 
-const INSIDE = '#4a1119';
-const TONGUE = '#e2707d';
-const TEETH = '#ffffff';
-const LIPS = '#d0606f';
+const PAINT: MouthPaint = { inside: '#4a1119', tongue: '#e2707d', teeth: '#ffffff', lips: '#d0606f' };
 
 // Face units → pixels: x from the head center, y from the mouth line.
 const px = (units: number) => units * MOUTH.unit;
@@ -41,32 +42,48 @@ const pathOf = (outline: MouthOutline) => (PATHS[outline.kind] as (outline: Mout
 
 const Band: FC<Readonly<{ rect: Rect; fill: string }>> = ({ rect, fill }) =>
   <rect x={HEAD.x + px(rect.x)} y={MOUTH.y + px(rect.y)} width={px(rect.width)} height={px(rect.height)} fill={fill} />;
-const Tongue: FC<Readonly<{ oval: Oval }>> = ({ oval }) =>
-  <ellipse cx={HEAD.x + px(oval.cx)} cy={MOUTH.y + px(oval.cy)} rx={px(oval.rx)} ry={px(oval.ry)} fill={TONGUE} />;
+const Tongue: FC<Readonly<{ oval: Oval; fill: string }>> = ({ oval, fill }) =>
+  <ellipse cx={HEAD.x + px(oval.cx)} cy={MOUTH.y + px(oval.cy)} rx={px(oval.rx)} ry={px(oval.ry)} fill={fill} />;
+
+// Small fangs hanging from the top edge of the mouth, over whatever shape it has.
+const Fangs: FC<Readonly<{ fangs: readonly Fang[]; line: string }>> = ({ fangs, line }) => (
+  <g fill="#ffffff" stroke={line} strokeWidth={1.6} strokeLinejoin="round">
+    {fangs.map(({ x, y, width, length }) => <path key={x} d={`M${at(x - width / 2, y - 0.6)} L${at(x + width / 2, y - 0.6)} L${at(x, y + length)} Z`} />)}
+  </g>
+);
 
 // Dark interior with pink lips (teeth stay readable against them); the parts are clipped to the outline.
-const OpenMouth: FC<Readonly<{ parts: MouthParts }>> = ({ parts }) => {
+const OpenMouth: FC<Readonly<{ parts: MouthParts; paint: MouthPaint }>> = ({ parts, paint }) => {
   const clip = useSvgId('mouth');
   const path = pathOf(parts.outline);
   return (
     <g>
       <clipPath id={clip}><path d={path} /></clipPath>
-      <path d={path} fill={INSIDE} />
+      <path d={path} fill={paint.inside} />
       <g clipPath={`url(#${clip})`}>
-        {parts.teeth && <Band rect={parts.teeth} fill={TEETH} />}
-        {parts.tongue && <Tongue oval={parts.tongue} />}
-        {parts.lip && <Band rect={parts.lip} fill={LIPS} />}
+        {parts.teeth && <Band rect={parts.teeth} fill={paint.teeth} />}
+        {parts.tongue && <Tongue oval={parts.tongue} fill={paint.tongue} />}
+        {parts.lip && <Band rect={parts.lip} fill={paint.lips} />}
       </g>
-      <path d={path} fill="none" stroke={LIPS} strokeWidth={4} strokeLinejoin="round" />
+      <path d={path} fill="none" stroke={paint.lips} strokeWidth={4} strokeLinejoin="round" />
     </g>
   );
 };
 
 const CLOSED: ReadonlySet<MouthOutline['kind']> = new Set(['pressed', 'line', 'wave']);
 
-/** Draws the mouth the domain laid out for this state: a stroked line when closed, an open mouth otherwise. */
-export const Mouth: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }): ReactNode => {
-  const parts = MouthLayout.for(state);
-  if (!CLOSED.has(parts.outline.kind)) return <OpenMouth parts={parts} />;
+const Shape: FC<Readonly<{ parts: MouthParts; look: Look }>> = ({ parts, look }): ReactNode => {
+  if (!CLOSED.has(parts.outline.kind)) return <OpenMouth parts={parts} paint={{ ...PAINT, ...SPECIES_OVERLAYS[look.species].mouth }} />;
   return <path d={pathOf(parts.outline)} fill="none" stroke={skinOf(look).line} strokeWidth={7} strokeLinecap="round" />;
+};
+
+/** Draws the mouth the domain laid out for this state and species: a stroked line when closed, an open mouth otherwise, then any fangs. */
+export const Mouth: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }) => {
+  const { parts, fangs } = Species.mouth(look.species, state);
+  return (
+    <g>
+      <Shape parts={parts} look={look} />
+      <Fangs fangs={fangs} line={skinOf(look).line} />
+    </g>
+  );
 };

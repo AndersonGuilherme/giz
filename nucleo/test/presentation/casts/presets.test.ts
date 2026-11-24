@@ -11,6 +11,8 @@ import { isQwenVoice } from '../../../src/infrastructure/voice/qwenVoices.ts';
 
 const PRESETS = fileURLToPath(new URL('../../../casts/presets', import.meta.url));
 const ERAS = ['past', 'present', 'future'];
+// The preset folders: one per era, plus the creatures.
+const FOLDERS = [...ERAS, 'creatures'];
 
 async function presetsOf(era: string): Promise<string[]> {
   return (await readdir(join(PRESETS, era))).filter((file) => file.endsWith('.json')).map((file) => file.replace(/\.json$/, ''));
@@ -32,8 +34,8 @@ async function loadEra(era: string) {
   }
 }
 
-test('every era has at least 3 presets and each one loads with no error through the production catalog', async () => {
-  for (const era of ERAS) {
+test('every era (and the creatures) has at least 3 presets and each one loads with no error through the production catalog', async () => {
+  for (const era of FOLDERS) {
     const { ids, cast } = await loadEra(era);
     assert.ok(ids.length >= 3, era);
     assert.deepEqual(cast.ids().sort(), [...ids].sort(), era);
@@ -41,7 +43,7 @@ test('every era has at least 3 presets and each one loads with no error through 
 });
 
 test('every preset is a giz character with a name, a short personality and a Qwen voice', async () => {
-  const files = (await Promise.all(ERAS.map(async (era) => (await presetsOf(era)).map((id) => join(PRESETS, era, `${id}.json`))))).flat();
+  const files = (await Promise.all(FOLDERS.map(async (era) => (await presetsOf(era)).map((id) => join(PRESETS, era, `${id}.json`))))).flat();
   for (const file of files) {
     const json = JSON.parse(await readFile(file, 'utf8'));
     assert.equal(json.rig, 'giz', file);
@@ -58,9 +60,17 @@ test('the presets mix skin tones, head shapes and voices', async () => {
   assert.ok(new Set(characters.map(({ voice }) => voice.id)).size >= 8);
 });
 
-test('each era sheet lists every preset of its era once (the props of the PresetSheet composition)', async () => {
-  for (const era of ERAS) {
+test('each sheet lists every preset of its era (or the creatures) once (the props of the PresetSheet composition)', async () => {
+  for (const era of FOLDERS) {
     const sheet = JSON.parse(await readFile(join(PRESETS, 'sheets', `${era}.json`), 'utf8'));
     assert.deepEqual([...sheet.characters].sort(), (await presetsOf(era)).map((id) => `${era}/${id}.json`).sort(), era);
   }
+});
+
+test('the creatures: every species but human, each a generic archetype with its own preset', async () => {
+  const creatures = await Promise.all((await presetsOf('creatures')).map(async (id) => JSON.parse(await readFile(join(PRESETS, 'creatures', `${id}.json`), 'utf8'))));
+  const species = creatures.map(({ parameters }) => parameters.species);
+  assert.ok(creatures.length >= 8);
+  assert.deepEqual([...new Set(species)].sort(), ['alien', 'ghost', 'mummy', 'robot', 'slime-monster', 'vampire', 'werewolf', 'zombie']);
+  assert.ok(new Set(creatures.map(({ voice }) => voice.id)).size >= 7, 'varied voices');
 });

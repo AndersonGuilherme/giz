@@ -3,9 +3,9 @@ import type { Arm as ArmShape, Hand as HandShape } from '../../../domain/charact
 import { Silhouette } from '../../../domain/drawing/Silhouette.ts';
 import { Chalked } from './Chalked.tsx';
 import { ARM, SHOULDERS } from './measures.ts';
-import { Wardrobe } from '../../../domain/character/wardrobe/Wardrobe.ts';
-import { outfitPaletteOf, skinOf, type Look } from './parameters.ts';
+import { outfitPaletteOf, skinOf, sleeveOf, type Look } from './parameters.ts';
 import { shade } from '../svg.ts';
+import { SPECIES_OVERLAYS } from './species/speciesOverlays.ts';
 
 type ArmProps = Readonly<{ arm: ArmShape; side: -1 | 1; look: Look }>;
 type HandProps = Readonly<{ look: Look; side: -1 | 1 }>;
@@ -40,11 +40,13 @@ const HAND_SHAPES: Readonly<Record<HandShape, FC<HandProps>>> = {
   ),
 };
 
+// The hand shape, then what the species adds on the hand (claws, wraps).
 const Hand: FC<HandProps & Readonly<{ shape: HandShape }>> = ({ shape, side, look }) => {
-  const Shape = HAND_SHAPES[shape];
+  const [Shape, Extra] = [HAND_SHAPES[shape], SPECIES_OVERLAYS[look.species].Hand];
   return (
     <g transform={`translate(0 ${ARM.fore}) scale(1.3) translate(0 ${-ARM.fore})`}>
       <Shape look={look} side={side} />
+      {Extra && <Extra look={look} side={side} shape={shape} />}
       <path d={`M-10,${ARM.fore + 2} q-2,9 3,16`} fill="none" stroke={skinOf(look).shade} strokeWidth={3} strokeLinecap="round" />
     </g>
   );
@@ -59,7 +61,7 @@ const Limb: FC<Readonly<{ look: Look; rectangle: Parameters<typeof Silhouette.ro
 );
 
 const Forearm: FC<ArmProps> = ({ arm, side, look }) => {
-  const short = Wardrobe.sleeve(look.outfit) !== 'long';
+  const short = sleeveOf(look) !== 'long';
   const color = short ? skinOf(look).base : outfitPaletteOf(look).sleeve;
   return (
     <g transform={`translate(0 ${ARM.upper * arm.foreshortening}) rotate(${-side * arm.elbow})`}>
@@ -80,7 +82,7 @@ export const Arm: FC<ArmProps> = (props) => {
   const { arm, side, look } = props;
   const shoulder = side < 0 ? SHOULDERS.left : SHOULDERS.right;
   const length = ARM.upper * arm.foreshortening;
-  const sleeve = SLEEVE_LENGTHS[Wardrobe.sleeve(look.outfit)](length);
+  const sleeve = SLEEVE_LENGTHS[sleeveOf(look)](length);
   return (
     <g transform={`translate(${shoulder.x} ${shoulder.y}) rotate(${-side * arm.shoulder})`}>
       <Limb look={look} rectangle={{ x: -ARM.thickness / 2, y: -14, width: ARM.thickness, height: length + 26 }} corner={16} color={skinOf(look).base} part="upper" side={side} />

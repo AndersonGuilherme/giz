@@ -1,0 +1,19 @@
+{
+  "id": "lua",
+  "name": "Lua",
+  "rig": "giz",
+  "parameters": {
+    "species": "vampire",
+    "outfit": "victorian",
+    "outfitColor": "#4b2f5e",
+    "hair": "long",
+    "hairColor": "#1f1a2b",
+    "headShape": "oval",
+    "eyeColor": "#b33a4a"
+  },
+  "voice": {
+    "id": "vivian"
+  },
+  "personality": "vampira tímida que tem medo do escuro e coleciona guarda-chuvas",
+  "defaultExpression": "happy"
+}

@@ -4,8 +4,9 @@ import { HEADWEARS, Headwear, type HeadwearName } from '../../../domain/characte
 import type { HeadwearPalette } from '../../../domain/character/headwear/HeadwearDesign.ts';
 import { HEAD_SHAPES, type HeadShapeName } from '../../../domain/character/HeadShape.ts';
 import { AUTO } from '../../../domain/character/Palette.ts';
-import { SKIN_TONES, SkinTone, type SkinColors, type SkinToneName } from '../../../domain/character/SkinTone.ts';
-import type { OutfitPalette } from '../../../domain/character/wardrobe/OutfitDesign.ts';
+import { SkinTone, type SkinColors, type SkinToneName } from '../../../domain/character/SkinTone.ts';
+import { SPECIES, Species, type SpeciesName } from '../../../domain/character/species/Species.ts';
+import type { OutfitPalette, Sleeve } from '../../../domain/character/wardrobe/OutfitDesign.ts';
 import { OUTFITS, Wardrobe, type OutfitName } from '../../../domain/character/wardrobe/Wardrobe.ts';
 import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
 import { FEET, VIEW_BOX } from './measures.ts';
@@ -14,7 +15,8 @@ export const gizDefinition: RigDefinition = {
   id: 'giz',
   name: { 'pt-BR': 'Giz', en: 'Giz' },
   parameters: {
-    skin: { type: 'option', defaultValue: SkinTone.DEFAULT, options: [...SKIN_TONES] },
+    species: { type: 'option', defaultValue: Species.DEFAULT, options: [...SPECIES] },
+    skin: { type: 'option', defaultValue: SkinTone.DEFAULT, options: [...SkinTone.ALL] },
     headShape: { type: 'option', defaultValue: 'round', options: [...HEAD_SHAPES] },
     eyeColor: { type: 'color', defaultValue: '#7a4a26' },
     hairColor: { type: 'color', defaultValue: '#3a2418' },
@@ -38,6 +40,7 @@ export const gizDefinition: RigDefinition = {
 /** The giz parameters, typed for drawing, plus the character's `id` (the seed of its chalk line). */
 export type Look = Readonly<{
   id: string;
+  species: SpeciesName;
   skin: SkinToneName;
   headShape: HeadShapeName;
   eyeColor: string;
@@ -63,15 +66,21 @@ export function lookOf(parameters: ValidatedParameters, id = 'giz'): Look {
   return { ...defaults, ...parameters, id } as Look;
 }
 
-/** The skin colors of the look's tone. */
+/** The skin colors of the look's tone (a creature's own skin, unless another creature skin was chosen). */
 export function skinOf(look: Look): SkinColors {
-  return SkinTone.colors(look.skin);
+  return SkinTone.colors(Species.skin(look.species, look.skin));
 }
 
-/** The outfit's colors, with the ones the character file chose. */
+/** The outfit's colors, with the ones the character file chose (a creature without clothes has skin legs). */
 export function outfitPaletteOf(look: Look): OutfitPalette {
-  return Wardrobe.palette(look.outfit, { main: look.outfitColor, accent: look.accessoryColor });
+  return Species.palette(look.species, Wardrobe.palette(look.outfit, { main: look.outfitColor, accent: look.accessoryColor }));
 }
+
+/** How long the sleeves are: the outfit's cut, bare on a creature without clothes. */
+export const sleeveOf = (look: Look): Sleeve => Species.sleeve(look.species, Wardrobe.sleeve(look.outfit));
+
+/** The eye size: the chosen one times the species' (big alien eyes). */
+export const eyeScaleOf = (look: Look): number => Species.eyeScale(look.species, look.eyeScale);
 
 /** The headwear's colors, with the one the character file chose. */
 export function headwearPaletteOf(look: Look): HeadwearPalette {

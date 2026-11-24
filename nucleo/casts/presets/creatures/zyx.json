@@ -1,0 +1,19 @@
+{
+  "id": "zyx",
+  "name": "Zyx",
+  "rig": "giz",
+  "parameters": {
+    "species": "alien",
+    "outfit": "spacesuit",
+    "outfitColor": "#7b5cc4",
+    "hair": "bald",
+    "headShape": "bean",
+    "eyeColor": "#2c1f4f",
+    "hairColor": "#2c5a2e"
+  },
+  "voice": {
+    "id": "sohee"
+  },
+  "personality": "alienígena curiosa que acha tudo na Terra fascinante",
+  "defaultExpression": "surprised"
+}
