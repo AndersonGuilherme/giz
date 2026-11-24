@@ -37,3 +37,14 @@ test('preload order: runtime, cuBLASLt, cuBLAS, cuRAND, then cuDNN with its main
   assert.deepEqual(order.slice(0, 5), ['libcudart.so.13', 'libcublasLt.so.13', 'libcublas.so.13', 'libcurand.so.10', 'libcudnn.so.9']);
   assert.deepEqual(order.slice(5).sort(), ['libcudnn_adv.so.9', 'libcudnn_cnn.so.9']);
 });
+
+test('cuda without the ONNX Runtime CUDA provider runs on the CPU with a readable warning; otherwise nothing changes', async () => {
+  const { usableDevice } = await import('../../../src/infrastructure/gpu/deviceChoice.ts');
+  const warnings: string[] = [];
+  const warn = (message: string) => warnings.push(message);
+  assert.equal(usableDevice('cuda', () => false, warn), 'cpu');
+  assert.deepEqual(warnings, ['GPU não configurada: rodando na CPU (rode `giz gpu install`)']);
+  assert.equal(usableDevice('cuda', () => true, warn), 'cuda');
+  assert.equal(usableDevice('cpu', () => assert.fail('not asked'), warn), 'cpu');
+  assert.equal(warnings.length, 1);
+});

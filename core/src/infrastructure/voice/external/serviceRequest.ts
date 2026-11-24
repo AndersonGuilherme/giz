@@ -20,9 +20,19 @@ function pcm16(bytes: Buffer): Audio {
   return Audio.of(samples, SERVICE_RATE);
 }
 
+type Cause = Readonly<{ code?: string; message?: string }>;
+
+// fetch says only "fetch failed"; the real reason (ENOTFOUND, ECONNRESET...) is in its cause.
+function reasonOf(error: unknown): string {
+  const { message } = error as Error;
+  const cause = (error as { cause?: Cause }).cause;
+  const detail = cause?.code ?? cause?.message;
+  return detail ? `${message}: ${detail}` : message;
+}
+
 // A dropped connection (network, server closed the socket): `undefined`, so the caller tries again.
 function networkFailure(service: string, error: unknown, number: number): undefined {
-  if (number >= NETWORK_ATTEMPTS) throw new Error(`${service}: falha de rede (${(error as Error).message})`);
+  if (number >= NETWORK_ATTEMPTS) throw new Error(`${service}: falha de rede (${reasonOf(error)})`);
   return undefined;
 }
 

@@ -30,7 +30,7 @@ const TOOLS: Readonly<Record<string, Tool>> = {
   asr: async ([folder]) => print(await (await qa()).asr(folderOf(folder))),
   'asr-aggregate': async ([folder]) => print((await qa()).aggregate(folderOf(folder))),
   pitch: async ([folder]) => print(await (await qa()).pitch(folderOf(folder))),
-  voices: async ([output = 'vozes', voices, instruct]) => (await qa()).voices(resolve(output), { voices: voices?.split(','), instruct: instruct || undefined }, console.log),
+  voices: async ([output = 'voice-lab', voices, instruct]) => (await qa()).voices(resolve(output), { voices: voices?.split(','), instruct: instruct || undefined }, console.log),
   lexicon: async ([file, voice]) => (await qa()).lexicon(await spellingTests(file), voice ?? process.env.LAB_VOICE ?? 'vivian', console.log),
 };
 

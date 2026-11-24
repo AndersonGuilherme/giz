@@ -5,11 +5,12 @@ import { defaultConfig, type GizConfig } from '../../../infrastructure/config/Gi
 
 export type { GizConfig } from '../../../infrastructure/config/GizConfig.ts';
 
-const warn = (message: string) => console.log(`AVISO: ${message}`);
+// To stderr: the missing configuration does not mix with the command output.
+const warn = (message: string) => console.warn(`AVISO: ${message}`);
 
-/** giz.config.json at the repository root. */
-export function configFile(): ConfigFile {
-  return new ConfigFile(CONFIG_PATH, { env: process.env, home: homedir(), warn });
+/** giz.config.json at the repository root, or another path (tests). */
+export function configFile(path: string = CONFIG_PATH): ConfigFile {
+  return new ConfigFile(path, { env: process.env, home: homedir(), warn });
 }
 
 export const defaults = (): GizConfig => defaultConfig(homedir());

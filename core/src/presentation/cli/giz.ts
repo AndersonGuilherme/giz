@@ -86,7 +86,7 @@ async function sheet([rig, character]: readonly string[]): Promise<void> {
 
 const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = {
   voice, check, build, render, produce, sheet,
-  setup: setupCommand, models: modelsCommand, gpu: gpuCommand, qa: qaCommand, sounds: soundsCommand,
+  setup: (args) => setupCommand(args), models: modelsCommand, gpu: gpuCommand, qa: qaCommand, sounds: soundsCommand,
 };
 
 async function main([name = '', ...args]: readonly string[]): Promise<void> {

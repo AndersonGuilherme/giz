@@ -12,6 +12,8 @@ export function apiKeyOf(service: ExternalService, { env, home }: Sources): stri
   const fromEnvironment = env[variable]?.trim();
   if (fromEnvironment) return fromEnvironment;
   const file = join(home, '.config', 'giz', `${service}.key`);
-  if (existsSync(file)) return readFileSync(file, 'utf8').trim();
+  // An empty file (or only spaces) is no key: the same message as a missing one.
+  const fromFile = existsSync(file) ? readFileSync(file, 'utf8').trim() : '';
+  if (fromFile) return fromFile;
   throw new Error(`chave da ${service} não encontrada: defina ${variable} ou crie ${file}`);
 }

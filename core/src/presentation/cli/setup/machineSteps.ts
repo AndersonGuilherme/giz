@@ -16,6 +16,12 @@ function freeGigabytes(folder: string): number {
   }
 }
 
+// NaN: the folder does not exist yet (a dry run does not create it) or cannot be read.
+function freeSpaceLine(free: number): string {
+  if (Number.isNaN(free)) return yellow('⚠ espaço livre desconhecido (a pasta ainda não existe)');
+  return free < 10 ? yellow(`⚠ só ${free.toFixed(0)} GB livres nessa pasta (recomendado: 10 GB)`) : green(`✔ ${free.toFixed(0)} GB livres`);
+}
+
 export function checkNode(): void {
   step(1, TOTAL_STEPS, 'Verificando o Node.js');
   const [major = 0, minor = 0] = process.versions.node.split('.').map(Number);
@@ -28,8 +34,7 @@ export async function modelsFolder(context: SetupContext): Promise<void> {
   console.log('A voz usa o modelo aberto Qwen3-TTS (5,9 GB ou 13,4 GB, você escolhe no passo 4), baixado uma única vez. Com GPU, mais ~1,8 GB de bibliotecas CUDA.');
   context.config.modelsDir = await context.prompter.ask('Pasta dos modelos', context.previous.modelsDir);
   if (!context.dryRun) mkdirSync(context.config.modelsDir, { recursive: true });
-  const free = freeGigabytes(context.config.modelsDir);
-  console.log(free < 10 ? yellow(`⚠ só ${free.toFixed(0)} GB livres nessa pasta (recomendado: 10 GB)`) : green(`✔ ${free.toFixed(0)} GB livres`));
+  console.log(freeSpaceLine(freeGigabytes(context.config.modelsDir)));
 }
 
 async function installGpu(context: SetupContext): Promise<void> {

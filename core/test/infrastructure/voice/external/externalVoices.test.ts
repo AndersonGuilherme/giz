@@ -131,3 +131,28 @@ test('a missing key fails at once, without retrying or calling the service', asy
   await assert.rejects(new FishVoice({ fetch, key: missing, wait }, settings).generate(request), /chave da fish não encontrada/);
   assert.deepEqual([calls.length, delays.length], [0, 0]);
 });
+
+test('an empty or blank key file is a missing key, with the same readable error', () => {
+  const home = mkdtempSync(join(tmpdir(), 'giz-home-'));
+  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
+  writeFileSync(join(home, '.config', 'giz', 'elevenlabs.key'), '  \n');
+  assert.throws(() => apiKeyOf('elevenlabs', { env: { ELEVENLABS_API_KEY: '  ' }, home }), /chave da elevenlabs não encontrada: defina ELEVENLABS_API_KEY ou crie .*elevenlabs\.key/);
+});
+
+test('the final network failure names the real cause (code or message of error.cause)', async () => {
+  const { wait } = waits();
+  const withCode = () => Object.assign(new TypeError('fetch failed'), { cause: { code: 'ENOTFOUND' } });
+  const coded = fakeFetch([1, 2, 3, 4].map(withCode));
+  await assert.rejects(new FishVoice({ fetch: coded.fetch, key: () => KEY, wait }, settings).generate(request), /fish: falha de rede \(fetch failed: ENOTFOUND\)/);
+  const withMessage = () => Object.assign(new TypeError('fetch failed'), { cause: new Error('other side closed') });
+  const messaged = fakeFetch([1, 2, 3, 4].map(withMessage));
+  await assert.rejects(new FishVoice({ fetch: messaged.fetch, key: () => KEY, wait }, settings).generate(request), /fetch failed: other side closed/);
+});
+
+test('a pause that is not a number keeps the default and warns', () => {
+  const warnings: string[] = [];
+  const result = externalSettings({ GIZ_SENTENCE_PAUSE: 'meio', PAUSA_VIRGULA: '' }, (message) => warnings.push(message));
+  assert.deepEqual(result.pauses, { sentence: 0.15, comma: 0 });
+  assert.equal(warnings.length, 2);
+  assert.match(warnings[0]!, /GIZ_SENTENCE_PAUSE="meio" não é um número de segundos; usando 0\.15/);
+});

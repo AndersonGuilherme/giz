@@ -30,9 +30,10 @@ Para trocar vozes, GPU ou pastas: npx giz setup`;
 
 const tools = () => import('../composition/install.ts');
 
-async function context(args: readonly string[]): Promise<SetupContext> {
-  const { configFile, defaults } = await tools();
-  const file = configFile();
+type ConfigStore = Readonly<{ exists(): boolean; load(): GizConfig; save(config: GizConfig): void }>;
+
+async function context(args: readonly string[], file: ConfigStore): Promise<SetupContext> {
+  const { defaults } = await tools();
   const hasFile = file.exists();
   const previous = hasFile ? file.load() : defaults();
   const dryRun = args.includes('--dry-run');
@@ -49,11 +50,12 @@ async function questions(setup: SetupContext): Promise<void> {
   await remotionLicense(setup);
 }
 
-export async function setupCommand(args: readonly string[]): Promise<void> {
+/** `configPath`: another giz.config.json than the repository one (tests). */
+export async function setupCommand(args: readonly string[], configPath?: string): Promise<void> {
   if (args.includes('--help')) return console.log(SETUP_USAGE);
   console.log(INTRO);
-  const setup = await context(args);
-  const file = (await tools()).configFile();
+  const file = (await tools()).configFile(configPath);
+  const setup = await context(args, file);
   const save = (config: GizConfig) => (setup.dryRun ? undefined : file.save(config));
   try {
     await questions(setup);

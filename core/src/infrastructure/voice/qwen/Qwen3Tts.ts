@@ -1,5 +1,7 @@
 import { join } from 'node:path';
 import * as ort from 'onnxruntime-node';
+import { usableDevice } from '../../gpu/deviceChoice.ts';
+import { ortHasCuda } from '../../gpu/onnxRuntimeCuda.ts';
 import { preloadCuda } from '../../gpu/preloadCuda.ts';
 import { BpeTokenizer } from './BpeTokenizer.ts';
 import { QwenEmbeddings } from './QwenEmbeddings.ts';
@@ -38,7 +40,8 @@ export class Qwen3Tts {
     this.#parts = parts;
   }
 
-  static async load(folder: string, settings: LoadSettings): Promise<Qwen3Tts> {
+  static async load(folder: string, requested: LoadSettings): Promise<Qwen3Tts> {
+    const settings = { ...requested, device: usableDevice(requested.device, ortHasCuda, (message) => console.warn(`AVISO: ${message}`)) };
     if (settings.device === 'cuda') preloadCuda(settings.modelsDir);
     const config = readModelConfig(folder);
     const sessions = await QwenSessions.load(folder, settings);
