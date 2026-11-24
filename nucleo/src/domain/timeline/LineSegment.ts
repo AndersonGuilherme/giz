@@ -1,6 +1,7 @@
 import type { Cast } from '../cast/Cast.ts';
 import { Words } from '../speech/Words.ts';
 import type { Line, HoldAfter } from '../script/Line.ts';
+import type { Language } from '../values/Language.ts';
 import { Fps, Seconds } from '../values/Time.ts';
 import { segmentSoundEffects } from './SoundEffects.ts';
 import { lineStates } from './LineStates.ts';
@@ -10,7 +11,7 @@ import type { ResolvedScene, SoundEffectJson, SegmentJson } from './VideoProps.t
 import type { LineScene } from './SceneSequence.ts';
 import { LineTimings, type LineVoice } from './LineTimings.ts';
 
-export type SegmentContext = Readonly<{ start: number; scene: LineScene; cast: Cast }>;
+export type SegmentContext = Readonly<{ start: number; scene: LineScene; cast: Cast; language: Language }>;
 
 const BREATHER_IN_SECONDS = 0.35;
 
@@ -21,12 +22,13 @@ function totalDuration(lineDuration: number, hold: HoldAfter | undefined): numbe
 }
 
 // What the line has that depends only on itself and on the recorded voice.
-function fromLine(line: Line, voice: LineVoice, scene: LineScene) {
+function fromLine(line: Line, voice: LineVoice, context: SegmentContext) {
+  const { scene, language } = context;
   const speaker = line.speaker();
   const scriptWords = Words.fromText(line.text());
   const texts = scriptWords.texts();
   const times = LineTimings.of(voice, texts);
-  const hold = lineHold(line, scene.opened ? scene.scene : undefined);
+  const hold = lineHold(line, scene.opened ? scene.scene : undefined, language);
   return { speaker: speaker.text(), times, words: times.toFrames(texts), hold };
 }
 
@@ -46,7 +48,7 @@ export class LineSegment {
   }
 
   static build(line: Line, voice: LineVoice, context: SegmentContext): LineSegment {
-    const { speaker, times, words, hold } = fromLine(line, voice, context.scene);
+    const { speaker, times, words, hold } = fromLine(line, voice, context);
     const beats = Beats.fromLine(line, times);
     const { scene, key } = context.scene;
     const json: SegmentJson = {

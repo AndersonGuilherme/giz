@@ -16,6 +16,7 @@ export type FixedTexts = Readonly<{
   clue: string;
   healthy: string;
   rotten: string;
+  readTheCode: string;
 }>;
 
 const TEXTS: Readonly<Record<ReturnType<Language['code']>, FixedTexts>> = { 'pt-BR': PORTUGUESE, en: ENGLISH };

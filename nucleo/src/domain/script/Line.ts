@@ -1,5 +1,6 @@
 import type { Expression, Pose } from '../cast/PoseAndExpression.ts';
 import type { CharacterId } from '../values/CharacterId.ts';
+import { BeatText } from '../timeline/BeatText.ts';
 import type { Chapter } from './Chapter.ts';
 import type { Scene } from './Scene.ts';
 
@@ -65,9 +66,14 @@ export class Line {
     return this.#data.text;
   }
 
-  /** The text for the voice; without its own pronunciation, it is the caption text. */
+  /** The text for the voice (own pronunciation or the caption text), without the `[span]` brackets of the beats. */
   pronunciation(): string {
-    return this.#data.pronunciation ?? this.#data.text;
+    return BeatText.of(this.#data.pronunciation ?? this.#data.text).clean();
+  }
+
+  /** The own pronunciation as written, `[span]` beats included; `undefined` when the line has none. */
+  markedPronunciation(): string | undefined {
+    return this.#data.pronunciation;
   }
 
   pose(): Pose | undefined {

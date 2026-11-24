@@ -110,3 +110,13 @@ test('the record has the time of each word of the script text (not of the pronun
   assert.deepEqual(record.words?.map((p) => p.text), ['Oi,', 'eu', 'sou', 'a', 'Ana.']);
   assert.ok(record.words!.at(-1)!.end <= record.durationSeconds + 1e-9);
 });
+
+test('a line with [span] beats sends the voice its text without brackets, and the hash follows the spoken text', async () => {
+  const { voice, store, useCase } = build();
+  await useCase.run(project({ texts: ['O [bug] voltou.'] }));
+  assert.equal(voice.requests[0]?.text, 'O bug voltou.');
+  const first = await store.read('1');
+  await useCase.run(project({ texts: ['O [bug] voltou.'], pronunciation: 'O [bãg] voltou.' }));
+  assert.equal(voice.requests[1]?.text, 'O bãg voltou.');
+  assert.notEqual((await store.read('1')).hash, first.hash);
+});

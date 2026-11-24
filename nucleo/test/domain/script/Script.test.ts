@@ -62,6 +62,16 @@ test('Line uses the pronunciation when there is one', () => {
   const f = Line.of(CharacterId.of('ana'), { id: '1', chapter: Chapter.of(1), text: 'deploy', pronunciation: 'diplói' });
   assert.equal(f.pronunciation(), 'diplói');
 });
+test('Line pronunciation without its own text drops the [span] brackets (they never reach the voice)', () => {
+  const f = Line.of(CharacterId.of('ana'), { id: '1', chapter: Chapter.of(1), text: 'o [bug] voltou [ontem]' });
+  assert.equal(f.pronunciation(), 'o bug voltou ontem');
+  assert.equal(f.markedPronunciation(), undefined);
+});
+test('Line pronunciation drops the brackets of its own beats, but keeps them in the marked pronunciation', () => {
+  const f = Line.of(CharacterId.of('ana'), { id: '1', chapter: Chapter.of(1), text: 'o deploy', pronunciation: 'o [diplói]' });
+  assert.equal(f.pronunciation(), 'o diplói');
+  assert.equal(f.markedPronunciation(), 'o [diplói]');
+});
 test('Chapter rejects a number below 1 or not an integer', () => {
   assert.throws(() => Chapter.of(0), /capítulo 0 inválido/);
   assert.throws(() => Chapter.of(1.5), /capítulo 1.5 inválido/);

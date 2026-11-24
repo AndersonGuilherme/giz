@@ -1,11 +1,12 @@
 import type { Scene } from '../script/Scene.ts';
 import type { Line, HoldAfter } from '../script/Line.ts';
+import { fixedTexts } from '../i18n/fixedTexts.ts';
+import type { Language } from '../values/Language.ts';
 
 // readingSeconds from the motor: ~0.35 s per line with text, between 4 and 9 s, +1 s if there are added lines.
 const SECONDS_PER_LINE = 0.35;
 const MINIMUM_IN_SECONDS = 4;
 const MAXIMUM_IN_SECONDS = 9;
-const READING_LABEL = 'Leia o código';
 
 function readingSeconds(scene: Scene): number {
   if (scene.type !== 'code') return 0;
@@ -17,12 +18,13 @@ function readingSeconds(scene: Scene): number {
 
 /**
  * The hold after the line: the explicit one (`holdAfter`) and/or the reading hold of code the line opens on screen;
- * the larger one wins. `openedScene` is the scene the line opens (absent when it inherits the previous one).
+ * the larger one wins. `openedScene` is the scene the line opens (absent when it inherits the previous one); the reading
+ * hold is labeled in the video language.
  */
-export function lineHold(line: Line, openedScene: Scene | undefined): HoldAfter | undefined {
+export function lineHold(line: Line, openedScene: Scene | undefined, language: Language): HoldAfter | undefined {
   const reading = openedScene ? readingSeconds(openedScene) : 0;
   const explicit = line.holdAfter();
   if (explicit) return { ...explicit, seconds: Math.max(explicit.seconds, reading) };
-  if (reading > 0) return { seconds: reading, label: READING_LABEL };
+  if (reading > 0) return { seconds: reading, label: fixedTexts(language).readTheCode };
   return undefined;
 }

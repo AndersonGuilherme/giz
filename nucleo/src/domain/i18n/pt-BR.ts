@@ -13,4 +13,5 @@ export const PORTUGUESE: FixedTexts = {
   clue: 'Pista',
   healthy: 'saudável',
   rotten: 'apodrecido',
+  readTheCode: 'Leia o código',
 };

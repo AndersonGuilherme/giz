@@ -32,6 +32,11 @@ export class Boxes {
     return pairsOf(this.#list).filter(([first, second]) => first.overlaps(second));
   }
 
+  /** The boxes of the list that `box` overlaps (pairs inside the list are not looked at). */
+  overlapping(box: Box): Box[] {
+    return this.#list.filter((other) => other.overlaps(box));
+  }
+
   outsideOf(area: Box): Box[] {
     return this.#list.filter((box) => !box.isInside(area));
   }

@@ -1,6 +1,7 @@
 import { DomainError } from '../DomainError.ts';
 import { Seconds } from '../values/Time.ts';
 import type { WordJson } from './WordJson.ts';
+import { BeatText } from '../timeline/BeatText.ts';
 
 export type { WordJson };
 
@@ -53,7 +54,7 @@ export class Words {
 
   /** The brackets of the `[span]` beats are not part of the words. */
   static fromText(text: string): Words {
-    const texts = text.replace(/[[\]]/g, '').split(/\s+/).filter(Boolean);
+    const texts = BeatText.of(text).clean().split(/\s+/).filter(Boolean);
     return new Words(texts.map((word) => Word.of(word)));
   }
 

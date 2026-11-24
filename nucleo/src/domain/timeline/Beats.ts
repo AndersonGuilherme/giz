@@ -9,8 +9,8 @@ type BeatSource = Readonly<{ text: BeatText; byWord: boolean }>;
 // The beats live in the pronunciation (if it has brackets) or in the text, as in the motor. The recorded words
 // are the text words: in the pronunciation, the beat falls by the fraction of the spoken text.
 function beatSource(line: Line): BeatSource {
-  const pronunciation = line.pronunciation();
-  const inPronunciation = pronunciation !== line.text() && BeatText.hasBeats(pronunciation);
+  const pronunciation = line.markedPronunciation() ?? '';
+  const inPronunciation = BeatText.hasBeats(pronunciation);
   return { text: BeatText.of(inPronunciation ? pronunciation : line.text()), byWord: !inPronunciation };
 }
 

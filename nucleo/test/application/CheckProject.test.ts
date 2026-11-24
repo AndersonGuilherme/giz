@@ -18,18 +18,21 @@ import { CharacterId } from '../../src/domain/values/CharacterId.ts';
 import { Language } from '../../src/domain/values/Language.ts';
 import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
 
-type TestLine = { text?: string; scene?: Scene; beats?: Beat[] };
+type TestLine = { text?: string; scene?: Scene; beats?: Beat[]; holdAfter?: { seconds: number; label: string } };
 
 type Extras = Readonly<{ warnings?: string[]; format?: Format; captionStyle?: CaptionStyle; withBody?: string[]; chapters?: string[] }>;
 
 const member = (id: string) => Character.of(CharacterId.of(id), { name: id, rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
 
+const TALK: Scene = { type: 'talk' };
 const NO_EXTRAS = { warnings: [], format: 'lesson', withBody: ['ana'], chapters: ['Abertura'] } as const;
 
 function project(lines: TestLine[], aspect: string, extras: Extras = {}): Project {
   const { warnings, format, captionStyle, withBody, chapters } = { ...NO_EXTRAS, ...extras };
   const ana = CharacterId.of('ana');
-  const list = lines.map(({ text = 'Olá.', scene, beats }, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene, beats }));
+  // The first line must open a scene: tests that do not care get the talk stage, which has no boxes of its own.
+  const list = lines.map(({ text = 'Olá.', scene, beats, holdAfter }, i) =>
+    Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene: scene ?? (i === 0 ? TALK : undefined), beats, holdAfter }));
   return Project.of(
     { title: 'T', format, language: Language.PORTUGUESE, aspect: AspectRatio.of(aspect), ...(captionStyle ? { captionStyle } : {}), voice: { provider: 'qwen' } },
     { cast: Cast.of(withBody.map(member)), script: Script.of(chapters, Lines.of(list)), warnings },
@@ -125,9 +128,10 @@ test('a different number of [spans] and beats is a readable line error, not a cr
   const r = check(project([{ text: 'Um [dois] e [três].', beats: [{ pose: 'point' }], scene: title('Olá') }], '9:16'));
   assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', '2 [trechos] no texto, mas 1 marca(s)']]);
 });
-test('a lesson scene with more than 2 cast members with a body is an error of the line that opens it', () => {
-  const r = check(project([{ text: 'Oi.' }, { scene: title('Olá') }, { scene: title('De novo') }], '16:9', { withBody: ['ana', 'bia', 'caio'], chapters: ['Abertura'] }));
-  assert.deepEqual(r.errors.map((e) => e.line), ['2', '3']);
+test('a lesson with more than 2 cast members with a body is one error, on the first line that opens a lesson scene', () => {
+  const scenario: Scene = { type: 'scenario', background: { vector: 'village' }, characters: [{ character: 'ana', position: 'center' }] };
+  const r = check(project([{ scene: scenario }, { scene: title('Olá') }, {}, { scene: title('De novo') }], '16:9', { withBody: ['ana', 'bia', 'caio'], chapters: ['Abertura'] }));
+  assert.deepEqual(r.errors.map((e) => e.line), ['2']);
   assert.match(r.errors[0]!.message, /no máximo 2 apresentadores numa aula \(o elenco tem 3 com corpo: ana, bia, caio\)/);
 });
 test('the crowd limit is a lesson rule: a scenario scene has its own limit', () => {
@@ -137,4 +141,30 @@ test('the crowd limit is a lesson rule: a scenario scene has its own limit', () 
 test('in a 16:9 lesson the chapter in the frame is checked: a name too long is an error', () => {
   const r = check(project([{ scene: title('Olá') }], '16:9', { chapters: ['Capítulo muito comprido '.repeat(6)] }));
   assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'capítulo não cabe na caixa nem com a letra a 60%']]);
+});
+test('a first line without a scene is a readable check error, not a crash at build time', () => {
+  const ana = CharacterId.of('ana');
+  const lines = Lines.of([Line.of(ana, { id: '1', chapter: Chapter.of(1), text: 'Oi.' }), Line.of(ana, { id: '2', chapter: Chapter.of(1), text: 'Tudo?', scene: title('Olá') })]);
+  const p = Project.of(
+    { title: 'T', format: 'lesson', language: Language.PORTUGUESE, aspect: AspectRatio.of('9:16'), voice: { provider: 'qwen' } },
+    { cast: Cast.of([member('ana')]), script: Script.of(['Abertura'], lines), warnings: [] },
+  );
+  assert.deepEqual(check(p).errors, [{ line: '1', message: 'a primeira fala precisa de cena (as falas sem cena herdam a anterior)' }]);
+});
+test('a hold label is checked in the caption place: a normal one passes, one too long is a line error', () => {
+  for (const aspect of ['9:16', '16:9']) {
+    assert.deepEqual(check(project([{ scene: title('Olá'), holdAfter: { seconds: 3, label: 'Ache o bug' } }], aspect)).errors, [], aspect);
+    const r = check(project([{ scene: title('Olá'), holdAfter: { seconds: 3, label: 'palavra '.repeat(30) } }], aspect));
+    assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'rótulo da pausa não cabe na caixa nem com a letra a 60%']], aspect);
+  }
+});
+test('the hold label is checked against the scene, not against the caption it replaces', () => {
+  const layouts = LayoutRegistry.empty();
+  layouts.register('quote', (_scene, aspect) => Boxes.of([Box.of('aspas', { x: 100, y: aspect.vertical() ? 1400 : 1000, width: 100, height: 10 })]));
+  const r = check(project([{ scene: { type: 'quote', text: 'x' }, holdAfter: { seconds: 2, label: 'Pense' } }], '9:16'), layouts);
+  assert.deepEqual(r.errors.map((e) => e.message), ['aspas sobrepõe legenda', 'rótulo da pausa sobrepõe aspas']);
+});
+test('code opening on screen gets the reading hold label in the check too', () => {
+  const code: Scene = { type: 'code', title: 'a.ts', lines: ['const a = 1;'] };
+  assert.deepEqual(check(project([{ scene: code }], '16:9')).errors, []);
 });

@@ -1,5 +1,4 @@
 import { DomainError } from '../../domain/DomainError.ts';
-import type { Cast } from '../../domain/cast/Cast.ts';
 import type { Character } from '../../domain/cast/Character.ts';
 import type { SoundEffectJson, CharacterJson, VideoProps, SegmentJson } from '../../domain/timeline/VideoProps.ts';
 import { SceneSequence } from '../../domain/timeline/SceneSequence.ts';
@@ -50,7 +49,7 @@ export class BuildTimeline {
     this.#rejectLinesWithoutAudio(lines);
     const voices = await Promise.all(lines.map((line) => this.#dependencies.store.read(line.id())));
     const cast = project.cast();
-    const assembly = buildSegments(lines, voices, cast);
+    const assembly = buildSegments(lines, voices, project);
     return { ...profileToJson(project), ...assembly, cast: cast.each().map(characterToJson) };
   }
 
@@ -63,12 +62,13 @@ export class BuildTimeline {
 }
 
 // The lines in sequence: the scene carries from one to the next and each segment starts where the previous one ends.
-function buildSegments(lines: readonly Line[], voices: readonly LineVoice[], cast: Cast): Assembly {
+function buildSegments(lines: readonly Line[], voices: readonly LineVoice[], project: Project): Assembly {
+  const context = { cast: project.cast(), language: project.language() };
   const scenes = new SceneSequence();
   const assembly: Assembly = { segments: [], soundEffects: [], totalFrames: 0 };
   lines.forEach((line, index) => {
     const voice = voices[index] as LineVoice;
-    const segment = LineSegment.build(line, voice, { start: assembly.totalFrames, scene: scenes.sceneOf(line), cast });
+    const segment = LineSegment.build(line, voice, { ...context, start: assembly.totalFrames, scene: scenes.sceneOf(line) });
     scenes.continueWith(segment.sceneAfter());
     assembly.segments.push(segment.toJson());
     assembly.soundEffects.push(...segment.soundEffects());

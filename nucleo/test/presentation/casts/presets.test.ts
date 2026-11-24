@@ -74,3 +74,9 @@ test('the creatures: every species but human, each a generic archetype with its 
   assert.deepEqual([...new Set(species)].sort(), ['alien', 'ghost', 'mummy', 'robot', 'slime-monster', 'vampire', 'werewolf', 'zombie']);
   assert.ok(new Set(creatures.map(({ voice }) => voice.id)).size >= 7, 'varied voices');
 });
+
+test('Bru keeps an original trait: no echo of a famous film scene (a librarian ghost hushing people)', async () => {
+  const bru = JSON.parse(await readFile(join(PRESETS, 'creatures', 'bru.json'), 'utf8'));
+  assert.doesNotMatch(bru.personality, /bibliotec|silêncio|library|silence/i);
+  assert.match(bru.personality, /geladeira/);
+});

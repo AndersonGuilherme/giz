@@ -40,3 +40,7 @@ test('a box of a text fitted elsewhere keeps only whether it fitted', () => {
   assert.equal(Box.fitted('eixo', rectangle, { fits: true }).textFits(), true);
   assert.equal(Box.fitted('eixo', rectangle, { fits: false }).textFits(), false);
 });
+test('overlapping lists the boxes of the list that one box overlaps, without pairing the rest', () => {
+  const boxes = Boxes.of([box('título', [0, 0]), box('legenda', [50, 50]), box('rodapé', [0, 500])]);
+  assert.deepEqual(boxes.overlapping(box('pausa', [0, 450])).map((c) => c.label), ['rodapé']);
+});

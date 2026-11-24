@@ -263,9 +263,9 @@ Personagem de moletom com cabelo em degradê, como os apresentadores das aulas.
 | `expression` | não | veja abaixo | A expressão de quem fala. |
 | `look` | não | `camera`, `other`, `content` | Para onde quem fala olha: para quem assiste, para o outro personagem ou para o conteúdo da cena. |
 | `reaction` | não | `{ expression, pose, look }` | Como os outros personagens reagem enquanto a fala acontece. Quem escuta só reage com o corpo. |
-| `scene` | não | seção 8 | A cena que começa nesta fala. Sem `scene`, a fala continua na cena anterior. A primeira fala precisa ter uma. |
+| `scene` | não | seção 8 | A cena que começa nesta fala. Sem `scene`, a fala continua na cena anterior. A primeira fala precisa ter uma (o `check` aponta quando falta). |
 | `beats` | não | lista | Uma mudança para cada `[trecho]` do texto, na mesma ordem. Veja abaixo. |
-| `holdAfter` | não | `{ "seconds": 3, "label": "Ache o bug" }` | Uma pausa depois da fala, para quem assiste pensar, marcada por um tique a cada segundo. |
+| `holdAfter` | não | `{ "seconds": 3, "label": "Ache o bug" }` | Uma pausa depois da fala, para quem assiste pensar, marcada por um tique a cada segundo. Durante a pausa, o rótulo aparece com a contagem regressiva no lugar da legenda. |
 | `sfx` | não | veja abaixo | Um som no começo da fala. |
 
 Poses: `neutral`, `explain`, `point`, `wave`, `raise`, `think`, `shrug`, `celebrate`, `hand-on-head`, `hands-on-mouth`.
