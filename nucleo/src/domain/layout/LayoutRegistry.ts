@@ -4,7 +4,7 @@ import type { AspectRatio } from '../values/AspectRatio.ts';
 import type { Boxes } from './Boxes.ts';
 
 export type SceneType = Scene['type'];
-type SceneOfType<T extends SceneType> = Extract<Scene, Readonly<{ type: T }>>;
+export type SceneOfType<T extends SceneType> = Extract<Scene, Readonly<{ type: T }>>;
 
 /** Contract of every scene: the boxes it takes in an aspect ratio and a language. */
 export type SceneLayout<T extends SceneType = SceneType> = (scene: SceneOfType<T>, aspect: AspectRatio, language: Language) => Boxes;

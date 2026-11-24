@@ -1,4 +1,5 @@
 import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
+import { SOLES, VIEW_BOX } from './measures.ts';
 
 export const HAIRS = ['long', 'short', 'shaved', 'bun'] as const;
 export const EMBLEMS = ['star', 'code', 'none'] as const;
@@ -23,6 +24,7 @@ export const liaStyleDefinition: RigDefinition = {
     browArch: { type: 'number', defaultValue: 7, min: 0, max: 9 },
     smile: { type: 'number', defaultValue: 30, min: 18, max: 34 },
   },
+  stance: { viewBox: VIEW_BOX, feet: SOLES },
 };
 
 /** The lia-style parameters, typed for drawing; `hairColor` → `hairColor2` is the hair gradient. */

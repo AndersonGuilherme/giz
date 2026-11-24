@@ -40,6 +40,11 @@ export class Font {
     return this.#measures.maximumLines;
   }
 
+  /** Line height as a multiple of the letter size (the renderer uses it with the size `TextFit` chose). */
+  lineHeight(): number {
+    return this.#measures.lineHeight;
+  }
+
   /** Height the text takes at the base size with every allowed line. */
   maximumHeight(): number {
     const { size, lineHeight, maximumLines } = this.#measures;

@@ -1,6 +1,6 @@
 import { DomainError } from '../DomainError.ts';
 
-type AspectRatioText = '9:16' | '16:9';
+export type AspectRatioText = '9:16' | '16:9';
 
 export class AspectRatio {
   static readonly VERTICAL = new AspectRatio(1080, 1920);

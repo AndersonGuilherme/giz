@@ -24,6 +24,10 @@ export class Boxes {
     return new Boxes([...this.#list, box]);
   }
 
+  plus(other: Boxes): Boxes {
+    return new Boxes([...this.#list, ...other.#list]);
+  }
+
   overlappingPairs(): Array<[Box, Box]> {
     return pairsOf(this.#list).filter(([first, second]) => first.overlaps(second));
   }

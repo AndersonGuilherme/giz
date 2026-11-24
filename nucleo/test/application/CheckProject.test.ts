@@ -44,6 +44,16 @@ test('a normal title passes without problems in both aspect ratios', () => {
     assert.deepEqual(check(projectWithTitle('Arquitetura hexagonal na prática', aspect)), { errors: [], warnings: [] });
   }
 });
+test('three characters in a 9:16 scenario are a line error, not a crash', () => {
+  const crowded: Scene = {
+    type: 'scenario',
+    background: { vector: 'village' },
+    characters: ['ana', 'bia', 'caio'].map((character) => ({ character, position: 'center' as const })),
+  };
+  const r = check(project([{ scene: crowded }], '9:16'));
+  assert.deepEqual(r.errors.map((e) => e.line), ['1']);
+  assert.match(r.errors[0].message, /no máximo 2 personagens em 9:16/);
+});
 test('a caption that does not fit is a line error', () => {
   const r = check(project([{ text: 'palavra '.repeat(80) }], '9:16'));
   assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'legenda não cabe na caixa nem com a letra a 60%']]);

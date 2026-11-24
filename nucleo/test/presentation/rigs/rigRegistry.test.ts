@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import type { RigDefinition } from '../../../src/presentation/rigs/RigModel.ts';
 import { RigRegistry, rigRegistry } from '../../../src/presentation/rigs/rigRegistry.ts';
 
+const STANCE = { viewBox: { x: 0, y: 0, width: 100, height: 100 }, feet: { x: 50, y: 100 } };
+
 test('the registry refuses an unknown rig listing the valid ones', () => assert.throws(() => rigRegistry.get('robot'), /ball-head/));
 
 test('the ball-head comes registered with the parameters and defaults from the brief', () => {
@@ -21,14 +23,14 @@ test('the ball-head comes registered with the parameters and defaults from the b
 
 test('register adds and all() returns in registration order', () => {
   const registry = RigRegistry.with<RigDefinition>([]);
-  registry.register({ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {} });
-  registry.register({ id: 'b', name: { 'pt-BR': 'B', en: 'B' }, parameters: {} });
+  registry.register({ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {}, stance: STANCE });
+  registry.register({ id: 'b', name: { 'pt-BR': 'B', en: 'B' }, parameters: {}, stance: STANCE });
   assert.deepEqual(registry.all().map(({ id }) => id), ['a', 'b']);
 });
 
 test('registering the same id twice is an error', () => {
-  const registry = RigRegistry.with<RigDefinition>([{ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {} }]);
-  assert.throws(() => registry.register({ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {} }), /já registrado/);
+  const registry = RigRegistry.with<RigDefinition>([{ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {}, stance: STANCE }]);
+  assert.throws(() => registry.register({ id: 'a', name: { 'pt-BR': 'A', en: 'A' }, parameters: {}, stance: STANCE }), /já registrado/);
 });
 
 test('the lia-style comes registered with the parameters, ranges and options from the brief', () => {
@@ -46,4 +48,14 @@ test('the lia-style comes registered with the parameters, ranges and options fro
   assert.deepEqual(Object.keys(parameters).sort(), [
     'browArch', 'browWidth', 'emblem', 'glasses', 'glassesColor', 'hair', 'hairColor', 'hairColor2', 'hoodieColor', 'hoodieShade', 'skin', 'smile',
   ]);
+});
+
+test('every rig declares where its feet touch the ground, inside its view box (ball-head 590, lia-style 570)', () => {
+  for (const { id, stance } of rigRegistry.all()) {
+    const { viewBox, feet } = stance;
+    assert.ok(feet.y > viewBox.y && feet.y <= viewBox.y + viewBox.height, id);
+    assert.ok(feet.x > viewBox.x && feet.x < viewBox.x + viewBox.width, id);
+  }
+  assert.equal(rigRegistry.get('ball-head').stance.feet.y, 590);
+  assert.equal(rigRegistry.get('lia-style').stance.feet.y, 570);
 });

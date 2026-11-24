@@ -6,6 +6,8 @@ export const EARS = { left: 92, right: 308, y: 200 } as const;
 /** Pivots: the head tilts around the neck, the body leans around the feet. */
 export const NECK = { x: 200, y: 290 } as const;
 export const FEET = { x: 200, y: 575 } as const;
+/** Where the soles touch the ground (bottom of the shoes, y 558 + 12); the lean pivot `FEET` sits 5 units lower. */
+export const SOLES = { x: 200, y: 570 } as const;
 /** `rest` is the shoulder's own angle with the arm hanging (degrees), added to the pose angle. */
 export const SHOULDERS = { left: { x: 134, y: 306, rest: 8 }, right: { x: 266, y: 306, rest: -8 } } as const;
 export const ARM = { upper: 52, hand: 62 } as const;

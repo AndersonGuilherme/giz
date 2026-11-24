@@ -1,4 +1,5 @@
 import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
+import { FEET, VIEW_BOX } from './measures.ts';
 
 export const OUTFITS = ['tshirt', 'tunic', 'dress', 'hoodie'] as const;
 export const HAIRS = ['none', 'bun', 'short', 'scarf', 'hat'] as const;
@@ -18,6 +19,7 @@ export const ballHeadDefinition: RigDefinition = {
     glasses: { type: 'boolean', defaultValue: false },
     eyeScale: { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 },
   },
+  stance: { viewBox: VIEW_BOX, feet: { x: 200, y: FEET.y } },
 };
 
 /** The ball-head parameters, typed for drawing. */

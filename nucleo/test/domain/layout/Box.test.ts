@@ -30,3 +30,7 @@ test('overflowingTexts reports the box whose text does not fit', () => {
   const long = Box.withText('longa', { x: 0, y: 100, width: 400, height: 60 }, { text: 'palavra '.repeat(20), font });
   assert.deepEqual(Boxes.of([short, long]).overflowingTexts().map((c) => c.label), ['longa']);
 });
+test('plus joins two lists of boxes, so overlaps across them are seen', () => {
+  const joined = Boxes.of([box('hud', [0, 0])]).plus(Boxes.of([box('destaque', [50, 50])]));
+  assert.deepEqual(joined.overlappingPairs().map(([a, b]) => [a.label, b.label]), [['hud', 'destaque']]);
+});

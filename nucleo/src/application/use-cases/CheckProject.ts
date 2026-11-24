@@ -1,3 +1,4 @@
+import { DomainError } from '../../domain/DomainError.ts';
 import { SafeArea } from '../../domain/layout/SafeArea.ts';
 import type { Box } from '../../domain/layout/Box.ts';
 import { Boxes } from '../../domain/layout/Boxes.ts';
@@ -18,6 +19,11 @@ function layoutMessages(boxes: Boxes, safeArea: Box): string[] {
   return [...overflowing, ...overlapping, ...outside];
 }
 
+function refusalMessage(error: unknown): string {
+  if (error instanceof DomainError) return error.message;
+  throw error;
+}
+
 /** Reports text that does not fit, overlapping boxes and whatever leaves the safe area, line by line. */
 export class CheckProject {
   readonly #dependencies: Dependencies;
@@ -36,13 +42,21 @@ export class CheckProject {
   }
 
   #lineErrors(project: Project, line: Line, safeArea: Box): Problem[] {
-    const caption = captionBox(line.text(), project.aspect());
-    const boxes = this.#sceneBoxes(project, line).with(caption);
-    return layoutMessages(boxes, safeArea).map((message) => ({ line: line.id(), message }));
+    return this.#lineMessages(project, line, safeArea).map((message) => ({ line: line.id(), message }));
+  }
+
+  // A scene the layout refuses (too many characters, camera target out of the scene) is an error of that line, not a crash.
+  #lineMessages(project: Project, line: Line, safeArea: Box): string[] {
+    try {
+      const caption = captionBox(line.text(), project.aspect());
+      return layoutMessages(this.#sceneBoxes(project, line).with(caption), safeArea);
+    } catch (error) {
+      return [refusalMessage(error)];
+    }
   }
 
   // Only the line that declares the scene checks it: lines that inherit the scene do not repeat the same errors.
-  // Provisional: scenes without a registered layout yet (Tasks 12 and 13) are skipped, without an error.
+  // Provisional: scenes without a registered layout yet (Task 13) are skipped, without an error.
   #sceneBoxes(project: Project, line: Line): Boxes {
     const scene = line.scene();
     if (!scene) return Boxes.empty();
