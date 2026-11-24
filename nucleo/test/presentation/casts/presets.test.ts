@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { DiskProjectRepository } from '../../../src/infrastructure/disk/DiskProjectRepository.ts';
 import { RigCatalogFromRegistry } from '../../../src/presentation/rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../../../src/presentation/rigs/rigRegistry.ts';
-import { QWEN_SPEAKERS } from '../../../../motor/scripts/qwen3-tts.ts';
+import { isQwenVoice } from '../../../src/infrastructure/voice/qwenVoices.ts';
 
 const PRESETS = fileURLToPath(new URL('../../../casts/presets', import.meta.url));
 const ERAS = ['past', 'present', 'future'];
@@ -46,7 +46,7 @@ test('every preset is a giz character with a name, a short personality and a Qwe
     const json = JSON.parse(await readFile(file, 'utf8'));
     assert.equal(json.rig, 'giz', file);
     assert.ok(json.name.length > 0 && json.personality.length > 10 && json.personality.length < 90, file);
-    assert.ok((QWEN_SPEAKERS as readonly string[]).includes(json.voice.id), `${file}: ${json.voice.id}`);
+    assert.ok(isQwenVoice(json.voice.id), `${file}: ${json.voice.id}`);
   }
 });
 
