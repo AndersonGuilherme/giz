@@ -6,6 +6,10 @@ import { Segundos } from '../../../src/dominio/valores/Tempo.ts';
 
 const s = (...valores: number[]) => valores.map((valor) => Segundos.de(valor));
 
+test('doTexto tira os colchetes das marcas [trecho]', () => {
+  assert.deepEqual(Palavras.doTexto('Um [usou um cupom] e [ pagou ].').textos(), ['Um', 'usou', 'um', 'cupom', 'e', 'pagou', '.']);
+});
+
 test('doTexto separa por espaço e mantém a pontuação junto da palavra', () => {
   const palavras = Palavras.doTexto('  Olá,   Téo!  Tudo bem? ');
   assert.deepEqual(palavras.textos(), ['Olá,', 'Téo!', 'Tudo', 'bem?']);

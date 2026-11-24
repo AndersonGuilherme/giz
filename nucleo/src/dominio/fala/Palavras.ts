@@ -46,8 +46,9 @@ export class Palavras {
     this.#palavras = palavras;
   }
 
+  /** Os colchetes das marcas `[trecho]` não fazem parte das palavras. */
   static doTexto(texto: string): Palavras {
-    const textos = texto.split(/\s+/).filter(Boolean);
+    const textos = texto.replace(/[[\]]/g, '').split(/\s+/).filter(Boolean);
     return new Palavras(textos.map((palavra) => Palavra.de(palavra)));
   }
 
