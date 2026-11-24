@@ -55,6 +55,34 @@ test('AlinhadorWhisper cai para a reserva quando o alinhamento é ruim demais', 
   assert.deepEqual(palavras.textos(), ['um', 'dois', 'três', 'quatro']);
 });
 
+class OuvidoQueFalha implements Ouvido {
+  async ouvir(): Promise<PalavraJson[]> {
+    throw new Error('sem rede para baixar o modelo');
+  }
+}
+
+test('AlinhadorWhisper avisa e usa a reserva quando o Whisper falha', async () => {
+  const reserva = new ReservaFalsa();
+  const avisos: string[] = [];
+  const alinhador = new AlinhadorWhisper(reserva, new OuvidoQueFalha(), (mensagem) => avisos.push(mensagem));
+  const palavras = await alinhador.alinhar(som, 'um dois', Idioma.PORTUGUES);
+  assert.equal(reserva.chamadas, 1);
+  assert.deepEqual(palavras.textos(), ['um', 'dois']);
+  assert.deepEqual(avisos, ['alinhamento por Whisper falhou (sem rede para baixar o modelo); usando o envelope da voz']);
+});
+
+test('AlinhadorWhisper sem quem avise também usa a reserva quando o Whisper falha', async () => {
+  const reserva = new ReservaFalsa();
+  await new AlinhadorWhisper(reserva, new OuvidoQueFalha()).alinhar(som, 'um', Idioma.PORTUGUES);
+  assert.equal(reserva.chamadas, 1);
+});
+
+test('AlinhadorWhisper limita os tempos à duração do áudio', async () => {
+  const ouvido = new OuvidoFalso([{ texto: 'um', inicio: 0, fim: 5 }]);
+  const palavras = await new AlinhadorWhisper(new ReservaFalsa(), ouvido).alinhar(som, 'um', Idioma.PORTUGUES);
+  assert.deepEqual(palavras.paraJson(), [{ texto: 'um', inicio: 0, fim: 1 }]);
+});
+
 // Integração com o modelo de verdade: só roda se ele já estiver no cache e a fixture já tiver voz.
 const modeloBaixado = existsSync(join(env.cacheDir ?? '', MODELO_DO_WHISPER, 'config.json'));
 const wavDaFixture = new URL('../../fixtures/projeto-minimo/voz/1.wav', import.meta.url);

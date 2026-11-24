@@ -44,7 +44,7 @@ function lacunas(tempos: readonly (Trecho | undefined)[]): Faixa[] {
   }, []);
 }
 
-// As palavras sem par ganham o tempo entre a vizinha anterior e a seguinte (ou o fim do que foi ouvido).
+// As palavras sem par ganham o tempo entre a vizinha anterior e a seguinte (ou o fim do áudio, se não há seguinte).
 function preencherLacunas(tempos: (Trecho | undefined)[], textos: readonly string[], fimOuvido: number): Trecho[] {
   lacunas(tempos).forEach((faixa) => {
     const inicio = tempos[faixa.inicio - 1]?.fim ?? 0;
@@ -64,16 +64,27 @@ function emOrdem(tempos: readonly Trecho[]): Trecho[] {
 
 const emparelhadas = (pares: readonly Par[]) => pares.reduce((soma, { roteiro }) => soma + roteiro.fim - roteiro.inicio, 0);
 
+// O que foi ouvido, sem a pontuação solta e sem passar do fim do áudio.
+function audiveisAte(ouvidas: readonly PalavraJson[], fimMaximo: Segundos | undefined): PalavraJson[] {
+  const limite = fimMaximo?.valor() ?? Infinity;
+  const audiveis = ouvidas.filter((ouvida) => normalizar(ouvida.texto) !== '');
+  return audiveis.map(({ texto, inicio, fim }) => ({ texto, inicio: Math.min(inicio, limite), fim: Math.min(fim, limite) }));
+}
+
+// Até onde vão as palavras sem par no fim: a duração do áudio, ou, sem ela, o fim do que foi ouvido.
+const ultimoInstante = (audiveis: readonly PalavraJson[], fimMaximo: Segundos | undefined) =>
+  fimMaximo?.valor() ?? Math.max(0, ...audiveis.map((ouvida) => ouvida.fim));
+
 /**
- * As palavras do roteiro com os tempos do que foi ouvido, em ordem crescente de tempo.
+ * As palavras do roteiro com os tempos do que foi ouvido, em ordem crescente de tempo e sem passar de `fimMaximo`
+ * (a duração do áudio); as palavras sem par depois da última ouvida vão até ele.
  * `null` quando menos de 60% das palavras do roteiro acharam par: aí o alinhamento não merece confiança.
  */
-export function reconciliar(roteiro: Palavras, ouvidas: readonly PalavraJson[]): Palavras | null {
+export function reconciliar(roteiro: Palavras, ouvidas: readonly PalavraJson[], fimMaximo?: Segundos): Palavras | null {
   const textos = roteiro.textos();
-  const audiveis = ouvidas.filter((ouvida) => normalizar(ouvida.texto) !== '');
+  const audiveis = audiveisAte(ouvidas, fimMaximo);
   const pares = alinharSequencias(textos.map(normalizar), audiveis.map((ouvida) => normalizar(ouvida.texto)));
   if (textos.length === 0 || emparelhadas(pares) < MINIMO_EMPARELHADO * textos.length) return null;
-  const fimOuvido = Math.max(0, ...audiveis.map((ouvida) => ouvida.fim));
-  const tempos = emOrdem(preencherLacunas(temposDosPares(pares, textos, audiveis), textos, fimOuvido));
+  const tempos = emOrdem(preencherLacunas(temposDosPares(pares, textos, audiveis), textos, ultimoInstante(audiveis, fimMaximo)));
   return roteiro.comTempos(tempos.map(({ inicio }) => Segundos.de(inicio)), tempos.map(({ fim }) => Segundos.de(fim)));
 }

@@ -26,9 +26,11 @@ export function repositorioDeProjeto(): RepositorioDeProjeto {
   return new RepositorioDeProjetoEmDisco({ catalogo: new CatalogoDeRigsProvisorio() });
 }
 
+const avisar = (mensagem: string) => console.log(`AVISO: ${mensagem}`);
+
 export function gerarVozes(pasta: string, projeto: Projeto): GerarVozes {
   const voz = PROVEDORES[projeto.voz().provedor](pasta, projeto);
-  const alinhador = new AlinhadorWhisper(new AlinhadorPorEnvelope(), new OuvidoWhisper());
+  const alinhador = new AlinhadorWhisper(new AlinhadorPorEnvelope(), new OuvidoWhisper(), avisar);
   return new GerarVozes({ voz, fonetizador: new FonetizadorEspeak(), armazem: new ArmazemDeVozesEmDisco(pasta), alinhador });
 }
 

@@ -3,6 +3,7 @@ import assert from 'node:assert/strict';
 import type { PalavraJson } from '../../../src/dominio/fala/PalavraJson.ts';
 import { Palavras } from '../../../src/dominio/fala/Palavras.ts';
 import { reconciliar } from '../../../src/dominio/fala/Reconciliacao.ts';
+import { Segundos } from '../../../src/dominio/valores/Tempo.ts';
 
 const w = (texto: string, inicio: number, fim: number): PalavraJson => ({ texto, inicio, fim });
 const textos = (palavras: Palavras) => palavras.paraJson().map((p) => p.texto);
@@ -92,4 +93,23 @@ test('palavra que o Whisper não ouviu não rouba o tempo da vizinha', () => {
     { texto: 'eu', inicio: 0, fim: 0.3 }, { texto: 'sou', inicio: 0.3, fim: 0.6 },
     { texto: 'a', inicio: 0.6, fim: 0.7 }, { texto: 'Ana', inicio: 0.7, fim: 1.1 },
   ]);
+});
+
+test('tempo ouvido além do fim do áudio é limitado à duração', () => {
+  const r = reconciliar(Palavras.doTexto('um dois'), [w('um', 0, 5), w('dois', 6, 7)], Segundos.de(1))!;
+  r.paraJson().forEach((p) => assert.ok(p.inicio <= 1 && p.fim <= 1, JSON.stringify(p)));
+  assertCrescente(r);
+});
+
+test('palavras sem par depois da última ouvida vão até o fim do áudio, sem ficar com duração zero', () => {
+  const r = reconciliar(Palavras.doTexto('um dois três quatro cinco'),
+    [w('um', 0, .2), w('dois', .2, .4), w('três', .4, .6)], Segundos.de(2))!;
+  for (const texto of ['quatro', 'cinco']) {
+    const p = tempoDe(r, texto);
+    assert.ok(p.fim > p.inicio, `"${texto}" com duração zero: ${JSON.stringify(p)}`);
+    assert.ok(p.fim <= 2);
+  }
+  assert.equal(tempoDe(r, 'quatro').inicio, 0.6);
+  assert.equal(tempoDe(r, 'cinco').fim, 2);
+  assertCrescente(r);
 });
