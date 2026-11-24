@@ -39,9 +39,11 @@ function dependencies({ report = clean, log = [], renderer = new FakeRenderer(lo
   };
 }
 
-test('produce stops at a check error and does not render', async () => {
-  const renderer = new FakeRenderer();
-  await assert.rejects(new ProduceVideo(dependencies({ renderer, report: withError })).run('x'), /fala 1: título não cabe/);
+test('produce stops at a check error: no voice is generated (paid credits) and nothing is rendered', async () => {
+  const log: string[] = [];
+  const renderer = new FakeRenderer(log);
+  await assert.rejects(new ProduceVideo(dependencies({ log, renderer, report: withError })).run('x'), /fala 1: título não cabe/);
+  assert.deepEqual(log, ['load', 'check']);
   assert.equal(renderer.calls, 0);
 });
 test('produce runs the steps in order: load, check, voices, build, render, captions', async () => {
