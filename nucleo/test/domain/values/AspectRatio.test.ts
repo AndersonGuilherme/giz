@@ -12,3 +12,10 @@ test('the aspect ratio comes back from the video size; another size is refused',
   assert.equal(AspectRatio.ofSize(1920, 1080), AspectRatio.HORIZONTAL);
   assert.throws(() => AspectRatio.ofSize(1000, 1000), /1000×1000 não suportado/);
 });
+test('an image size matches the aspect within 5%: 270×480 and 1000×1800 fit 9:16, 1920×1080 and 800×1200 do not', () => {
+  assert.equal(AspectRatio.VERTICAL.matches(270, 480), true);
+  assert.equal(AspectRatio.VERTICAL.matches(1000, 1800), true);
+  assert.equal(AspectRatio.VERTICAL.matches(1920, 1080), false);
+  assert.equal(AspectRatio.VERTICAL.matches(800, 1200), false);
+  assert.equal(AspectRatio.HORIZONTAL.matches(1280, 720), true);
+});

@@ -2,6 +2,9 @@ import { DomainError } from '../DomainError.ts';
 
 export type AspectRatioText = '9:16' | '16:9';
 
+// How far (as a fraction) an image width-to-height ratio may be from the video's before it is a different aspect.
+const TOLERANCE = 0.05;
+
 export class AspectRatio {
   static readonly VERTICAL = new AspectRatio(1080, 1920);
   static readonly HORIZONTAL = new AspectRatio(1920, 1080);
@@ -39,6 +42,12 @@ export class AspectRatio {
 
   vertical(): boolean {
     return this.#height > this.#width;
+  }
+
+  /** Whether a size (a scenario image) has this aspect, within 5%: otherwise covering the frame crops it. */
+  matches(width: number, height: number): boolean {
+    const ratio = width / height / (this.#width / this.#height);
+    return Math.abs(ratio - 1) <= TOLERANCE;
   }
 
   text(): AspectRatioText {

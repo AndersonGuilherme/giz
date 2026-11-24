@@ -3,6 +3,7 @@ import type { ProjectRepository } from '../../application/ports/ProjectRepositor
 import { Cast } from '../../domain/cast/Cast.ts';
 import type { Character } from '../../domain/cast/Character.ts';
 import type { Project } from '../../domain/project/Project.ts';
+import { AspectRatio } from '../../domain/values/AspectRatio.ts';
 import { characterSchema } from '../schema/characterSchema.ts';
 import { projectSchema, type ProjectJson } from '../schema/projectSchema.ts';
 import { scriptSchema, type ScriptJson } from '../schema/scriptSchema.ts';
@@ -54,7 +55,7 @@ export class DiskProjectRepository implements ProjectRepository {
     checkSpeakers(script, cast, collector);
     checkCharactersOnStage(loaded.script, cast, collector);
     collector.failIfAny();
-    const warnings = await imageWarnings(folder, loaded.script);
+    const warnings = await imageWarnings(folder, loaded.script, AspectRatio.of(loaded.project.aspect));
     return projectToDomain(loaded.project, { cast, script, warnings });
   }
 }

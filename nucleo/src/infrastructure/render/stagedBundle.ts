@@ -24,9 +24,9 @@ async function copyInto(folder: string, sources: RemotionSources, files: readonl
 }
 
 /**
- * Runs `use` with a temporary public folder: the package sounds plus the project files the video asks for (voices, a
- * cast JSON). Copying only those keeps the project folder (with `output/`) out of the bundle. The folder is removed
- * whatever happens: a missing file while copying, or a failure in `use`.
+ * Runs `use` with a temporary public folder: the package sounds plus the project files the video asks for (voices,
+ * scenario images, a cast JSON). Copying only those keeps the project folder (with `output/`) out of the bundle. The
+ * folder is removed whatever happens: a missing file while copying, or a failure in `use`.
  */
 export async function withPublicDir<T>(sources: RemotionSources, files: readonly StagedFile[], use: (publicDir: string) => Promise<T>): Promise<T> {
   const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'giz-public-'));

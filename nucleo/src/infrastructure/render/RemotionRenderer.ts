@@ -1,17 +1,12 @@
 import { mkdir } from 'node:fs/promises';
-import { dirname, join } from 'node:path';
+import { dirname } from 'node:path';
 import { renderMedia, selectComposition } from '@remotion/renderer';
 import type { Renderer } from '../../application/ports/Renderer.ts';
 import type { VideoProps } from '../../domain/timeline/VideoProps.ts';
-import { withBundle, type RemotionSources, type StagedFile } from './stagedBundle.ts';
+import { projectFiles } from './projectFiles.ts';
+import { withBundle, type RemotionSources } from './stagedBundle.ts';
 
 const COMPOSITION = 'Video';
-
-// The audio of each segment (`voice/<id>.wav`, relative to the project) is served at the same path.
-function voiceFiles(props: VideoProps, folder: string): StagedFile[] {
-  const audios = props.segments.flatMap((segment) => (segment.audio ? [segment.audio] : []));
-  return audios.map((audio) => ({ from: join(folder, audio), at: audio }));
-}
 
 /**
  * Renders the Video composition with `@remotion/renderer` called directly (no `npx`), as the Electron main process will:
@@ -28,7 +23,7 @@ export class RemotionRenderer implements Renderer {
 
   async render(props: VideoProps, output: string, onProgress: (fraction: number) => void): Promise<void> {
     await mkdir(dirname(output), { recursive: true });
-    await withBundle(this.#sources, voiceFiles(props, this.#folder), async (serveUrl) => {
+    await withBundle(this.#sources, projectFiles(props, this.#folder), async (serveUrl) => {
       const browserExecutable = this.#sources.browserExecutable ?? null;
       const composition = await selectComposition({ serveUrl, id: COMPOSITION, inputProps: props, browserExecutable });
       const reportProgress = ({ progress }: { progress: number }) => onProgress(progress);

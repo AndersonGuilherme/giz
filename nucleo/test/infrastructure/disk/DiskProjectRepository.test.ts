@@ -83,6 +83,13 @@ test('a missing scenario image is a warning, not a load failure', async () => {
   assert.match(p.warnings().join('\n'), /cenarios\/nao-existe\.png não encontrada.*fala 1/);
 });
 
+test('a scenario image outside the project folder is refused with the field and a readable message', async () => {
+  const outside = loadWithScene({ type: 'scenario', background: { image: '../../etc/passwd.png' }, characters: [] });
+  await assert.rejects(outside, /script\.json › lines\[0\]\.scene\.background\.image: "\.\.\/\.\.\/etc\/passwd\.png" sai da pasta do projeto/);
+  const absolute = loadWithScene({ type: 'scenario', background: { image: '/tmp/room.png' }, characters: [] });
+  await assert.rejects(absolute, /background\.image: caminho absoluto "\/tmp\/room\.png"/);
+});
+
 test('a missing required field gives the path', async () => {
   const error = await capture(loadWithScript({ lines: [{ id: '1', chapter: 1, speaker: 'ana' }] }));
   assert.match(error.message, /script\.json › lines\[0\]\.text: obrigatório/);
