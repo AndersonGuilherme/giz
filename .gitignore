@@ -17,4 +17,5 @@ producao-stats.tsv
 *.mp4
 giz.config.json
 amostras-de-voz/
+voice-samples/
 .superpowers/

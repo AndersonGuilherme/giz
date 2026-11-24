@@ -119,6 +119,31 @@ test('with the qwen voice, recordings are not looked at', async () => {
   assert.doesNotMatch(p.warnings().join('\n'), /recordings/);
 });
 
+test('with an external voice service, the cast voice is the service voice id (no Qwen check)', async () => {
+  const folder = await changedCopy('project.json', (json) => ({ ...json, voice: { provider: 'elevenlabs' } }));
+  await changeFile(folder, 'cast/ana.json', (json) => ({ ...json, voice: { id: 'EXAVITQu4vr4xnSDxMaL' } }));
+  const project = await repository().load(folder);
+  assert.equal(project.voice().provider, 'elevenlabs');
+});
+test('the pronunciation dictionary of the service: pronunciation.json for qwen, pronunciation.<service>.json for the others', async () => {
+  const folder = await changedCopy('project.json', (json) => json);
+  await writeFile(join(folder, 'pronunciation.json'), JSON.stringify({ Ana: 'Âna' }));
+  await writeFile(join(folder, 'pronunciation.fish.json'), JSON.stringify({ Ana: 'Anna' }));
+  assert.equal((await repository().load(folder)).lexicon().apply('Oi, Ana'), 'Oi, Âna');
+  await changeFile(folder, 'project.json', (json) => ({ ...json, voice: { provider: 'fish' } }));
+  assert.equal((await repository().load(folder)).lexicon().apply('Oi, Ana'), 'Oi, Anna');
+  await changeFile(folder, 'project.json', (json) => ({ ...json, voice: { provider: 'elevenlabs' } }));
+  assert.equal((await repository().load(folder)).lexicon().apply('Oi, Ana'), 'Oi, Ana');
+});
+test('recordings use no pronunciation dictionary; a broken dictionary is an error naming the file', async () => {
+  const folder = await changedCopy('project.json', (json) => ({ ...json, voice: { provider: 'recording' } }));
+  await writeFile(join(folder, 'pronunciation.json'), JSON.stringify({ Ana: 'Âna' }));
+  assert.equal((await repository().load(folder)).lexicon().apply('Ana'), 'Ana');
+  await changeFile(folder, 'project.json', (json) => ({ ...json, voice: { provider: 'qwen' } }));
+  await writeFile(join(folder, 'pronunciation.json'), JSON.stringify({ Ana: 3 }));
+  await assert.rejects(repository().load(folder), /pronunciation\.json › Ana/);
+});
+
 test('a missing required field gives the path', async () => {
   const error = await capture(loadWithScript({ lines: [{ id: '1', chapter: 1, speaker: 'ana' }] }));
   assert.match(error.message, /script\.json › lines\[0\]\.text: obrigatório/);

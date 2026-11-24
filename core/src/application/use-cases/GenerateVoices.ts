@@ -25,7 +25,8 @@ function lineRequest(project: Project, line: Line): VoiceRequest {
   const cast = project.cast();
   const character = cast.character(line.speaker());
   const { id, style } = character.voice();
-  return { lineId: line.id(), text: line.pronunciation(), voice: id, style, language: project.language() };
+  const lexicon = project.lexicon();
+  return { lineId: line.id(), text: lexicon.apply(line.pronunciation()), voice: id, style, language: project.language() };
 }
 
 // Changing any of these fields re-records the line; the rest (pose, scene...) does not touch the voice. The model and

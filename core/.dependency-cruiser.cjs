@@ -1,9 +1,9 @@
-/** Layer rules of core. The only exception is src/presentation/cli/composition.ts. */
+/** Layer rules of core. The only exception is the composition point: src/presentation/cli/composition.ts and its parts in composition/. */
 const DOMAIN = '^src/domain/';
 const APPLICATION = '^src/application/';
 const INFRASTRUCTURE = '^src/infrastructure/';
 const PRESENTATION = '^src/presentation/';
-const COMPOSITION = '^src/presentation/cli/composition\\.ts$';
+const COMPOSITION = '^src/presentation/cli/composition(\\.ts|/[^/]+\\.ts)$';
 
 module.exports = {
   forbidden: [

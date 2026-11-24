@@ -11,15 +11,18 @@ import { Lines } from '../../src/domain/script/Lines.ts';
 import { Script } from '../../src/domain/script/Script.ts';
 import { CharacterId } from '../../src/domain/values/CharacterId.ts';
 import { Language } from '../../src/domain/values/Language.ts';
+import { Lexicon } from '../../src/domain/speech/Lexicon.ts';
 import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
 import { FakeAligner } from '../doubles/FakeAligner.ts';
 import { InMemoryVoiceStore } from '../doubles/InMemoryVoiceStore.ts';
 import { FakePhonemizer } from '../doubles/FakePhonemizer.ts';
 import { FakeVoice } from '../doubles/FakeVoice.ts';
 
-type Options = { texts?: string[]; style?: string; provider?: 'qwen' | 'recording'; model?: '0.6b' | '1.7b'; pronunciation?: string };
+type Options = {
+  texts?: string[]; style?: string; provider?: 'qwen' | 'recording' | 'elevenlabs'; model?: '0.6b' | '1.7b'; pronunciation?: string; lexicon?: Lexicon;
+};
 
-function project({ texts = ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.'], style, provider = 'qwen', model, pronunciation }: Options = {}): Project {
+function project({ texts = ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.'], style, provider = 'qwen', model, pronunciation, lexicon }: Options = {}): Project {
   const ana = CharacterId.of('ana');
   const character = Character.of(ana, {
     name: 'Ana', rig: 'test', parameters: {}, voice: { id: 'vivian', style }, defaultExpression: 'neutral',
@@ -27,7 +30,7 @@ function project({ texts = ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.'],
   const lines = texts.map((text, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, pronunciation: i === 0 ? pronunciation : undefined }));
   return Project.of(
     { title: 'T', format: 'story', language: Language.PORTUGUESE, aspect: AspectRatio.VERTICAL, captionStyle: 'words', voice: { provider, model } },
-    { cast: Cast.of([character]), script: Script.of(['Abertura'], Lines.of(lines)), warnings: [] },
+    { cast: Cast.of([character]), script: Script.of(['Abertura'], Lines.of(lines)), warnings: [], lexicon },
   );
 }
 
@@ -149,4 +152,21 @@ test('a line whose spoken text did not change keeps its hash: bracket-free lines
   assert.equal((await store.read('1')).hash, before);
   await useCase.run(project({ texts: ['Oi, eu sou a Ana.'] }));
   assert.equal(voice.calls, 1, 'the same spoken text is skipped');
+});
+
+test('the lexicon of the voice service changes what the voice says, not the caption words', async () => {
+  const { voice, aligner, useCase } = build();
+  await useCase.run(project({ texts: ['Fiz o deploy.'], lexicon: Lexicon.of({ deploy: 'diplói' }) }));
+  assert.equal(voice.requests[0]?.text, 'Fiz o diplói.');
+  assert.deepEqual(aligner.texts, ['Fiz o deploy.']);
+});
+
+test('changing the lexicon regenerates only the lines it affects; without a lexicon the hash is unchanged', async () => {
+  const { voice, useCase } = build();
+  const texts = ['Fiz o deploy.', 'Hoje vamos aprender juntos.'];
+  await useCase.run(project({ texts }));
+  await useCase.run(project({ texts, lexicon: Lexicon.EMPTY }));
+  assert.equal(voice.calls, 2);
+  const report = await useCase.run(project({ texts, lexicon: Lexicon.of({ deploy: 'diplói' }) }));
+  assert.deepEqual(report, { generated: ['1'], skipped: ['2'] });
 });

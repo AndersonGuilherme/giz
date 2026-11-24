@@ -7,7 +7,7 @@ import { fileURLToPath } from 'node:url';
 import { DiskProjectRepository } from '../../../src/infrastructure/disk/DiskProjectRepository.ts';
 import { RigCatalogFromRegistry } from '../../../src/presentation/rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../../../src/presentation/rigs/rigRegistry.ts';
-import { isQwenVoice } from '../../../src/infrastructure/voice/qwenVoices.ts';
+import { isQwenVoice } from '../../../src/infrastructure/voice/qwen/qwenModels.ts';
 
 const PRESETS = fileURLToPath(new URL('../../../casts/presets', import.meta.url));
 const ERAS = ['past', 'present', 'future'];

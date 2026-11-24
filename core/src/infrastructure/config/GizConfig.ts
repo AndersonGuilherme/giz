@@ -1,0 +1,65 @@
+import { join } from 'node:path';
+
+// The INDIVIDUAL configuration of each giz install (GPU, voices, folders...), in giz.config.json at the repository
+// root. `giz setup` creates it and it stays out of git. The keys are the motor's, so existing installs keep working.
+export type GizConfig = {
+  /** The channel or brand name shown in the corner of the videos. */
+  brand: string;
+  /** Voice model: '0.6b' (5.9 GB, lighter) or '1.7b' (13.4 GB, better, follows style instructions). */
+  model: '0.6b' | '1.7b';
+  /** Where the voice runs: 'cuda' (NVIDIA GPU) or 'cpu'. */
+  device: 'cpu' | 'cuda';
+  /** CPU cores for the voice (0 = automatic). */
+  threads: number;
+  /** Folder of the downloaded AI models (voice, CUDA libraries). */
+  modelsDir: string;
+  /** Narration language for the setup test and the QA labs (Qwen3-TTS ids: portuguese, english, spanish...). */
+  language: string;
+  /** Qwen3-TTS voice of the motor presenters (lessons converted from the motor). */
+  voices: { lia: string; teo: string };
+  /** Style instruction of each presenter (1.7B model only). */
+  styles: { lia: string; teo: string };
+  /** Pronunciation check with Whisper when producing a course. */
+  qa: boolean;
+  /** Video render (Remotion): frames in parallel (null = Remotion default). */
+  render: { concurrency: number | null };
+  /** Who uses it: decides whether the free Remotion license applies. */
+  remotionLicense: 'pessoa-fisica' | 'empresa-ate-3' | 'empresa-com-licenca' | 'nao-informado';
+};
+
+export type Environment = Readonly<Record<string, string | undefined>>;
+
+export function defaultConfig(home: string): GizConfig {
+  return {
+    brand: 'giz',
+    model: '0.6b',
+    device: 'cpu',
+    threads: 0,
+    modelsDir: join(home, '.cache', 'giz'),
+    language: 'portuguese',
+    voices: { lia: 'vivian', teo: 'dylan' },
+    styles: { lia: '', teo: '' },
+    qa: false,
+    render: { concurrency: null },
+    remotionLicense: 'nao-informado',
+  };
+}
+
+// Environment variables win (handy for one-off tests): GIZ_MODELS_DIR and GIZ_DEVICE=cpu|cuda.
+function withEnvironment(config: GizConfig, env: Environment): GizConfig {
+  const device = env.GIZ_DEVICE === 'cpu' || env.GIZ_DEVICE === 'cuda' ? env.GIZ_DEVICE : config.device;
+  return { ...config, device, modelsDir: env.GIZ_MODELS_DIR ?? config.modelsDir };
+}
+
+/** The defaults, then the file keys (nested objects merged key by key), then the environment. */
+export function mergedConfig(file: Partial<GizConfig>, sources: Readonly<{ env: Environment; home: string }>): GizConfig {
+  const defaults = defaultConfig(sources.home);
+  const merged = {
+    ...defaults,
+    ...file,
+    voices: { ...defaults.voices, ...file.voices },
+    styles: { ...defaults.styles, ...file.styles },
+    render: { ...defaults.render, ...file.render },
+  };
+  return withEnvironment(merged, sources.env);
+}

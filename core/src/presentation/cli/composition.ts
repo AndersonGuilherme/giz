@@ -1,11 +1,10 @@
-// Single composition point: only here are the adapters created with `new`.
+// Single composition point: only here (and in composition/, its parts) are the adapters created with `new`.
 import { fileURLToPath } from 'node:url';
 import { BuildTimeline } from '../../application/use-cases/BuildTimeline.ts';
 import { ProduceVideo } from '../../application/use-cases/ProduceVideo.ts';
 import { RenderVideo } from '../../application/use-cases/RenderVideo.ts';
 import { GenerateVoices } from '../../application/use-cases/GenerateVoices.ts';
 import { CheckProject } from '../../application/use-cases/CheckProject.ts';
-import type { VoiceProvider } from '../../application/ports/VoiceProvider.ts';
 import type { ProjectRepository } from '../../application/ports/ProjectRepository.ts';
 import { CAPTION_LAYOUTS } from '../../domain/caption/captionLayouts.ts';
 import { createLayoutRegistry } from '../../domain/layout/defaultLayoutRegistry.ts';
@@ -20,24 +19,9 @@ import { RemotionRenderer } from '../../infrastructure/render/RemotionRenderer.t
 import { RemotionSheet } from '../../infrastructure/render/RemotionSheet.ts';
 import { headlessShellIn } from '../../infrastructure/render/browserLocation.ts';
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
-import { RecordingVoice } from '../../infrastructure/voice/RecordingVoice.ts';
-import { LazyVoice } from '../../infrastructure/voice/LazyVoice.ts';
 import { RigCatalogFromRegistry } from '../rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../rigs/rigRegistry.ts';
-
-type Provider = ReturnType<Project['voice']>['provider'];
-
-// QwenVoice imports motor/scripts/qwen3-tts.ts (onnxruntime from motor/node_modules): it is imported only when a line
-// is generated, so check, build, render and sheet run without the motor installed.
-async function qwenVoice(project: Project): Promise<VoiceProvider> {
-  const { QwenVoice } = await import('../../infrastructure/voice/QwenVoice.ts');
-  return new QwenVoice(project.voice().model);
-}
-
-const PROVIDERS: Readonly<Record<Provider, (folder: string, project: Project) => VoiceProvider>> = {
-  qwen: (_folder, project) => new LazyVoice(() => qwenVoice(project)),
-  recording: (folder) => new RecordingVoice(folder),
-};
+import { voiceOf } from './composition/voices.ts';
 
 export function projectRepository(): ProjectRepository {
   return new DiskProjectRepository({ catalog: new RigCatalogFromRegistry(rigRegistry) });
@@ -46,7 +30,7 @@ export function projectRepository(): ProjectRepository {
 const warn = (message: string) => console.log(`AVISO: ${message}`);
 
 export function generateVoices(folder: string, project: Project): GenerateVoices {
-  const voice = PROVIDERS[project.voice().provider](folder, project);
+  const voice = voiceOf(folder, project);
   const aligner = new WhisperAligner(new EnvelopeAligner(), new WhisperListener(), warn);
   return new GenerateVoices({ voice, phonemizer: new EspeakPhonemizer(), store: new DiskVoiceStore(folder), aligner });
 }

@@ -5,7 +5,7 @@ import type { Cast } from '../../domain/cast/Cast.ts';
 import type { Line } from '../../domain/script/Line.ts';
 import type { Script } from '../../domain/script/Script.ts';
 import type { ProblemCollector } from '../schema/errorMessages.ts';
-import { isQwenVoice, QWEN_VOICES } from '../voice/qwenVoices.ts';
+import { isQwenVoice, QWEN_VOICES } from '../voice/qwen/qwenModels.ts';
 import { fromWav } from '../voice/wav.ts';
 
 /** With the qwen provider every cast voice must be a Qwen voice: `produce` would fail on the first line otherwise. */

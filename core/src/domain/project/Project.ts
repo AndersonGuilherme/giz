@@ -2,6 +2,7 @@ import type { Cast } from '../cast/Cast.ts';
 import type { Script } from '../script/Script.ts';
 import type { Language } from '../values/Language.ts';
 import type { AspectRatio } from '../values/AspectRatio.ts';
+import { Lexicon } from '../speech/Lexicon.ts';
 
 export const FORMATS = ['story', 'lesson'] as const;
 export type Format = (typeof FORMATS)[number];
@@ -17,10 +18,12 @@ export function captionStyleOf(format: Format, declared?: CaptionStyle): Caption
   return declared ?? DEFAULT_CAPTION_STYLE[format];
 }
 
-export const VOICE_PROVIDERS = ['qwen', 'recording'] as const;
+// qwen: the local voice; recording: own recordings; elevenlabs and fish: the paid voice services.
+export const VOICE_PROVIDERS = ['qwen', 'recording', 'elevenlabs', 'fish'] as const;
+export type VoiceProviderName = (typeof VOICE_PROVIDERS)[number];
 export const VOICE_MODELS = ['0.6b', '1.7b'] as const;
 export type ProjectVoice = Readonly<{
-  provider: (typeof VOICE_PROVIDERS)[number];
+  provider: VoiceProviderName;
   model?: (typeof VOICE_MODELS)[number];
 }>;
 
@@ -35,8 +38,11 @@ export type ProjectProfile = Readonly<{
   voice: ProjectVoice;
 }>;
 
-/** `warnings` are problems that do not prevent loading (for example, a missing scenario image). */
-export type ProjectContent = Readonly<{ cast: Cast; script: Script; warnings: readonly string[] }>;
+/**
+ * `warnings` are problems that do not prevent loading (for example, a missing scenario image); `lexicon` is the
+ * pronunciation dictionary of the project voice service (none: the voice reads the text as it is).
+ */
+export type ProjectContent = Readonly<{ cast: Cast; script: Script; warnings: readonly string[]; lexicon?: Lexicon }>;
 
 export class Project {
   readonly #profile: ProjectProfile;
@@ -90,5 +96,9 @@ export class Project {
 
   warnings(): readonly string[] {
     return this.#content.warnings;
+  }
+
+  lexicon(): Lexicon {
+    return this.#content.lexicon ?? Lexicon.EMPTY;
   }
 }
