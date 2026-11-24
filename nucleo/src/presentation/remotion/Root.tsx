@@ -2,6 +2,8 @@ import type { FC } from 'react';
 import { Composition, staticFile, type CalculateMetadataFunction } from 'remotion';
 import { CharacterSheet, type CharacterSheetProps } from './CharacterSheet.tsx';
 import { PREVIEW_DEFAULTS } from './previewScene.ts';
+import { catalogMetadata, FRAMES_PER_SCENE, SceneCatalog } from './SceneCatalog.tsx';
+import { CATALOG_SAMPLES } from './catalogSamples.ts';
 import { previewMetadata, ScenePreview } from './ScenePreview.tsx';
 
 // `character` is a cast JSON path relative to the public folder (`--public-dir` can point at a project).
@@ -38,9 +40,24 @@ const PreviewComposition: FC = () => (
   />
 );
 
+// Every lesson scene with sample data (`--props='{"aspect":"9:16"}'` for the vertical version).
+const CatalogComposition: FC = () => (
+  <Composition
+    id="SceneCatalog"
+    component={SceneCatalog}
+    width={1920}
+    height={1080}
+    fps={30}
+    durationInFrames={CATALOG_SAMPLES.length * FRAMES_PER_SCENE}
+    defaultProps={{ aspect: '16:9', language: 'pt-BR' }}
+    calculateMetadata={catalogMetadata}
+  />
+);
+
 export const Root: FC = () => (
   <>
     <SheetComposition />
     <PreviewComposition />
+    <CatalogComposition />
   </>
 );

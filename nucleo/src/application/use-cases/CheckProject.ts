@@ -56,7 +56,7 @@ export class CheckProject {
   }
 
   // Only the line that declares the scene checks it: lines that inherit the scene do not repeat the same errors.
-  // Provisional: scenes without a registered layout yet (Task 13) are skipped, without an error.
+  // A scene type without a registered layout has no boxes to check (every known type has one since Task 13).
   #sceneBoxes(project: Project, line: Line): Boxes {
     const scene = line.scene();
     if (!scene) return Boxes.empty();

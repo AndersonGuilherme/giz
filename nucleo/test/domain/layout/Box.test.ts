@@ -34,3 +34,9 @@ test('plus joins two lists of boxes, so overlaps across them are seen', () => {
   const joined = Boxes.of([box('hud', [0, 0])]).plus(Boxes.of([box('destaque', [50, 50])]));
   assert.deepEqual(joined.overlappingPairs().map(([a, b]) => [a.label, b.label]), [['hud', 'destaque']]);
 });
+
+test('a box of a text fitted elsewhere keeps only whether it fitted', () => {
+  const rectangle = { x: 0, y: 0, width: 10, height: 10 };
+  assert.equal(Box.fitted('eixo', rectangle, { fits: true }).textFits(), true);
+  assert.equal(Box.fitted('eixo', rectangle, { fits: false }).textFits(), false);
+});

@@ -4,7 +4,7 @@ import type { Font } from './Font.ts';
 /** Rectangle in video pixels (origin at the top left corner). */
 export type Rectangle = Readonly<{ x: number; y: number; width: number; height: number }>;
 export type BoxText = Readonly<{ text: string; font: Font }>;
-type Content = Readonly<{ label: string; text?: BoxText }>;
+type Content = Readonly<{ label: string; text?: BoxText; fits?: boolean }>;
 
 /** Region an element takes on screen; the label shows up in the `check` messages. */
 export class Box {
@@ -22,6 +22,14 @@ export class Box {
 
   static withText(label: string, rectangle: Rectangle, text: BoxText): Box {
     return new Box({ ...rectangle }, { label, text });
+  }
+
+  /**
+   * A text already fitted by its layout in a shape the box does not describe (turned 90°, inside padding): the box
+   * keeps only whether it fitted.
+   */
+  static fitted(label: string, rectangle: Rectangle, fitted: Readonly<{ fits: boolean }>): Box {
+    return new Box({ ...rectangle }, { label, fits: fitted.fits });
   }
 
   get x(): number {
@@ -58,6 +66,7 @@ export class Box {
 
   /** Without text, there is nothing to fit. */
   textFits(): boolean {
+    if (this.#content.fits !== undefined) return this.#content.fits;
     const content = this.#content.text;
     if (!content) return true;
     const fit = TextFit.measure(content.text, content.font, this.width);

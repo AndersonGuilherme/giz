@@ -1,11 +1,12 @@
-import type { ScenarioScene } from '../../domain/script/Scene.ts';
+import type { Scene } from '../../domain/script/Scene.ts';
 import type { AspectRatioText } from '../../domain/values/AspectRatio.ts';
 import type { CastMember } from '../scenes/SceneRegistry.ts';
 import type { PreviewState } from './previewState.ts';
 
 export type ScenePreviewProps = Readonly<{
-  scene: ScenarioScene;
+  scene: Scene;
   aspect: AspectRatioText;
+  language?: 'pt-BR' | 'en';
   frames: number;
   cast: readonly CastMember[];
   states: Readonly<Record<string, PreviewState>>;

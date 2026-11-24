@@ -4,6 +4,7 @@ import type { SceneLayout, SceneOfType, SceneType } from '../../domain/layout/La
 import type { Scene } from '../../domain/script/Scene.ts';
 import type { CharacterJson } from '../../domain/timeline/VideoProps.ts';
 import type { AspectRatio } from '../../domain/values/AspectRatio.ts';
+import type { Language } from '../../domain/values/Language.ts';
 
 /** The cast as the video receives it: who uses which rig with which parameters. */
 export type CastMember = Pick<CharacterJson, 'id' | 'rig' | 'parameters'>;
@@ -12,7 +13,9 @@ export type CastMember = Pick<CharacterJson, 'id' | 'rig' | 'parameters'>;
 export type SceneProps<S extends Scene = Scene> = Readonly<{
   scene: S;
   aspect: AspectRatio;
+  language: Language; // the fixed labels drawn in the scene follow it
   progress: number; // 0 at the start of the scene, 1 at its end
+  changedAt?: number; // frame (from the start of the scene) of the last beat that changed its fields; 0 when none did
   cast: readonly CastMember[];
   stateOf: (characterId: string) => CharacterState;
 }>;

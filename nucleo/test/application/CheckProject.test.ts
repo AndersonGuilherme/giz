@@ -58,7 +58,7 @@ test('a caption that does not fit is a line error', () => {
   const r = check(project([{ text: 'palavra '.repeat(80) }], '9:16'));
   assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'legenda não cabe na caixa nem com a letra a 60%']]);
 });
-test('an inherited scene does not repeat the error and a scene without layout is skipped', () => {
+test('an inherited scene does not repeat the error', () => {
   const r = check(project([{ scene: title('A'.repeat(80)) }, {}, { scene: { type: 'quote', text: 'x' } }], '9:16'));
   assert.deepEqual(r.errors.map((e) => e.line), ['1']);
 });
@@ -74,4 +74,18 @@ test('overlap and leaving the safe area are errors with the labels', () => {
 test('project warnings (missing image) come in as warnings', () => {
   const r = check(project([{}], '9:16', ['fundo.png não encontrada (fala 1)']));
   assert.deepEqual(r, { errors: [], warnings: [{ line: '', message: 'fundo.png não encontrada (fala 1)' }] });
+});
+test('20 lines of code in 9:16 go through the real code layout: they shrink and fit; 40 lines are a line error', () => {
+  const code = (count: number): Scene => ({
+    type: 'code',
+    title: 'passos.ts',
+    lines: Array.from({ length: count }, (_, i) => `  const valor${i} = calcular(entrada, ${i}); // passo ${i}`),
+  });
+  assert.deepEqual(check(project([{ scene: code(20) }], '9:16')).errors, []);
+  const r = check(project([{ scene: code(40) }], '9:16'));
+  assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'código não cabe na caixa nem com a letra a 60%']]);
+});
+test('every lesson scene type has a registered layout: none is skipped any more', () => {
+  const r = check(project([{ scene: { type: 'quote', text: 'palavra '.repeat(120) } }], '9:16'));
+  assert.deepEqual(r.errors.map((e) => e.message), ['citação não cabe na caixa nem com a letra a 60%']);
 });

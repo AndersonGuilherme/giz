@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { useCurrentFrame, type CalculateMetadataFunction } from 'remotion';
 import { AspectRatio } from '../../domain/values/AspectRatio.ts';
+import { Language } from '../../domain/values/Language.ts';
 import { Frame } from '../../domain/values/Time.ts';
 import { sceneRegistry } from '../scenes/scenes.ts';
 import type { ScenePreviewProps } from './previewScene.ts';
@@ -13,10 +14,10 @@ export const previewMetadata: CalculateMetadataFunction<ScenePreviewProps> = ({ 
 };
 
 /** One scene JSON alone, for N frames, with fixed character states (no audio): for checking a scene by eye. */
-export const ScenePreview: FC<ScenePreviewProps> = ({ scene, aspect, frames, cast, states }) => {
+export const ScenePreview: FC<ScenePreviewProps> = ({ scene, aspect, language = 'pt-BR', frames, cast, states }) => {
   const frame = useCurrentFrame();
   const { Component } = sceneRegistry.get(scene.type);
   const stateOf = (characterId: string) => previewState(characterId, states[characterId] ?? {}, Frame.of(frame));
   const progress = frames > 1 ? frame / (frames - 1) : 0;
-  return <Component scene={scene} aspect={AspectRatio.of(aspect)} progress={progress} cast={cast} stateOf={stateOf} />;
+  return <Component scene={scene} aspect={AspectRatio.of(aspect)} language={Language.of(language)} progress={progress} cast={cast} stateOf={stateOf} />;
 };
