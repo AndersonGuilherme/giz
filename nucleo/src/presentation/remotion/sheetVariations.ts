@@ -3,23 +3,23 @@ import type { ValidatedParameters } from '../rigs/RigModel.ts';
 
 type Variation = Readonly<{ label: string; parameters: ValidatedParameters; pose: Pose; expression: Expression; side: -1 | 1 }>;
 
-/** Giz variations: outfits, hair and headwear, glasses, eye size. */
+/** Giz variations: skin tones, head shapes and eye colors, with other outfits and hair. */
 const GIZ: readonly Variation[] = [
   {
-    label: 'túnica + lenço', pose: 'hands-on-mouth', expression: 'scared', side: 1,
-    parameters: { outfit: 'tunic', outfitColor: '#b4472e', hair: 'scarf', accessoryColor: '#efe6d2' },
+    label: 'oval · clara', pose: 'explain', expression: 'happy', side: 1,
+    parameters: { skin: 'light', headShape: 'oval', eyeColor: '#3f7fc4', hairColor: '#b4532a', freckles: true, outfit: 'hoodie', outfitColor: '#e8735a', accessoryColor: '#f6e7c8' },
   },
   {
-    label: 'vestido + coque', pose: 'wave', expression: 'happy', side: -1,
-    parameters: { outfit: 'dress', outfitColor: '#6b8f3e', hair: 'bun', accessoryColor: '#d9443a', eyeScale: 1.2 },
+    label: 'quadrada · marrom', pose: 'wave', expression: 'excited', side: -1,
+    parameters: { skin: 'brown', headShape: 'soft-square', eyeColor: '#4c9a5a', hairColor: '#1f1410', hair: 'bun', outfit: 'dress', outfitColor: '#6c4f9c', accessoryColor: '#f2b134' },
   },
   {
-    label: 'moletom + óculos', pose: 'explain', expression: 'excited', side: 1,
-    parameters: { outfit: 'hoodie', outfitColor: '#7b4fc9', hair: 'short', glasses: true, accessoryColor: '#f2c14e' },
+    label: 'feijão · escura', pose: 'think', expression: 'skeptical', side: 1,
+    parameters: { skin: 'deep', headShape: 'bean', eyeColor: '#d09a2e', hairColor: '#120c09', glasses: true, outfitColor: '#3d8c8a', accessoryColor: '#f3efe2', cheeks: false },
   },
   {
-    label: 'camiseta + chapéu', pose: 'think', expression: 'skeptical', side: 1,
-    parameters: { outfit: 'tshirt', outfitColor: '#e0a33a', hair: 'hat', accessoryColor: '#8a6a45', shine: false },
+    label: 'redonda · bege', pose: 'shrug', expression: 'surprised', side: 1,
+    parameters: { skin: 'fair', headShape: 'round', eyeColor: '#7f8fa3', hair: 'hat', outfit: 'tshirt', outfitColor: '#c9a227', accessoryColor: '#5a6b8c' },
   },
 ];
 

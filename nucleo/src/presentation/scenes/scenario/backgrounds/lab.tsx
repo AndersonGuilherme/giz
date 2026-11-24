@@ -1,33 +1,35 @@
 import type { FC } from 'react';
-import { Fill, Glow, Placed } from './parts.tsx';
+import { ChalkBox, ChalkDisc, Fill, Glow, Placed } from './parts.tsx';
 import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
 
-// A science lab: teal tiled wall, shelves of glowing flasks, a molecule poster, a bench with a microscope.
+// A science lab, giz style: lilac tiled wall, shelves of glowing flasks, a molecule poster, a bench with a microscope;
+// chalk lines on the furniture and the glass.
 
 const palette = {
-  wall: '#3f6e6a',
-  wallShade: '#2a4a48',
-  tile: '#4c7f7a',
-  shelf: '#5a4634',
-  glass: '#cfe8e6',
-  liquid1: '#7ee08a',
-  liquid2: '#5fc3ff',
-  liquid3: '#ff8bd0',
-  poster: '#e9e2cc',
-  ink: '#2f3b3a',
-  floor: '#596b6a',
-  floorFar: '#6f8483',
-  bench: '#2f3a3c',
-  benchTop: '#d9d4c3',
-  metal: '#8c9aa0',
-  lamp: '#e8fff6',
-  foreground: '#14201f',
+  wall: '#5d5378',
+  wallShade: '#463e5c',
+  tile: '#6b6189',
+  shelf: '#3a3348',
+  glass: '#e3eef0',
+  liquid1: '#8fe3b0',
+  liquid2: '#f2b134',
+  liquid3: '#ff8c73',
+  poster: '#f3efe2',
+  ink: '#2a2438',
+  floor: '#7c7488',
+  floorFar: '#8e869a',
+  bench: '#2f2a3a',
+  benchTop: '#e9e2d0',
+  metal: '#a9b4bd',
+  lamp: '#f2fff8',
+  foreground: '#1b1724',
 };
 
 const Flask: FC<Readonly<{ x: number; liquid: string; colors: Palette; tall?: number }>> = ({ x, liquid, colors, tall = 70 }) => (
   <g transform={`translate(${x} 0)`}>
     <circle cx={0} cy={-26} r={26} fill={colors.glass} opacity={0.5} />
     <circle cx={0} cy={-22} r={20} fill={liquid} />
+    <ChalkDisc x={0} y={-26} radius={26} chalk={{ seed: `flask${x}${tall}`, width: 3.5 }} />
     <rect x={-7} y={-tall} width={14} height={tall - 40} fill={colors.glass} opacity={0.6} />
     <circle cx={0} cy={-26} r={36} fill={liquid} opacity={0.18} />
   </g>
@@ -39,14 +41,14 @@ const Shelf: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
     <Flask x={-20} liquid={colors.liquid2} colors={colors} tall={90} />
     <Flask x={50} liquid={colors.liquid3} colors={colors} />
     <Flask x={115} liquid={colors.liquid1} colors={colors} tall={80} />
-    <rect x={-140} y={0} width={290} height={14} rx={3} fill={colors.shelf} />
+    <ChalkBox x={-140} y={0} width={290} height={14} corner={3} fill={colors.shelf} chalk={{ seed: 'lab-shelf', width: 4 }} />
   </g>
 );
 
 const Poster: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
-    <rect x={-90} y={-120} width={180} height={240} rx={6} fill={colors.poster} />
-    <path d="M -30 -40 L 30 -10 L 0 50 M 30 -10 L 50 -70" stroke={colors.ink} strokeWidth={6} />
+    <ChalkBox x={-90} y={-120} width={180} height={240} corner={6} fill={colors.poster} chalk={{ seed: 'lab-poster', width: 5 }} />
+    <path d="M -30 -40 L 30 -10 L 0 50 M 30 -10 L 50 -70" fill="none" stroke={colors.ink} strokeWidth={6} />
     {[[-30, -40], [30, -10], [0, 50], [50, -70]].map(([x, y]) => <circle key={`${x}${y}`} cx={x} cy={y} r={14} fill={colors.liquid2} stroke={colors.ink} strokeWidth={4} />)}
   </g>
 );
@@ -81,8 +83,8 @@ const Middle: FC<LayerProps> = (layer) => {
   return (
     <>
       <Fill id="lab-floor" layer={layer} stops={[[0, colors.floorFar], [1, colors.floor]]} from={base} />
-      <rect x={width * 0.62} y={base - 160 * unit} width={width * 0.5} height={160 * unit} fill={colors.bench} />
-      <rect x={width * 0.6} y={base - 176 * unit} width={width * 0.52} height={20 * unit} rx={6 * unit} fill={colors.benchTop} />
+      <ChalkBox x={width * 0.62} y={base - 160 * unit} width={width * 0.5} height={160 * unit} fill={colors.bench} chalk={{ seed: 'lab-bench', width: 4 * unit }} />
+      <ChalkBox x={width * 0.6} y={base - 176 * unit} width={width * 0.52} height={20 * unit} corner={6 * unit} fill={colors.benchTop} chalk={{ seed: 'lab-top', width: 4 * unit }} />
       <Placed x={width * 0.72} y={base - 176 * unit} scale={unit}><Microscope colors={colors} /></Placed>
       <Placed x={width * 0.86} y={base - 176 * unit} scale={unit}><Flask x={0} liquid={colors.liquid3} colors={colors} tall={100} /></Placed>
     </>

@@ -36,13 +36,13 @@ test('cues are numbered across segments; the narrator (no body) has no name befo
 });
 
 test('a long line becomes sentence blocks, each from its first word to the next block (story too)', () => {
-  const texts = 'Você nasceu numa aldeia pequena, perto de um rio largo e frio. A peste chegou no verão de mil trezentos e quarenta e oito.'.split(' ');
+  const texts = 'Você acordou numa casa pequena, perto de uma praça larga e calma. O wi-fi caiu no domingo de manhã e ninguém sabia o motivo.'.split(' ');
   const words = texts.map((text, index) => ({ text, start: index * 10, end: index * 10 + 8 }));
   const srt = srtOf(props([segment('narrator', 0, words)], 'story'));
   const cues = srt.trim().split('\n\n');
   assert.equal(cues.length, 2);
-  assert.equal(cues[0], '1\n00:00:00,500 --> 00:00:04,500\nVocê nasceu numa aldeia pequena, perto de um rio largo e frio.');
-  assert.match(cues[1], /^2\n00:00:04,500 --> 00:00:08,433\nA peste chegou/);
+  assert.equal(cues[0], '1\n00:00:00,500 --> 00:00:04,500\nVocê acordou numa casa pequena, perto de uma praça larga e calma.');
+  assert.match(cues[1], /^2\n00:00:04,500 --> 00:00:08,433\nO wi-fi caiu/);
 });
 
 test('a segment without words (old props) adds no cue', () => {

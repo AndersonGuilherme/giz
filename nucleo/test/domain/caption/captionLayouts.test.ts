@@ -24,14 +24,14 @@ test('every caption style has a layout', () => {
 
 test('every style, in every format and aspect, stays inside the safe area', () => {
   for (const { aspect, format, name } of PLACES) {
-    const boxes = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('Você nasceu', aspect, format));
+    const boxes = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('Você acordou', aspect, format));
     assert.ok(boxes.every((box) => box.label === 'legenda' && box.isInside(SafeArea.for(aspect))), name);
   }
 });
 
 test('in a story the word caption is centered in the lower third', () => {
   for (const aspect of ASPECTS) {
-    const box = WORD_CAPTIONS.box('Você nasceu', aspect, 'story');
+    const box = WORD_CAPTIONS.box('Você acordou', aspect, 'story');
     assert.equal(box.x + box.width / 2, aspect.width() / 2, aspect.text());
     assert.ok(box.y >= aspect.height() * (2 / 3), aspect.text());
   }
@@ -47,13 +47,13 @@ test('in a lesson both styles sit under the content', () => {
 
 test('the word caption box reports a word that does not fit even at 60%', () => {
   for (const { aspect, format, name } of PLACES) {
-    assert.equal(WORD_CAPTIONS.box('Você nasceu em mil trezentos', aspect, format).textFits(), true, name);
+    assert.equal(WORD_CAPTIONS.box('Você acordou sem internet hoje', aspect, format).textFits(), true, name);
     assert.equal(WORD_CAPTIONS.box(HUGE, aspect, format).textFits(), false, name);
   }
 });
 
 test('the renderer groups with the same width the check uses', () => {
-  const text = 'Você nasceu em mil trezentos';
+  const text = 'Você acordou sem internet hoje';
   for (const { aspect, format, name } of PLACES) {
     assert.equal(WORD_CAPTIONS.caption(Words.fromText(text), aspect, format).fits(), WORD_CAPTIONS.box(text, aspect, format).textFits(), name);
   }
@@ -90,11 +90,11 @@ test('in a story scenario the word caption overlaps neither the HUD nor the big 
     type: 'scenario',
     background: { vector: 'village' },
     characters: [{ character: 'ana', position: 'left' }],
-    hud: { fields: [{ label: 'ANO', value: '1347' }], bar: { label: 'CHANCE DE CHEGAR AOS 20', value: 65 } },
-    highlight: { text: 'A PESTE CHEGOU À ALDEIA' },
+    hud: { fields: [{ label: 'DIA', value: '3' }], bar: { label: 'PACIÊNCIA ATÉ A NOITE', value: 65 } },
+    highlight: { text: 'O WI-FI CAIU NA PRAÇA INTEIRA' },
   };
   for (const aspect of ASPECTS) {
-    const boxes = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('Você nasceu', aspect, 'story'));
+    const boxes = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('Você acordou', aspect, 'story'));
     assert.ok(boxes.every((caption) => scenarioBoxes(scene, aspect).with(caption).overlappingPairs().length === 0), aspect.text());
   }
 });

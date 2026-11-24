@@ -3,7 +3,8 @@ import { ArmGeometry } from '../../../domain/character/ArmGeometry.ts';
 import type { CharacterState } from '../../../domain/character/CharacterState.ts';
 import type { RigProps } from '../RigModel.ts';
 import { Arm } from './Arms.tsx';
-import { Ball, Face } from './Face.tsx';
+import { Face } from './Face.tsx';
+import { Head } from './Head.tsx';
 import { Hair } from './Hair.tsx';
 import { FEET, NECK, VIEW_BOX } from './measures.ts';
 import { lookOf, type Look } from './parameters.ts';
@@ -21,7 +22,7 @@ const Body: FC<BodyProps> = ({ state, look }) => {
       {!right.inFront && <Arm arm={right} side={1} look={look} />}
       <g transform={`rotate(${headTilt} ${NECK.x} ${NECK.y})`}>
         <Hair look={look} layer="back" />
-        <Ball look={look} />
+        <Head look={look} />
         <Hair look={look} layer="front" />
         <Face state={state} look={look} />
       </g>

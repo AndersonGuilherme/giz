@@ -3,6 +3,10 @@
   "name": "Nina",
   "rig": "giz",
   "parameters": {
+    "skin": "brown",
+    "headShape": "oval",
+    "eyeColor": "#d09a2e",
+    "hairColor": "#1f1410",
     "outfit": "dress",
     "outfitColor": "#d0573f",
     "hair": "bun",

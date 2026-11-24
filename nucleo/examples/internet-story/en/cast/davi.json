@@ -3,6 +3,9 @@
   "name": "Davi",
   "rig": "giz",
   "parameters": {
+    "skin": "tan",
+    "headShape": "soft-square",
+    "eyeColor": "#4c9a5a",
     "outfit": "hoodie",
     "outfitColor": "#2f7f6f",
     "hair": "short",

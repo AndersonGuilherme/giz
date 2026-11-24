@@ -2,8 +2,8 @@ import type { FC, ReactNode } from 'react';
 import type { CharacterState } from '../../../domain/character/CharacterState.ts';
 import { MouthLayout, type MouthOutline, type MouthParts, type Oval, type Rect } from '../../../domain/character/MouthLayout.ts';
 import { HEAD, MOUTH } from './measures.ts';
-import type { Look } from './parameters.ts';
-import { contrast, useSvgId } from '../svg.ts';
+import { skinOf, type Look } from './parameters.ts';
+import { useSvgId } from '../svg.ts';
 
 const INSIDE = '#4a1119';
 const TONGUE = '#e2707d';
@@ -68,5 +68,5 @@ const CLOSED: ReadonlySet<MouthOutline['kind']> = new Set(['pressed', 'line', 'w
 export const Mouth: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }): ReactNode => {
   const parts = MouthLayout.for(state);
   if (!CLOSED.has(parts.outline.kind)) return <OpenMouth parts={parts} />;
-  return <path d={pathOf(parts.outline)} fill="none" stroke={contrast(look.headColor)} strokeWidth={7} strokeLinecap="round" />;
+  return <path d={pathOf(parts.outline)} fill="none" stroke={skinOf(look).line} strokeWidth={7} strokeLinecap="round" />;
 };

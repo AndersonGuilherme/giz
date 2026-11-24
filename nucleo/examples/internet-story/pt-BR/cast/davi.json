@@ -2,7 +2,7 @@
   "id": "davi",
   "name": "Davi",
   "rig": "giz",
-  "parameters": { "outfit": "hoodie", "outfitColor": "#2f7f6f", "hair": "short", "glasses": true },
+  "parameters": { "skin": "tan", "headShape": "soft-square", "eyeColor": "#4c9a5a", "outfit": "hoodie", "outfitColor": "#2f7f6f", "hair": "short", "glasses": true },
   "voice": {
     "id": "aiden",
     "style": "Fale em português do Brasil, com sotaque brasileiro, de forma exagerada e engraçada, como um jovem dramático"

@@ -21,7 +21,7 @@ export type GroupInFrame = Readonly<{ words: string[]; active: number }>;
 const NOTHING: GroupInFrame = { words: [], active: -1 };
 
 /**
- * Word-by-word caption, in the style of the reference videos: groups of up to 3 words that change when the next group
+ * Word-by-word caption, in the style of short story videos: groups of up to 3 words that change when the next group
  * starts, with the spoken word highlighted. The whole group fits one line of the given width.
  */
 export class WordCaption {

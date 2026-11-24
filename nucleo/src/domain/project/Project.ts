@@ -9,7 +9,7 @@ export type Format = (typeof FORMATS)[number];
 export const CAPTION_STYLES = ['words', 'blocks'] as const;
 export type CaptionStyle = (typeof CAPTION_STYLES)[number];
 
-// Without a declared style: a story speaks word by word (as the reference videos), a lesson in blocks (as the motor).
+// Without a declared style: a story speaks word by word (as short story videos do), a lesson in blocks (as the motor).
 const DEFAULT_CAPTION_STYLE: Readonly<Record<Format, CaptionStyle>> = { story: 'words', lesson: 'blocks' };
 
 /** The caption style of a video: the declared one, or the default of its format. The `check` and the renderer both use it. */

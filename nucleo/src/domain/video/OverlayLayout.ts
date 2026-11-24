@@ -39,7 +39,7 @@ function stacked(content: OverlayContent, place: { x: number; y: number; width: 
 /**
  * The brand and chapter frame. Only the 16:9 lesson has room for it (the left column, above the presenters). In 9:16 the
  * lesson content starts at the top of the safe area and above it the Reels/Shorts interface covers the screen, and a
- * story keeps the scene clean, like the reference videos: both have no frame.
+ * story keeps the scene clean, like short story videos: both have no frame.
  */
 export class OverlayLayout {
   static for(aspect: AspectRatio, format: Format, content: OverlayContent): OverlayDrawing {

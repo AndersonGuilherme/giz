@@ -4,7 +4,7 @@ import { EXPRESSIONS, POSES } from '../../domain/cast/PoseAndExpression.ts';
 import type { Viseme } from '../../domain/speech/Visemes.ts';
 import type { RigModel, ValidatedParameters } from '../rigs/RigModel.ts';
 import { rigModels } from '../rigs/rigModels.ts';
-import { Card, FONT, INK, Placed, Section, stillState } from './sheetParts.tsx';
+import { BOARD, Card, FONT, INK, Placed, Section, stillState } from './sheetParts.tsx';
 import { VARIATIONS } from './sheetVariations.ts';
 
 export type CharacterSheetProps = Readonly<{ rig: string; character?: string; parameters?: ValidatedParameters }>;
@@ -89,9 +89,9 @@ const Variations: FC<Sheet> = ({ model, parameters }) => {
 export const CharacterSheet: FC<CharacterSheetProps> = ({ rig, parameters = {} }) => {
   const sheet = { model: rigModels.get(rig), parameters };
   return (
-    <AbsoluteFill style={{ background: '#f4efe4', padding: '18px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
+    <AbsoluteFill style={{ background: BOARD, padding: '18px 32px', display: 'flex', flexDirection: 'column', gap: 12 }}>
       <div style={{ fontFamily: FONT, fontSize: 32, fontWeight: 700, color: INK }}>
-        {sheet.model.name['pt-BR']} <span style={{ fontWeight: 400, color: '#7a6a52' }}>· ficha do personagem</span>
+        {sheet.model.name['pt-BR']} <span style={{ fontWeight: 400, color: '#a9c2b8' }}>· ficha do personagem</span>
       </div>
       <Expressions {...sheet} />
       <Poses {...sheet} />

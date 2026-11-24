@@ -12,7 +12,7 @@ import { DiskProjectRepository } from '../../../src/infrastructure/disk/DiskProj
 test('the real catalog exposes the rigs of the registry', () => {
   const catalog = new RigCatalogFromRegistry(rigRegistry);
   assert.ok(catalog.ids().includes('giz'));
-  assert.equal(catalog.definition('giz')?.headColor?.defaultValue, '#151515');
+  assert.equal(catalog.definition('giz')?.skin?.defaultValue, 'medium');
 });
 
 test('an unknown rig has no definition (the repository reports the readable error)', () => {
@@ -26,8 +26,9 @@ test('the minimal fixture project loads with the production catalog (giz)', asyn
   const project = await repository.load(fileURLToPath(new URL('../../fixtures/minimal-project', import.meta.url)));
   const ana = project.cast().character(CharacterId.of('ana'));
   assert.equal(ana.rig(), 'giz');
-  assert.equal(ana.parameters().outfit, 'tunic');
-  assert.equal(ana.parameters().headColor, '#151515');
+  assert.equal(ana.parameters().outfit, 'hoodie');
+  assert.equal(ana.parameters().skin, 'tan');
+  assert.equal(ana.parameters().chalk, true, 'the defaults fill what the cast leaves out');
 });
 
 // `giz check` loads a project with this catalog: a project whose cast is the example Lia and Téo must load clean.

@@ -10,8 +10,8 @@ const scene: ScenarioScene = {
   type: 'scenario',
   background: { vector: 'village' },
   characters: [{ character: 'ana', position: 'left' }, { character: 'bia', position: 'right' }],
-  hud: { fields: [{ label: 'ANO', value: '1347' }, { label: 'IDADE', value: '7' }], bar: { label: 'CHANCE', value: 65 } },
-  highlight: { text: 'A PESTE CHEGOU' },
+  hud: { fields: [{ label: 'DIA', value: '3' }, { label: 'SEM', value: 'WI-FI' }], bar: { label: 'PACIÊNCIA', value: 65 } },
+  highlight: { text: 'O WI-FI CAIU' },
 };
 const boxesOf = (value: ScenarioScene, aspect: string) =>
   createLayoutRegistry().boxesOf(value, AspectRatio.of(aspect), Language.PORTUGUESE);

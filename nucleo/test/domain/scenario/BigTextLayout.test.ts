@@ -9,11 +9,11 @@ import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 import { Frame } from '../../../src/domain/values/Time.ts';
 
 const ASPECTS = ['9:16', '16:9'].map((text) => AspectRatio.of(text));
-const HUD = { fields: [{ label: 'ANO', value: '1347' }], bar: { label: 'CHANCE', value: 50 } };
+const HUD = { fields: [{ label: 'DIA', value: '3' }], bar: { label: 'CHANCE', value: 50 } };
 
 test('the big text stays in the safe area and clear of the HUD and the caption', () => {
   for (const aspect of ASPECTS) {
-    const big = Box.of('destaque', BigTextLayout.for({ text: 'A PESTE CHEGOU' }, aspect).rectangle);
+    const big = Box.of('destaque', BigTextLayout.for({ text: 'O WI-FI CAIU' }, aspect).rectangle);
     assert.ok(big.isInside(SafeArea.for(aspect)), aspect.text());
     assert.equal(big.overlaps(Box.of('hud', HudLayout.for(HUD, aspect).panel)), false, aspect.text());
     const captions = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('legenda', aspect, 'story'));
@@ -61,7 +61,7 @@ test('a long uppercase word in 9:16 shrinks whole instead of passing the frame e
 
 test('every line of a long uppercase sentence fits its box at the pop peak, in both aspects', () => {
   for (const aspect of ASPECTS) {
-    const { rectangle, fit } = BigTextLayout.for({ text: 'O INACREDITÁVEL ACONTECEU NA ALDEIA' }, aspect);
+    const { rectangle, fit } = BigTextLayout.for({ text: 'O INACREDITÁVEL ACONTECEU NA PRAÇA' }, aspect);
     const widest = Math.max(...fit.lines.map((line) => line.length));
     assert.ok(widest * fit.size * HEAVY_CAPS_EM * Entrance.peakScale() <= rectangle.width, aspect.text());
   }

@@ -1,111 +1,102 @@
 import type { FC } from 'react';
-import { Fill, Glow, Grass, Placed, Ridge, Stars, Tree } from './parts.tsx';
-import { BarrelAndSack, Chapel, Cottage, Fence, House, Ruts } from './villageParts.tsx';
+import { ChalkDisc, ChalkShape, Fill, Glow, Grass, Placed, Ridge, Tree } from './parts.tsx';
+import { Cloud, HillHouse, Stall, Tower, Well, Windmill } from './villageParts.tsx';
 import type { LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
 
-// A medieval village at dusk: warm sky, far hills with a chapel, timber houses with lit windows, a dirt square.
+// A hill village in the morning, giz style: a teal sky with chalk clouds and the sun rising behind a cluster of
+// white houses on the central hill, a windmill on the far left, a road winding up to the houses, a stone well on the
+// left and a fruit stall on the right.
 
 const palette = {
-  skyTop: '#22183a',
-  skyMiddle: '#7d3b52',
-  horizon: '#f0a05a',
-  sun: '#ffd994',
-  star: '#fff1cf',
-  cloud: '#c86a5a',
-  mountains: '#6b4566',
-  farHills: '#5a3446',
-  farHouses: '#3f2536',
-  hills: '#47293a',
-  haze: '#f3a35f',
-  wall: '#a87048',
-  timber: '#3a2317',
-  roof: '#8a6233',
-  roofShade: '#5a3d1f',
-  window: '#ffc66b',
-  ground: '#4f321f',
-  groundFar: '#86552f',
-  road: '#8a5d35',
-  trunk: '#3a2418',
-  leaves: '#55522a',
-  leavesShade: '#3a3719',
-  barrel: '#7a4e2c',
-  sack: '#a88a5c',
-  foreground: '#1f130d',
-  grass: '#2b2612',
+  skyTop: '#6fa6b4',
+  skyMiddle: '#a9cdc4',
+  horizon: '#f3e4c0',
+  sun: '#fbe3a1',
+  cloud: '#f6f1e4',
+  farHills: '#7ea592',
+  hill: '#93b98a',
+  meadow: '#9cc185',
+  meadowNear: '#7aa36a',
+  road: '#e6d2a6',
+  wall: '#f4efe2',
+  wallShade: '#dcd3c0',
+  roof: '#e8735a',
+  roof2: '#3d8c8a',
+  roofLine: '#b5523b',
+  door: '#6c4f7c',
+  window: '#5f8fa8',
+  flag: '#f2b134',
+  mill: '#e9dcc0',
+  millSail: '#c9b99a',
+  wood: '#7a5a42',
+  stone: '#a7a39a',
+  stoneShade: '#7f7b72',
+  awning: '#e8735a',
+  awning2: '#f6f1e4',
+  fruit1: '#f2b134',
+  fruit2: '#d9534a',
+  trunk: '#6b4a32',
+  leaves: '#5f9a63',
+  leavesShade: '#467a4e',
+  bush: '#4e7f55',
+  grass: '#3f6b47',
 };
 
 const Sky: FC<LayerProps> = (layer) => {
-  const { colors, width, height, ground, unit } = layer;
-  const stops = [[0, colors.skyTop], [0.5, colors.skyMiddle], [1, colors.horizon]] as const;
+  const { colors, width, ground, unit } = layer;
+  const stops = [[0, colors.skyTop], [0.6, colors.skyMiddle], [1, colors.horizon]] as const;
+  const sun = { x: width * 0.56, y: ground - 470 * unit };
   return (
     <>
       <Fill id="village-sky" layer={layer} stops={stops} to={ground - 140 * unit} />
-      <Stars color={colors.star} width={width} height={ground * 0.55} unit={unit} />
-      <circle cx={width * 0.86} cy={height * 0.13} r={34 * unit} fill={colors.star} opacity={0.9} />
-      <circle cx={width * 0.86 + 14 * unit} cy={height * 0.13 - 8 * unit} r={30 * unit} fill={colors.skyTop} />
-      <Glow id="village-sun-glow" x={width * 0.7} y={ground - 300 * unit} radius={560 * unit} color={colors.sun} opacity={0.8} />
-      <circle cx={width * 0.7} cy={ground - 300 * unit} r={62 * unit} fill={colors.sun} />
-      <ellipse cx={width * 0.25} cy={ground - 520 * unit} rx={260 * unit} ry={16 * unit} fill={colors.cloud} opacity={0.45} />
-      <ellipse cx={width * 0.8} cy={ground - 640 * unit} rx={200 * unit} ry={12 * unit} fill={colors.cloud} opacity={0.35} />
+      <Glow id="village-sun-glow" x={sun.x} y={sun.y} radius={420 * unit} color={colors.sun} opacity={0.7} />
+      <ChalkDisc x={sun.x} y={sun.y} radius={80 * unit} fill={colors.sun} chalk={{ seed: 'village-sun', width: 5 * unit }} />
+      <Placed x={width * 0.8} y={ground - 700 * unit} scale={unit}><Cloud colors={colors} seed="cloud-right" /></Placed>
+      <Placed x={width * 0.24} y={ground - 610 * unit} scale={unit * 0.8}><Cloud colors={colors} seed="cloud-left" /></Placed>
     </>
   );
 };
 
-const Distance: FC<LayerProps> = ({ colors, width, ground, unit }) => (
-  <>
-    <Ridge base={ground} fill={colors.mountains} opacity={0.8} points={[[-width * 0.1, ground - 330 * unit], [width * 0.15, ground - 470 * unit], [width * 0.4, ground - 360 * unit], [width * 0.62, ground - 450 * unit], [width * 0.9, ground - 350 * unit], [width * 1.1, ground - 420 * unit]]} />
-    <Ridge base={ground} fill={colors.farHills} points={[[-width * 0.1, ground - 240 * unit], [width * 0.25, ground - 360 * unit], [width * 0.55, ground - 250 * unit], [width * 0.85, ground - 330 * unit], [width * 1.1, ground - 260 * unit]]} />
-    <Placed x={width * 0.24} y={ground - 330 * unit} scale={unit * 0.8}><Chapel colors={colors} /></Placed>
-    <Placed x={width * 0.36} y={ground - 300 * unit} scale={unit * 0.6}><Cottage colors={colors} light /></Placed>
-    <Placed x={width * 0.12} y={ground - 280 * unit} scale={unit * 0.55}><Cottage colors={colors} light={false} /></Placed>
-    <Placed x={width * 0.88} y={ground - 315 * unit} scale={unit * 0.6}><Cottage colors={colors} light /></Placed>
-    <Ridge base={ground} fill={colors.hills} points={[[-width * 0.1, ground - 170 * unit], [width * 0.4, ground - 215 * unit], [width * 0.75, ground - 160 * unit], [width * 1.1, ground - 205 * unit]]} />
-  </>
-);
+// The cluster on the central hill: [x from the hill center, lift, scale, roof color key].
+const CLUSTER = [[-210, 40, 0.8, 'roof'], [-110, 70, 1, 'roof2'], [120, 66, 0.95, 'roof'], [220, 36, 0.8, 'roof2'], [10, 92, 1.1, 'roof']] as const;
+
+const Hills: FC<LayerProps> = ({ colors, width, ground, unit }) => {
+  const hilltop = ground - 330 * unit;
+  return (
+    <>
+      <Ridge base={ground} fill={colors.farHills} chalk={{ seed: 'village-far', width: 4 * unit }} points={[[-width * 0.1, ground - 300 * unit], [width * 0.12, ground - 420 * unit], [width * 0.3, ground - 300 * unit], [width * 0.75, ground - 280 * unit], [width * 1.1, ground - 360 * unit]]} />
+      <Placed x={width * 0.12} y={ground - 380 * unit} scale={unit * 0.75}><Windmill colors={colors} seed="mill" /></Placed>
+      <Ridge base={ground} fill={colors.hill} chalk={{ seed: 'village-hill', width: 4 * unit }} points={[[width * 0.18, ground - 150 * unit], [width * 0.38, ground - 300 * unit], [width * 0.5, ground - 350 * unit], [width * 0.62, ground - 300 * unit], [width * 0.82, ground - 150 * unit]]} />
+      <Placed x={width * 0.5 + 40 * unit} y={hilltop + 30 * unit} scale={unit * 0.7}><Tower colors={colors} seed="tower" /></Placed>
+      {CLUSTER.map(([x, lift, scale, roof]) => (
+        <Placed key={x} x={width * 0.5 + x * unit} y={hilltop + lift * unit} scale={unit * scale * 0.7}>
+          <HillHouse colors={colors} seed={`house${x}`} roof={colors[roof]!} />
+        </Placed>
+      ))}
+    </>
+  );
+};
 
 const Back: FC<LayerProps> = (layer) => (
   <>
     <Sky {...layer} />
-    <Distance {...layer} />
+    <Hills {...layer} />
   </>
 );
 
-const HOUSES = [
-  { at: 0.05, scale: 1.05, flip: false },
-  { at: 0.3, scale: 0.85, flip: true },
-  { at: 0.75, scale: 0.9, flip: false },
-  { at: 0.98, scale: 1.1, flip: true },
-] as const;
-
-const Square: FC<LayerProps> = (layer) => {
-  const { colors, width, height, ground, unit } = layer;
-  const horizon = ground - 120 * unit;
-  const stops = [[0, colors.groundFar], [0.3, colors.ground], [1, colors.ground]] as const;
-  return (
-    <>
-      <Fill id="village-ground" layer={layer} stops={stops} from={horizon - 10 * unit} />
-      <path d={`M ${width * 0.42} ${horizon} L ${width * 0.58} ${horizon} L ${width * 1.05} ${height * 1.1} L ${width * 0.02} ${height * 1.1} Z`} fill={colors.road} opacity={0.5} />
-      <Ruts color={colors.ground} width={width} horizon={horizon} bottom={height * 1.1} />
-      <rect x={-width * 0.1} y={horizon - 160 * unit} width={width * 1.2} height={170 * unit} fill="url(#village-haze)" />
-    </>
-  );
-};
-
 const Middle: FC<LayerProps> = (layer) => {
-  const { colors, width, ground, unit } = layer;
-  const horizon = ground - 120 * unit;
+  const { colors, width, height, ground, unit } = layer;
+  const horizon = ground - 150 * unit;
+  const road = `M ${width * 0.47} ${horizon} Q ${width * 0.56} ${horizon + 60 * unit} ${width * 0.5} ${ground - 40 * unit}`
+    + ` Q ${width * 0.42} ${ground + 80 * unit} ${width * 0.7} ${height * 1.1} L ${width * 0.98} ${height * 1.1}`
+    + ` Q ${width * 0.62} ${ground + 60 * unit} ${width * 0.6} ${ground - 50 * unit} Q ${width * 0.6} ${horizon + 50 * unit} ${width * 0.52} ${horizon} Z`;
   return (
     <>
-      <defs>
-        <radialGradient id="village-window-glow"><stop offset={0} stopColor={colors.window} stopOpacity={0.55} /><stop offset={1} stopColor={colors.window} stopOpacity={0} /></radialGradient>
-        <linearGradient id="village-haze" x1={0} y1={0} x2={0} y2={1}><stop offset={0} stopColor={colors.haze} stopOpacity={0} /><stop offset={1} stopColor={colors.haze} stopOpacity={0.35} /></linearGradient>
-      </defs>
-      <Placed x={width * 0.17} y={horizon} scale={unit}><Tree trunk={colors.trunk} leaves={colors.leaves} shade={colors.leavesShade} height={660} /></Placed>
-      <Square {...layer} />
-      {HOUSES.map(({ at, scale, flip }) => (
-        <Placed key={at} x={width * at} y={horizon + 8 * unit} scale={unit * scale} flip={flip}><House colors={colors} /></Placed>
-      ))}
-      <Placed x={width * 0.5} y={horizon + 4 * unit} scale={unit * 0.9}><Fence color={colors.timber} width={220} /></Placed>
+      <Fill id="village-meadow" layer={layer} stops={[[0, colors.meadow], [1, colors.meadowNear]]} from={horizon} />
+      <ChalkShape path={road} fill={colors.road} chalk={{ seed: 'village-road', width: 4 * unit }} />
+      <Placed x={width * 0.92} y={horizon + 20 * unit} scale={unit * 0.9}><Tree trunk={colors.trunk} leaves={colors.leaves} shade={colors.leavesShade} height={520} seed="village-tree" /></Placed>
+      <Placed x={width * 0.2} y={horizon + 40 * unit} scale={unit * 0.85}><Well colors={colors} seed="well" /></Placed>
+      <Placed x={width * 0.8} y={horizon + 60 * unit} scale={unit * 0.85}><Stall colors={colors} seed="stall" /></Placed>
     </>
   );
 };
@@ -114,10 +105,9 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   const bottom = height * 1.06;
   return (
     <>
-      <Ridge base={bottom + 40 * unit} fill={colors.foreground} points={[[-width * 0.1, bottom - 200 * unit], [width * 0.02, bottom - 210 * unit], [200 * unit, bottom - 170 * unit], [400 * unit, bottom - 40 * unit], [width * 0.5, bottom - 10 * unit], [width - 250 * unit, bottom - 30 * unit], [width * 1.1, bottom - 120 * unit]]} />
-      <Placed x={115 * unit} y={bottom - 165 * unit} scale={unit}><BarrelAndSack colors={colors} /></Placed>
-      <Placed x={220 * unit} y={bottom - 90 * unit} scale={unit}><Grass color={colors.grass} width={200} height={80} /></Placed>
-      <Placed x={width - 90 * unit} y={bottom - 20 * unit} scale={unit}><Grass color={colors.grass} width={180} height={60} /></Placed>
+      <Ridge base={bottom + 40 * unit} fill={colors.bush} chalk={{ seed: 'village-bush', width: 4 * unit }} points={[[-width * 0.1, bottom - 170 * unit], [60 * unit, bottom - 200 * unit], [220 * unit, bottom - 120 * unit], [330 * unit, bottom - 20 * unit]]} />
+      <Placed x={120 * unit} y={bottom - 60 * unit} scale={unit}><Grass color={colors.grass} width={220} height={90} /></Placed>
+      <Placed x={width - 100 * unit} y={bottom - 20 * unit} scale={unit}><Grass color={colors.grass} width={200} height={70} /></Placed>
     </>
   );
 };

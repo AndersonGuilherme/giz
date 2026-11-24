@@ -15,7 +15,7 @@ const pick = <T>(table: Readonly<Record<Format, ByAspect<T>>>, aspect: AspectRat
   (aspect.vertical() ? table[format].vertical : table[format].horizontal);
 
 // Words, one line. Story: centered in the lower third (9:16 → y 1330–1427, above the Reels/Shorts buttons; 16:9 →
-// y 780–877, as in the reference videos). Lesson: in the middle of the caption area under the content.
+// y 780–877, as in short story videos). Lesson: in the middle of the caption area under the content.
 const WORD_HEIGHT = Math.round(WORD_CAPTION_FONT.maximumHeight() * ACTIVE_WORD_SCALE);
 const WORD_PLACES: Readonly<Record<Format, ByAspect<Rectangle>>> = {
   story: { vertical: { x: 86, y: 1330, width: 908, height: WORD_HEIGHT }, horizontal: { x: 360, y: 780, width: 1200, height: WORD_HEIGHT } },

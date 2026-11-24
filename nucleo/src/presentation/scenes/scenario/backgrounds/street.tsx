@@ -1,26 +1,27 @@
 import type { FC } from 'react';
-import { Fill, Glow, Placed } from './parts.tsx';
+import { ChalkBox, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
 import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
 
-// A city street at dusk: a skyline with lit windows, shops with warm fronts, a sidewalk and street lamps.
+// A city street at dusk, giz style: a teal sky, a skyline with lit windows, two shops with striped awnings, a
+// sidewalk and a street lamp; chalk lines on the buildings.
 
 const palette = {
-  skyTop: '#1f2a4f',
-  skyBottom: '#e8875f',
-  skyline: '#3a3355',
-  skylineNear: '#2b2540',
-  window: '#ffd37a',
-  shopWall: '#6d4c5e',
-  shopWall2: '#4f5f74',
-  awning: '#c4503f',
-  awning2: '#3f8f7a',
-  shopLight: '#ffcf86',
-  sidewalk: '#7d6f78',
-  curb: '#4a4250',
-  asphalt: '#38323f',
+  skyTop: '#2f4858',
+  skyBottom: '#9cc5b8',
+  skyline: '#46707a',
+  skylineNear: '#365a63',
+  window: '#f6dc8f',
+  shopWall: '#b5523b',
+  shopWall2: '#6c4f7c',
+  awning: '#f2b134',
+  awning2: '#3d8c8a',
+  shopLight: '#ffe7b0',
+  sidewalk: '#a6ada0',
+  curb: '#66726c',
+  asphalt: '#3d4a48',
   lamp: '#ffe3a0',
-  post: '#1e1a24',
-  foreground: '#15111a',
+  post: '#22302f',
+  foreground: '#18211f',
 };
 
 // Towers of the skyline: [x as a fraction of the width, width and height in units].
@@ -30,7 +31,7 @@ const Skyline: FC<LayerProps> = ({ colors, width, ground, unit }) => (
   <g fill={colors.skyline}>
     {TOWERS.map(([at, wide, tall]) => (
       <g key={at}>
-        <rect x={width * at} y={ground - 150 * unit - tall * unit} width={wide * unit} height={tall * unit} />
+        <ChalkBox x={width * at} y={ground - 150 * unit - tall * unit} width={wide * unit} height={tall * unit} fill={colors.skyline} chalk={{ seed: `tower${at}`, width: 3.5 * unit }} />
         {[0.2, 0.45, 0.7].map((row) => (
           <rect key={row} x={width * at + wide * unit * 0.3} y={ground - 150 * unit - tall * unit * (1 - row)} width={14 * unit} height={18 * unit} fill={colors.window} opacity={0.7} />
         ))}
@@ -48,10 +49,12 @@ const Back: FC<LayerProps> = (layer) => (
 
 const Shop: FC<Readonly<{ colors: Palette; wall: string; awning: string }>> = ({ colors, wall, awning }) => (
   <g>
-    <rect x={-170} y={-420} width={340} height={420} fill={wall} />
+    <ChalkBox x={-170} y={-420} width={340} height={420} fill={wall} chalk={{ seed: `shop${wall}`, width: 5 }} />
     {[-110, 0, 110].map((x) => <rect key={x} x={x - 30} y={-380} width={60} height={70} rx={4} fill={colors.window} opacity={0.85} />)}
     <rect x={-150} y={-170} width={300} height={170} fill={colors.shopLight} opacity={0.9} />
     <path d="M -175 -190 H 175 L 155 -150 H -155 Z" fill={awning} />
+    {[-140, -70, 0, 70, 140].map((x) => <path key={x} d={`M ${x - 16} -190 H ${x + 16} L ${x * 0.89 + 16} -150 H ${x * 0.89 - 16} Z`} fill={colors.shopLight} opacity={0.85} />)}
+    <ChalkShape path="M -175 -190 H 175 L 155 -150 H -155 Z" chalk={{ seed: `awning${wall}`, width: 4 }} />
     <rect x={-30} y={-150} width={60} height={150} fill={colors.post} opacity={0.6} />
   </g>
 );
@@ -64,7 +67,7 @@ const Middle: FC<LayerProps> = (layer) => {
       <Placed x={width * 0.16} y={curb - 90 * unit} scale={unit}><Shop colors={colors} wall={colors.shopWall} awning={colors.awning} /></Placed>
       <Placed x={width * 0.84} y={curb - 90 * unit} scale={unit}><Shop colors={colors} wall={colors.shopWall2} awning={colors.awning2} /></Placed>
       <rect x={-width * 0.1} y={curb - 90 * unit} width={width * 1.2} height={height} fill={colors.sidewalk} />
-      <rect x={-width * 0.1} y={curb + 120 * unit} width={width * 1.2} height={18 * unit} fill={colors.curb} />
+      <ChalkBox x={-width * 0.1} y={curb + 120 * unit} width={width * 1.2} height={18 * unit} fill={colors.curb} chalk={{ seed: 'curb', width: 3.5 * unit }} />
       <rect x={-width * 0.1} y={curb + 138 * unit} width={width * 1.2} height={height} fill={colors.asphalt} />
       <Glow id="street-lamp-glow" x={width * 0.5} y={curb - 560 * unit} radius={380 * unit} color={colors.lamp} opacity={0.6} />
       <Placed x={width * 0.5} y={curb - 90 * unit} scale={unit}><StreetLamp colors={colors} /></Placed>
@@ -74,8 +77,8 @@ const Middle: FC<LayerProps> = (layer) => {
 
 const StreetLamp: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
-    <rect x={-9} y={-470} width={18} height={470} fill={colors.post} />
-    <path d="M -34 -470 L -22 -520 L 22 -520 L 34 -470 Z" fill={colors.lamp} />
+    <ChalkBox x={-9} y={-470} width={18} height={470} fill={colors.post} chalk={{ seed: 'lamp-post', width: 4 }} />
+    <ChalkShape path="M -34 -470 L -22 -520 L 22 -520 L 34 -470 Z" fill={colors.lamp} chalk={{ seed: 'lamp-head', width: 4 }} />
     <rect x={-40} y={-476} width={80} height={10} rx={4} fill={colors.post} />
   </g>
 );

@@ -1,3 +1,5 @@
+import { HEAD_SHAPES, type HeadShapeName } from '../../../domain/character/HeadShape.ts';
+import { SKIN_TONES, SkinTone, type SkinColors, type SkinToneName } from '../../../domain/character/SkinTone.ts';
 import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
 import { FEET, VIEW_BOX } from './measures.ts';
 
@@ -10,12 +12,17 @@ export const gizDefinition: RigDefinition = {
   id: 'giz',
   name: { 'pt-BR': 'Giz', en: 'Giz' },
   parameters: {
-    headColor: { type: 'color', defaultValue: '#151515' },
-    shine: { type: 'boolean', defaultValue: true },
-    outfitColor: { type: 'color', defaultValue: '#3f6fb5' },
+    skin: { type: 'option', defaultValue: SkinTone.DEFAULT, options: [...SKIN_TONES] },
+    headShape: { type: 'option', defaultValue: 'round', options: [...HEAD_SHAPES] },
+    eyeColor: { type: 'color', defaultValue: '#7a4a26' },
+    hairColor: { type: 'color', defaultValue: '#3a2418' },
+    cheeks: { type: 'boolean', defaultValue: true },
+    freckles: { type: 'boolean', defaultValue: false },
+    chalk: { type: 'boolean', defaultValue: true },
+    outfitColor: { type: 'color', defaultValue: '#2f8f83' },
     outfit: { type: 'option', defaultValue: 'tshirt', options: [...OUTFITS] },
-    hair: { type: 'option', defaultValue: 'none', options: [...HAIRS] },
-    accessoryColor: { type: 'color', defaultValue: '#e8d9b5' },
+    hair: { type: 'option', defaultValue: 'short', options: [...HAIRS] },
+    accessoryColor: { type: 'color', defaultValue: '#f2b134' },
     glasses: { type: 'boolean', defaultValue: false },
     eyeScale: { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 },
   },
@@ -24,8 +31,13 @@ export const gizDefinition: RigDefinition = {
 
 /** The giz parameters, typed for drawing. */
 export type Look = Readonly<{
-  headColor: string;
-  shine: boolean;
+  skin: SkinToneName;
+  headShape: HeadShapeName;
+  eyeColor: string;
+  hairColor: string;
+  cheeks: boolean;
+  freckles: boolean;
+  chalk: boolean;
   outfitColor: string;
   outfit: Outfit;
   hair: Hair;
@@ -39,4 +51,9 @@ const defaults = Object.fromEntries(Object.entries(gizDefinition.parameters).map
 /** Fills in the defaults: the sheet and the tests may pass only some of the parameters. */
 export function lookOf(parameters: ValidatedParameters): Look {
   return { ...defaults, ...parameters } as Look;
+}
+
+/** The skin colors of the look's tone. */
+export function skinOf(look: Look): SkinColors {
+  return SkinTone.colors(look.skin);
 }

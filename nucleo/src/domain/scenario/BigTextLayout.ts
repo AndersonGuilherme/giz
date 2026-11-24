@@ -9,7 +9,7 @@ import type { Frame } from '../values/Time.ts';
 /** Where the big text goes, at which size and in which lines; `boxes()` is what the `check` sees. */
 export type BigTextDrawing = Readonly<{ rectangle: Rectangle; fit: Fit; font: Font; boxes: () => Boxes }>;
 
-// Below the HUD and above the caption: 9:16 → y 440–818; 16:9 → y 260–554, on the left like the reference thumbnails.
+// Below the HUD and above the caption: 9:16 → y 440–818; 16:9 → y 260–554, on the left, clear of the characters.
 const VERTICAL = { column: { x: 86, y: 440, width: 908 }, font: Font.of({ family: 'display', size: 120, lineHeight: 1.05, maximumLines: 3 }) };
 const HORIZONTAL = { column: { x: 96, y: 260, width: 1100 }, font: Font.of({ family: 'display', size: 140, lineHeight: 1.05, maximumLines: 2 }) };
 

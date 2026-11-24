@@ -1,4 +1,6 @@
 import type { FC, ReactNode } from 'react';
+import { Silhouette } from '../../../../domain/drawing/Silhouette.ts';
+import { ChalkLine } from '../../../drawing/ChalkLine.tsx';
 import type { LayerProps } from './VectorBackgroundModel.ts';
 
 // Shared drawing pieces of the vector backgrounds. Sizes are in "units" (1/1000 of the shorter side of the frame).
@@ -37,19 +39,60 @@ export const Glow: FC<GlowProps> = ({ id, x, y, radius, color, opacity = 1 }) =>
   </>
 );
 
-type RidgeProps = Readonly<{ points: readonly (readonly [number, number])[]; base: number; fill: string; opacity?: number }>;
+type RidgeProps = Readonly<{ points: readonly (readonly [number, number])[]; base: number; fill: string; opacity?: number; chalk?: Chalk }>;
+/** A chalk line on a background shape: its seed and width (in the units of the drawing it is in). */
+export type Chalk = Readonly<{ seed: string; width: number }>;
 
-/** A smooth silhouette (hills, bushes, roofs far away) through the points, closed down to `base`. */
-export const Ridge: FC<RidgeProps> = ({ points, base, fill, opacity }) => {
+// The top curve of a ridge: smooth through the midpoints between the given points.
+function ridgeTop(points: RidgeProps['points']): string {
   const [first, ...rest] = points;
   const curve = rest.map(([x, y], index) => {
     const [previousX, previousY] = points[index]!;
     return `Q ${previousX} ${previousY} ${(previousX + x) / 2} ${(previousY + y) / 2}`;
   });
   const [lastX, lastY] = points.at(-1)!;
-  const path = `M ${first![0]} ${base} L ${first![0]} ${first![1]} ${curve.join(' ')} L ${lastX} ${lastY} L ${lastX} ${base} Z`;
-  return <path d={path} fill={fill} opacity={opacity} />;
+  return `M ${first![0]} ${first![1]} ${curve.join(' ')} L ${lastX} ${lastY}`;
+}
+
+/** A smooth silhouette (hills, bushes, roofs far away) through the points, closed down to `base`; chalk on its top. */
+export const Ridge: FC<RidgeProps> = ({ points, base, fill, opacity, chalk }) => {
+  const top = ridgeTop(points);
+  const [[firstX], [lastX]] = [points[0]!, points.at(-1)!];
+  return (
+    <>
+      <path d={`M ${firstX} ${base} L ${top.slice(2)} L ${lastX} ${base} Z`} fill={fill} opacity={opacity} />
+      {chalk && <ChalkLine outline={Silhouette.parse(top)} seed={chalk.seed} width={chalk.width} />}
+    </>
+  );
 };
+
+type BoxProps = Readonly<{ x: number; y: number; width: number; height: number; corner?: number; fill?: string; chalk: Chalk }>;
+
+/** A rectangle (rounded by `corner`) with the chalk line around it; without `fill`, only the line. */
+export const ChalkBox: FC<BoxProps> = ({ x, y, width, height, corner = 0, fill, chalk }) => (
+  <>
+    {fill && <rect x={x} y={y} width={width} height={height} rx={corner} fill={fill} />}
+    <ChalkLine outline={Silhouette.roundedRect({ x, y, width, height }, corner)} seed={chalk.seed} width={chalk.width} />
+  </>
+);
+
+type ShapeProps = Readonly<{ path: string; fill?: string; opacity?: number; chalk: Chalk }>;
+
+/** A path (absolute M, L, H, V, C, Q, Z) with the chalk line around it. */
+export const ChalkShape: FC<ShapeProps> = ({ path, fill, opacity, chalk }) => (
+  <>
+    {fill && <path d={path} fill={fill} opacity={opacity} />}
+    <ChalkLine outline={Silhouette.parse(path)} seed={chalk.seed} width={chalk.width} />
+  </>
+);
+
+/** A disc with the chalk line around it. */
+export const ChalkDisc: FC<Readonly<{ x: number; y: number; radius: number; fill?: string; chalk: Chalk }>> = ({ x, y, radius, fill, chalk }) => (
+  <>
+    {fill && <circle cx={x} cy={y} r={radius} fill={fill} />}
+    <ChalkLine outline={Silhouette.ellipse({ x, y }, radius, radius)} seed={chalk.seed} width={chalk.width} />
+  </>
+);
 
 type PlacedProps = Readonly<{ x: number; y: number; scale: number; flip?: boolean; children: ReactNode }>;
 
@@ -58,18 +101,19 @@ export const Placed: FC<PlacedProps> = ({ x, y, scale, flip, children }) => (
   <g transform={`translate(${x} ${y}) scale(${flip ? -scale : scale} ${scale})`}>{children}</g>
 );
 
-type TreeProps = Readonly<{ trunk: string; leaves: string; shade: string; height?: number }>;
+type TreeProps = Readonly<{ trunk: string; leaves: string; shade: string; height?: number; seed?: string }>;
 
-/** A round-crowned tree standing on (0, 0), `height` units tall. */
-export const Tree: FC<TreeProps> = ({ trunk, leaves, shade, height = 600 }) => {
+/** A round-crowned tree standing on (0, 0), `height` units tall, with chalk on the trunk and the crown. */
+export const Tree: FC<TreeProps> = ({ trunk, leaves, shade, height = 600, seed = 'tree' }) => {
   const crown = height * 0.42;
+  const chalk = (part: string) => ({ seed: `${seed}-${part}`, width: 6 });
   return (
     <g>
-      <path d={`M -22 0 L -14 ${-height * 0.6} L 14 ${-height * 0.6} L 22 0 Z`} fill={trunk} />
+      <ChalkShape path={`M -22 0 L -14 ${-height * 0.6} L 14 ${-height * 0.6} L 22 0 Z`} fill={trunk} chalk={chalk('trunk')} />
       <path d={`M -10 ${-height * 0.45} L -70 ${-height * 0.7} M 8 ${-height * 0.5} L 80 ${-height * 0.75}`} stroke={trunk} strokeWidth={14} strokeLinecap="round" />
       <circle cx={-crown * 0.45} cy={-height + crown * 0.9} r={crown * 0.62} fill={shade} />
       <circle cx={crown * 0.5} cy={-height + crown * 0.95} r={crown * 0.6} fill={shade} />
-      <circle cx={0} cy={-height + crown * 0.6} r={crown * 0.7} fill={leaves} />
+      <ChalkDisc x={0} y={-height + crown * 0.6} radius={crown * 0.7} fill={leaves} chalk={chalk('crown')} />
       <circle cx={-crown * 0.55} cy={-height + crown * 1.15} r={crown * 0.45} fill={leaves} />
       <circle cx={crown * 0.6} cy={-height + crown * 1.2} r={crown * 0.42} fill={leaves} />
     </g>

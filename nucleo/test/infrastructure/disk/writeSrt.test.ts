@@ -11,7 +11,7 @@ const props: VideoProps = {
   totalFrames: 100, soundEffects: [], cast: [{ id: 'narrator', name: 'Narrador', parameters: {}, defaultExpression: 'neutral' }],
   segments: [{
     lineId: '1', speaker: 'narrator', chapter: 1, start: 30, lineDuration: 40, totalDuration: 50, scene: { type: 'talk' }, sceneKey: 0, beats: [], states: {},
-    words: [{ text: 'Você', start: 6, end: 20 }, { text: 'nasceu.', start: 21, end: 40 }],
+    words: [{ text: 'Você', start: 6, end: 20 }, { text: 'acordou.', start: 21, end: 40 }],
   }],
 };
 
@@ -20,7 +20,7 @@ test('writeSrt saves the srt with the times of the words, creating the folder', 
   try {
     const file = join(folder, 'render', 'captions.srt');
     await writeSrt(props, file);
-    assert.equal(await readFile(file, 'utf8'), '1\n00:00:01,700 --> 00:00:02,833\nVocê nasceu.\n');
+    assert.equal(await readFile(file, 'utf8'), '1\n00:00:01,700 --> 00:00:02,833\nVocê acordou.\n');
   } finally {
     await rm(folder, { recursive: true, force: true });
   }

@@ -3,7 +3,7 @@ import type { Effect } from '../script/SceneElements.ts';
 /** The schema refuses more; the domain clamps too, so no input can ask for thousands of particles. */
 export const MAXIMUM_INTENSITY = 3;
 
-// Without `intensity`, each effect uses the strength that looked right in the reference stills.
+// Without `intensity`, each effect uses the strength that looked right in the test stills.
 const DEFAULT_INTENSITIES: Readonly<Partial<Record<Effect['type'], number>>> = { vignette: 0.7, tint: 0.35, glow: 0.6 };
 
 /** How strong an effect is, from 0 to `MAXIMUM_INTENSITY` (1 = the normal amount). */

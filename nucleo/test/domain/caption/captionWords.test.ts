@@ -32,9 +32,9 @@ test('a segment without words (old props) gives no words and does not crash', ()
 
 test('a voice recorded before Task 6 (no words) still drives the word caption', () => {
   const envelope = Array.from({ length: 60 }, () => 0.5);
-  const texts = ['Você', 'nasceu', 'em', 'mil'];
+  const texts = ['Você', 'ficou', 'sem', 'wi-fi'];
   const frames = LineTimings.of({ file: 'a.wav', envelope, visemes: 'A'.repeat(60) }, texts).toFrames(texts);
   const caption = WordCaption.of(captionWords(frames, 60), 908);
-  assert.deepEqual(caption.groupAt(Frame.of(0)), { words: ['Você', 'nasceu', 'em'], active: 0 });
-  assert.deepEqual(caption.groupAt(Frame.of(59)), { words: ['mil'], active: 0 });
+  assert.deepEqual(caption.groupAt(Frame.of(0)), { words: ['Você', 'ficou', 'sem'], active: 0 });
+  assert.deepEqual(caption.groupAt(Frame.of(59)), { words: ['wi-fi'], active: 0 });
 });

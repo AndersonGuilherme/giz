@@ -7,8 +7,8 @@ import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 import type { Hud } from '../../../src/domain/script/SceneElements.ts';
 
 const HUD: Hud = {
-  fields: [{ label: 'ANO', value: '1347' }, { label: 'IDADE', value: '7' }, { label: 'ALDEIA', value: '190' }],
-  bar: { label: 'CHANCE DE CHEGAR AOS 20', value: 65 },
+  fields: [{ label: 'DIA', value: '3' }, { label: 'SEM', value: 'WI-FI' }, { label: 'HUMOR', value: '7' }],
+  bar: { label: 'PACIÊNCIA ATÉ A NOITE', value: 65 },
 };
 const ASPECTS = ['9:16', '16:9'].map((text) => AspectRatio.of(text));
 
@@ -33,7 +33,7 @@ test('the HUD sits on the top left corner of the safe area', () => {
 
 test('the fields become one line separated by dots, fitted by TextFit', () => {
   const layout = HudLayout.for(HUD, AspectRatio.of('16:9'));
-  assert.deepEqual(layout.fields.fit.lines, ['ANO 1347 · IDADE 7 · ALDEIA 190']);
+  assert.deepEqual(layout.fields.fit.lines, ['DIA 3 · SEM WI-FI · HUMOR 7']);
   assert.ok(layout.fields.fit.fits);
 });
 

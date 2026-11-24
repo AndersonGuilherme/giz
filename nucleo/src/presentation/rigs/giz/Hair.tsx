@@ -1,4 +1,6 @@
 import type { FC } from 'react';
+import { Silhouette } from '../../../domain/drawing/Silhouette.ts';
+import { Chalked } from './Chalked.tsx';
 import type { Hair as HairName, Look } from './parameters.ts';
 import { shade } from '../svg.ts';
 
@@ -7,16 +9,32 @@ type Piece = FC<Readonly<{ look: Look }>>;
 
 const Nothing: Piece = () => null;
 
-const BunBack: Piece = ({ look }) => <circle cx={200} cy={22} r={38} fill={look.headColor} />;
-const BunFront: Piece = ({ look }) => <ellipse cx={200} cy={46} rx={28} ry={9} fill={look.accessoryColor} />;
+const BUN = Silhouette.ellipse({ x: 200, y: 22 }, 38, 38);
+const SHORT = 'M80,118 C88,44 146,18 182,30 C196,10 226,12 236,30 C276,22 316,52 320,118 C304,92 286,80 262,78'
+  + ' C246,96 214,100 196,86 C170,100 128,96 116,80 C100,86 88,100 80,118 Z';
+const CROWN = 'M134,58 C132,6 150,-12 200,-12 C250,-12 268,6 266,58 Z';
 
+const BunBack: Piece = ({ look }) => (
+  <g>
+    <path d={BUN.path()} fill={look.hairColor} />
+    <Chalked look={look} outline={BUN} seed="bun" />
+  </g>
+);
+
+// A cap of hair with a wavy fringe over the forehead.
 const Short: Piece = ({ look }) => (
   <g>
-    <path
-      d="M84,110 C96,40 150,22 176,30 C182,10 214,6 226,26 C258,14 300,40 306,84 C320,92 326,110 324,124 C290,80 250,66 200,68 C150,66 110,80 84,110 Z"
-      fill={look.headColor}
-    />
-    <path d="M150,38 C176,30 200,32 220,38" fill="none" stroke={shade(look.headColor, 0.25)} strokeWidth={4} strokeLinecap="round" />
+    <path d={SHORT} fill={look.hairColor} />
+    <path d="M150,44 C176,34 206,36 228,46" fill="none" stroke={shade(look.hairColor, 0.25)} strokeWidth={4} strokeLinecap="round" />
+    <Chalked look={look} outline={Silhouette.parse(SHORT)} seed="hair" />
+  </g>
+);
+
+// The hair with a tie where the bun meets the head.
+const BunFront: Piece = ({ look }) => (
+  <g>
+    <Short look={look} />
+    <ellipse cx={200} cy={44} rx={24} ry={8} fill={look.accessoryColor} />
   </g>
 );
 
@@ -31,9 +49,11 @@ const Scarf: Piece = ({ look }) => (
 
 const Hat: Piece = ({ look }) => (
   <g>
-    <path d="M134,58 C132,6 150,-12 200,-12 C250,-12 268,6 266,58 Z" fill={look.accessoryColor} />
+    <path d={CROWN} fill={look.accessoryColor} />
     <path d="M133,34 L267,34 L266,56 L134,56 Z" fill={shade(look.accessoryColor, -0.35)} />
+    <Chalked look={look} outline={Silhouette.parse(CROWN)} seed="hat" />
     <ellipse cx={200} cy={60} rx={150} ry={20} fill={shade(look.accessoryColor, -0.08)} />
+    <Chalked look={look} outline={Silhouette.ellipse({ x: 200, y: 60 }, 150, 20)} seed="brim" />
   </g>
 );
 

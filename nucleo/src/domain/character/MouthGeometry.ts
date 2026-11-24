@@ -77,9 +77,13 @@ export class MouthGeometry {
     };
   }
 
-  /** The viseme replaces the expression's mouth only while speaking and not at rest (X). */
+  /**
+   * The viseme replaces the expression's mouth only while speaking and not at rest (X). A listener keeps the lips
+   * closed (a smile stays a closed smile): an open mouth on someone who is not speaking reads as speech.
+   */
   static forState(state: CharacterState): MouthOfState {
     if (state.isSpeaking() && state.viseme() !== 'X') return { speaking: true, shape: MouthGeometry.for(state.viseme(), state.opening()) };
-    return { speaking: false, shape: MouthGeometry.silent(FaceGeometry.for(state.expression()).mouth) };
+    const { mouth } = FaceGeometry.for(state.expression());
+    return { speaking: false, shape: MouthGeometry.silent(state.isSpeaking() ? mouth : { ...mouth, opening: 0 }) };
   }
 }

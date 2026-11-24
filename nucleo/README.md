@@ -9,7 +9,7 @@ Os exemplos completos estão em [`examples/`](examples/):
 
 | Pasta | O que é |
 |---|---|
-| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador, dois personagens giz, 6 fundos vetoriais, câmera, chuva, fogo, HUD e texto grande |
+| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador, dois personagens no estilo giz, 6 fundos vetoriais, câmera, chuva, fogo, HUD e texto grande |
 | `examples/coupon-lesson/pt-BR` e `en` | Aula 16:9 sobre um bug de cupom de desconto, com Lia e Téo, cartão, título, código, terminal, citação e desafio |
 
 Use qualquer uma dessas pastas como ponto de partida: copie a pasta, troque os textos e rode `produce`.
@@ -157,23 +157,30 @@ Um narrador, só voz:
 O `check` recusa um parâmetro que o rig não tem, um valor fora da lista ou uma cor que não é `#rrggbb`, e diz o
 arquivo, o campo e o valor. Veja um rig desenhado com `giz sheet <rig>`.
 
-### `giz` (giz)
+### `giz` (estilo giz, o padrão da casa)
 
-Cabeça redonda escura e corpo simples, no estilo dos vídeos curtos de curiosidade.
+O visual próprio do giz: cabeça colorida com tom de pele, contorno de giz (um traço esbranquiçado levemente
+irregular, igual em todo quadro), olhos arredondados com íris colorida, pupila e brilho, um pontinho de nariz e, se
+quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vira sorriso fechado).
 
 | Parâmetro | Tipo | Padrão | Valores |
 |---|---|---|---|
-| `headColor` | cor | `#151515` | qualquer `#rrggbb` |
-| `shine` | sim/não | `true` | o brilho na cabeça |
+| `skin` | opção | `medium` | `light`, `fair`, `medium`, `tan`, `brown`, `deep` (do mais claro ao mais escuro) |
+| `headShape` | opção | `round` | `round`, `oval`, `soft-square`, `bean` |
+| `eyeColor` | cor | `#7a4a26` | a cor da íris |
+| `hairColor` | cor | `#3a2418` | o cabelo e as sobrancelhas |
+| `cheeks` | sim/não | `true` | bochechas rosadas |
+| `freckles` | sim/não | `false` | sardas |
+| `chalk` | sim/não | `true` | o contorno de giz |
 | `outfit` | opção | `tshirt` | `tshirt`, `tunic`, `dress`, `hoodie` |
-| `outfitColor` | cor | `#3f6fb5` | |
-| `hair` | opção | `none` | `none`, `bun`, `short`, `scarf`, `hat` |
-| `accessoryColor` | cor | `#e8d9b5` | a cor do lenço, do chapéu ou do coque |
+| `outfitColor` | cor | `#2f8f83` | |
+| `hair` | opção | `short` | `none`, `bun`, `short`, `scarf`, `hat` |
+| `accessoryColor` | cor | `#f2b134` | a cor do lenço, do chapéu, do prendedor do coque e do cinto |
 | `glasses` | sim/não | `false` | |
 | `eyeScale` | número | `1` | de `0.8` a `1.4` |
 
 ```json
-{ "rig": "giz", "parameters": { "outfit": "hoodie", "outfitColor": "#2f7f6f", "hair": "short", "glasses": true } }
+{ "rig": "giz", "parameters": { "skin": "tan", "headShape": "soft-square", "eyeColor": "#4c9a5a", "outfit": "hoodie", "hair": "short", "glasses": true } }
 ```
 
 ### `lia-style` (estilo Lia)
@@ -334,7 +341,7 @@ Os fundos vetoriais têm três camadas que se movem em velocidades diferentes co
 | `field` | campo com morros, árvore e cerca |
 | `night-sky` | céu estrelado com lua e cabana |
 | `lab` | laboratório com frascos e bancada |
-| `village` | vila ao pôr do sol |
+| `village` | vila num morro de manhã, com moinho, poço e barraca de frutas |
 
 `colors` troca cores da paleta, uma a uma. Os nomes ficam no começo de cada arquivo em
 `src/presentation/scenes/scenario/backgrounds/` (por exemplo `skyTop`, `skyBottom` e `window` na `street`).

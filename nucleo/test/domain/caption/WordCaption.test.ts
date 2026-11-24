@@ -12,27 +12,27 @@ function words(text: string, seconds: number): Words {
 }
 
 test('a group of up to 3 words with the right active word', () => {
-  const caption = WordCaption.of(words('Você nasceu em mil trezentos e quarenta', 0.3), 908);
-  assert.deepEqual(caption.groupAt(Frame.of(10)), { words: ['Você', 'nasceu', 'em'], active: 1 });
+  const caption = WordCaption.of(words('Você ficou ali sem televisão e paciência', 0.3), 908);
+  assert.deepEqual(caption.groupAt(Frame.of(10)), { words: ['Você', 'ficou', 'ali'], active: 1 });
 });
 
 test('the group changes only when the next group starts', () => {
-  const caption = WordCaption.of(words('Você nasceu em mil trezentos e quarenta', 0.3), 908);
-  assert.deepEqual(caption.groupAt(Frame.of(26)), { words: ['Você', 'nasceu', 'em'], active: 2 });
-  assert.deepEqual(caption.groupAt(Frame.of(27)), { words: ['mil', 'trezentos'], active: 0 });
+  const caption = WordCaption.of(words('Você ficou ali sem televisão e paciência', 0.3), 908);
+  assert.deepEqual(caption.groupAt(Frame.of(26)), { words: ['Você', 'ficou', 'ali'], active: 2 });
+  assert.deepEqual(caption.groupAt(Frame.of(27)), { words: ['sem', 'televisão'], active: 0 });
 });
 
 test('a group that does not fit one line at the base size gets fewer words', () => {
-  const caption = WordCaption.of(words('mil trezentos e quarenta', 0.3), 908);
-  assert.deepEqual(caption.groupAt(Frame.of(0)).words, ['mil', 'trezentos']);
-  assert.deepEqual(caption.groupAt(Frame.of(18)).words, ['e', 'quarenta']);
+  const caption = WordCaption.of(words('sem televisão e paciência', 0.3), 908);
+  assert.deepEqual(caption.groupAt(Frame.of(0)).words, ['sem', 'televisão']);
+  assert.deepEqual(caption.groupAt(Frame.of(18)).words, ['e', 'paciência']);
 });
 
-test('punctuation closes the group, as in "DOENÇA."', () => {
-  const caption = WordCaption.of(words('Veio a doença. E depois', 0.3), 908);
-  assert.deepEqual(caption.groupAt(Frame.of(0)).words, ['Veio', 'a', 'doença.']);
+test('punctuation closes the group, as in "CHUVA."', () => {
+  const caption = WordCaption.of(words('Veio a chuva. E depois', 0.3), 908);
+  assert.deepEqual(caption.groupAt(Frame.of(0)).words, ['Veio', 'a', 'chuva.']);
   assert.deepEqual(caption.groupAt(Frame.of(28)).words, ['E', 'depois']);
-  const comma = WordCaption.of(words('Sim, você nasceu', 0.3), 908);
+  const comma = WordCaption.of(words('Sim, você ficou', 0.3), 908);
   assert.deepEqual(comma.groupAt(Frame.of(0)).words, ['Sim,']);
 });
 
@@ -54,7 +54,7 @@ test('in a pause between words the group stays but nothing is highlighted', () =
 });
 
 test('a group that fits stays at the base size of the display family', () => {
-  const caption = WordCaption.of(words('Você nasceu', 0.3), 908);
+  const caption = WordCaption.of(words('Você acordou', 0.3), 908);
   assert.equal(WORD_CAPTION_FONT.family(), 'display');
   assert.equal(caption.sizeAt(Frame.of(0)), WORD_CAPTION_FONT.baseSize());
   assert.equal(caption.fits(), true);
@@ -82,8 +82,8 @@ test('a line without words has no caption and fits', () => {
 
 test('the spoken word gets room on each side in proportion to its length', () => {
   assert.ok(ACTIVE_WORD_SCALE > 1);
-  assert.ok(activeWordMargin('A') < activeWordMargin('DOENÇA.'));
-  assert.ok(activeWordMargin('DOENÇA.') < 0.3);
+  assert.ok(activeWordMargin('A') < activeWordMargin('CHUVA.'));
+  assert.ok(activeWordMargin('CHUVA.') < 0.3);
 });
 
 test('a group heavy with wide capitals gets fewer words instead of running out of the line', () => {

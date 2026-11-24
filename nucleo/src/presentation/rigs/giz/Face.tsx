@@ -3,28 +3,9 @@ import type { CharacterState } from '../../../domain/character/CharacterState.ts
 import { FaceGeometry } from '../../../domain/character/FaceGeometry.ts';
 import { Brows } from './Brows.tsx';
 import { Eyes, Glasses } from './Eyes.tsx';
-import { HEAD } from './measures.ts';
+import { CHEEKS, FRECKLES, HEAD, NOSE } from './measures.ts';
 import { Mouth } from './Mouth.tsx';
-import type { Look } from './parameters.ts';
-import { shade, useSvgId } from '../svg.ts';
-
-/** The ball: flat color, a soft light from the upper left and, with `shine`, a glossy highlight. */
-export const Ball: FC<Readonly<{ look: Look }>> = ({ look }) => {
-  const light = useSvgId('light');
-  return (
-    <g>
-      <radialGradient id={light} cx="0.36" cy="0.3" r="0.75">
-        <stop offset="0" stopColor="#ffffff" stopOpacity={0.16} />
-        <stop offset="0.6" stopColor="#ffffff" stopOpacity={0} />
-      </radialGradient>
-      <circle cx={HEAD.x} cy={HEAD.y} r={HEAD.radius} fill={look.headColor} />
-      <circle cx={HEAD.x} cy={HEAD.y} r={HEAD.radius} fill={`url(#${light})`} />
-      <circle cx={HEAD.x} cy={HEAD.y} r={HEAD.radius - 2} fill="none" stroke={shade(look.headColor, 0.12)} strokeWidth={3} />
-      {look.shine && <ellipse cx={130} cy={84} rx={36} ry={15} transform="rotate(-38 130 84)" fill="#ffffff" opacity={0.3} />}
-      {look.shine && <circle cx={100} cy={122} r={6} fill="#ffffff" opacity={0.35} />}
-    </g>
-  );
-};
+import { skinOf, type Look } from './parameters.ts';
 
 const Sweat: FC = () => (
   <path
@@ -36,12 +17,31 @@ const Sweat: FC = () => (
   />
 );
 
-/** Eyes, brows and mouth from the domain geometry of the state's expression. */
+const SIDES = [-1, 1] as const;
+
+/** A small nose dot, the optional cheeks and freckles. */
+const Details: FC<Readonly<{ look: Look }>> = ({ look }) => {
+  const skin = skinOf(look);
+  return (
+    <g>
+      {look.cheeks && SIDES.map((side) => (
+        <ellipse key={side} cx={HEAD.x + side * CHEEKS.x} cy={CHEEKS.y} rx={CHEEKS.radiusX} ry={CHEEKS.radiusY} fill={skin.blush} opacity={0.6} />
+      ))}
+      {look.freckles && SIDES.flatMap((side) => FRECKLES.map(([x, y]) => (
+        <circle key={`${side}${x}${y}`} cx={HEAD.x + side * (CHEEKS.x + x)} cy={CHEEKS.y + y} r={2.6} fill={skin.line} opacity={0.45} />
+      )))}
+      <ellipse cx={HEAD.x} cy={NOSE.y} rx={NOSE.radiusX} ry={NOSE.radiusY} fill={skin.line} opacity={0.55} />
+    </g>
+  );
+};
+
+/** Eyes, brows and mouth from the domain geometry of the state's expression, plus the nose and cheeks. */
 export const Face: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }) => {
   const face = FaceGeometry.for(state.expression());
   const eyes = FaceGeometry.eyes(state.expression(), state.gaze(), state.eyeClosure());
   return (
     <g>
+      <Details look={look} />
       <Eyes eyes={eyes} look={look} />
       {look.glasses && <Glasses look={look} />}
       <Brows pair={face.brows} look={look} />

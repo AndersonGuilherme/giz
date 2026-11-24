@@ -9,7 +9,7 @@ import type { LayoutRegistry } from './LayoutRegistry.ts';
 
 /**
  * The text boxes of a scenario (HUD and big text). The characters are not boxes: the caption may cover their legs,
- * as in the reference videos. Placing them and aiming the camera still run here, so that too many characters or a
+ * as in short story videos. Placing them and aiming the camera still run here, so that too many characters or a
  * camera target out of the scene become `check` errors.
  */
 export function scenarioBoxes(scene: ScenarioScene, aspect: AspectRatio): Boxes {

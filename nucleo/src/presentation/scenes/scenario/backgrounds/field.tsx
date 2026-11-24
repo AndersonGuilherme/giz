@@ -1,35 +1,32 @@
 import type { FC } from 'react';
-import { Fill, Glow, Grass, Placed, Ridge, Tree } from './parts.tsx';
+import { ChalkBox, ChalkShape, Fill, Glow, Grass, Placed, Ridge, Tree } from './parts.tsx';
 import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
 
-// An open field on a warm afternoon: soft sky with clouds, blue hills, a meadow with a lone tree, a fence and flowers.
+// An open field on a warm afternoon, giz style: teal sky with chalk clouds, layered hills with chalk ridges, a meadow
+// with a lone tree, a fence and flowers.
 
 const palette = {
-  skyTop: '#6fa8d8',
-  skyBottom: '#f6dca0',
-  sun: '#fff2c4',
-  cloud: '#fff8ea',
-  farHills: '#7ea0a8',
-  hills: '#7fa65a',
-  meadow: '#6f9a45',
-  meadowNear: '#557d33',
-  path: '#c9a66b',
-  trunk: '#5a3d26',
-  leaves: '#4f8a3a',
-  leavesShade: '#3a6a2c',
-  fence: '#8a6a48',
-  flower1: '#f4d35e',
-  flower2: '#f2f2f2',
-  flower3: '#e56b6f',
-  grass: '#3e6526',
+  skyTop: '#6fa6b4',
+  skyBottom: '#efe4c4',
+  sun: '#fff1c1',
+  cloud: '#f6f1e4',
+  farHills: '#5e8f8a',
+  hills: '#7aa06a',
+  meadow: '#8db06a',
+  meadowNear: '#6c9152',
+  path: '#e6d2a6',
+  trunk: '#6b4a32',
+  leaves: '#4f8a5a',
+  leavesShade: '#3b6e47',
+  fence: '#8a6a50',
+  flower1: '#f2b134',
+  flower2: '#f3efe2',
+  flower3: '#e8735a',
+  grass: '#4b7340',
 };
 
-const Cloud: FC<Readonly<{ color: string }>> = ({ color }) => (
-  <g fill={color} opacity={0.9}>
-    <ellipse cx={0} cy={0} rx={120} ry={34} />
-    <circle cx={-40} cy={-24} r={42} />
-    <circle cx={30} cy={-34} r={52} />
-  </g>
+const Cloud: FC<Readonly<{ color: string; seed: string }>> = ({ color, seed }) => (
+  <ChalkShape path="M -120 10 Q -140 -20 -92 -30 Q -80 -66 -36 -60 Q -8 -96 40 -80 Q 90 -86 96 -36 Q 136 -30 120 10 Z" fill={color} chalk={{ seed, width: 4 }} />
 );
 
 const Back: FC<LayerProps> = (layer) => {
@@ -38,10 +35,10 @@ const Back: FC<LayerProps> = (layer) => {
     <>
       <Fill id="field-sky" layer={layer} stops={[[0, colors.skyTop], [1, colors.skyBottom]]} to={ground - 150 * unit} />
       <Glow id="field-sun" x={width * 0.78} y={ground - 620 * unit} radius={360 * unit} color={colors.sun} opacity={0.9} />
-      <Placed x={width * 0.22} y={ground - 640 * unit} scale={unit}><Cloud color={colors.cloud} /></Placed>
-      <Placed x={width * 0.6} y={ground - 760 * unit} scale={unit * 0.8}><Cloud color={colors.cloud} /></Placed>
-      <Ridge base={ground} fill={colors.farHills} points={[[-width * 0.1, ground - 260 * unit], [width * 0.3, ground - 380 * unit], [width * 0.6, ground - 280 * unit], [width * 0.9, ground - 350 * unit], [width * 1.1, ground - 300 * unit]]} />
-      <Ridge base={ground} fill={colors.hills} points={[[-width * 0.1, ground - 180 * unit], [width * 0.35, ground - 240 * unit], [width * 0.7, ground - 170 * unit], [width * 1.1, ground - 220 * unit]]} />
+      <Placed x={width * 0.22} y={ground - 640 * unit} scale={unit}><Cloud color={colors.cloud} seed="field-cloud1" /></Placed>
+      <Placed x={width * 0.6} y={ground - 760 * unit} scale={unit * 0.8}><Cloud color={colors.cloud} seed="field-cloud2" /></Placed>
+      <Ridge base={ground} fill={colors.farHills} chalk={{ seed: 'field-far', width: 4 * unit }} points={[[-width * 0.1, ground - 260 * unit], [width * 0.3, ground - 380 * unit], [width * 0.6, ground - 280 * unit], [width * 0.9, ground - 350 * unit], [width * 1.1, ground - 300 * unit]]} />
+      <Ridge base={ground} fill={colors.hills} chalk={{ seed: 'field-hills', width: 4 * unit }} points={[[-width * 0.1, ground - 180 * unit], [width * 0.35, ground - 240 * unit], [width * 0.7, ground - 170 * unit], [width * 1.1, ground - 220 * unit]]} />
     </>
   );
 };
@@ -61,7 +58,7 @@ const Middle: FC<LayerProps> = (layer) => {
   const horizon = ground - 150 * unit;
   return (
     <>
-      <Placed x={width * 0.8} y={horizon + 10 * unit} scale={unit}><Tree trunk={colors.trunk} leaves={colors.leaves} shade={colors.leavesShade} height={560} /></Placed>
+      <Placed x={width * 0.8} y={horizon + 10 * unit} scale={unit}><Tree trunk={colors.trunk} leaves={colors.leaves} shade={colors.leavesShade} height={560} seed="field-tree" /></Placed>
       <Fill id="field-meadow" layer={layer} stops={[[0, colors.meadow], [1, colors.meadowNear]]} from={horizon} />
       <path d={`M ${width * 0.46} ${horizon} Q ${width * 0.5} ${ground} ${width * 0.3} ${height * 1.1} L ${width * 0.62} ${height * 1.1} Q ${width * 0.56} ${ground} ${width * 0.5} ${horizon} Z`} fill={colors.path} opacity={0.7} />
       <Placed x={width * 0.04} y={horizon + 40 * unit} scale={unit * 0.8}><FieldFence color={colors.fence} /></Placed>
@@ -72,7 +69,7 @@ const Middle: FC<LayerProps> = (layer) => {
 
 const FieldFence: FC<Readonly<{ color: string }>> = ({ color }) => (
   <g fill={color}>
-    {[0, 120, 240, 360].map((x) => <rect key={x} x={x - 8} y={-120} width={16} height={120} rx={3} />)}
+    {[0, 120, 240, 360].map((x) => <ChalkBox key={x} x={x - 8} y={-120} width={16} height={120} corner={3} fill={color} chalk={{ seed: `field-post${x}`, width: 4 }} />)}
     <rect x={0} y={-96} width={360} height={10} rx={4} />
     <rect x={0} y={-52} width={360} height={10} rx={4} />
   </g>

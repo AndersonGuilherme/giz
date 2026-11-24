@@ -3,7 +3,11 @@ import type { Expression, Pose } from '../../domain/cast/PoseAndExpression.ts';
 import type { Viseme } from '../../domain/speech/Visemes.ts';
 import { CharacterState } from '../../domain/character/CharacterState.ts';
 
-export const INK = '#26221c';
+// The giz board: chalk-colored text on a slate background, the cards a lighter slate.
+export const INK = '#f3efe2';
+export const BOARD = '#2a3634';
+const CARD = '#3a4a47';
+const MUTED = '#a9c2b8';
 export const FONT = '"DejaVu Sans", "Liberation Sans", Arial, sans-serif';
 
 type StillOptions = Readonly<{ pose?: Pose; expression?: Expression; viseme?: Viseme }>;
@@ -23,7 +27,7 @@ export const Card: FC<Readonly<{ width: number; height: number; label: string; c
   <div style={{ width: props.width, display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
     <div style={{
       width: props.width, height: props.height, position: 'relative', overflow: props.clip ? 'hidden' : 'visible',
-      background: props.clip ? '#ffffff' : 'transparent', borderRadius: 18, boxShadow: props.clip ? '0 2px 6px rgba(0,0,0,0.12)' : 'none',
+      background: props.clip ? CARD : 'transparent', borderRadius: 18, boxShadow: props.clip ? '0 2px 6px rgba(0,0,0,0.25)' : 'none',
     }}>
       {props.children}
     </div>
@@ -41,7 +45,7 @@ type SectionProps = Readonly<{ title: string; children: ReactNode; style?: CSSPr
 /** A titled row of cards; `wrap` packs them from the left in several lines. */
 export const Section: FC<SectionProps> = ({ title, children, style, wrap }) => (
   <div style={style}>
-    <div style={{ fontFamily: FONT, fontSize: 22, fontWeight: 700, color: '#7a6a52', letterSpacing: 2, marginBottom: 8 }}>{title}</div>
+    <div style={{ fontFamily: FONT, fontSize: 22, fontWeight: 700, color: MUTED, letterSpacing: 2, marginBottom: 8 }}>{title}</div>
     <div style={{ display: 'flex', flexWrap: 'wrap', gap: wrap ? '10px 15px' : 10, justifyContent: wrap ? 'flex-start' : 'space-between' }}>{children}</div>
   </div>
 );

@@ -15,7 +15,7 @@ export type ScenePreviewProps = Readonly<{
   caption?: Readonly<{ text: string; format: Format; style?: CaptionStyle }>;
 }>;
 
-// The test scene of Task 12: a village at dusk with a campfire, the HUD of a chronicle and two worried villagers.
+// The test scene: two friends in the village on the third day without internet, one explaining, one unconvinced.
 export const PREVIEW_DEFAULTS: ScenePreviewProps = {
   aspect: '16:9',
   frames: 91,
@@ -27,15 +27,15 @@ export const PREVIEW_DEFAULTS: ScenePreviewProps = {
       { character: 'beto', position: 'right' },
     ],
     camera: { type: 'zoom-in', to: { zoom: 1.12, x: 0, y: 0 }, easing: 'smooth' },
-    effects: [{ type: 'fire' }, { type: 'particles', intensity: 0.6 }, { type: 'vignette', intensity: 0.75 }],
+    effects: [{ type: 'particles', intensity: 0.4 }, { type: 'vignette', intensity: 0.5 }],
     hud: {
-      fields: [{ label: 'ANO', value: '1347' }, { label: 'IDADE', value: '7' }, { label: 'ALDEIA', value: '190' }],
-      bar: { label: 'CHANCE DE CHEGAR AOS 20', value: 65 },
+      fields: [{ label: 'DIA', value: '3' }, { label: 'SEM', value: 'WI-FI' }],
+      bar: { label: 'PACIÊNCIA', value: 40 },
     },
   },
   cast: [
-    { id: 'ana', rig: 'giz', parameters: { outfit: 'dress', outfitColor: '#a5452f', hair: 'scarf', accessoryColor: '#e9dcc0' } },
-    { id: 'beto', rig: 'giz', parameters: { outfit: 'tunic', outfitColor: '#6f7a32' } },
+    { id: 'ana', rig: 'giz', parameters: { skin: 'brown', headShape: 'bean', eyeColor: '#4c9a5a', hair: 'bun', hairColor: '#1f1410', outfit: 'hoodie', outfitColor: '#e8735a', accessoryColor: '#f6e7c8' } },
+    { id: 'beto', rig: 'giz', parameters: { skin: 'fair', headShape: 'soft-square', eyeColor: '#3f7fc4', hairColor: '#b4532a', freckles: true, glasses: true, outfitColor: '#3d6fb0', accessoryColor: '#f2b134' } },
   ],
-  states: { ana: { expression: 'surprised', pose: 'hands-on-mouth' }, beto: { expression: 'worried', pose: 'hand-on-head' } },
+  states: { ana: { expression: 'happy', pose: 'explain' }, beto: { expression: 'skeptical', pose: 'think' } },
 };

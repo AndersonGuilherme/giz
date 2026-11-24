@@ -1,104 +1,89 @@
 import type { FC } from 'react';
+import { ChalkBox, ChalkShape } from './parts.tsx';
 import type { Palette } from './VectorBackgroundModel.ts';
 
-// Pieces of the village, in units, standing on (0, 0). Timber-framed houses with thatched roofs and warm windows.
+// Pieces of the giz village, in units, standing on (0, 0): white houses with tiled roofs on a hill, a round tower,
+// a windmill, a stone well and a fruit stall. Every main shape carries a chalk line.
 
-const LitWindow: FC<Readonly<{ x: number; y: number; colors: Palette }>> = ({ x, y, colors }) => (
+type Piece = FC<Readonly<{ colors: Palette; seed: string }>>;
+const line = (seed: string, part: string, width = 5) => ({ seed: `${seed}-${part}`, width });
+
+/** A small house: whitewashed walls, a tiled roof of `roof` color, one window and a door. */
+export const HillHouse: FC<Readonly<{ colors: Palette; seed: string; roof: string }>> = ({ colors, seed, roof }) => (
   <g>
-    <circle cx={x + 22} cy={y + 28} r={70} fill="url(#village-window-glow)" />
-    <rect x={x} y={y} width={44} height={56} rx={4} fill={colors.window} />
-    <path d={`M ${x + 22} ${y} V ${y + 56} M ${x} ${y + 26} H ${x + 44}`} stroke={colors.timber} strokeWidth={6} />
-    <rect x={x} y={y} width={44} height={56} rx={4} fill="none" stroke={colors.timber} strokeWidth={7} />
+    <ChalkBox x={-70} y={-90} width={140} height={90} fill={colors.wall} chalk={line(seed, 'wall')} />
+    <rect x={30} y={-90} width={40} height={90} fill={colors.wallShade} />
+    <ChalkShape path="M -88 -86 L 0 -150 L 88 -86 Z" fill={roof} chalk={line(seed, 'roof')} />
+    <path d="M -56 -98 H 56 M -36 -116 H 36" stroke={colors.roofLine} strokeWidth={5} />
+    <rect x={-48} y={-66} width={30} height={30} rx={6} fill={colors.window} />
+    <path d="M 4 0 V -50 Q 22 -66 40 -50 V 0 Z" fill={colors.door} />
   </g>
 );
 
-const Thatch: FC<Readonly<{ colors: Palette }>> = ({ colors }) => {
-  const strands = Array.from({ length: 13 }, (_empty, index) => -165 + index * 27);
+/** A round tower with a pointed cap and a flag. */
+export const Tower: Piece = ({ colors, seed }) => (
+  <g>
+    <ChalkBox x={-42} y={-230} width={84} height={230} corner={8} fill={colors.wall} chalk={line(seed, 'body')} />
+    <rect x={12} y={-230} width={30} height={230} fill={colors.wallShade} />
+    <ChalkShape path="M -56 -226 L 0 -320 L 56 -226 Z" fill={colors.roof2} chalk={line(seed, 'cap')} />
+    <path d="M 0 -320 V -372 M 0 -372 L 40 -360 L 0 -348" stroke={colors.flag} strokeWidth={6} fill={colors.flag} />
+    <rect x={-12} y={-180} width={24} height={36} rx={12} fill={colors.window} />
+  </g>
+);
+
+/** A windmill on a hill: a tapered body and four sails. */
+export const Windmill: Piece = ({ colors, seed }) => (
+  <g>
+    <ChalkShape path="M -46 0 L -30 -200 L 30 -200 L 46 0 Z" fill={colors.mill} chalk={line(seed, 'body')} />
+    <ChalkShape path="M -40 -196 Q 0 -250 40 -196 Z" fill={colors.roof2} chalk={line(seed, 'cap')} />
+    <g transform="translate(0 -206) rotate(20)">
+      {[0, 90, 180, 270].map((angle) => (
+        <g key={angle} transform={`rotate(${angle})`}>
+          <ChalkBox x={-14} y={-170} width={28} height={150} corner={4} fill={colors.millSail} chalk={line(seed, `sail${angle}`, 4)} />
+        </g>
+      ))}
+      <circle r={12} fill={colors.wood} />
+    </g>
+  </g>
+);
+
+/** A stone well with a little gabled roof on two posts and a bucket. */
+export const Well: Piece = ({ colors, seed }) => (
+  <g>
+    <ChalkBox x={-80} y={-90} width={160} height={90} corner={16} fill={colors.stone} chalk={line(seed, 'stone')} />
+    <path d="M -80 -60 H 80 M -80 -30 H 80 M -30 -90 V -60 M 30 -60 V -30 M -10 -30 V 0" stroke={colors.stoneShade} strokeWidth={5} />
+    <rect x={-74} y={-230} width={14} height={140} fill={colors.wood} />
+    <rect x={60} y={-230} width={14} height={140} fill={colors.wood} />
+    <ChalkShape path="M -110 -220 L 0 -290 L 110 -220 Z" fill={colors.roof} chalk={line(seed, 'roof')} />
+    <path d="M -60 -190 H 60" stroke={colors.wood} strokeWidth={8} />
+    <path d="M 10 -190 V -150" stroke={colors.stoneShade} strokeWidth={3} />
+    <ChalkShape path="M -6 -150 L 26 -150 L 22 -118 L -2 -118 Z" fill={colors.awning} chalk={line(seed, 'bucket', 3)} />
+  </g>
+);
+
+/** A fruit stall: a counter, two poles and a striped awning. */
+export const Stall: Piece = ({ colors, seed }) => {
+  const stripes = [-120, -72, -24, 24, 72];
   return (
     <g>
-      <path d="M -190 -176 L -18 -336 Q 0 -348 18 -336 L 190 -176 Q 0 -160 -190 -176 Z" fill={colors.roof} />
-      <path d="M -190 -176 Q 0 -160 190 -176 L 182 -160 Q 0 -146 -182 -160 Z" fill={colors.roofShade} />
-      <path d={strands.map((x) => `M ${x * 0.12} -322 L ${x} -172`).join(' ')} stroke={colors.roofShade} strokeWidth={4} opacity={0.6} />
-      <path d="M 0 -340 L 190 -176 L 120 -170 Z" fill="#000000" opacity={0.18} />
-    </g>
-  );
-};
-
-/** A house 300 units wide: wall with timbers, a door, two lit windows and a thatched roof. */
-export const House: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
-  <g>
-    <rect x={-150} y={-192} width={300} height={192} fill={colors.wall} />
-    <rect x={60} y={-192} width={90} height={192} fill="#000000" opacity={0.2} />
-    <path
-      d="M -150 -96 H 150 M -60 -192 V 0 M 60 -192 V 0 M -150 -192 L -60 -96 M 60 -96 L 150 -192"
-      stroke={colors.timber}
-      strokeWidth={11}
-      fill="none"
-    />
-    <rect x={-150} y={-192} width={300} height={192} fill="none" stroke={colors.timber} strokeWidth={12} />
-    <path d="M -34 0 V -104 Q 0 -136 34 -104 V 0 Z" fill={colors.timber} />
-    <circle cx={20} cy={-50} r={4} fill={colors.window} />
-    <LitWindow x={-130} y={-80} colors={colors} />
-    <LitWindow x={84} y={-80} colors={colors} />
-    <Thatch colors={colors} />
-    <rect x={70} y={-330} width={34} height={90} fill={colors.timber} />
-  </g>
-);
-
-/** A small chapel with a bell tower, as a far silhouette with one lit window. */
-export const Chapel: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
-  <g fill={colors.farHouses}>
-    <rect x={-90} y={-110} width={150} height={110} />
-    <path d="M -100 -110 L -15 -170 L 70 -110 Z" />
-    <rect x={40} y={-260} width={56} height={260} />
-    <path d="M 32 -260 L 68 -330 L 104 -260 Z" />
-    <rect x={58} y={-228} width={20} height={30} rx={10} fill={colors.window} opacity={0.85} />
-  </g>
-);
-
-/** A far cottage: a dark block with a roof and a lit window. */
-export const Cottage: FC<Readonly<{ colors: Palette; light: boolean }>> = ({ colors, light }) => (
-  <g fill={colors.farHouses}>
-    <rect x={-50} y={-60} width={100} height={60} />
-    <path d="M -62 -58 L 0 -105 L 62 -58 Z" />
-    {light && <rect x={-14} y={-42} width={22} height={22} fill={colors.window} opacity={0.9} />}
-  </g>
-);
-
-/** A barrel and a sack, a corner of the foreground. */
-export const BarrelAndSack: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
-  <g>
-    <path d="M -60 0 Q -74 -70 -60 -140 L 60 -140 Q 74 -70 60 0 Z" fill={colors.barrel} />
-    <path d="M -66 -30 H 66 M -70 -110 H 70" stroke={colors.foreground} strokeWidth={10} />
-    <ellipse cx={0} cy={-140} rx={60} ry={14} fill={colors.foreground} opacity={0.5} />
-    <path d="M 70 0 Q 60 -70 100 -96 Q 112 -110 130 -96 Q 170 -70 160 0 Z" fill={colors.sack} />
-    <path d="M 100 -96 Q 115 -84 130 -96" stroke={colors.foreground} strokeWidth={6} fill="none" />
-  </g>
-);
-
-/** Posts and rails of a wooden fence, `width` units long. */
-export const Fence: FC<Readonly<{ color: string; width: number }>> = ({ color, width }) => {
-  const posts = Array.from({ length: Math.ceil(width / 110) + 1 }, (_empty, index) => index * 110);
-  return (
-    <g fill={color}>
-      {posts.map((x) => <rect key={x} x={x - 9} y={-150} width={18} height={150} rx={4} />)}
-      <rect x={0} y={-118} width={width} height={12} rx={4} />
-      <rect x={0} y={-66} width={width} height={12} rx={4} />
-    </g>
-  );
-};
-
-type RutsProps = Readonly<{ color: string; width: number; horizon: number; bottom: number }>;
-
-/** Wheel ruts and a few stones on the dirt square, converging to the horizon. */
-export const Ruts: FC<RutsProps> = ({ color, width, horizon, bottom }) => (
-  <g stroke={color} strokeLinecap="round" fill="none" opacity={0.7}>
-    <path d={`M ${width * 0.47} ${horizon} Q ${width * 0.4} ${(horizon + bottom) / 2} ${width * 0.3} ${bottom}`} strokeWidth={10} />
-    <path d={`M ${width * 0.53} ${horizon} Q ${width * 0.6} ${(horizon + bottom) / 2} ${width * 0.72} ${bottom}`} strokeWidth={10} />
-    <g fill={color} stroke="none">
-      {[[0.36, 0.3], [0.62, 0.45], [0.2, 0.62], [0.82, 0.7], [0.55, 0.85]].map(([x, depth]) => (
-        <ellipse key={x} cx={width * x!} cy={horizon + (bottom - horizon) * depth!} rx={10 + 18 * depth!} ry={4 + 7 * depth!} />
+      <rect x={-130} y={-240} width={12} height={240} fill={colors.wood} />
+      <rect x={118} y={-240} width={12} height={240} fill={colors.wood} />
+      <ChalkBox x={-140} y={-100} width={280} height={100} corner={8} fill={colors.wood} chalk={line(seed, 'counter')} />
+      {[-90, -50, -10, 30, 70, 104].map((x, index) => (
+        <circle key={x} cx={x} cy={-112} r={20} fill={index % 2 ? colors.fruit1 : colors.fruit2} />
       ))}
+      <path d="M -150 -240 L 150 -240 L 168 -190 L -168 -190 Z" fill={colors.awning} />
+      {stripes.map((x) => <path key={x} d={`M ${x} -240 L ${x + 24} -240 L ${x * 1.12 + 27} -190 L ${x * 1.12} -190 Z`} fill={colors.awning2} />)}
+      <ChalkShape path="M -150 -240 L 150 -240 L 168 -190 L -168 -190 Z" chalk={line(seed, 'awning')} />
     </g>
-  </g>
+  );
+};
+
+/** A flat cloud: one puffy outline with a flat bottom. */
+export const Cloud: Piece = ({ colors, seed }) => (
+  <ChalkShape
+    path="M -130 16 Q -156 -18 -112 -36 Q -96 -78 -44 -70 Q -14 -112 40 -94 Q 92 -100 102 -48 Q 146 -40 132 16 Z"
+    fill={colors.cloud}
+    chalk={line(seed, 'cloud', 4)}
+  />
 );

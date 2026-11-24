@@ -8,8 +8,8 @@ const fps = Fps.DEFAULT;
 
 test('particles are deterministic per frame', () => {
   for (const kind of PARTICLE_KINDS) {
-    const first = Particles.for(kind, { seed: 'aldeia', count: 30 }).at(Frame.of(45), fps);
-    const second = Particles.for(kind, { seed: 'aldeia', count: 30 }).at(Frame.of(45), fps);
+    const first = Particles.for(kind, { seed: 'praça', count: 30 }).at(Frame.of(45), fps);
+    const second = Particles.for(kind, { seed: 'praça', count: 30 }).at(Frame.of(45), fps);
     assert.deepEqual(first, second);
     assert.equal(first.length, 30);
   }

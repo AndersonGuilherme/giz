@@ -7,18 +7,29 @@ const STANCE = { viewBox: { x: 0, y: 0, width: 100, height: 100 }, feet: { x: 50
 
 test('the registry refuses an unknown rig listing the valid ones', () => assert.throws(() => rigRegistry.get('robot'), /giz|lia-style/));
 
-test('the giz rig comes registered with the parameters and defaults from the brief', () => {
+test('the giz rig comes registered with the house-style parameters: skin tones, head shapes, eyes and chalk', () => {
   const { parameters, name } = rigRegistry.get('giz');
   assert.equal(name['pt-BR'], 'Giz');
-  assert.deepEqual(parameters.headColor, { type: 'color', defaultValue: '#151515' });
-  assert.deepEqual(parameters.shine, { type: 'boolean', defaultValue: true });
+  assert.deepEqual(parameters.skin, { type: 'option', defaultValue: 'medium', options: ['light', 'fair', 'medium', 'tan', 'brown', 'deep'] });
+  assert.deepEqual(parameters.headShape, { type: 'option', defaultValue: 'round', options: ['round', 'oval', 'soft-square', 'bean'] });
+  assert.deepEqual(parameters.eyeColor, { type: 'color', defaultValue: '#7a4a26' });
+  assert.deepEqual(parameters.hairColor, { type: 'color', defaultValue: '#3a2418' });
+  assert.deepEqual(parameters.cheeks, { type: 'boolean', defaultValue: true });
+  assert.deepEqual(parameters.freckles, { type: 'boolean', defaultValue: false });
+  assert.deepEqual(parameters.chalk, { type: 'boolean', defaultValue: true });
   assert.deepEqual(parameters.outfit, { type: 'option', defaultValue: 'tshirt', options: ['tshirt', 'tunic', 'dress', 'hoodie'] });
-  assert.deepEqual(parameters.hair, { type: 'option', defaultValue: 'none', options: ['none', 'bun', 'short', 'scarf', 'hat'] });
+  assert.deepEqual(parameters.hair, { type: 'option', defaultValue: 'short', options: ['none', 'bun', 'short', 'scarf', 'hat'] });
   assert.deepEqual(parameters.glasses, { type: 'boolean', defaultValue: false });
   assert.deepEqual(parameters.eyeScale, { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 });
   assert.deepEqual(Object.keys(parameters).sort(), [
-    'accessoryColor', 'eyeScale', 'glasses', 'hair', 'headColor', 'outfit', 'outfitColor', 'shine',
+    'accessoryColor', 'chalk', 'cheeks', 'eyeColor', 'eyeScale', 'freckles', 'glasses', 'hair', 'hairColor', 'headShape', 'outfit', 'outfitColor', 'skin',
   ]);
+});
+
+test('the giz heads are not black by default: no color parameter defaults to black', () => {
+  const { parameters } = rigRegistry.get('giz');
+  const colors = Object.values(parameters).filter(({ type }) => type === 'color').map(({ defaultValue }) => String(defaultValue));
+  assert.ok(colors.every((color) => !['#000000', '#151515', '#101010'].includes(color)));
 });
 
 test('register adds and all() returns in registration order', () => {

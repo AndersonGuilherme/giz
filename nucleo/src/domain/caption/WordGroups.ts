@@ -5,7 +5,7 @@ import { TextFit, type Fit } from '../layout/TextFit.ts';
 export type WordGroup = Readonly<{ first: number; texts: readonly string[]; fit: Fit }>;
 export type GroupRule = Readonly<{ font: Font; width: number; maximumWords: number }>;
 
-// A word that ends a sentence or a clause closes its group, as in "DOENÇA." of the reference videos.
+// A word that ends a sentence or a clause closes its group, as in "Veio a chuva.".
 const CLOSES_GROUP = /[.,!?;:…]["'”’)]*$/;
 
 function joins(group: readonly string[], word: string, rule: GroupRule): boolean {

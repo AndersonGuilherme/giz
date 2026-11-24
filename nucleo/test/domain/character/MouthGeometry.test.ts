@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { MouthGeometry } from '../../../src/domain/character/MouthGeometry.ts';
 import type { Viseme } from '../../../src/domain/speech/Visemes.ts';
+import { EXPRESSIONS, type Expression } from '../../../src/domain/cast/PoseAndExpression.ts';
 import { CharacterState } from '../../../src/domain/character/CharacterState.ts';
 import { FaceGeometry } from '../../../src/domain/character/FaceGeometry.ts';
 
@@ -93,6 +94,29 @@ test('the viseme replaces the expression mouth only while speaking and not at re
   assert.equal(MouthGeometry.forState(state(true, 'A')).speaking, true);
   assert.equal(MouthGeometry.forState(state(true, 'X')).speaking, false);
   assert.equal(MouthGeometry.forState(state(false, 'A')).speaking, false);
-  const silent = MouthGeometry.forState(state(false, 'A'));
-  assert.deepEqual(silent.speaking ? undefined : silent.shape, MouthGeometry.silent(FaceGeometry.for('happy').mouth));
+  const resting = MouthGeometry.forState(state(true, 'X'));
+  assert.deepEqual(resting.speaking ? undefined : resting.shape, MouthGeometry.silent(FaceGeometry.for('happy').mouth));
+});
+
+const listener = (expression: Expression) => CharacterState.of({
+  pose: 'neutral', expression, look: 'other', speaking: false, viseme: 'X', opening: 0, blink: 0, body: { y: 0, rotation: 0, scale: 1 },
+});
+
+test('a listener keeps the mouth closed: happy and excited smile with closed lips (an open mouth reads as speaking)', () => {
+  for (const expression of EXPRESSIONS) {
+    const mouth = MouthGeometry.forState(listener(expression));
+    assert.equal(mouth.speaking ? true : mouth.shape.open, false, expression);
+  }
+  const happy = MouthGeometry.forState(listener('happy'));
+  assert.ok(!happy.speaking && happy.shape.upper > 0, 'the closed smile still curves up');
+  const excited = MouthGeometry.forState(listener('excited'));
+  assert.ok(!excited.speaking && excited.shape.upper > happy.shape.upper, 'excited smiles wider than happy');
+});
+
+test('the speaker between words (rest X) keeps the open expression mouth', () => {
+  const resting = CharacterState.of({
+    pose: 'neutral', expression: 'excited', look: 'camera', speaking: true, viseme: 'X', opening: 0, blink: 0, body: { y: 0, rotation: 0, scale: 1 },
+  });
+  const mouth = MouthGeometry.forState(resting);
+  assert.equal(mouth.speaking ? false : mouth.shape.open, true);
 });

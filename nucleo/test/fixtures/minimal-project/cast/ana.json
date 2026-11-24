@@ -2,7 +2,7 @@
   "id": "ana",
   "name": "Ana",
   "rig": "giz",
-  "parameters": { "outfit": "tunic", "outfitColor": "#b4472e", "hair": "scarf" },
+  "parameters": { "skin": "tan", "headShape": "oval", "outfit": "hoodie", "outfitColor": "#e8735a", "hair": "bun" },
   "voice": { "id": "vivian" },
   "defaultExpression": "neutral"
 }
