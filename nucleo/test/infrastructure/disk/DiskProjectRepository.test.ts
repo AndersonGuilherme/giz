@@ -154,6 +154,10 @@ test('a background color key the vector background does not have is an error nam
   const scene = { type: 'scenario', background: { vector: 'graveyard', colors: { moon: '#ffeedd', mooon: '#ffeedd' } }, characters: [] };
   await assert.rejects(loadWithScene(scene), /lines\[0\]\.scene\.background\.colors\.mooon: cor desconhecida no fundo "graveyard" \(use skyTop, skyBottom, star, moon,/);
 });
+test('colors without a vector are checked against the room, the background actually drawn', async () => {
+  const scene = { type: 'scenario', background: { colors: { wall: '#ffeedd', skyTop: '#000000' } }, characters: [] };
+  await assert.rejects(loadWithScene(scene), /background\.colors\.skyTop: cor desconhecida no fundo "room" \(use wall,/);
+});
 test('a HUD bar above 100 is an error', async () => {
   const scene = { type: 'scenario', background: {}, characters: [], hud: { fields: [], bar: { label: 'x', value: 120 } } };
   await assert.rejects(loadWithScene(scene), /scene\.hud\.bar\.value: deve ser no máximo 100/);

@@ -1,13 +1,15 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape, Fill, Glow, Placed, Ridge, Stars } from './parts.tsx';
 import { CornerProps, Fog, Moon, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'graveyard'>;
 
 // An old churchyard at night, spooky but cute, giz style: a big moon clear of the HUD, a little chapel with warm
 // windows behind the characters, a curly bare tree, two friendly bats, rounded headstones with a flower carved on
 // them, smiling pumpkin lanterns and bands of fog. No skulls, no bones, nothing gory.
 
-const Chapel: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Chapel: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -20 -250 L 0 -300 L 20 -250 Z" fill={colors.roof} chalk={{ seed: 'grave-spire', width: 4 }} />
     <ChalkBox x={-30} y={-250} width={60} height={110} fill={colors.chapel} chalk={{ seed: 'grave-belfry', width: 4 }} />
@@ -35,7 +37,7 @@ const Bat: FC<Readonly<{ color: string }>> = ({ color }) => (
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   return (
@@ -54,7 +56,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // A rounded headstone with a carved flower, standing on (0, 0).
-const Headstone: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Headstone: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkShape path="M -60 0 V -120 Q -60 -180 0 -180 Q 60 -180 60 -120 V 0 Z" fill={colors.stone} chalk={{ seed, width: 4 }} />
     <path d="M 0 -40 V -90" stroke={colors.carving} strokeWidth={6} />
@@ -62,7 +64,7 @@ const Headstone: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, se
   </g>
 );
 
-const Pumpkin: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Pumpkin: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <Glow id={`${seed}-glow`} x={0} y={-40} radius={110} color={colors.pumpkin} opacity={0.35} />
     <ChalkShape path="M -56 0 Q -70 -70 0 -76 Q 70 -70 56 0 Q 0 10 -56 0 Z" fill={colors.pumpkin} chalk={{ seed, width: 4 }} />
@@ -71,7 +73,7 @@ const Pumpkin: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   const pickets = spread(Math.round(width / (36 * unit)), -0.05, 1.05).map((at) => `M ${width * at} ${horizon + 6 * unit} V ${horizon - 90 * unit} l ${6 * unit} ${-14 * unit} l ${6 * unit} ${14 * unit} V ${horizon + 6 * unit} Z`);
@@ -89,18 +91,18 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A leaning headstone with a pumpkin at its foot, in the fog.
-const Corner: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Corner: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <g transform="translate(-20 40) rotate(8) scale(1.8)"><Headstone colors={{ ...colors, stone: colors.foreground!, carving: colors.hills! }} seed="grave-near-stone" /></g>
     <Placed x={130} y={-10} scale={1.2}><Pumpkin colors={colors} seed="grave-near-pumpkin" /></Placed>
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => (
+const Front: FC<LayerProps<Colors>> = (layer) => (
   <>
     <CornerProps layer={layer}><Corner colors={layer.colors} /></CornerProps>
     <Fog layer={layer} y={layer.height * 1.02} color={layer.colors.fog!} depth={140} opacity={0.25} />
   </>
 );
 
-export const graveyard: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const graveyard: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

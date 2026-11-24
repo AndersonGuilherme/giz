@@ -2,7 +2,9 @@ import type { FC } from 'react';
 import { FOCUS_RADIUS } from '../../../../domain/scenario/BackdropLayout.ts';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'classroom'>;
 
 // A classroom in the morning, giz style: a chalkboard with doodles behind the characters (our own chalk, on a board),
 // sunny windows, a clock, desks on the sides and a wooden floor; chalk lines on the furniture.
@@ -11,7 +13,7 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 const BOARD_HALF_WIDTH = 232;
 
 // The chalkboard: a + b = ?, a triangle, a little sun and an arrow, drawn in chalk.
-const Board: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Board: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-232} y={-128} width={464} height={256} corner={8} fill={colors.boardFrame} chalk={{ seed: 'class-frame', width: 5 }} />
     <rect x={-216} y={-112} width={432} height={224} rx={4} fill={colors.board} />
@@ -25,7 +27,7 @@ const Board: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Window: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Window: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkBox x={-100} y={-150} width={200} height={300} corner={6} fill={colors.sky} chalk={{ seed, width: 5 }} />
     <circle cx={50} cy={-90} r={30} fill={colors.sun} />
@@ -34,7 +36,7 @@ const Window: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed 
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   return (
@@ -52,7 +54,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // A pupil's desk with a chair, seen from the front, standing on (0, 0).
-const Desk: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Desk: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <path d="M -70 0 V -110 M 70 0 V -110" stroke={colors.deskLeg} strokeWidth={10} />
     <ChalkBox x={-90} y={-130} width={180} height={24} corner={6} fill={colors.desk} chalk={{ seed, width: 4 }} />
@@ -60,7 +62,7 @@ const Desk: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed })
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   return (
@@ -74,7 +76,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A potted plant beside a stack of books.
-const Plant: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Plant: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     {[-40, -10, 25, 60].map((angle) => <path key={angle} d="M 0 0 Q 40 -120 0 -260 Q -40 -120 0 0 Z" fill={colors.plant} transform={`translate(20 -150) rotate(${angle})`} />)}
     <ChalkShape path="M -60 -150 H 100 L 80 60 H -40 Z" fill={colors.pot} chalk={{ seed: 'class-pot', width: 5 }} />
@@ -83,6 +85,6 @@ const Plant: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Plant colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Plant colors={layer.colors} /></CornerProps>;
 
-export const classroom: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const classroom: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

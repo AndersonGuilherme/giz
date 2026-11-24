@@ -2,13 +2,15 @@ import type { FC } from 'react';
 import { Silhouette } from '../../../../domain/drawing/Silhouette.ts';
 import { ChalkLine } from '../../../drawing/ChalkLine.tsx';
 import { ChalkBox, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'room'>;
 
 // A cozy room in the evening, giz style: sage wall with a night window, a shelf and a picture; wooden floor, a round
 // rug and a lamp; chalk lines on the furniture.
 // It is also the fallback when a scenario image does not load.
 
-const Window: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Window: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <rect x={-150} y={-230} width={300} height={260} rx={8} fill={colors.night} />
     <circle cx={70} cy={-160} r={26} fill={colors.moon} />
@@ -21,7 +23,7 @@ const Window: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Shelf: FC<Readonly<{ colors: Palette }>> = ({ colors }) => {
+const Shelf: FC<Readonly<{ colors: Colors }>> = ({ colors }) => {
   const books = [[colors.book1, 70], [colors.book2, 86], [colors.book3, 62], [colors.book1, 78], [colors.book2, 70]] as const;
   return (
     <g>
@@ -32,7 +34,7 @@ const Shelf: FC<Readonly<{ colors: Palette }>> = ({ colors }) => {
   );
 };
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, ground, unit } = layer;
   const base = ground - 150 * unit;
   return (
@@ -48,7 +50,7 @@ const Back: FC<LayerProps> = (layer) => {
   );
 };
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, ground, unit } = layer;
   const base = ground - 150 * unit;
   const planks = Array.from({ length: 13 }, (_empty, index) => (index - 6) / 6);
@@ -65,7 +67,7 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Lamp: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Lamp: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-60} y={-110} width={120} height={110} corner={8} fill={colors.wood} chalk={{ seed: 'room-table', width: 5 }} />
     <rect x={-6} y={-290} width={12} height={180} fill={colors.trim} />
@@ -73,7 +75,7 @@ const Lamp: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
+const Front: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {
   const bottom = height * 1.06;
   return (
     <>
@@ -85,4 +87,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const room: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const room: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

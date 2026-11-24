@@ -6,7 +6,7 @@ type Issue = z.core.$ZodIssue;
 type Translator = (issue: Issue) => string | undefined;
 
 const TYPE_NAMES: Record<string, string> = {
-  string: 'texto', number: 'número', boolean: 'verdadeiro ou falso', object: 'objeto', array: 'lista', null: 'nulo',
+  string: 'texto', number: 'número', int: 'número inteiro', boolean: 'verdadeiro ou falso', object: 'objeto', array: 'lista', null: 'nulo',
 };
 const typeName = (type: string) => TYPE_NAMES[type] ?? type;
 
@@ -18,6 +18,9 @@ function receivedType(input: unknown): string {
 
 const required: Translator = (issue) =>
   issue.code === 'invalid_type' && issue.input === undefined ? 'obrigatório' : undefined;
+// zod 4 refuses a fraction where an integer goes as a wrong type (`int`): it is a number, just not a whole one.
+const notInteger: Translator = (issue) =>
+  issue.code === 'invalid_type' && issue.expected === 'int' && typeof issue.input === 'number' ? 'esperava número inteiro' : undefined;
 const wrongType: Translator = (issue) =>
   issue.code === 'invalid_type' ? `esperava ${typeName(issue.expected)}, veio ${typeName(receivedType(issue.input))}` : undefined;
 // An enum and a literal both refuse with `invalid_value`: a literal has a single value.
@@ -37,7 +40,7 @@ const tooSmall: Translator = (issue) => {
 const tooBig: Translator = (issue) =>
   issue.code === 'too_big' ? `deve ser no máximo ${issue.maximum}` : undefined;
 
-const TRANSLATORS = [required, wrongType, invalidOption, invalidLiteral, invalidSceneType, tooSmall, tooBig];
+const TRANSLATORS = [required, notInteger, wrongType, invalidOption, invalidLiteral, invalidSceneType, tooSmall, tooBig];
 
 function issueMessage(issue: Issue): string {
   return TRANSLATORS.map((translate) => translate(issue)).find(Boolean) ?? issue.message;

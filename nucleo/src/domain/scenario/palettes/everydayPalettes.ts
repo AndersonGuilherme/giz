@@ -26,7 +26,6 @@ export const EVERYDAY_PALETTES = {
     skyTop: '#2f4858',
     skyBottom: '#9cc5b8',
     skyline: '#46707a',
-    skylineNear: '#365a63',
     window: '#f6dc8f',
     shopWall: '#b5523b',
     shopWall2: '#6c4f7c',

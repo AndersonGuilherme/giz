@@ -17,12 +17,15 @@ import { pirateShip } from './pirate-ship.tsx';
 import { room } from './room.tsx';
 import { spaceStation } from './space-station.tsx';
 import { street } from './street.tsx';
-import type { VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, VectorBackgroundModel } from './VectorBackgroundModel.ts';
 import { victorianStreet } from './victorian-street.tsx';
 import { village } from './village.tsx';
 
-/** The vector backgrounds by name; the record type makes every name of the domain list have its drawing. */
-export const backgroundRegistry: Readonly<Record<VectorBackground, VectorBackgroundModel>> = {
+/**
+ * The vector backgrounds by name: every name of the domain list has its drawing, and each drawing reads exactly the
+ * colors of its own palette.
+ */
+export const backgroundRegistry: { readonly [B in VectorBackground]: VectorBackgroundModel<ColorsOf<B>> } = {
   room,
   street,
   field,

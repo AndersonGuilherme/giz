@@ -15,7 +15,6 @@ export const SPOOKY_PALETTES = {
     grassFar: '#3a5656',
     grass: '#2f4a4a',
     stone: '#8a8fa8',
-    stoneShade: '#6b6f88',
     carving: '#5a5e78',
     fence: '#1a1c2e',
     pumpkin: '#f2a14a',

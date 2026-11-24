@@ -1,14 +1,16 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape, Fill, Placed } from './parts.tsx';
 import { CornerProps, FloorRows, HangingLamp, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'office'>;
 
 // A modern office, giz style: a wide window on a made-up skyline behind the characters, a board of sticky notes, desks
 // with screens on the sides, pendant lamps and a carpet floor; chalk lines on the furniture.
 
 // The window: glass, a skyline of plain towers and the mullions, `wide` × 300 units centered on (0, 0); the scene gives
 // it the backdrop's focus width, so it stays between the characters in 16:9.
-const Window: FC<Readonly<{ colors: Palette; wide: number }>> = ({ colors, wide }) => {
+const Window: FC<Readonly<{ colors: Colors; wide: number }>> = ({ colors, wide }) => {
   const towers = spread(Math.max(3, Math.round(wide / 80)), -wide / 2 + 20, wide / 2 - 76).map((x, index) => `M ${x} 150 V ${60 - (index % 3) * 50 - (index % 2) * 30} h ${40 + (index % 2) * 16} V 150 Z`);
   return (
     <g>
@@ -26,7 +28,7 @@ const Window: FC<Readonly<{ colors: Palette; wide: number }>> = ({ colors, wide 
   );
 };
 
-const Notes: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Notes: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-90} y={-70} width={180} height={140} corner={6} fill={colors.board} chalk={{ seed: 'office-board', width: 4 }} />
     {[[-60, -40, colors.note1], [-6, -46, colors.note2], [46, -36, colors.note3], [-50, 12, colors.note2], [10, 16, colors.note1]].map(([x, y, color]) => (
@@ -35,7 +37,7 @@ const Notes: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   return (
@@ -49,7 +51,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // A desk with a screen and a chair back, standing on (0, 0); the screen faces the inside of the frame.
-const Desk: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Desk: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <path d="M -110 0 V -120 M 110 0 V -120" stroke={colors.deskLeg} strokeWidth={10} />
     <ChalkBox x={-130} y={-140} width={260} height={22} corner={4} fill={colors.desk} chalk={{ seed, width: 4 }} />
@@ -60,7 +62,7 @@ const Desk: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed })
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   return (
@@ -74,7 +76,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A tall leafy plant in a round pot.
-const Plant: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Plant: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     {[-50, -20, 10, 40, 70].map((angle, index) => (
       <path key={angle} d="M 0 0 Q 70 -60 40 -200 Q -30 -110 0 0 Z" fill={index % 2 ? colors.leaves : colors.leavesDark} transform={`translate(30 -170) rotate(${angle})`} />
@@ -83,6 +85,6 @@ const Plant: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Plant colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Plant colors={layer.colors} /></CornerProps>;
 
-export const office: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const office: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

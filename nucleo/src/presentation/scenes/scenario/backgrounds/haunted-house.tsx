@@ -1,13 +1,15 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'haunted-house'>;
 
 // The hall of an old haunted house, spooky but cute, giz style: striped plum wallpaper, a tall arched window with the
 // moon and curtains behind the characters, crooked portraits of a cat and of a round ghost, cobwebs, a grandfather
 // clock, a candelabra and a dusty rug; chalk lines on the furniture. Nothing gory.
 
-const Window: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Window: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -100 150 V -60 Q -100 -160 0 -160 Q 100 -160 100 -60 V 150 Z" fill={colors.night} chalk={{ seed: 'haunted-window', width: 5 }} />
     <circle cx={34} cy={-70} r={34} fill={colors.moon} />
@@ -19,7 +21,7 @@ const Window: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 );
 
 // A crooked portrait: a black cat with yellow eyes, or a round little ghost.
-const Portrait: FC<Readonly<{ colors: Palette; ghost?: boolean; seed: string }>> = ({ colors, ghost, seed }) => (
+const Portrait: FC<Readonly<{ colors: Colors; ghost?: boolean; seed: string }>> = ({ colors, ghost, seed }) => (
   <g>
     <ChalkBox x={-70} y={-90} width={140} height={180} corner={12} fill={colors.frame} chalk={{ seed, width: 4 }} />
     <rect x={-54} y={-74} width={108} height={148} rx={8} fill={colors.portrait} />
@@ -43,7 +45,7 @@ const Cobweb: FC<Readonly<{ color: string }>> = ({ color }) => {
   );
 };
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   const stripes = spread(Math.round(width / (60 * unit)), -0.05, 1.05).map((at) => `M ${width * at} ${-layer.height * 0.1} V ${horizon}`);
@@ -61,7 +63,7 @@ const Back: FC<LayerProps> = (layer) => {
   );
 };
 
-const GrandfatherClock: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const GrandfatherClock: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -60 0 V -380 Q -60 -440 0 -440 Q 60 -440 60 -380 V 0 Z" fill={colors.wood} chalk={{ seed: 'haunted-clock', width: 5 }} />
     <ChalkDisc x={0} y={-370} radius={40} fill={colors.clockFace} chalk={{ seed: 'haunted-clock-face', width: 3.5 }} />
@@ -70,7 +72,7 @@ const GrandfatherClock: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Candelabra: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Candelabra: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <path d="M -40 0 H 40 L 6 -20 V -120 M -60 -150 Q -60 -110 0 -110 Q 60 -110 60 -150" stroke={colors.frame} strokeWidth={10} fill="none" />
     {[-60, 0, 60].map((x) => (
@@ -82,7 +84,7 @@ const Candelabra: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, ground } = backdrop;
   return (
@@ -99,7 +101,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A tall candle on an iron stand, with a cobweb from the stand to the floor.
-const CandleStand: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const CandleStand: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <path d="M 20 60 V -280 M -40 60 L 20 -40 L 80 60" stroke={colors.foreground} strokeWidth={18} fill="none" />
     <rect x={-10} y={-400} width={60} height={120} rx={8} fill={colors.candle} />
@@ -108,6 +110,6 @@ const CandleStand: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><CandleStand colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><CandleStand colors={layer.colors} /></CornerProps>;
 
-export const hauntedHouse: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const hauntedHouse: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

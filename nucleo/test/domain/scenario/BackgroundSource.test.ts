@@ -31,3 +31,8 @@ test('a vector background keeps its name and colors; an unknown name or none at 
 test('with an image and a vector, a failing image falls back to the given vector', () => {
   assert.equal(BackgroundSource.for({ image: 'x.png', vector: 'lab' }, { imageFailed: true }).vector, 'lab');
 });
+test('vectorFor names the background actually drawn: the named one, or the room when absent or unknown', () => {
+  assert.equal(BackgroundSource.vectorFor('graveyard'), 'graveyard');
+  assert.equal(BackgroundSource.vectorFor(undefined), 'room');
+  assert.equal(BackgroundSource.vectorFor('sala'), 'room');
+});

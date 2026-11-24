@@ -1,7 +1,9 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape, Fill, Placed, Ridge } from './parts.tsx';
 import { CornerProps, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'medieval-castle'>;
 
 // A castle on a hill, giz style: a keep with two round towers and pennants behind the characters, stone walls on the
 // sides, a grassy yard with a dirt path; chalk lines on the stones. A made-up castle.
@@ -11,7 +13,7 @@ const merlons = (left: number, right: number, top: number) =>
   spread(Math.max(2, Math.round((right - left) / 44)), left, right - 24).map((x) => `M ${x} ${top} h 24 v -26 h -24 Z`).join(' ');
 
 // A round tower `height` units tall on (0, 0) with a pointed roof and a pennant.
-const Tower: FC<Readonly<{ colors: Palette; height: number; seed: string; flag: string }>> = ({ colors, height, seed, flag }) => (
+const Tower: FC<Readonly<{ colors: Colors; height: number; seed: string; flag: string }>> = ({ colors, height, seed, flag }) => (
   <g>
     <ChalkBox x={-50} y={-height} width={100} height={height} fill={colors.stone} chalk={{ seed, width: 4 }} />
     <rect x={-12} y={-height * 0.7} width={24} height={40} rx={12} fill={colors.window} />
@@ -21,7 +23,7 @@ const Tower: FC<Readonly<{ colors: Palette; height: number; seed: string; flag: 
   </g>
 );
 
-const Keep: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Keep: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <Placed x={-140} y={0} scale={1}><Tower colors={colors} height={230} seed="castle-tower-left" flag={colors.pennant} /></Placed>
     <Placed x={140} y={0} scale={1}><Tower colors={colors} height={260} seed="castle-tower-right" flag={colors.pennant2} /></Placed>
@@ -33,7 +35,7 @@ const Keep: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   const base = focus.y + 140 * unit;
@@ -48,7 +50,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // A stretch of the outer wall from the frame's edge inward, with battlements and a torch bracket.
-const Wall: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Wall: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <path d={merlons(-140, 300, -300)} fill={colors.stone} />
     <ChalkBox x={-140} y={-300} width={440} height={300} fill={colors.stone} chalk={{ seed, width: 5 }} />
@@ -56,7 +58,7 @@ const Wall: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed })
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   return (
@@ -70,7 +72,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A hay bale leaning on a barrel.
-const Barrel: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Barrel: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -220 60 L -220 -150 Q -120 -200 -20 -150 L -20 60 Z" fill={colors.hay} chalk={{ seed: 'castle-hay', width: 5 }} />
     <path d="M -200 -100 Q -120 -130 -40 -100 M -200 -40 Q -120 -70 -40 -40" stroke={colors.wood} strokeWidth={6} fill="none" opacity={0.5} />
@@ -79,6 +81,6 @@ const Barrel: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Barrel colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Barrel colors={layer.colors} /></CornerProps>;
 
-export const medievalCastle: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const medievalCastle: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

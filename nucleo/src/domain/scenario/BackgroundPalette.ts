@@ -7,15 +7,21 @@ import { SPOOKY_PALETTES } from './palettes/spookyPalettes.ts';
 /** Named colors of a vector background. */
 export type Palette = Readonly<Record<string, string>>;
 
-// The record type makes every vector background have its palette.
-const PALETTES: Readonly<Record<VectorBackground, Palette>> = {
+// Every vector background has its palette (`satisfies`), and each palette keeps its own literal keys.
+const PALETTES = {
   ...EVERYDAY_PALETTES, ...PAST_PALETTES, ...PRESENT_AND_FUTURE_PALETTES, ...SPOOKY_PALETTES,
-};
+} as const satisfies Readonly<Record<VectorBackground, Palette>>;
+
+/** The color names of one background: a view that reads another name does not compile. */
+export type PaletteKey<B extends VectorBackground> = keyof (typeof PALETTES)[B] & string;
+
+/** The colors a background's layers draw with: exactly its palette's names. */
+export type BackgroundColors<B extends VectorBackground> = Readonly<Record<PaletteKey<B>, string>>;
 
 /** The palettes of the vector backgrounds as data: a scene's `background.colors` may override only these keys. */
 export class BackgroundPalette {
-  static defaults(background: VectorBackground): Palette {
-    return PALETTES[background];
+  static defaults<B extends VectorBackground>(background: B): BackgroundColors<B> {
+    return PALETTES[background] as BackgroundColors<B>;
   }
 
   static keys(background: VectorBackground): string[] {
@@ -29,7 +35,7 @@ export class BackgroundPalette {
   }
 
   /** The defaults with the overrides on top. */
-  static with(background: VectorBackground, overrides: Palette): Palette {
-    return { ...PALETTES[background], ...overrides };
+  static with<B extends VectorBackground>(background: B, overrides: Palette): BackgroundColors<B> {
+    return { ...PALETTES[background], ...overrides } as BackgroundColors<B>;
   }
 }

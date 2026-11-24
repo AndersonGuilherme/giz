@@ -1,6 +1,6 @@
 import { z } from 'zod';
 import { BackgroundPalette } from '../../domain/scenario/BackgroundPalette.ts';
-import { VECTOR_BACKGROUNDS, type VectorBackground } from '../../domain/scenario/BackgroundSource.ts';
+import { BackgroundSource } from '../../domain/scenario/BackgroundSource.ts';
 import { DIRECTIONS, NAMED_POSITIONS, type Scene } from '../../domain/script/Scene.ts';
 import { lessonSceneSchemas } from './lessonSceneSchemas.ts';
 import {
@@ -21,13 +21,14 @@ const characterInSceneSchema = z
   })
   .strict();
 
-const isVector = (name: string | undefined): name is VectorBackground => VECTOR_BACKGROUNDS.some((known) => known === name);
-
 type BackgroundJson = Readonly<{ vector?: string; colors?: Readonly<Record<string, string>> }>;
 
-// A color key the background does not have would silently do nothing: it is an error naming the valid keys.
-function rejectUnknownColors({ vector, colors }: BackgroundJson, context: z.RefinementCtx): void {
-  if (!colors || !isVector(vector)) return;
+// A color key the background does not have would silently do nothing: it is an error naming the valid keys. Without a
+// known `vector` the colors go to the background actually drawn (the `room` fallback), so they are checked against it.
+function rejectUnknownColors(background: BackgroundJson, context: z.RefinementCtx): void {
+  const { colors } = background;
+  if (!colors) return;
+  const vector = BackgroundSource.vectorFor(background.vector);
   const valid = BackgroundPalette.keys(vector).join(', ');
   BackgroundPalette.unknownKeys(vector, colors).forEach((key) =>
     context.addIssue({ code: 'custom', path: ['colors', key], message: `cor desconhecida no fundo "${vector}" (use ${valid})` }));

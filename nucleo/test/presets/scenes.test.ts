@@ -93,7 +93,7 @@ test('every scene preset only overrides colors its background has (a typo would 
 
 test('every vector background has its palette as domain data, with colors in hex', () => {
   for (const background of VECTOR_BACKGROUNDS) assert.ok(BackgroundPalette.keys(background).length >= 10, background);
-  const colors = VECTOR_BACKGROUNDS.flatMap((background) => Object.entries(BackgroundPalette.defaults(background)).map(([key, color]) => ({ background, key, color })));
+  const colors = VECTOR_BACKGROUNDS.flatMap((background) => Object.entries(BackgroundPalette.defaults(background) as Readonly<Record<string, string>>).map(([key, color]) => ({ background, key, color })));
   for (const { background, key, color } of colors) assert.match(color, /^#[0-9a-f]{6}$/i, `${background}.${key}`);
   assert.deepEqual(BackgroundPalette.unknownKeys('graveyard', { moon: '#000000', mooon: '#000000' }), ['mooon']);
   assert.equal(BackgroundPalette.with('graveyard', { moon: '#000000' }).moon, '#000000');

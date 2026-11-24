@@ -1,13 +1,15 @@
 import type { FC } from 'react';
 import { ChalkDisc, ChalkShape, Fill, Glow, Grass, Placed, Ridge, Tree } from './parts.tsx';
 import { Cloud, HillHouse, Stall, Tower, Well, Windmill } from './villageParts.tsx';
-import type { LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'village'>;
 
 // A hill village in the morning, giz style: a teal sky with chalk clouds and the sun rising behind a cluster of
 // white houses on the central hill, a windmill on the far left, a road winding up to the houses, a stone well on the
 // left and a fruit stall on the right.
 
-const Sky: FC<LayerProps> = (layer) => {
+const Sky: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, ground, unit } = layer;
   const stops = [[0, colors.skyTop], [0.6, colors.skyMiddle], [1, colors.horizon]] as const;
   const sun = { x: width * 0.56, y: ground - 470 * unit };
@@ -25,7 +27,7 @@ const Sky: FC<LayerProps> = (layer) => {
 // The cluster on the central hill: [x from the hill center, lift, scale, roof color key].
 const CLUSTER = [[-210, 40, 0.8, 'roof'], [-110, 70, 1, 'roof2'], [120, 66, 0.95, 'roof'], [220, 36, 0.8, 'roof2'], [10, 92, 1.1, 'roof']] as const;
 
-const Hills: FC<LayerProps> = ({ colors, width, ground, unit }) => {
+const Hills: FC<LayerProps<Colors>> = ({ colors, width, ground, unit }) => {
   const hilltop = ground - 330 * unit;
   return (
     <>
@@ -42,14 +44,14 @@ const Hills: FC<LayerProps> = ({ colors, width, ground, unit }) => {
   );
 };
 
-const Back: FC<LayerProps> = (layer) => (
+const Back: FC<LayerProps<Colors>> = (layer) => (
   <>
     <Sky {...layer} />
     <Hills {...layer} />
   </>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, ground, unit } = layer;
   const horizon = ground - 150 * unit;
   const road = `M ${width * 0.47} ${horizon} Q ${width * 0.56} ${horizon + 60 * unit} ${width * 0.5} ${ground - 40 * unit}`
@@ -66,7 +68,7 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
+const Front: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {
   const bottom = height * 1.06;
   return (
     <>
@@ -77,4 +79,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const village: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const village: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

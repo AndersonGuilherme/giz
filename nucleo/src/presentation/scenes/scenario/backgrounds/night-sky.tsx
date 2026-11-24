@@ -2,12 +2,14 @@ import type { FC } from 'react';
 import { SkyLayout } from '../../../../domain/scenario/SkyLayout.ts';
 import { AspectRatio } from '../../../../domain/values/AspectRatio.ts';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Grass, Placed, Ridge, Stars } from './parts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'night-sky'>;
 
 // A starry night on a hill, giz style: blue-slate sky, a chalk moon clear of the HUD, hills with chalk ridges, pines
 // and a lit cabin.
 
-const Moon: FC<LayerProps> = ({ colors, width, height, unit }) => {
+const Moon: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {
   const moon = SkyLayout.moon(AspectRatio.ofSize(width, height));
   return (
     <>
@@ -19,7 +21,7 @@ const Moon: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, ground, unit } = layer;
   return (
     <>
@@ -40,7 +42,7 @@ const Pine: FC<Readonly<{ color: string; seed: string }>> = ({ color, seed }) =>
   </g>
 );
 
-const Cabin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Cabin: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-80} y={-90} width={160} height={90} fill={colors.cabin} chalk={{ seed: 'cabin', width: 5 }} />
     <ChalkShape path="M -100 -88 L 0 -160 L 100 -88 Z" fill={colors.roof} chalk={{ seed: 'cabin-roof', width: 5 }} />
@@ -49,7 +51,7 @@ const Cabin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, ground, unit } = layer;
   return (
     <>
@@ -63,7 +65,7 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
+const Front: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {
   const bottom = height * 1.06;
   return (
     <>
@@ -74,4 +76,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const nightSky: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const nightSky: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

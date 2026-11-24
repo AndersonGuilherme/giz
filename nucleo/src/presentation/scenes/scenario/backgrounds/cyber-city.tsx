@@ -1,7 +1,9 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
 import { CornerProps, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'cyber-city'>;
 
 // A future city at night, giz style: a violet haze, giant towers with neon edges, a hologram ring behind the
 // characters, flying cars, near buildings with neon signs (shapes, no brands) and a wet street that reflects the neon.
@@ -9,7 +11,7 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // Far towers: [x as a fraction of the width, width and height in units, neon color key].
 const TOWERS = [[0.04, 130, 560, 'cyan'], [0.16, 100, 680, 'pink'], [0.28, 140, 480, 'yellow'], [0.66, 120, 620, 'cyan'], [0.78, 150, 720, 'pink'], [0.92, 110, 520, 'cyan']] as const;
 
-const Tower: FC<Readonly<{ colors: Palette; wide: number; tall: number; neon: string; seed: string }>> = ({ colors, wide, tall, neon, seed }) => (
+const Tower: FC<Readonly<{ colors: Colors; wide: number; tall: number; neon: string; seed: string }>> = ({ colors, wide, tall, neon, seed }) => (
   <g>
     <ChalkShape path={`M 0 0 V ${-tall + 40} L ${wide / 2} ${-tall} L ${wide} ${-tall + 40} V 0 Z`} fill={colors.tower} chalk={{ seed, width: 3.5, color: neon }} />
     <path d={spread(Math.floor(tall / 90), 60, tall - 80).map((y) => `M 16 ${-y} H ${wide - 16}`).join(' ')} stroke={colors.window} strokeWidth={6} opacity={0.35} />
@@ -17,7 +19,7 @@ const Tower: FC<Readonly<{ colors: Palette; wide: number; tall: number; neon: st
 );
 
 // The hologram: two rings and a turning hexagon, 150 units in radius.
-const Hologram: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Hologram: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g fill="none" strokeLinecap="round">
     <circle r={140} stroke={colors.cyan} strokeWidth={6} opacity={0.6} strokeDasharray="40 18" />
     <circle r={110} stroke={colors.pink} strokeWidth={4} opacity={0.5} />
@@ -26,7 +28,7 @@ const Hologram: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Car: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Car: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <path d="M -50 0 Q -40 -26 0 -28 Q 40 -26 50 0 Z" fill={colors.car} />
     <rect x={-56} y={0} width={112} height={12} rx={6} fill={colors.near} />
@@ -35,7 +37,7 @@ const Car: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   const neon: Readonly<Record<string, string>> = { cyan: colors.cyan!, pink: colors.pink!, yellow: colors.yellow! };
@@ -55,7 +57,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // A near building from the frame's edge inward, with a neon sign of plain shapes (a bowl, a star, stripes).
-const Building: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Building: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkBox x={-200} y={-620} width={400} height={620} fill={colors.near} chalk={{ seed, width: 5, color: colors.pink }} />
     <ChalkBox x={30} y={-520} width={120} height={200} corner={14} fill={colors.near} chalk={{ seed: `${seed}-sign`, width: 6, color: colors.cyan }} />
@@ -65,7 +67,7 @@ const Building: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, see
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   const reflections = [[0.2, colors.pink], [0.45, colors.cyan], [0.6, colors.yellow], [0.82, colors.cyan]] as const;
@@ -81,7 +83,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A street post with a neon ring and a bundle of cables.
-const Post: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Post: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-40} y={-420} width={80} height={480} corner={20} fill={colors.foreground} chalk={{ seed: 'cyber-post', width: 5, color: colors.cyan }} />
     <rect x={-40} y={-360} width={80} height={16} fill={colors.pink} />
@@ -89,6 +91,6 @@ const Post: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Post colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Post colors={layer.colors} /></CornerProps>;
 
-export const cyberCity: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const cyberCity: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

@@ -59,3 +59,13 @@ test('a custom message passes through and the path reads like code', () => {
   assert.deepEqual(messages(z.object({ colors: z.record(z.string(), schema) }), { colors: { wall: 'bege' } }), ['colors.wall: cor "bege" inválida']);
   assert.equal(readablePath(['lines', 0, 'speaker']), 'lines[0].speaker');
 });
+test('an integer field with a fraction says it expects a whole number', () => {
+  const chapter = z.object({ chapter: z.number().int().min(1) });
+  assert.deepEqual(messages(chapter, { chapter: 1.5 }), ['chapter: esperava número inteiro']);
+  assert.deepEqual(messages(chapter, { chapter: 'um' }), ['chapter: esperava número, veio texto']);
+});
+test('enums stay readable: a single option, a value that is not text, and several literals', () => {
+  assert.deepEqual(messages(z.object({ kind: z.enum(['only']) }), { kind: 'x' }), ['kind: esperava "only", veio "x"']);
+  assert.deepEqual(messages(shape, { ...VALID, kind: 5 }), ['kind: "5" inválido (use story, lesson)']);
+  assert.deepEqual(messages(z.object({ size: z.literal([1, 2]) }), { size: 3 }), ['size: "3" inválido (use 1, 2)']);
+});

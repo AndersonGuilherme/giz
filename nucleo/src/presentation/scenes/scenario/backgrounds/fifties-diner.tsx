@@ -1,13 +1,15 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
 import { CornerProps, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'fifties-diner'>;
 
 // A 1950s diner, giz style: a mint wall with a coral stripe, a neon milkshake sign behind the characters, menu boards,
 // a long counter with stools, a checkered floor and a jukebox in each corner; chalk lines on the furniture.
 
 // The neon sign: a milkshake glass with a straw and a cherry, in pink tubes.
-const Neon: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Neon: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g fill="none" strokeLinecap="round" strokeLinejoin="round">
     <path d="M -70 -60 L -45 90 H 45 L 70 -60 Z M -90 -60 H 90 M 20 -60 L 50 -140 L 80 -140" stroke={colors.neonGlow} strokeWidth={22} opacity={0.35} />
     <path d="M -70 -60 L -45 90 H 45 L 70 -60 Z M -90 -60 H 90 M 20 -60 L 50 -140 L 80 -140" stroke={colors.neon} strokeWidth={10} />
@@ -16,14 +18,14 @@ const Neon: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Menu: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Menu: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkBox x={-110} y={-80} width={220} height={160} corner={10} fill={colors.menu} chalk={{ seed, width: 4 }} />
     <path d={spread(4, -46, 46).map((y, index) => `M -80 ${y} H ${30 + (index % 2) * 30} M 56 ${y} H 80`).join(' ')} stroke={colors.menuLine} strokeWidth={7} strokeLinecap="round" opacity={0.8} />
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   return (
@@ -42,7 +44,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // The checkered floor in perspective: columns that close in toward the horizon, rows that grow toward the viewer.
-const Checkers: FC<LayerProps> = ({ colors, width, height, backdrop }) => {
+const Checkers: FC<LayerProps<Colors>> = ({ colors, width, height, backdrop }) => {
   const depth = height * 1.1 - backdrop.horizon;
   const rows = spread(9, 0, 1).map((share) => ({ y: backdrop.horizon + depth * share * share, narrow: 0.3 + 0.7 * share * share }));
   const columns = spread(21, -1.5, 2.5).map((at) => width * at);
@@ -55,7 +57,7 @@ const Checkers: FC<LayerProps> = ({ colors, width, height, backdrop }) => {
   return <path d={tiles.join(' ')} fill={colors.floorDark} />;
 };
 
-const Stool: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Stool: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <rect x={-6} y={-90} width={12} height={90} fill={colors.chrome} />
     <ellipse cx={0} cy={0} rx={30} ry={8} fill={colors.chrome} />
@@ -63,7 +65,7 @@ const Stool: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   return (
@@ -78,7 +80,7 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Jukebox: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Jukebox: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -180 60 V -260 Q -180 -400 -20 -400 Q 140 -400 140 -260 V 60 Z" fill={colors.jukebox} chalk={{ seed: 'diner-jukebox', width: 5 }} />
     <path d="M -140 -250 Q -140 -360 -20 -360 Q 100 -360 100 -250 V -170 H -140 Z" fill={colors.jukeboxLight} />
@@ -86,6 +88,6 @@ const Jukebox: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Jukebox colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Jukebox colors={layer.colors} /></CornerProps>;
 
-export const fiftiesDiner: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const fiftiesDiner: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

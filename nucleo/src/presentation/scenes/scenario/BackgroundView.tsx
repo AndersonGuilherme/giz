@@ -8,7 +8,7 @@ import { Parallax, type Layer } from '../../../domain/scenario/Parallax.ts';
 import type { AspectRatio } from '../../../domain/values/AspectRatio.ts';
 import { backgroundRegistry } from './backgrounds/backgroundRegistry.ts';
 import { LayerCanvas } from './backgrounds/LayerCanvas.tsx';
-import type { LayerProps } from './backgrounds/VectorBackgroundModel.ts';
+import type { LayerProps, VectorBackgroundModel } from './backgrounds/VectorBackgroundModel.ts';
 import { CameraPlane } from './CameraPlane.tsx';
 
 /** `behind` draws the back and middle layers (before the characters); `front`, the foreground over them. */
@@ -38,7 +38,8 @@ function layerPropsFor(choice: Extract<BackgroundChoice, { kind: 'vector' }>, as
 /** The scenario background: an image (behind only) or the layers of a vector background, each with its parallax. */
 export const BackgroundView: FC<ViewProps> = ({ choice, camera, aspect, part, onImageError }) => {
   if (choice.kind === 'image') return part === 'behind' ? <ImageBackground image={choice.image} camera={camera} onImageError={onImageError} /> : null;
-  const model = backgroundRegistry[choice.vector];
+  // The layers get the full palette of this same background (`BackgroundPalette.with`), so they may be widened to any palette.
+  const model = backgroundRegistry[choice.vector] as VectorBackgroundModel;
   const props = layerPropsFor(choice, aspect);
   return (
     <>

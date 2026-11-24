@@ -1,13 +1,15 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Placed, Stars } from './parts.tsx';
 import { CornerProps, FloorLines, FloorRows, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'space-station'>;
 
 // Inside a space station, giz style: a round window on a ringed planet behind the characters, wall panels with light
 // strips, consoles with screens on the sides, a grid floor and cargo crates; chalk lines on the hull.
 
 // The porthole: space with stars, a nebula and a ringed planet, inside a thick rim, 150 units in radius.
-const Porthole: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Porthole: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <defs><clipPath id="station-glass"><circle cx={0} cy={0} r={130} /></clipPath></defs>
     <circle cx={0} cy={0} r={150} fill={colors.rim} />
@@ -24,7 +26,7 @@ const Porthole: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   const columns = spread(9, -0.1, 1.1).map((at) => `M ${width * at} ${-layer.height * 0.1} V ${horizon}`);
@@ -41,7 +43,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // A console from the frame's edge inward: a slanted desk with two screens and a row of buttons.
-const Console: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Console: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkShape path="M -160 0 V -150 L 200 -170 L 230 0 Z" fill={colors.console} chalk={{ seed, width: 5 }} />
     <ChalkBox x={-120} y={-400} width={150} height={110} corner={10} fill={colors.console} chalk={{ seed: `${seed}-screen1`, width: 4 }} />
@@ -54,7 +56,7 @@ const Console: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   return (
     <>
@@ -68,7 +70,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // Two stacked cargo crates with hazard stripes.
-const Crates: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Crates: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-200} y={-200} width={300} height={260} corner={10} fill={colors.crate} chalk={{ seed: 'station-crate', width: 5 }} />
     <path d={spread(6, -190, 60).map((x) => `M ${x} -190 l 30 0 l -30 40 l -30 0 Z`).join(' ')} fill={colors.hazard} />
@@ -77,6 +79,6 @@ const Crates: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Crates colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Crates colors={layer.colors} /></CornerProps>;
 
-export const spaceStation: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const spaceStation: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

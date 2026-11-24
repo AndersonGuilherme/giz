@@ -2,13 +2,15 @@ import type { FC } from 'react';
 import { FOCUS_RADIUS } from '../../../../domain/scenario/BackdropLayout.ts';
 import { ChalkBox, ChalkShape, Fill, Placed, Ridge } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'ancient-rome'>;
 
 // A forum at noon, giz style: a small temple on a hill behind the characters, cypress trees, a colonnade on each side,
 // a paved square with a water basin; chalk lines on the marble. A generic ancient square, no real building.
 
 // A column `height` units tall standing on (0, 0): base, fluted shaft and capital.
-const Column: FC<Readonly<{ colors: Palette; height: number; seed: string }>> = ({ colors, height, seed }) => (
+const Column: FC<Readonly<{ colors: Colors; height: number; seed: string }>> = ({ colors, height, seed }) => (
   <g>
     <ChalkBox x={-30} y={-height + 30} width={60} height={height - 50} fill={colors.marble} chalk={{ seed, width: 4 }} />
     <path d={`M -12 ${-height + 36} V -26 M 12 ${-height + 36} V -26`} stroke={colors.marbleShade} strokeWidth={5} />
@@ -20,7 +22,7 @@ const Column: FC<Readonly<{ colors: Palette; height: number; seed: string }>> = 
 // The temple is drawn 200 units to each side (its lower step) and scaled into the backdrop's focus radius.
 const TEMPLE_HALF_WIDTH = 200;
 
-const Temple: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Temple: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -170 -150 L 0 -230 L 170 -150 Z" fill={colors.roof} chalk={{ seed: 'rome-pediment', width: 5 }} />
     <ChalkBox x={-160} y={-150} width={320} height={24} fill={colors.marble} chalk={{ seed: 'rome-frieze', width: 4 }} />
@@ -32,7 +34,7 @@ const Temple: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Cypress: FC<Readonly<{ color: string }>> = ({ color }) => <path d="M 0 -180 Q 30 -100 22 0 L -22 0 Q -30 -100 0 -180 Z" fill={color} />;
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   const top = focus.y + 126 * unit;
@@ -49,7 +51,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // One side of the colonnade: columns under a beam, from the frame's edge inward.
-const Colonnade: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Colonnade: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     {[0, 150, 300].map((x) => <Placed key={x} x={x} y={0} scale={1}><Column colors={colors} height={560} seed={`${seed}${x}`} /></Placed>)}
     <ChalkBox x={-120} y={-620} width={470} height={60} fill={colors.marble} chalk={{ seed: `${seed}-beam`, width: 5 }} />
@@ -57,7 +59,7 @@ const Colonnade: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, se
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   return (
@@ -72,7 +74,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A broken column stump beside an amphora.
-const Ruin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Ruin: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -200 60 L -200 -260 L -150 -240 L -110 -280 L -60 -250 L -40 60 Z" fill={colors.foreground} chalk={{ seed: 'rome-stump', width: 5 }} />
     <ChalkShape path="M 40 0 Q -10 -60 20 -150 L 10 -190 L 90 -190 L 80 -150 Q 110 -60 60 0 Z" fill={colors.banner} chalk={{ seed: 'rome-amphora', width: 5 }} />
@@ -80,6 +82,6 @@ const Ruin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Ruin colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Ruin colors={layer.colors} /></CornerProps>;
 
-export const ancientRome: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const ancientRome: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

@@ -1,6 +1,8 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape, Fill, Glow, Grass, Placed, Ridge, Tree } from './parts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'field'>;
 
 // An open field on a warm afternoon, giz style: teal sky with chalk clouds, layered hills with chalk ridges, a meadow
 // with a lone tree, a fence and flowers.
@@ -9,7 +11,7 @@ const Cloud: FC<Readonly<{ color: string; seed: string }>> = ({ color, seed }) =
   <ChalkShape path="M -120 10 Q -140 -20 -92 -30 Q -80 -66 -36 -60 Q -8 -96 40 -80 Q 90 -86 96 -36 Q 136 -30 120 10 Z" fill={color} chalk={{ seed, width: 4 }} />
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, ground, unit } = layer;
   return (
     <>
@@ -23,7 +25,7 @@ const Back: FC<LayerProps> = (layer) => {
   );
 };
 
-const Flowers: FC<Readonly<{ colors: Palette; width: number; top: number; depth: number; unit: number }>> = ({ colors, width, top, depth, unit }) => {
+const Flowers: FC<Readonly<{ colors: Colors; width: number; top: number; depth: number; unit: number }>> = ({ colors, width, top, depth, unit }) => {
   const spots = [[0.08, 0.3], [0.2, 0.7], [0.33, 0.45], [0.46, 0.9], [0.58, 0.35], [0.69, 0.75], [0.81, 0.5], [0.93, 0.85], [0.26, 0.15], [0.75, 0.2]] as const;
   const tones = [colors.flower1, colors.flower2, colors.flower3];
   return (
@@ -33,7 +35,7 @@ const Flowers: FC<Readonly<{ colors: Palette; width: number; top: number; depth:
   );
 };
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, ground, unit } = layer;
   const horizon = ground - 150 * unit;
   return (
@@ -55,7 +57,7 @@ const FieldFence: FC<Readonly<{ color: string }>> = ({ color }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
+const Front: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {
   const bottom = height * 1.06;
   return (
     <>
@@ -65,4 +67,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const field: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const field: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

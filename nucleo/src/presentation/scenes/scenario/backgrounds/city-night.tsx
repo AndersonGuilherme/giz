@@ -1,7 +1,9 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape, Fill, Glow, Placed, Stars } from './parts.tsx';
 import { CornerProps, Moon, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'city-night'>;
 
 // A city at night, giz style: stars and a chalk moon clear of the HUD, a skyline of lit towers with a tall antenna
 // tower behind the characters, near buildings with a glowing shop window on each side, a sidewalk and street lamps.
@@ -14,7 +16,7 @@ const windowsOf = (wide: number, tall: number) =>
   spread(Math.floor(tall / 60), 30, tall - 50).flatMap((y, row) => spread(Math.max(1, Math.floor(wide / 40)), 16, wide - 30).map((x, column) =>
     (row + column * 2) % 3 ? `M ${x} ${-y} h 14 v 20 h -14 Z` : ''));
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
   return (
@@ -34,7 +36,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // The tall tower behind the characters: a slim shaft, a pod near the top, an antenna with a red beacon.
-const AntennaTower: FC<Readonly<{ colors: Palette; tall: number }>> = ({ colors, tall }) => (
+const AntennaTower: FC<Readonly<{ colors: Colors; tall: number }>> = ({ colors, tall }) => (
   <g>
     <ChalkShape path={`M -50 0 L -30 ${-tall + 120} H 30 L 50 0 Z`} fill={colors.tower} chalk={{ seed: 'city-tower', width: 4 }} />
     <ChalkShape path={`M -90 ${-tall + 150} Q 0 ${-tall + 190} 90 ${-tall + 150} L 70 ${-tall + 90} H -70 Z`} fill={colors.tower} chalk={{ seed: 'city-pod', width: 4 }} />
@@ -45,7 +47,7 @@ const AntennaTower: FC<Readonly<{ colors: Palette; tall: number }>> = ({ colors,
 );
 
 // A near building from the frame's edge inward, with a lit shop window and an awning.
-const Building: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Building: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkBox x={-200} y={-560} width={420} height={560} fill={colors.near} chalk={{ seed, width: 5 }} />
     <path d={windowsOf(380, 330).join(' ')} fill={colors.window} opacity={0.75} transform="translate(-180 -220)" />
@@ -54,7 +56,7 @@ const Building: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, see
   </g>
 );
 
-const StreetLamp: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const StreetLamp: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <Glow id={seed} x={0} y={-430} radius={200} color={colors.lamp} opacity={0.5} />
     <path d="M 0 0 V -430" stroke={colors.post} strokeWidth={12} />
@@ -62,7 +64,7 @@ const StreetLamp: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, s
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, unit, backdrop } = layer;
   const { horizon, ground } = backdrop;
   const dashes = spread(9, -0.05, 1.05).map((at) => `M ${width * at} ${ground + 70 * unit} h ${60 * unit}`);
@@ -80,7 +82,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A trash bin with a lid.
-const Bin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Bin: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -60 60 L -80 -220 H 140 L 120 60 Z" fill={colors.bin} chalk={{ seed: 'city-bin', width: 5 }} />
     <ChalkBox x={-100} y={-250} width={260} height={34} corner={14} fill={colors.foreground} chalk={{ seed: 'city-lid', width: 5 }} />
@@ -88,6 +90,6 @@ const Bin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Bin colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Bin colors={layer.colors} /></CornerProps>;
 
-export const cityNight: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const cityNight: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

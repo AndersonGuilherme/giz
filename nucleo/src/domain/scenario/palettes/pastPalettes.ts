@@ -25,7 +25,6 @@ export const PAST_PALETTES = {
     pyramidShade: '#c99a58',
     block: '#b78a4c',
     farDunes: '#ebcb8f',
-    dunes: '#dcad66',
     sand: '#e6bb78',
     sandNear: '#d29e5e',
     river: '#4fa3b5',
@@ -93,7 +92,6 @@ export const PAST_PALETTES = {
     plank: '#6e4a30',
     barrel: '#8a5a3a',
     hoop: '#3a2a22',
-    foreground: '#3a2418',
   },
   'victorian-street': {
     skyTop: '#3c4a63',

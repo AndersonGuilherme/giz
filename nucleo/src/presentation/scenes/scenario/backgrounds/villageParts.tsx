@@ -1,15 +1,17 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkShape } from './parts.tsx';
-import type { Palette } from './VectorBackgroundModel.ts';
+import type { ColorsOf } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'village'>;
 
 // Pieces of the giz village, in units, standing on (0, 0): white houses with tiled roofs on a hill, a round tower,
 // a windmill, a stone well and a fruit stall. Every main shape carries a chalk line.
 
-type Piece = FC<Readonly<{ colors: Palette; seed: string }>>;
+type Piece = FC<Readonly<{ colors: Colors; seed: string }>>;
 const line = (seed: string, part: string, width = 5) => ({ seed: `${seed}-${part}`, width });
 
 /** A small house: whitewashed walls, a tiled roof of `roof` color, one window and a door. */
-export const HillHouse: FC<Readonly<{ colors: Palette; seed: string; roof: string }>> = ({ colors, seed, roof }) => (
+export const HillHouse: FC<Readonly<{ colors: Colors; seed: string; roof: string }>> = ({ colors, seed, roof }) => (
   <g>
     <ChalkBox x={-70} y={-90} width={140} height={90} fill={colors.wall} chalk={line(seed, 'wall')} />
     <rect x={30} y={-90} width={40} height={90} fill={colors.wallShade} />

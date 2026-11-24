@@ -21,7 +21,11 @@ const isKnown = (name: string | undefined): name is VectorBackground => VECTOR_B
 export class BackgroundSource {
   static for(background: Background, status: Readonly<{ imageFailed: boolean }>): BackgroundChoice {
     if (background.image && !status.imageFailed) return { kind: 'image', image: background.image };
-    const vector = isKnown(background.vector) ? background.vector : FALLBACK;
-    return { kind: 'vector', vector, colors: background.colors ?? {} };
+    return { kind: 'vector', vector: BackgroundSource.vectorFor(background.vector), colors: background.colors ?? {} };
+  }
+
+  /** The vector background drawn for a name: the named one, or `room` when the name is absent or unknown. */
+  static vectorFor(name: string | undefined): VectorBackground {
+    return isKnown(name) ? name : FALLBACK;
   }
 }

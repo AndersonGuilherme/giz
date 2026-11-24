@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { createHash } from 'node:crypto';
 import { GenerateVoices } from '../../src/application/use-cases/GenerateVoices.ts';
 import { Cast } from '../../src/domain/cast/Cast.ts';
 import { Character } from '../../src/domain/cast/Character.ts';
@@ -119,4 +120,14 @@ test('a line with [span] beats sends the voice its text without brackets, and th
   await useCase.run(project({ texts: ['O [bug] voltou.'], pronunciation: 'O [bãg] voltou.' }));
   assert.equal(voice.requests[1]?.text, 'O bãg voltou.');
   assert.notEqual((await store.read('1')).hash, first.hash);
+});
+
+test('a line whose spoken text did not change keeps its hash: bracket-free lines are not re-recorded by the bracket fix', async () => {
+  const { store, voice, useCase } = build();
+  await useCase.run(project({ texts: ['Oi, eu sou a Ana.'] }));
+  // The hash before the fix: text | pronunciation (the text itself) | voice | style | language | provider.
+  const before = createHash('sha1').update(['Oi, eu sou a Ana.', 'Oi, eu sou a Ana.', 'vivian', '', 'pt-BR', 'qwen'].join('|')).digest('hex');
+  assert.equal((await store.read('1')).hash, before);
+  await useCase.run(project({ texts: ['Oi, eu sou a Ana.'] }));
+  assert.equal(voice.calls, 1, 'the same spoken text is skipped');
 });

@@ -2,12 +2,14 @@ import type { FC } from 'react';
 import { FOCUS_RADIUS } from '../../../../domain/scenario/BackdropLayout.ts';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Placed, Ridge } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'pirate-ship'>;
 
 // The deck of a sailing ship, giz style: the sea and a far island behind the rail, the mast with a big sail marked with
 // a compass star behind the characters, rigging ropes, a plank deck and barrels; chalk lines on the wood and the sail.
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   const sea = horizon - 150 * unit;
@@ -26,7 +28,7 @@ const Back: FC<LayerProps> = (layer) => {
 // The sail: a square sail bellied by the wind, with an original compass star on it; drawn 170 units to each side, it is
 // scaled into the backdrop's focus radius.
 const SAIL_HALF_WIDTH = 170;
-const Sail: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Sail: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -170 -150 Q 0 -120 170 -150 Q 200 0 170 150 Q 0 175 -170 150 Q -140 0 -170 -150 Z" fill={colors.sail} chalk={{ seed: 'ship-sail', width: 5 }} />
     <path d="M -150 0 Q 0 30 150 0 Q 0 60 -150 0 Z" fill={colors.sailShade} opacity={0.6} />
@@ -36,7 +38,7 @@ const Sail: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 );
 
 // The rail along the horizon: posts and a top rail, from edge to edge.
-const Rail: FC<LayerProps> = ({ colors, width, unit, backdrop }) => {
+const Rail: FC<LayerProps<Colors>> = ({ colors, width, unit, backdrop }) => {
   const top = backdrop.horizon - 110 * unit;
   const posts = spread(Math.round(width / (70 * unit)), -0.05, 1.05).map((at) => `M ${width * at} ${top} V ${backdrop.horizon}`);
   return (
@@ -47,7 +49,7 @@ const Rail: FC<LayerProps> = ({ colors, width, unit, backdrop }) => {
   );
 };
 
-const Mast: FC<LayerProps> = ({ colors, width, height, unit, backdrop }) => {
+const Mast: FC<LayerProps<Colors>> = ({ colors, width, height, unit, backdrop }) => {
   const { focus, horizon } = backdrop;
   const ropes = [-0.02, 0.18, 0.82, 1.02].map((at) => `M ${focus.x} ${focus.y - 210 * unit} L ${width * at} ${horizon - 110 * unit}`);
   return (
@@ -60,7 +62,7 @@ const Mast: FC<LayerProps> = ({ colors, width, height, unit, backdrop }) => {
   );
 };
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   return (
     <>
@@ -73,7 +75,7 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Barrel: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Barrel: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <ChalkShape path="M -80 0 Q -100 -110 -70 -220 H 70 Q 100 -110 80 0 Z" fill={colors.barrel} chalk={{ seed, width: 5 }} />
     <path d="M -84 -170 H 84 M -92 -50 H 92" stroke={colors.hoop} strokeWidth={12} />
@@ -81,7 +83,7 @@ const Barrel: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed 
 );
 
 // A barrel and a coil of rope.
-const Cargo: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Cargo: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <Placed x={-10} y={40} scale={1.1}><Barrel colors={colors} seed="ship-barrel" /></Placed>
     <ellipse cx={150} cy={-40} rx={46} ry={22} fill="none" stroke={colors.rope} strokeWidth={16} />
@@ -89,6 +91,6 @@ const Cargo: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Cargo colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Cargo colors={layer.colors} /></CornerProps>;
 
-export const pirateShip: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const pirateShip: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

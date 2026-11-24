@@ -3,14 +3,16 @@ import { EffectCenter } from '../../../../domain/scenario/EffectCenter.ts';
 import { AspectRatio } from '../../../../domain/values/AspectRatio.ts';
 import { ChalkShape, Fill, Placed, Ridge } from './parts.tsx';
 import { CornerProps, spread } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'cave'>;
 
 // A cave at dusk, giz style: plum rock walls with ochre paintings, stalactites, an opening on an orange sky, a sandy
 // floor and a stone fire pit right where the `fire` effect burns by default; chalk lines on the rocks.
 
 const MOUTH = 'M -170 150 Q -175 -40 -80 -130 Q 0 -185 85 -125 Q 175 -45 165 150 Z';
 
-const Opening: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Opening: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <defs>
       <linearGradient id="cave-sky" x1={0} y1={0} x2={0} y2={1}>
@@ -29,7 +31,7 @@ const Opening: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 );
 
 // Original cave art: a round beast with stick legs and horns, a hand print and three tally lines.
-const Painting: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Painting: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g opacity={0.85} strokeLinecap="round" fill="none">
     <path d="M -70 0 Q -60 -50 0 -48 Q 60 -50 70 0 Q 40 14 0 12 Q -40 14 -70 0 Z" fill={colors.paint} />
     <path d="M -45 10 V 46 M -20 12 V 48 M 25 12 V 48 M 50 10 V 46 M 66 -16 Q 92 -40 82 -62" stroke={colors.paint} strokeWidth={8} />
@@ -39,7 +41,7 @@ const Painting: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Stalactites: FC<LayerProps> = ({ colors, width, unit, height, backdrop }) => {
+const Stalactites: FC<LayerProps<Colors>> = ({ colors, width, unit, height, backdrop }) => {
   const line = backdrop.focus.y - 240 * unit;
   const drops = spread(11, 0.02, 0.98).filter((at) => Math.abs(at - 0.5) > 0.1);
   const tips = drops.map((at, index) => `M ${width * at - 26 * unit} ${line} L ${width * at} ${line + (60 + (index % 3) * 45) * unit} L ${width * at + 26 * unit} ${line} Z`);
@@ -52,7 +54,7 @@ const Stalactites: FC<LayerProps> = ({ colors, width, unit, height, backdrop }) 
   );
 };
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   return (
     <>
@@ -66,7 +68,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // The fire pit: a ring of stones around crossed logs, under the default center of the `fire` effect.
-const FirePit: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const FirePit: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <path d="M -90 -10 L 90 -40 M -90 -40 L 90 -10" stroke={colors.log} strokeWidth={26} strokeLinecap="round" />
     {spread(6, -110, 110).map((x, index) => (
@@ -75,7 +77,7 @@ const FirePit: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, unit, backdrop } = layer;
   const pit = EffectCenter.of({ type: 'fire' }, AspectRatio.ofSize(width, height));
   const rise = [120, 160, 80, 0];
@@ -90,13 +92,13 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Boulder: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Boulder: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M 40 60 L 95 -360 L 150 60 Z" fill={colors.foreground} chalk={{ seed: 'cave-spike', width: 5 }} />
     <ChalkShape path="M -220 60 L -220 -250 Q -120 -330 -20 -240 Q 70 -190 120 -110 Q 165 -30 185 60 Z" fill={colors.foreground} chalk={{ seed: 'cave-boulder', width: 5 }} />
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Boulder colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Boulder colors={layer.colors} /></CornerProps>;
 
-export const cave: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const cave: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

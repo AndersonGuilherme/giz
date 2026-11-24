@@ -1,11 +1,13 @@
 import type { FC } from 'react';
 import { ChalkBox, ChalkDisc, Fill, Glow, Placed } from './parts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'lab'>;
 
 // A science lab, giz style: lilac tiled wall, shelves of glowing flasks, a molecule poster, a bench with a microscope;
 // chalk lines on the furniture and the glass.
 
-const Flask: FC<Readonly<{ x: number; liquid: string; colors: Palette; tall?: number }>> = ({ x, liquid, colors, tall = 70 }) => (
+const Flask: FC<Readonly<{ x: number; liquid: string; colors: Colors; tall?: number }>> = ({ x, liquid, colors, tall = 70 }) => (
   <g transform={`translate(${x} 0)`}>
     <circle cx={0} cy={-26} r={26} fill={colors.glass} opacity={0.5} />
     <circle cx={0} cy={-22} r={20} fill={liquid} />
@@ -15,7 +17,7 @@ const Flask: FC<Readonly<{ x: number; liquid: string; colors: Palette; tall?: nu
   </g>
 );
 
-const Shelf: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Shelf: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <Flask x={-90} liquid={colors.liquid1} colors={colors} />
     <Flask x={-20} liquid={colors.liquid2} colors={colors} tall={90} />
@@ -25,7 +27,7 @@ const Shelf: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Poster: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Poster: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-90} y={-120} width={180} height={240} corner={6} fill={colors.poster} chalk={{ seed: 'lab-poster', width: 5 }} />
     <path d="M -30 -40 L 30 -10 L 0 50 M 30 -10 L 50 -70" fill="none" stroke={colors.ink} strokeWidth={6} />
@@ -33,7 +35,7 @@ const Poster: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, ground, unit } = layer;
   const base = ground - 150 * unit;
   const columns = Array.from({ length: 24 }, (_empty, index) => index / 20 - 0.1);
@@ -49,7 +51,7 @@ const Back: FC<LayerProps> = (layer) => {
   );
 };
 
-const Microscope: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Microscope: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g fill={colors.metal}>
     <rect x={-50} y={-14} width={100} height={14} rx={4} />
     <path d="M 20 -14 Q 40 -90 0 -130 L -14 -118 Q 20 -80 6 -14 Z" />
@@ -57,7 +59,7 @@ const Microscope: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, ground, unit } = layer;
   const base = ground - 150 * unit;
   return (
@@ -71,7 +73,7 @@ const Middle: FC<LayerProps> = (layer) => {
   );
 };
 
-const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
+const Front: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {
   const bottom = height * 1.06;
   return (
     <>
@@ -81,4 +83,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const lab: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const lab: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };

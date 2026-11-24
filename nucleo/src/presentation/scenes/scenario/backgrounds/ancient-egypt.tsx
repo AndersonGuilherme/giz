@@ -3,14 +3,16 @@ import { SkyLayout } from '../../../../domain/scenario/SkyLayout.ts';
 import { AspectRatio } from '../../../../domain/values/AspectRatio.ts';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Placed, Ridge } from './parts.tsx';
 import { CornerProps } from './sceneryParts.tsx';
-import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.ts';
+
+type Colors = ColorsOf<'ancient-egypt'>;
 
 // A desert by the river in ancient times, giz style: a big hazy pyramid behind the characters, two small ones, an
 // obelisk with made-up signs, palm trees and dunes; chalk lines on the monuments. Generic archetypes, no real landmark.
 
 type Pyramid = Readonly<{ x: number; base: number; apex: number; seed: string }>;
 
-const PyramidShape: FC<Readonly<{ pyramid: Pyramid; colors: Palette; unit: number }>> = ({ pyramid, colors, unit }) => {
+const PyramidShape: FC<Readonly<{ pyramid: Pyramid; colors: Colors; unit: number }>> = ({ pyramid, colors, unit }) => {
   const { x, base, apex, seed } = pyramid;
   const half = (base - apex) * 0.78;
   const outline = `M ${x - half} ${base} L ${x} ${apex} L ${x + half} ${base} Z`;
@@ -25,7 +27,7 @@ const PyramidShape: FC<Readonly<{ pyramid: Pyramid; colors: Palette; unit: numbe
   );
 };
 
-const Back: FC<LayerProps> = (layer) => {
+const Back: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, height, unit, backdrop } = layer;
   const sun = SkyLayout.moon(AspectRatio.ofSize(width, height));
   const base = backdrop.horizon - 10 * unit;
@@ -43,7 +45,7 @@ const Back: FC<LayerProps> = (layer) => {
 };
 
 // An obelisk with original signs: a sun disc, waves, an eye-less bird outline and dots.
-const Obelisk: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Obelisk: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -40 0 L -30 -440 L 0 -480 L 30 -440 L 40 0 Z" fill={colors.stone} chalk={{ seed: 'egypt-obelisk', width: 5 }} />
     <g stroke={colors.glyph} strokeWidth={6} fill="none" strokeLinecap="round">
@@ -54,7 +56,7 @@ const Obelisk: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Palm: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed }) => (
+const Palm: FC<Readonly<{ colors: Colors; seed: string }>> = ({ colors, seed }) => (
   <g>
     <path d="M -10 0 Q 0 -200 30 -400 L 46 -398 Q 18 -200 14 0 Z" fill={colors.trunk} />
     {[-150, -100, -40, 30, 90, 140].map((angle) => (
@@ -64,7 +66,7 @@ const Palm: FC<Readonly<{ colors: Palette; seed: string }>> = ({ colors, seed })
   </g>
 );
 
-const Middle: FC<LayerProps> = (layer) => {
+const Middle: FC<LayerProps<Colors>> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
   return (
@@ -79,7 +81,7 @@ const Middle: FC<LayerProps> = (layer) => {
 };
 
 // A clay jar on a sandstone block.
-const Jar: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
+const Jar: FC<Readonly<{ colors: Colors }>> = ({ colors }) => (
   <g>
     <ChalkBox x={-220} y={-170} width={330} height={240} corner={10} fill={colors.foreground} chalk={{ seed: 'egypt-block', width: 5 }} />
     <ChalkShape path="M 10 -170 Q -40 -230 -10 -300 L -20 -330 L 60 -330 L 50 -300 Q 80 -230 30 -170 Z" fill={colors.jar} chalk={{ seed: 'egypt-jar', width: 5 }} />
@@ -87,6 +89,6 @@ const Jar: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   </g>
 );
 
-const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Jar colors={layer.colors} /></CornerProps>;
+const Front: FC<LayerProps<Colors>> = (layer) => <CornerProps layer={layer}><Jar colors={layer.colors} /></CornerProps>;
 
-export const ancientEgypt: VectorBackgroundModel = { layers: [Back, Middle, Front] };
+export const ancientEgypt: VectorBackgroundModel<Colors> = { layers: [Back, Middle, Front] };
