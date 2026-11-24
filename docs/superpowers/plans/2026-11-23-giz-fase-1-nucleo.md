@@ -26,9 +26,9 @@ dependency-cruiser, `@echogarden/espeak-ng-emscripten`, `@huggingface/transforme
 - Visemas (formas de boca) usam o alfabeto do motor: `X M A E I O U F C` (X = repouso).
 - Nenhum texto pode sobrepor ou sair da área segura (lição 32): toda cena declara as caixas que ocupa e o `check` falha se houver problema.
 - Movimento contido (lições 25–26): gesto forte uma vez quando a pose começa; respiração leve; quem escuta reage só com o corpo.
-- Sem marca "tchr" nem dados pessoais em nada que vá para o repositório.
+- Sem marca pessoal/de terceiros nem dados pessoais em nada que vá para o repositório.
 - Commits locais na branch `estudio/fase-1`. **Push só com autorização do Anderson.** Os commits usam o e-mail noreply já configurado no repo.
-- `motor/src/textFit.ts` e `motor/src/graphLayout.ts` **não estão no git** (os arquivos de `motor/` com alterações ainda não commitadas aguardam autorização). Se a execução usar um worktree, copie-os do checkout principal, `/home/kraoolyh/dev/tchr/aulas/motor/src/`.
+- `motor/src/textFit.ts` e `motor/src/graphLayout.ts` **não estão no git** (os arquivos de `motor/` com alterações ainda não commitadas aguardam autorização). Se a execução usar um worktree, copie-os de `motor/src/` no checkout principal.
 - Comandos rodam em `nucleo/`, salvo quando indicado. O pacote instala com `ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install`.
 
 ## Review Focus

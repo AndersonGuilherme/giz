@@ -2,7 +2,11 @@
   "name": "giz-nucleo",
   "private": true,
   "type": "module",
+  "bin": {
+    "giz": "src/presentation/cli/giz.ts"
+  },
   "scripts": {
+    "giz": "node src/presentation/cli/giz.ts",
     "test": "node --test \"test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && depcruise src",

@@ -25,8 +25,17 @@ cd nucleo
 ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install
 ```
 
-A voz local (Qwen3-TTS) usa a GPU e baixa o modelo na primeira vez. As configurações dela (pasta dos modelos, `cuda`
-ou `cpu`) ficam no `giz.config.json` da raiz do repositório, que o `npm run setup` cria.
+A voz local (Qwen3-TTS) ainda roda pelo `motor/`: para gerar vozes com `"provider": "qwen"`, instale e configure o
+motor uma vez (detalhes em [`motor/README.md`](../motor/README.md)):
+
+```bash
+cd motor
+npm install
+npm run setup   # cria o giz.config.json na raiz do repositório: pasta dos modelos, cuda ou cpu, modelo padrão
+```
+
+A voz usa a GPU e baixa o modelo na primeira vez. Só a geração de voz Qwen precisa do motor: `check`, `build`,
+`render`, `sheet` e os projetos com `"provider": "recording"` funcionam sem ele.
 
 ## 2. Criar um projeto
 
@@ -49,16 +58,17 @@ O `giz` cria sozinho, dentro da pasta:
 
 `voice/` e `output/` não vão para o git.
 
-Passo a passo:
+Passo a passo (os projetos ficam fora do repositório, em `~/giz/projetos/<nome>`):
 
-1. Copie um exemplo: `cp -r examples/internet-story/pt-BR ../meu-video`.
+1. Copie um exemplo: `mkdir -p ~/giz/projetos && cp -r examples/internet-story/pt-BR ~/giz/projetos/meu-video`.
 2. Edite `project.json`, os personagens em `cast/` e as falas em `script.json`.
-3. Rode `node src/presentation/cli/giz.ts check ../meu-video` até dar `0 erro(s)`.
-4. Rode `node src/presentation/cli/giz.ts produce ../meu-video`.
+3. Rode `npx giz check ~/giz/projetos/meu-video` até dar `0 erro(s)`.
+4. Rode `npx giz produce ~/giz/projetos/meu-video`.
 
 ## 3. Comandos
 
-Todos rodam dentro de `nucleo/`: `node src/presentation/cli/giz.ts <comando> <pasta-do-projeto>`.
+Todos rodam dentro de `nucleo/`: `npx giz <comando> <pasta-do-projeto>` (o mesmo que `npm run giz -- <comando> ...`
+ou `node src/presentation/cli/giz.ts <comando> ...`).
 
 | Comando | O que faz |
 |---|---|
@@ -72,9 +82,9 @@ Todos rodam dentro de `nucleo/`: `node src/presentation/cli/giz.ts <comando> <pa
 Exemplos:
 
 ```bash
-node src/presentation/cli/giz.ts check examples/coupon-lesson/pt-BR
-node src/presentation/cli/giz.ts produce examples/internet-story/en
-node src/presentation/cli/giz.ts sheet giz examples/internet-story/pt-BR/cast/bia.json
+npx giz check examples/coupon-lesson/pt-BR
+npx giz produce examples/internet-story/en
+npx giz sheet giz examples/internet-story/pt-BR/cast/bia.json
 ```
 
 Para ver um quadro só, sem renderizar o vídeo inteiro, rode `build` e depois:
@@ -110,8 +120,8 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 | `captionStyle` | não | `words`, `blocks` | O estilo da legenda (seção 9). Sem ele, `story` usa `words` e `lesson` usa `blocks`. |
 | `brand` | não | texto | Uma marca no canto superior esquerdo. Só aparece em aula 16:9. |
 | `cast` | sim | lista de ids | Quem participa. Cada id precisa de um `cast/<id>.json`. |
-| `voice.provider` | sim | `qwen`, `recording` | `qwen`: voz local gerada na GPU. `recording`: você grava cada fala em `recordings/<id-da-fala>.wav`. |
-| `voice.model` | não | `0.6b`, `1.7b` | O modelo Qwen. O `1.7b` é mais natural e é o único que segue o `style` da voz. Sem ele, vale o `giz.config.json`. |
+| `voice.provider` | sim | `qwen`, `recording` | `qwen`: voz local gerada na GPU. `recording`: você grava cada fala em `recordings/<id-da-fala>.wav` (WAV PCM de 16 bits); o `check` avisa sobre gravação ausente ou inválida, e uma gravação refeita gera a fala de novo. |
+| `voice.model` | não | `0.6b`, `1.7b` | O modelo Qwen. O `1.7b` é mais natural e é o único que segue o `style` da voz. Sem ele, vale o `giz.config.json`. Trocar o modelo aqui gera as vozes de novo. |
 
 ## 5. Personagens (`cast/<id>.json`)
 
@@ -136,7 +146,7 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 | `name` | sim | O nome que aparece na legenda do `.srt`. |
 | `rig` | não | O desenho do corpo (seção 6). Sem `rig`, o personagem é só voz, como um narrador, e não pode entrar em cena. |
 | `parameters` | não | A aparência, conforme o rig. Os que faltam usam o padrão do rig. |
-| `voice.id` | sim | A voz Qwen: `serena`, `vivian`, `uncle_fu`, `ryan`, `aiden`, `ono_anna`, `sohee`, `eric` ou `dylan`. As mesmas vozes falam pt-BR e inglês (o idioma vem do projeto). |
+| `voice.id` | sim | A voz Qwen: `serena`, `vivian`, `uncle_fu`, `ryan`, `aiden`, `ono_anna`, `sohee`, `eric` ou `dylan`. As mesmas vozes falam pt-BR e inglês (o idioma vem do projeto). Com `"provider": "qwen"`, outro valor é erro do `check`. |
 | `voice.style` | não | Uma instrução de como falar (sotaque, ritmo, humor). Só o modelo `1.7b` a segue. Em pt-BR, peça o sotaque brasileiro. |
 | `personality` | não | Uma nota para quem escreve o roteiro. O vídeo não usa. |
 | `defaultExpression` | sim | A expressão de quando ninguém pede outra (seção 7). |
@@ -401,7 +411,9 @@ a verga da vela) usa a largura de destaque, que fica entre os dois personagens e
 { "background": { "vector": "street", "colors": { "skyTop": "#0b1230", "skyBottom": "#3a2a5a" } } }
 ```
 
-Uma imagem própria fica dentro da pasta do projeto e deve ter a proporção do vídeo. Se o arquivo não existir, o
+Uma imagem própria fica dentro da pasta do projeto, com o caminho relativo a ela (sem `/` no começo, sem `./` e sem
+`..` que saia da pasta: o `check` recusa). Ela deve ter a proporção do vídeo: um PNG ou JPEG com outra proporção (mais
+de 5% de diferença) gera um aviso, porque o render corta as bordas para cobrir o quadro. Se o arquivo não existir, o
 `check` avisa e o vídeo usa o fundo vetorial (o `vector` dado ou `room`):
 
 ```json
@@ -664,7 +676,10 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
 - O código fica em inglês (identificadores, arquivos, chaves dos JSON do projeto, subcomandos). Os textos que a pessoa
   usuária vê ficam em pt-BR.
 - Render: `@remotion/bundler` e `@remotion/renderer` chamados direto (sem `npx`). A pasta pública do render é
-  temporária: os sons de `public/sounds/` (copiados de `motor/assets/sfx/`) mais as vozes do projeto.
+  temporária: os sons de `public/sounds/` (copiados de `motor/assets/sfx/`) mais as vozes e as imagens de cenário do
+  projeto, no mesmo caminho relativo.
+- `QwenVoice` importa `motor/scripts/qwen3-tts.ts` e é carregada com `import()` só quando uma fala é gerada
+  (`composition.ts`): os outros comandos não tocam no `motor/`.
 - Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-giz.png --props='{"rig":"giz"}'`.
   Acrescente `"character":"cast/<id>.json"` e `--public-dir=<projeto>` para usar os parâmetros de um personagem.
 - Galeria de elencos prontos (uma por época), com os presets como pasta pública:

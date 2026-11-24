@@ -44,7 +44,7 @@ contas de IA, gera roteiro, personagens, cenários e áudio, revisa cada etapa e
 - Gastar créditos da IA da pessoa sem ela saber: toda etapa paga mostra a estimativa antes de rodar, e nada que
   já foi gerado é gerado de novo se a entrada não mudou.
 - Texto sobreposto/cortado na tela (lição 32 continua valendo: tudo passa por encaixe de texto e checagem).
-- Marca "tchr" ou dados pessoais do Anderson no repositório público.
+- Marca pessoal/de terceiros ou dados pessoais do Anderson no repositório público.
 
 ## 3. Restrições
 

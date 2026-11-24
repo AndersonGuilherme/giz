@@ -1,3 +1,6 @@
 test/fixtures/**/voice/
 output/
 examples/**/voice/
+# The voice records of a project made inside nucleo/ (the .wav are ignored at the root). Only the .json: voice/ is
+# also the name of source folders (src/infrastructure/voice/), so the folder itself cannot be ignored.
+**/voice/*.json

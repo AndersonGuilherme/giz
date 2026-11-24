@@ -1,4 +1,5 @@
-// Usage: node src/presentation/cli/giz.ts <subcommand> [arguments]
+#!/usr/bin/env node
+// Usage: npx giz <subcommand> [arguments] (or node src/presentation/cli/giz.ts <subcommand> [arguments])
 import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, extname, join, resolve } from 'node:path';
 import type { Progress } from '../../application/use-cases/GenerateVoices.ts';
