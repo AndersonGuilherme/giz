@@ -7,7 +7,7 @@ import { esquemaDoPersonagem } from '../esquema/esquemaDoPersonagem.ts';
 import { esquemaDoProjeto, type ProjetoJson } from '../esquema/esquemaDoProjeto.ts';
 import { esquemaDoRoteiro, type RoteiroJson } from '../esquema/esquemaDoRoteiro.ts';
 import { ColetorDeProblemas } from '../esquema/mensagensDeErro.ts';
-import { parametrosDoRig } from '../esquema/parametrosDoRig.ts';
+import { parametrosDoRig, rigExigidoPresente } from '../esquema/parametrosDoRig.ts';
 import { personagemParaDominio, projetoParaDominio, roteiroParaDominio } from '../esquema/paraDominio.ts';
 import { verificarPersonagensEmCena, verificarQuemFala } from '../esquema/referenciasAoElenco.ts';
 import { avisosDeImagens } from './avisosDeImagens.ts';
@@ -44,6 +44,7 @@ export class RepositorioDeProjetoEmDisco implements RepositorioDeProjeto {
     const json = await lerValidado({ pasta, arquivo, coletor }, esquemaDoPersonagem);
     if (!json) return undefined;
     if (json.id !== id) coletor.adicionar({ arquivo, caminho: 'id', mensagem: `"${json.id}" difere do nome do arquivo (${id})` });
+    if (!rigExigidoPresente(json, { arquivo, coletor })) return undefined;
     return personagemParaDominio(json, parametrosDoRig(json, this.#catalogo, { arquivo, coletor }));
   }
 

@@ -1,6 +1,7 @@
 import type { CatalogoDeRigs, DefinicaoDeParametro, DefinicaoDeParametros } from '../../aplicacao/portas/CatalogoDeRigs.ts';
 import type { ValorDeParametro } from '../../dominio/elenco/Personagem.ts';
 import { CorHex } from '../../dominio/valores/CorHex.ts';
+import { IdPersonagem } from '../../dominio/valores/IdPersonagem.ts';
 import type { PersonagemJson } from './esquemaDoPersonagem.ts';
 import type { ColetorDeProblemas } from './mensagensDeErro.ts';
 import { mensagemDoDominio } from './refinamentos.ts';
@@ -33,7 +34,7 @@ function validarConhecidos(definicoes: DefinicaoDeParametros, parametros: Parame
   });
 }
 
-function recusarDesconhecidos(json: PersonagemJson, definicoes: DefinicaoDeParametros, origem: Origem): void {
+function recusarDesconhecidos(json: Readonly<{ rig: string; parametros: Parametros }>, definicoes: DefinicaoDeParametros, origem: Origem): void {
   const validos = Object.keys(definicoes);
   Object.keys(json.parametros)
     .filter((nome) => !validos.includes(nome))
@@ -49,15 +50,30 @@ function comPadroes(definicoes: DefinicaoDeParametros, parametros: Parametros): 
   return { ...Object.fromEntries(padroes), ...parametros };
 }
 
+/** Sem rig, só o narrador (voz sem corpo, sem parâmetros); os demais personagens precisam de um. */
+export function rigExigidoPresente(json: PersonagemJson, origem: Origem): boolean {
+  if (json.rig !== undefined) return true;
+  if (!IdPersonagem.de(json.id).eNarrador()) return recusar(origem, 'rig', 'obrigatório (só o narrador pode não ter rig)');
+  if (Object.keys(json.parametros).length > 0) return recusar(origem, 'parametros', 'o narrador sem rig não tem parâmetros');
+  return true;
+}
+
+function recusar(origem: Origem, caminho: string, mensagem: string): false {
+  origem.coletor.adicionar({ arquivo: origem.arquivo, caminho, mensagem });
+  return false;
+}
+
 /** Valida os parâmetros com a definição do rig e completa os ausentes com o padrão. */
 export function parametrosDoRig(json: PersonagemJson, catalogo: CatalogoDeRigs, origem: Origem): Parametros {
-  const definicoes = catalogo.definicao(json.rig);
+  const { rig, parametros } = json;
+  if (rig === undefined) return {};
+  const definicoes = catalogo.definicao(rig);
   if (!definicoes) {
-    const mensagem = `rig "${json.rig}" desconhecido (use ${catalogo.ids().join(', ')})`;
+    const mensagem = `rig "${rig}" desconhecido (use ${catalogo.ids().join(', ')})`;
     origem.coletor.adicionar({ arquivo: origem.arquivo, caminho: 'rig', mensagem });
-    return json.parametros;
+    return parametros;
   }
-  recusarDesconhecidos(json, definicoes, origem);
-  validarConhecidos(definicoes, json.parametros, origem);
-  return comPadroes(definicoes, json.parametros);
+  recusarDesconhecidos({ rig, parametros }, definicoes, origem);
+  validarConhecidos(definicoes, parametros, origem);
+  return comPadroes(definicoes, parametros);
 }

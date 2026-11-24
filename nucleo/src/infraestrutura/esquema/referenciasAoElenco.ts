@@ -10,6 +10,12 @@ function foraDoElenco(quem: string, elenco: Elenco): string {
   return `"${quem}" não está no elenco (${elenco.ids().join(', ')})`;
 }
 
+function problemaDeQuemEstaEmCena(quem: string, elenco: Elenco): string | undefined {
+  const id = IdPersonagem.de(quem);
+  if (!elenco.contem(id)) return foraDoElenco(quem, elenco);
+  return elenco.personagem(id).temCorpo() ? undefined : `${quem} não tem corpo e não pode aparecer em cena`;
+}
+
 /** Cada fala precisa ser de alguém do elenco. */
 export function verificarQuemFala(roteiro: Roteiro, elenco: Elenco, coletor: ColetorDeProblemas): void {
   const desconhecidos = roteiro.falas().idsDesconhecidos(elenco);
@@ -20,14 +26,14 @@ export function verificarQuemFala(roteiro: Roteiro, elenco: Elenco, coletor: Col
   });
 }
 
-/** Cada personagem posto num cenário precisa ser do elenco. */
+/** Cada personagem posto num cenário precisa ser do elenco e ter corpo. */
 export function verificarPersonagensEmCena(json: RoteiroJson, elenco: Elenco, coletor: ColetorDeProblemas): void {
   json.falas.forEach((fala, indiceDaFala) => {
     if (fala.cena?.tipo !== 'cenario') return;
     fala.cena.personagens.forEach(({ quem }, indice) => {
-      if (elenco.contem(IdPersonagem.de(quem))) return;
+      const mensagem = problemaDeQuemEstaEmCena(quem, elenco);
       const caminho = `falas[${indiceDaFala}].cena.personagens[${indice}].quem`;
-      coletor.adicionar({ arquivo: ARQUIVO, caminho, mensagem: foraDoElenco(quem, elenco) });
+      if (mensagem) coletor.adicionar({ arquivo: ARQUIVO, caminho, mensagem });
     });
   });
 }

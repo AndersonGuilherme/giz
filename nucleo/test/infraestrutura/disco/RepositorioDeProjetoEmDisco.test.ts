@@ -115,7 +115,7 @@ test('número fora do intervalo e opção inválida saem juntos', async () => {
 test('parâmetros ausentes recebem o padrão do rig', async () => {
   const p = await carregarComPersonagem({ parametros: { altura: 1.2 } });
   const ana = p.elenco().personagem(IdPersonagem.de('ana'));
-  assert.deepEqual(ana.ficha().parametros, { pele: '#f0c8a0', altura: 1.2, cabelo: 'curto', oculos: false });
+  assert.deepEqual(ana.parametros(), { pele: '#f0c8a0', altura: 1.2, cabelo: 'curto', oculos: false });
 });
 test('tipo de cena desconhecido lista os tipos', async () => {
   await assert.rejects(carregarComCena({ tipo: 'casa' }), /falas\[0\]\.cena\.tipo: tipo inválido \(use cenario, titulo,/);
@@ -127,7 +127,7 @@ test('personagem em cena fora do elenco é erro', async () => {
 test('cena de código embutido e cenário completo carregam', async () => {
   const codigo = { tipo: 'codigo', titulo: 'soma.ts', linhas: ['const a = 1;', 'const b = 2;'], adicionadas: [1], destaque: ['b'] };
   const p = await carregarComCena(codigo);
-  assert.deepEqual(p.roteiro().falas().cadaUma()[0].dados().cena, codigo);
+  assert.deepEqual(p.roteiro().falas().cadaUma()[0].cena(), codigo);
   const cenario = {
     tipo: 'cenario', fundo: { vetorial: 'sala', cores: { parede: '#ffeedd' } },
     personagens: [{ quem: 'ana', posicao: 'esquerda', escala: 1.1, direcao: 'direita' }],
@@ -145,4 +145,40 @@ test('cor inválida dentro da cena aponta o caminho', async () => {
 test('barra do HUD acima de 100 é erro', async () => {
   const cena = { tipo: 'cenario', fundo: {}, personagens: [], hud: { campos: [], barra: { rotulo: 'x', valor: 120 } } };
   await assert.rejects(carregarComCena(cena), /cena\.hud\.barra\.valor: deve ser no máximo 100/);
+});
+
+const NARRADOR = { id: 'narrador', nome: 'Narrador', voz: { id: 'narrador' }, expressaoPadrao: 'neutra' };
+async function pastaComNarrador(alterarRoteiro: (json: Json) => Json = (json) => json): Promise<string> {
+  const pasta = await copiaAlterada('projeto.json', (json) => ({ ...json, elenco: ['ana', 'narrador'] }));
+  await writeFile(join(pasta, 'elenco/narrador.json'), JSON.stringify(NARRADOR));
+  const caminho = join(pasta, 'roteiro.json');
+  await writeFile(caminho, JSON.stringify(alterarRoteiro(JSON.parse(await readFile(caminho, 'utf8')) as Json)));
+  return pasta;
+}
+test('narrador sem rig carrega como voz sem corpo', async () => {
+  const pasta = await pastaComNarrador((json) => ({
+    ...json, falas: [...(json.falas as Json[]), { id: '3', capitulo: 1, quem: 'narrador', texto: 'Era uma vez.' }],
+  }));
+  const p = await repositorio().carregar(pasta);
+  const narrador = p.elenco().personagem(IdPersonagem.NARRADOR);
+  assert.equal(narrador.temCorpo(), false);
+  assert.ok(p.elenco().personagem(IdPersonagem.de('ana')).temCorpo());
+});
+test('narrador em cena é erro legível', async () => {
+  const pasta = await pastaComNarrador((json) => {
+    const [primeira, ...resto] = json.falas as Json[];
+    const cena = { tipo: 'cenario', fundo: {}, personagens: [{ quem: 'narrador', posicao: 'centro' }] };
+    return { ...json, falas: [{ ...primeira, cena }, ...resto] };
+  });
+  await assert.rejects(repositorio().carregar(pasta),
+    /falas\[0\]\.cena\.personagens\[0\]\.quem: narrador não tem corpo e não pode aparecer em cena/);
+});
+test('personagem sem rig que não é o narrador é erro', async () => {
+  await assert.rejects(carregarCom('elenco/ana.json', (json) => ({ ...json, rig: undefined })),
+    /elenco\/ana\.json › rig: obrigatório \(só o narrador pode não ter rig\)/);
+});
+test('narrador sem rig com parâmetros é erro', async () => {
+  const pasta = await pastaComNarrador();
+  await writeFile(join(pasta, 'elenco/narrador.json'), JSON.stringify({ ...NARRADOR, parametros: { pele: '#000' } }));
+  await assert.rejects(repositorio().carregar(pasta), /elenco\/narrador\.json › parametros: o narrador sem rig não tem parâmetros/);
 });

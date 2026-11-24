@@ -1,5 +1,6 @@
 import { Personagem, type ValorDeParametro } from '../../dominio/elenco/Personagem.ts';
 import { type ConteudoDoProjeto, Projeto } from '../../dominio/projeto/Projeto.ts';
+import { Capitulo } from '../../dominio/roteiro/Capitulo.ts';
 import { Fala } from '../../dominio/roteiro/Fala.ts';
 import { Falas } from '../../dominio/roteiro/Falas.ts';
 import { Roteiro } from '../../dominio/roteiro/Roteiro.ts';
@@ -17,8 +18,8 @@ export function personagemParaDominio(json: PersonagemJson, parametros: Record<s
 }
 
 export function falaParaDominio(json: FalaJson): Fala {
-  const { quem, ...dados } = json;
-  return Fala.de(IdPersonagem.de(quem), dados);
+  const { quem, capitulo, ...dados } = json;
+  return Fala.de(IdPersonagem.de(quem), { ...dados, capitulo: Capitulo.de(capitulo) });
 }
 
 export function roteiroParaDominio(json: RoteiroJson): Roteiro {

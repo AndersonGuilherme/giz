@@ -1,9 +1,16 @@
+import { ErroDeDominio } from '../ErroDeDominio.ts';
 import type { Elenco } from '../elenco/Elenco.ts';
 import type { Fala } from './Fala.ts';
 
 function quemFalaEmTexto(fala: Fala): string {
   const quem = fala.quem();
   return quem.texto();
+}
+
+function recusarIdsRepetidos(lista: readonly Fala[]): void {
+  const ids = lista.map((fala) => fala.id());
+  const repetido = ids.find((id, indice) => ids.indexOf(id) !== indice);
+  if (repetido !== undefined) throw new ErroDeDominio(`id "${repetido}" repetido entre as falas`);
 }
 
 export class Falas {
@@ -14,6 +21,7 @@ export class Falas {
   }
 
   static de(lista: readonly Fala[]): Falas {
+    recusarIdsRepetidos(lista);
     return new Falas([...lista]);
   }
 
