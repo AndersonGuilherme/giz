@@ -62,7 +62,7 @@ export class Segundos {
   }
 
   emQuadros(fps: Fps): Quadro {
-    return Quadro.de(Math.ceil(this.#valor * fps.valor() - TOLERANCIA_DE_PONTO_FLUTUANTE));
+    return Quadro.de(Math.max(0, Math.ceil(this.#valor * fps.valor() - TOLERANCIA_DE_PONTO_FLUTUANTE)));
   }
 
   mais(outro: Segundos): Segundos {

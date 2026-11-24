@@ -21,3 +21,7 @@ test('Quadro soma e compara', () => {
   assert.ok(!Quadro.de(3).antesDe(Quadro.de(3)));
 });
 test('Fps padrão é 30', () => assert.equal(Fps.PADRAO.valor(), 30));
+test('duração zero ou ínfima vira quadro 0 positivo, nunca -0', () => {
+  assert.ok(Object.is(Segundos.de(0).emQuadros(Fps.PADRAO).valor(), 0));
+  assert.ok(Object.is(Segundos.de(1e-12).emQuadros(Fps.PADRAO).valor(), 0));
+});
