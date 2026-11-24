@@ -1,7 +1,9 @@
 // Único ponto de composição: só aqui os adaptadores são criados com `new`.
 import { GerarVozes } from '../../aplicacao/casos-de-uso/GerarVozes.ts';
+import { VerificarProjeto } from '../../aplicacao/casos-de-uso/VerificarProjeto.ts';
 import type { ProvedorVoz } from '../../aplicacao/portas/ProvedorVoz.ts';
 import type { RepositorioDeProjeto } from '../../aplicacao/portas/RepositorioDeProjeto.ts';
+import { criarRegistroDeLayouts } from '../../dominio/layout/registroPadrao.ts';
 import type { Projeto } from '../../dominio/projeto/Projeto.ts';
 import { AlinhadorPorEnvelope } from '../../infraestrutura/alinhamento/AlinhadorPorEnvelope.ts';
 import { AlinhadorWhisper } from '../../infraestrutura/alinhamento/AlinhadorWhisper.ts';
@@ -28,4 +30,8 @@ export function gerarVozes(pasta: string, projeto: Projeto): GerarVozes {
   const voz = PROVEDORES[projeto.voz().provedor](pasta, projeto);
   const alinhador = new AlinhadorWhisper(new AlinhadorPorEnvelope(), new OuvidoWhisper());
   return new GerarVozes({ voz, fonetizador: new FonetizadorEspeak(), armazem: new ArmazemDeVozesEmDisco(pasta), alinhador });
+}
+
+export function verificarProjeto(): VerificarProjeto {
+  return new VerificarProjeto({ layouts: criarRegistroDeLayouts() });
 }

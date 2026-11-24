@@ -1,7 +1,8 @@
 // Uso: node src/apresentacao/cli/giz.ts <subcomando> [argumentos]
 import { resolve } from 'node:path';
 import type { Progresso } from '../../aplicacao/casos-de-uso/GerarVozes.ts';
-import { gerarVozes, repositorioDeProjeto } from './composicao.ts';
+import type { Problema } from '../../aplicacao/casos-de-uso/VerificarProjeto.ts';
+import { gerarVozes, repositorioDeProjeto, verificarProjeto } from './composicao.ts';
 
 type Subcomando = (argumentos: readonly string[]) => Promise<void>;
 
@@ -19,7 +20,21 @@ async function voz([pasta]: readonly string[]): Promise<void> {
   console.log(`${relatorio.geradas.length} gerada(s), ${relatorio.puladas.length} já em dia`);
 }
 
-const SUBCOMANDOS: Readonly<Record<string, Subcomando>> = { voz };
+function linhaDoProblema(nivel: 'ERRO' | 'AVISO', { fala, mensagem }: Problema): string {
+  return fala ? `${nivel} fala ${fala}: ${mensagem}` : `${nivel}: ${mensagem}`;
+}
+
+async function check([pasta]: readonly string[]): Promise<void> {
+  if (!pasta) throw new ErroDeUso('uso: giz check <pasta-do-projeto>');
+  const projeto = await repositorioDeProjeto().carregar(resolve(pasta));
+  const { erros, avisos } = verificarProjeto().executar(projeto);
+  erros.forEach((erro) => console.log(linhaDoProblema('ERRO', erro)));
+  avisos.forEach((aviso) => console.log(linhaDoProblema('AVISO', aviso)));
+  console.log(`${erros.length} erro(s), ${avisos.length} aviso(s)`);
+  if (erros.length > 0) process.exitCode = 1;
+}
+
+const SUBCOMANDOS: Readonly<Record<string, Subcomando>> = { voz, check };
 
 async function principal([nome = '', ...argumentos]: readonly string[]): Promise<void> {
   const subcomando = SUBCOMANDOS[nome];
