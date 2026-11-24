@@ -122,8 +122,9 @@ Regras (valem para todo código novo; checadas por ferramenta no `npm run lint`,
   `max-lines-per-function`, `max-params: 3`, `complexity`, `id-length` mínimo), dependency-cruiser bloqueando
   importação contra o sentido das camadas, `tsc --strict`, testes com `node:test`.
 - Exceções às regras ficam numa linha de comentário com o motivo (`// calisthenics-exceção: …`) e são raras.
-- Idioma do código: nomes de domínio em português (como o resto do giz); termos técnicos consagrados podem
-  ficar em inglês (`props`, `render`, `hook`).
+- **Idioma do código: inglês** (decisão do Anderson, 2026-11-23): identificadores, arquivos, pastas, comentários,
+  chaves dos JSON de projeto, subcomandos da CLI e mensagens de commit. Textos que a pessoa usuária vê (erros,
+  saída da CLI, rótulos nas cenas) ficam em pt-BR/en pelo i18n.
 
 ### 5.2 Projeto (um vídeo)
 Uma pasta por vídeo, escolhida pela pessoa (padrão: `~/giz/projetos/<nome>`):
