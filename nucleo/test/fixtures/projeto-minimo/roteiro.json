@@ -1,0 +1,14 @@
+{
+  "capitulos": ["Abertura"],
+  "falas": [
+    {
+      "id": "1",
+      "capitulo": 1,
+      "quem": "ana",
+      "texto": "Oi, eu sou a Ana.",
+      "pose": "acenar",
+      "cena": { "tipo": "cenario", "fundo": { "vetorial": "quarto" }, "personagens": [{ "quem": "ana", "posicao": "centro" }] }
+    },
+    { "id": "2", "capitulo": 1, "quem": "ana", "texto": "Hoje vamos aprender juntos.", "expressao": "feliz" }
+  ]
+}

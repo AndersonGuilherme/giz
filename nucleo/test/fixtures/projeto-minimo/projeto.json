@@ -1,0 +1,10 @@
+{
+  "versao": 2,
+  "titulo": "Projeto mínimo",
+  "formato": "historia",
+  "idioma": "pt-BR",
+  "proporcao": "9:16",
+  "estiloDeLegenda": "palavras",
+  "elenco": ["ana"],
+  "voz": { "provedor": "qwen", "modelo": "0.6b" }
+}
