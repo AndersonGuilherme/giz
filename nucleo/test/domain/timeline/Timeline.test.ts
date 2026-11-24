@@ -10,7 +10,7 @@ const teo = CharacterId.of('teo');
 
 function segment(data: Partial<SegmentJson>): SegmentJson {
   return {
-    lineId: '1', speaker: 'ana', start: 0, lineDuration: 10, totalDuration: 20, scene: { type: 'talk' }, sceneKey: 0, words: [], beats: [],
+    lineId: '1', speaker: 'ana', chapter: 1, start: 0, lineDuration: 10, totalDuration: 20, scene: { type: 'talk' }, sceneKey: 0, words: [], beats: [],
     states: { ana: { pose: 'explain', expression: 'happy', look: 'other' }, teo: { pose: 'think', expression: 'skeptical', look: 'other' } },
     audio: 'voice/1.wav', envelope: [0, 0.2, 0.4, 0.6, 0.8, 1, 0.8, 0.6, 0.4, 0.2], visemes: 'XMAEIOUFCA',
     ...data,

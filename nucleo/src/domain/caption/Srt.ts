@@ -1,4 +1,5 @@
 import type { CharacterJson, SegmentJson, VideoProps } from '../timeline/VideoProps.ts';
+import { VideoClock } from '../video/VideoClock.ts';
 import { BLOCK_CAPTIONS } from './captionLayouts.ts';
 import { captionWords } from './captionWords.ts';
 
@@ -20,8 +21,10 @@ function prefixOf(speaker: string, cast: readonly CharacterJson[]): string {
   return character?.rig === undefined ? '' : `${character.name}: `;
 }
 
+// The video starts with a still lead-in: the segment starts where `VideoClock` puts it, as the mp4 plays it.
 function segmentEntries(segment: SegmentJson, props: VideoProps): Entry[] {
-  const offset = segment.start / props.fps;
+  const clock = VideoClock.of(props.totalFrames);
+  const offset = clock.toVideo(segment.start) / props.fps;
   const prefix = prefixOf(segment.speaker, props.cast);
   const caption = BLOCK_CAPTIONS.caption(captionWords(segment.words, segment.lineDuration));
   return caption.cues().map((cue) => ({ text: `${prefix}${cue.text}`, start: offset + cue.start.value(), end: offset + cue.end.value() }));

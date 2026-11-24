@@ -5,6 +5,8 @@ import { PREVIEW_DEFAULTS } from './previewScene.ts';
 import { catalogMetadata, FRAMES_PER_SCENE, SceneCatalog } from './SceneCatalog.tsx';
 import { CATALOG_SAMPLES } from './catalogSamples.ts';
 import { previewMetadata, ScenePreview } from './ScenePreview.tsx';
+import { EMPTY_VIDEO } from './emptyVideo.ts';
+import { Video, videoMetadata } from './Video.tsx';
 
 // `character` is a cast JSON path relative to the public folder (`--public-dir` can point at a project).
 const readCharacter: CalculateMetadataFunction<CharacterSheetProps> = async ({ props }) => {
@@ -54,8 +56,15 @@ const CatalogComposition: FC = () => (
   />
 );
 
+// The video of a project: `--props` (or `renderMedia`'s `inputProps`) is the VideoProps that `giz build` writes to
+// `output/props.json`; the audio paths in it are relative to the public folder.
+const VideoComposition: FC = () => (
+  <Composition id="Video" component={Video} width={1080} height={1920} fps={30} durationInFrames={1} defaultProps={EMPTY_VIDEO} calculateMetadata={videoMetadata} />
+);
+
 export const Root: FC = () => (
   <>
+    <VideoComposition />
     <SheetComposition />
     <PreviewComposition />
     <CatalogComposition />

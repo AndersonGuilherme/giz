@@ -8,6 +8,7 @@ personagens/comparativo.html
 producao-log.md
 *.wav
 !motor/assets/sfx/*.wav
+!nucleo/public/sounds/*.wav
 *.mp4
 giz.config.json
 amostras-de-voz/

@@ -11,9 +11,11 @@
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "^0.3.5",
     "@huggingface/transformers": "3.8.1",
+    "@remotion/bundler": "4.0.545",
     "@remotion/cli": "4.0.545",
     "@remotion/google-fonts": "4.0.545",
     "@remotion/media-utils": "4.0.545",
+    "@remotion/renderer": "4.0.545",
     "onnxruntime-node": "1.31.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",

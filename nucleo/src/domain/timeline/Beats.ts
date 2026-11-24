@@ -14,10 +14,21 @@ function beatSource(line: Line): BeatSource {
   return { text: BeatText.of(inPronunciation ? pronunciation : line.text()), byWord: !inPronunciation };
 }
 
-function rejectCountMismatch(line: Line, text: BeatText): void {
+function countMismatch(line: Line, text: BeatText): string | undefined {
   const beats = line.beats();
-  if (beats.length === text.count()) return;
-  throw new DomainError(`fala ${line.id()}: ${text.count()} [trechos] no texto, mas ${beats.length} marca(s)`);
+  if (beats.length === text.count()) return undefined;
+  return `${text.count()} [trechos] no texto, mas ${beats.length} marca(s)`;
+}
+
+function rejectCountMismatch(line: Line, text: BeatText): void {
+  const mismatch = countMismatch(line, text);
+  if (mismatch === undefined) return;
+  throw new DomainError(`fala ${line.id()}: ${mismatch}`);
+}
+
+/** The `check` message when the `[span]` count differs from the beat count; `undefined` when they match. */
+export function beatCountMismatch(line: Line): string | undefined {
+  return countMismatch(line, beatSource(line).text);
 }
 
 function beatFrames(source: BeatSource, times: LineTimings): number[] {
@@ -30,6 +41,8 @@ function beatFrames(source: BeatSource, times: LineTimings): number[] {
 }
 
 const CHARACTER_FIELDS = new Set(['expression', 'pose', 'sfx']);
+
+const sceneFieldsOf = (beat: BeatJson) => Object.entries(beat.changes).filter(([field]) => !CHARACTER_FIELDS.has(field));
 
 /** The beats of a line: the k-th `[span]` of the text fires the k-th beat. */
 export class Beats {
@@ -52,9 +65,20 @@ export class Beats {
 
   /** The scene after all the beats: only the scene fields (no expression, pose or sound). */
   appliedTo(scene: ResolvedScene): ResolvedScene {
-    const changes = this.#list.map((beat) => Object.entries(beat.changes).filter(([field]) => !CHARACTER_FIELDS.has(field)));
+    return this.appliedUntil(scene, Number.POSITIVE_INFINITY);
+  }
+
+  /** The scene with the scene fields of the beats up to the relative frame `frame` (the ones still to come are left out). */
+  appliedUntil(scene: ResolvedScene, frame: number): ResolvedScene {
+    const changes = this.#list.filter((beat) => beat.frame <= frame).map(sceneFieldsOf);
     // A beat accepts any scene field (like the motor beat); validating each field is the schema's job.
     return { ...scene, ...Object.fromEntries(changes.flat()) } as ResolvedScene;
+  }
+
+  /** The relative frame of the last beat up to `frame` that changed a scene field; `undefined` when none did. */
+  lastSceneChangeUntil(frame: number): number | undefined {
+    const changing = this.#list.filter((beat) => beat.frame <= frame && sceneFieldsOf(beat).length > 0);
+    return changing.at(-1)?.frame;
   }
 
   /** The sounds of the beats, in absolute frames from `start`. */

@@ -6,7 +6,7 @@ import type { SegmentJson, VideoProps, WordInFrames } from '../../../src/domain/
 function segment(speaker: string, start: number, words: WordInFrames[]): SegmentJson {
   const lineDuration = words.at(-1)?.end ?? 0;
   return {
-    lineId: `${speaker}-${start}`, speaker, start, lineDuration, totalDuration: lineDuration + 10,
+    lineId: `${speaker}-${start}`, speaker, chapter: 1, start, lineDuration, totalDuration: lineDuration + 10,
     scene: { type: 'talk' }, sceneKey: 0, words, beats: [], states: {},
   };
 }
@@ -22,9 +22,9 @@ function props(segments: SegmentJson[], format: VideoProps['format'] = 'lesson')
   };
 }
 
-test('the srt uses the real times of the words', () => {
+test('the srt uses the real times of the words, moved by the video lead-in (0.5 s) so it matches the mp4', () => {
   const srt = srtOf(props([segment('ana', 30, [{ text: 'Oi,', start: 6, end: 15 }, { text: 'Téo.', start: 18, end: 40 }])]));
-  assert.equal(srt, '1\n00:00:01,200 --> 00:00:02,333\nAna: Oi, Téo.\n');
+  assert.equal(srt, '1\n00:00:01,700 --> 00:00:02,833\nAna: Oi, Téo.\n');
 });
 
 test('cues are numbered across segments; the narrator (no body) has no name before the text', () => {
@@ -32,7 +32,7 @@ test('cues are numbered across segments; the narrator (no body) has no name befo
     segment('ana', 0, [{ text: 'Oi.', start: 0, end: 9 }]),
     segment('narrator', 3600 * 30 + 61 * 30, [{ text: 'Fim.', start: 3, end: 12 }]),
   ]));
-  assert.equal(srt, '1\n00:00:00,000 --> 00:00:00,300\nAna: Oi.\n\n2\n01:01:01,100 --> 01:01:01,400\nFim.\n');
+  assert.equal(srt, '1\n00:00:00,500 --> 00:00:00,800\nAna: Oi.\n\n2\n01:01:01,600 --> 01:01:01,900\nFim.\n');
 });
 
 test('a long line becomes sentence blocks, each from its first word to the next block (story too)', () => {
@@ -41,8 +41,8 @@ test('a long line becomes sentence blocks, each from its first word to the next 
   const srt = srtOf(props([segment('narrator', 0, words)], 'story'));
   const cues = srt.trim().split('\n\n');
   assert.equal(cues.length, 2);
-  assert.equal(cues[0], '1\n00:00:00,000 --> 00:00:04,000\nVocê nasceu numa aldeia pequena, perto de um rio largo e frio.');
-  assert.match(cues[1], /^2\n00:00:04,000 --> 00:00:07,933\nA peste chegou/);
+  assert.equal(cues[0], '1\n00:00:00,500 --> 00:00:04,500\nVocê nasceu numa aldeia pequena, perto de um rio largo e frio.');
+  assert.match(cues[1], /^2\n00:00:04,500 --> 00:00:08,433\nA peste chegou/);
 });
 
 test('a segment without words (old props) adds no cue', () => {

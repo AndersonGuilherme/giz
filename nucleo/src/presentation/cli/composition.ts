@@ -1,4 +1,8 @@
 // Single composition point: only here are the adapters created with `new`.
+import { fileURLToPath } from 'node:url';
+import { BuildTimeline } from '../../application/use-cases/BuildTimeline.ts';
+import { ProduceVideo } from '../../application/use-cases/ProduceVideo.ts';
+import { RenderVideo } from '../../application/use-cases/RenderVideo.ts';
 import { GenerateVoices } from '../../application/use-cases/GenerateVoices.ts';
 import { CheckProject } from '../../application/use-cases/CheckProject.ts';
 import type { VoiceProvider } from '../../application/ports/VoiceProvider.ts';
@@ -11,6 +15,9 @@ import { WhisperAligner } from '../../infrastructure/alignment/WhisperAligner.ts
 import { WhisperListener } from '../../infrastructure/alignment/WhisperListener.ts';
 import { DiskVoiceStore } from '../../infrastructure/disk/DiskVoiceStore.ts';
 import { DiskProjectRepository } from '../../infrastructure/disk/DiskProjectRepository.ts';
+import { SrtCaptionWriter } from '../../infrastructure/disk/SrtCaptionWriter.ts';
+import { RemotionRenderer } from '../../infrastructure/render/RemotionRenderer.ts';
+import { RemotionSheet } from '../../infrastructure/render/RemotionSheet.ts';
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
 import { RecordingVoice } from '../../infrastructure/voice/RecordingVoice.ts';
 import { QwenVoice } from '../../infrastructure/voice/QwenVoice.ts';
@@ -38,4 +45,27 @@ export function generateVoices(folder: string, project: Project): GenerateVoices
 
 export function checkProject(): CheckProject {
   return new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS });
+}
+
+export function buildTimeline(folder: string): BuildTimeline {
+  return new BuildTimeline({ store: new DiskVoiceStore(folder) });
+}
+
+// The Remotion entry point (the compositions) and the package public folder (the sound effects).
+const REMOTION = {
+  entryPoint: fileURLToPath(new URL('../remotion/index.ts', import.meta.url)),
+  publicFolder: fileURLToPath(new URL('../../../public', import.meta.url)),
+};
+
+export function renderVideo(folder: string): RenderVideo {
+  return new RenderVideo({ build: buildTimeline(folder), renderer: new RemotionRenderer(REMOTION, folder), captions: new SrtCaptionWriter() });
+}
+
+export function produceVideo(folder: string): ProduceVideo {
+  const voices = (project: Project) => generateVoices(folder, project);
+  return new ProduceVideo({ repository: projectRepository(), check: checkProject(), voices, render: renderVideo(folder) });
+}
+
+export function characterSheet(): RemotionSheet {
+  return new RemotionSheet(REMOTION);
 }

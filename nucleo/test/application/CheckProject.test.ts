@@ -11,24 +11,28 @@ import { CAPTION_LAYOUTS, type CaptionLayout } from '../../src/domain/caption/ca
 import { Project, type CaptionStyle, type Format } from '../../src/domain/project/Project.ts';
 import { Chapter } from '../../src/domain/script/Chapter.ts';
 import type { Scene } from '../../src/domain/script/Scene.ts';
-import { Line } from '../../src/domain/script/Line.ts';
+import { Line, type Beat } from '../../src/domain/script/Line.ts';
 import { Lines } from '../../src/domain/script/Lines.ts';
 import { Script } from '../../src/domain/script/Script.ts';
 import { CharacterId } from '../../src/domain/values/CharacterId.ts';
 import { Language } from '../../src/domain/values/Language.ts';
 import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
 
-type TestLine = { text?: string; scene?: Scene };
+type TestLine = { text?: string; scene?: Scene; beats?: Beat[] };
 
-type Extras = Readonly<{ warnings?: string[]; format?: Format; captionStyle?: CaptionStyle }>;
+type Extras = Readonly<{ warnings?: string[]; format?: Format; captionStyle?: CaptionStyle; withBody?: string[]; chapters?: string[] }>;
 
-function project(lines: TestLine[], aspect: string, { warnings = [], format = 'lesson', captionStyle }: Extras = {}): Project {
+const member = (id: string) => Character.of(CharacterId.of(id), { name: id, rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
+
+const NO_EXTRAS = { warnings: [], format: 'lesson', withBody: ['ana'], chapters: ['Abertura'] } as const;
+
+function project(lines: TestLine[], aspect: string, extras: Extras = {}): Project {
+  const { warnings, format, captionStyle, withBody, chapters } = { ...NO_EXTRAS, ...extras };
   const ana = CharacterId.of('ana');
-  const character = Character.of(ana, { name: 'Ana', rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
-  const list = lines.map(({ text = 'Olá.', scene }, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene }));
+  const list = lines.map(({ text = 'Olá.', scene, beats }, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene, beats }));
   return Project.of(
     { title: 'T', format, language: Language.PORTUGUESE, aspect: AspectRatio.of(aspect), ...(captionStyle ? { captionStyle } : {}), voice: { provider: 'qwen' } },
-    { cast: Cast.of([character]), script: Script.of(['Abertura'], Lines.of(list)), warnings },
+    { cast: Cast.of(withBody.map(member)), script: Script.of(chapters, Lines.of(list)), warnings },
   );
 }
 
@@ -116,4 +120,21 @@ test('20 lines of code in 9:16 go through the real code layout: they shrink and 
 test('every lesson scene type has a registered layout: none is skipped any more', () => {
   const r = check(project([{ scene: { type: 'quote', text: 'palavra '.repeat(120) } }], '9:16'));
   assert.deepEqual(r.errors.map((e) => e.message), ['citação não cabe na caixa nem com a letra a 60%']);
+});
+test('a different number of [spans] and beats is a readable line error, not a crash at build time', () => {
+  const r = check(project([{ text: 'Um [dois] e [três].', beats: [{ pose: 'point' }], scene: title('Olá') }], '9:16'));
+  assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', '2 [trechos] no texto, mas 1 marca(s)']]);
+});
+test('a lesson scene with more than 2 cast members with a body is an error of the line that opens it', () => {
+  const r = check(project([{ text: 'Oi.' }, { scene: title('Olá') }, { scene: title('De novo') }], '16:9', { withBody: ['ana', 'bia', 'caio'], chapters: ['Abertura'] }));
+  assert.deepEqual(r.errors.map((e) => e.line), ['2', '3']);
+  assert.match(r.errors[0]!.message, /no máximo 2 apresentadores numa aula \(o elenco tem 3 com corpo: ana, bia, caio\)/);
+});
+test('the crowd limit is a lesson rule: a scenario scene has its own limit', () => {
+  const scenario: Scene = { type: 'scenario', background: { vector: 'village' }, characters: [{ character: 'ana', position: 'center' }] };
+  assert.deepEqual(check(project([{ scene: scenario }], '16:9', { withBody: ['ana', 'bia', 'caio'], format: 'story' })).errors, []);
+});
+test('in a 16:9 lesson the chapter in the frame is checked: a name too long is an error', () => {
+  const r = check(project([{ scene: title('Olá') }], '16:9', { chapters: ['Capítulo muito comprido '.repeat(6)] }));
+  assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'capítulo não cabe na caixa nem com a letra a 60%']]);
 });

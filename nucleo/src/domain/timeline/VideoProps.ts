@@ -24,6 +24,8 @@ export type WordInFrames = WordJson;
 export type SegmentJson = {
   lineId: string;
   speaker: string;
+  /** Position (from 1) of the line chapter in `VideoProps.chapters`. */
+  chapter: number;
   start: number;
   lineDuration: number;
   totalDuration: number;

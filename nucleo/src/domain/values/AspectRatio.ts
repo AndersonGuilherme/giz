@@ -21,6 +21,14 @@ export class AspectRatio {
     return found;
   }
 
+  /** The aspect ratio of a video size (the video props carry the size, not the ratio). */
+  static ofSize(width: number, height: number): AspectRatio {
+    const supported = [AspectRatio.VERTICAL, AspectRatio.HORIZONTAL];
+    const found = supported.find((aspect) => aspect.width() === width && aspect.height() === height);
+    if (!found) throw new DomainError(`tamanho ${width}×${height} não suportado (use 1080×1920 ou 1920×1080)`);
+    return found;
+  }
+
   width(): number {
     return this.#width;
   }

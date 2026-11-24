@@ -30,6 +30,11 @@ function fromLine(line: Line, voice: LineVoice, scene: LineScene) {
   return { speaker: speaker.text(), times, words: times.toFrames(texts), hold };
 }
 
+function chapterOf(line: Line): number {
+  const chapter = line.chapter();
+  return chapter.number();
+}
+
 /** A line placed on the timeline: where it starts, how long it lasts, the scene, the beats and the state of each character. */
 export class LineSegment {
   readonly #json: SegmentJson;
@@ -45,7 +50,7 @@ export class LineSegment {
     const beats = Beats.fromLine(line, times);
     const { scene, key } = context.scene;
     const json: SegmentJson = {
-      lineId: line.id(), speaker, start: context.start, lineDuration: times.frames(), totalDuration: totalDuration(times.frames(), hold),
+      lineId: line.id(), speaker, chapter: chapterOf(line), start: context.start, lineDuration: times.frames(), totalDuration: totalDuration(times.frames(), hold),
       scene, sceneKey: key, words, beats: beats.toJson(), states: lineStates(line, context.cast, scene),
       audio: voice.file, envelope: [...voice.envelope], visemes: voice.visemes, ...(hold ? { holdAfter: hold } : {}),
     };
