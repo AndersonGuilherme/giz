@@ -72,9 +72,13 @@ test('eyes: the upper lid tilts with the brow, at 60% of its inner angle, per si
   assert.equal(skeptical.right.tilt, 4 * 0.6);
 });
 
-test('eyes: the catchlight scales with the pupil but never gets smaller than its minimum', () => {
+test('eyes: the catchlight sits on the upper right of the iris and scales with the pupil, never below its minimum', () => {
   const neutral = FaceGeometry.eyes('neutral', 'camera', 0).pupil.catchlight;
-  assert.deepEqual(neutral, { radius: 0.3, x: 0.35, y: -0.4 });
+  assert.deepEqual(neutral, { radius: 0.23, x: 0.42, y: -0.42 });
+  const excited = FaceGeometry.eyes('excited', 'camera', 0).pupil.catchlight;
+  assert.ok(excited.radius > neutral.radius, 'a bigger pupil gets a bigger highlight');
   const scared = FaceGeometry.eyes('scared', 'camera', 0).pupil.catchlight;
-  assert.equal(scared.radius, 0.18);
+  assert.equal(scared.radius, 0.16);
+  assert.deepEqual([scared.x, scared.y], [0.42, -0.42], 'the position does not follow the pupil size');
+  assert.ok(Math.hypot(scared.x, scared.y) + scared.radius < 1, 'the highlight stays inside the iris');
 });

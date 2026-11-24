@@ -33,9 +33,9 @@ const Body: FC<BodyProps> = ({ state, look }) => {
 };
 
 /** The giz rig, the house style: colored head, chalk outline, big expressive eyes and a clothed body. */
-export const Giz: FC<RigProps> = ({ state, parameters, height, side }) => {
+export const Giz: FC<RigProps> = ({ state, parameters, height, side, id }) => {
   const { y, rotation, scale } = state.bodyOffset();
-  const look = lookOf(parameters);
+  const look = lookOf(parameters, id);
   const width = (height * VIEW_BOX.width) / VIEW_BOX.height;
   const body = `translate(0 ${y}) translate(200 ${FEET.y}) rotate(${rotation}) scale(${scale}) translate(-200 -${FEET.y})`;
   return (

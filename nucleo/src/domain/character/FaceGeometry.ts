@@ -58,15 +58,17 @@ const GAZES: Readonly<Record<Gaze, Point>> = {
 /** Upper and lower lid (0 open to 1 closed) and the upper lid's tilt in degrees (positive lowers the inner end). */
 export type Lids = Readonly<{ upper: number; lower: number; tilt: number }>;
 /** Final pupil position (-1 to 1, positive x toward the facing side) and size, plus each eye's lids. */
-/** Catchlight in units of the base pupil radius, relative to the pupil center. */
+/** Catchlight in units of the iris radius, relative to the iris center: up and toward the light (upper right). */
 export type Catchlight = Readonly<{ radius: number; x: number; y: number }>;
 export type EyesState = Readonly<{ pupil: Readonly<{ x: number; y: number; scale: number; catchlight: Catchlight }>; left: Lids; right: Lids }>;
 
 const LID_TILT_PER_BROW_ANGLE = 0.6;
-const MINIMUM_CATCHLIGHT = 0.18; // a tiny scared pupil still keeps a visible highlight
+const MINIMUM_CATCHLIGHT = 0.16; // a tiny scared pupil still keeps a visible highlight
+const CATCHLIGHT_PER_PUPIL = 0.23;
+const CATCHLIGHT_AT = { x: 0.42, y: -0.42 } as const;
 
 const catchlightOf = (scale: number): Catchlight =>
-  ({ radius: Math.max(MINIMUM_CATCHLIGHT, 0.3 * scale), x: 0.35 * scale, y: -0.4 * scale });
+  ({ radius: Math.max(MINIMUM_CATCHLIGHT, CATCHLIGHT_PER_PUPIL * scale), ...CATCHLIGHT_AT });
 const clamp = (value: number) => Math.max(-1, Math.min(1, value));
 
 function lidsOf(face: Face, brow: Brow, blink: number): Lids {

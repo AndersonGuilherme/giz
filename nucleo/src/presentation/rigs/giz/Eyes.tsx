@@ -23,7 +23,8 @@ const Sclera: FC<Readonly<{ eye: EyeBox; fill: string; stroke?: string }>> = ({ 
   />
 );
 
-// Colored iris with a darker rim, the pupil (its size carries the emotion) and two highlights.
+// Colored iris with a darker rim, the pupil (its size carries the emotion) and two highlights; the domain places the
+// main one in iris units.
 const Iris: FC<Readonly<{ eye: EyeBox; pupil: Pupil; look: Look }>> = ({ eye, pupil, look }) => {
   const scale = look.eyeScale;
   const [iris, base] = [EYES.iris * scale, EYES.pupil * scale];
@@ -34,7 +35,7 @@ const Iris: FC<Readonly<{ eye: EyeBox; pupil: Pupil; look: Look }>> = ({ eye, pu
     <g>
       <circle cx={x} cy={y} r={iris} fill={look.eyeColor} stroke={shade(look.eyeColor, -0.35)} strokeWidth={3} />
       <circle cx={x} cy={y} r={base * pupil.scale} fill={PUPIL_COLOR} />
-      <circle cx={x + iris * 0.42} cy={y - iris * 0.42} r={Math.max(3, base * catchlight.radius * 1.6)} fill="#ffffff" />
+      <circle cx={x + iris * catchlight.x} cy={y + iris * catchlight.y} r={iris * catchlight.radius} fill="#ffffff" />
       <circle cx={x - iris * 0.38} cy={y + iris * 0.4} r={2.2 * scale} fill="#ffffff" opacity={0.8} />
     </g>
   );

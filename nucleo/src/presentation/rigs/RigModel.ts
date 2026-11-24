@@ -7,8 +7,11 @@ import type { StanceData } from '../../domain/scenario/Stance.ts';
 /** Parameters already validated against the rig definition, with defaults applied. */
 export type ValidatedParameters = Readonly<Record<string, ParameterValue>>;
 
-/** `height` in pixels of the whole character; `side` 1 turns the face to the right of the screen, -1 to the left. */
-export type RigProps = Readonly<{ state: CharacterState; parameters: ValidatedParameters; height: number; side: -1 | 1 }>;
+/**
+ * `height` in pixels of the whole character; `side` 1 turns the face to the right of the screen, -1 to the left;
+ * `id` (the character's) keeps hand-drawn details, like the chalk line, different from one character to another.
+ */
+export type RigProps = Readonly<{ state: CharacterState; parameters: ValidatedParameters; height: number; side: -1 | 1; id?: string }>;
 
 /** What Node (CLI, cast validation) needs to know about a rig, without React; `stance` puts its soles on the scene floor. */
 export type RigDefinition = Readonly<{

@@ -15,7 +15,7 @@ const OnSpot: FC<Readonly<{ spot: Spot; member: CastMember; state: CharacterStat
   const rectangle = Stance.of(model.stance).rectangleFor(spot);
   return (
     <div style={{ position: 'absolute', left: rectangle.x, top: rectangle.y, filter: AMBIENT_LIGHT }}>
-      <model.Component state={state} parameters={member.parameters} height={spot.height} side={spot.side} />
+      <model.Component state={state} parameters={member.parameters} height={spot.height} side={spot.side} id={member.id} />
     </div>
   );
 };

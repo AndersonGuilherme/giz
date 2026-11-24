@@ -17,7 +17,7 @@ const CROWN = 'M134,58 C132,6 150,-12 200,-12 C250,-12 268,6 266,58 Z';
 const BunBack: Piece = ({ look }) => (
   <g>
     <path d={BUN.path()} fill={look.hairColor} />
-    <Chalked look={look} outline={BUN} seed="bun" />
+    <Chalked look={look} outline={BUN} part="bun" />
   </g>
 );
 
@@ -26,7 +26,7 @@ const Short: Piece = ({ look }) => (
   <g>
     <path d={SHORT} fill={look.hairColor} />
     <path d="M150,44 C176,34 206,36 228,46" fill="none" stroke={shade(look.hairColor, 0.25)} strokeWidth={4} strokeLinecap="round" />
-    <Chalked look={look} outline={Silhouette.parse(SHORT)} seed="hair" />
+    <Chalked look={look} outline={Silhouette.parse(SHORT)} part="hair" />
   </g>
 );
 
@@ -51,9 +51,9 @@ const Hat: Piece = ({ look }) => (
   <g>
     <path d={CROWN} fill={look.accessoryColor} />
     <path d="M133,34 L267,34 L266,56 L134,56 Z" fill={shade(look.accessoryColor, -0.35)} />
-    <Chalked look={look} outline={Silhouette.parse(CROWN)} seed="hat" />
+    <Chalked look={look} outline={Silhouette.parse(CROWN)} part="hat" />
     <ellipse cx={200} cy={60} rx={150} ry={20} fill={shade(look.accessoryColor, -0.08)} />
-    <Chalked look={look} outline={Silhouette.ellipse({ x: 200, y: 60 }, 150, 20)} seed="brim" />
+    <Chalked look={look} outline={Silhouette.ellipse({ x: 200, y: 60 }, 150, 20)} part="brim" />
   </g>
 );
 

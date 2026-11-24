@@ -18,7 +18,7 @@ export const Head: FC<Readonly<{ look: Look }>> = ({ look }) => {
       <clipPath id={clip}><path d={outline.path()} /></clipPath>
       <path d={outline.path()} fill={skin.base} />
       <ellipse cx={HEAD.x - 34} cy={HEAD.y - 40} rx={HEAD.radius * 1.1} ry={HEAD.radius * 1.12} fill="none" stroke={skin.shade} strokeWidth={56} clipPath={`url(#${clip})`} opacity={0.75} />
-      <Chalked look={look} outline={outline} seed="head" />
+      <Chalked look={look} outline={outline} part="head" />
     </g>
   );
 };

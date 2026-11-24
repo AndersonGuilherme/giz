@@ -16,7 +16,7 @@ const LEFT_SHOE = `M140,${FEET.y} C140,560 196,556 198,578 L198,${FEET.y} Z`;
 const RIGHT_SHOE = `M260,${FEET.y} C260,560 204,556 202,578 L202,${FEET.y} Z`;
 
 // The side away from the light gets a darker band; the head casts a soft shadow on the chest; chalk around it all.
-const Shading: FC<Readonly<{ path: string; color: string; look: Look; seed: string }>> = ({ path, color, look, seed }) => {
+const Shading: FC<Readonly<{ path: string; color: string; look: Look; part: string }>> = ({ path, color, look, part }) => {
   const clip = useSvgId('torso');
   return (
     <g>
@@ -26,14 +26,14 @@ const Shading: FC<Readonly<{ path: string; color: string; look: Look; seed: stri
         <path d="M236,280 C262,300 270,340 272,380 L300,560 L250,560 C256,460 254,360 236,280 Z" fill={shade(color, -0.18)} />
         <ellipse cx={200} cy={298} rx={84} ry={24} fill="#000000" opacity={0.2} />
       </g>
-      <Chalked look={look} outline={Silhouette.parse(path)} seed={seed} />
+      <Chalked look={look} outline={Silhouette.parse(path)} part={part} />
     </g>
   );
 };
 
 const TShirt: FC<Readonly<{ look: Look }>> = ({ look }) => (
   <g>
-    <Shading path={SHIRT} color={look.outfitColor} look={look} seed="shirt" />
+    <Shading path={SHIRT} color={look.outfitColor} look={look} part="shirt" />
     <path d="M168,296 Q200,318 232,296" fill="none" stroke={shade(look.outfitColor, -0.3)} strokeWidth={5} />
   </g>
 );
@@ -41,7 +41,7 @@ const TShirt: FC<Readonly<{ look: Look }>> = ({ look }) => (
 // A long tunic with a flat belt and a square buckle.
 const Tunic: FC<Readonly<{ look: Look }>> = ({ look }) => (
   <g>
-    <Shading path={TUNIC} color={look.outfitColor} look={look} seed="tunic" />
+    <Shading path={TUNIC} color={look.outfitColor} look={look} part="tunic" />
     <path d="M114,404 Q200,418 286,404 L288,422 Q200,436 112,422 Z" fill={shade(look.accessoryColor, -0.2)} />
     <rect x={186} y={406} width={28} height={24} rx={4} fill="none" stroke={look.accessoryColor} strokeWidth={5} />
   </g>
@@ -49,8 +49,8 @@ const Tunic: FC<Readonly<{ look: Look }>> = ({ look }) => (
 
 const Dress: FC<Readonly<{ look: Look }>> = ({ look }) => (
   <g>
-    <Shading path={SKIRT} color={look.outfitColor} look={look} seed="skirt" />
-    <Shading path={BODICE} color={look.outfitColor} look={look} seed="bodice" />
+    <Shading path={SKIRT} color={look.outfitColor} look={look} part="skirt" />
+    <Shading path={BODICE} color={look.outfitColor} look={look} part="bodice" />
     <path d="M128,400 Q200,412 272,400" fill="none" stroke={look.accessoryColor} strokeWidth={10} strokeLinecap="round" />
     {[160, 200, 240].map((x) => <circle key={x} cx={x} cy={470 + (x === 200 ? 18 : 0)} r={9} fill={look.accessoryColor} />)}
   </g>
@@ -59,8 +59,8 @@ const Dress: FC<Readonly<{ look: Look }>> = ({ look }) => (
 const Hoodie: FC<Readonly<{ look: Look }>> = ({ look }) => (
   <g>
     <path d={HOOD} fill={shade(look.outfitColor, -0.28)} />
-    <Chalked look={look} outline={Silhouette.parse(HOOD)} seed="hood" />
-    <Shading path={SHIRT} color={look.outfitColor} look={look} seed="hoodie" />
+    <Chalked look={look} outline={Silhouette.parse(HOOD)} part="hood" />
+    <Shading path={SHIRT} color={look.outfitColor} look={look} part="hoodie" />
     <rect x={116} y={436} width={168} height={22} rx={10} fill={shade(look.outfitColor, -0.18)} />
     <path d="M150,410 L156,372 L244,372 L250,410 Z" fill={shade(look.outfitColor, -0.12)} />
     <path d="M182,304 v40 M218,304 v40" stroke={look.accessoryColor} strokeWidth={5} strokeLinecap="round" />
@@ -76,24 +76,24 @@ const CLOTHES: Readonly<Record<OutfitName, Clothes>> = {
   hoodie: { hem: 446, legs: '#3d5a8a', shoes: '#f1efe9', Torso: Hoodie },
 };
 
-const Leg: FC<Readonly<{ x: number; clothes: Clothes; look: Look }>> = ({ x, clothes, look }) => {
+const Leg: FC<Readonly<{ x: number; side: -1 | 1; clothes: Clothes; look: Look }>> = ({ x, side, clothes, look }) => {
   const rectangle = { x, y: clothes.hem - 12, width: 34, height: FEET.y - clothes.hem - 4 };
   return (
     <g>
       <rect {...rectangle} rx={14} fill={clothes.legs} />
-      <Chalked look={look} outline={Silhouette.roundedRect(rectangle, 14)} seed={`leg${x}`} />
+      <Chalked look={look} outline={Silhouette.roundedRect(rectangle, 14)} part="leg" side={side} />
     </g>
   );
 };
 
 const Legs: FC<Readonly<{ clothes: Clothes; look: Look }>> = ({ clothes, look }) => (
   <g>
-    <Leg x={160} clothes={clothes} look={look} />
-    <Leg x={206} clothes={clothes} look={look} />
-    {[LEFT_SHOE, RIGHT_SHOE].map((shoe) => (
+    <Leg x={160} side={-1} clothes={clothes} look={look} />
+    <Leg x={206} side={1} clothes={clothes} look={look} />
+    {([[LEFT_SHOE, -1], [RIGHT_SHOE, 1]] as const).map(([shoe, side]) => (
       <g key={shoe}>
         <path d={shoe} fill={clothes.shoes} />
-        <Chalked look={look} outline={Silhouette.parse(shoe)} seed={shoe.slice(0, 5)} />
+        <Chalked look={look} outline={Silhouette.parse(shoe)} part="shoe" side={side} />
       </g>
     ))}
     <rect x={138} y={FEET.y - 6} width={124} height={8} rx={4} fill={shade(clothes.shoes, -0.35)} />

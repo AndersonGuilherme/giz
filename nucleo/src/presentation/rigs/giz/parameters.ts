@@ -29,8 +29,9 @@ export const gizDefinition: RigDefinition = {
   stance: { viewBox: VIEW_BOX, feet: { x: 200, y: FEET.y } },
 };
 
-/** The giz parameters, typed for drawing. */
+/** The giz parameters, typed for drawing, plus the character's `id` (the seed of its chalk line). */
 export type Look = Readonly<{
+  id: string;
   skin: SkinToneName;
   headShape: HeadShapeName;
   eyeColor: string;
@@ -49,8 +50,8 @@ export type Look = Readonly<{
 const defaults = Object.fromEntries(Object.entries(gizDefinition.parameters).map(([name, { defaultValue }]) => [name, defaultValue]));
 
 /** Fills in the defaults: the sheet and the tests may pass only some of the parameters. */
-export function lookOf(parameters: ValidatedParameters): Look {
-  return { ...defaults, ...parameters } as Look;
+export function lookOf(parameters: ValidatedParameters, id = 'giz'): Look {
+  return { ...defaults, ...parameters, id } as Look;
 }
 
 /** The skin colors of the look's tone. */

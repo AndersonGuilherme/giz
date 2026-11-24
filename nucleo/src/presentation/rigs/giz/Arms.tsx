@@ -20,21 +20,21 @@ const HAND_SHAPES: Readonly<Record<HandShape, FC<HandProps>>> = {
     <g fill={skinOf(look).base}>
       <ellipse cx={side * 15} cy={ARM.fore + 2} rx={8} ry={12} transform={`rotate(${side * -30} ${side * 15} ${ARM.fore + 2})`} />
       <path d={PALM.path()} />
-      <Chalked look={look} outline={PALM} seed="palm" width={4.5} />
+      <Chalked look={look} outline={PALM} part="palm" side={side} width={4.5} />
     </g>
   ),
-  fist: ({ look }) => (
+  fist: ({ look, side }) => (
     <g fill={skinOf(look).base}>
       <path d={FIST.path()} />
-      <Chalked look={look} outline={FIST} seed="fist" width={4.5} />
+      <Chalked look={look} outline={FIST} part="fist" side={side} width={4.5} />
     </g>
   ),
-  index: ({ look }) => (
+  index: ({ look, side }) => (
     <g fill={skinOf(look).base}>
       <path d={FINGER.path()} />
-      <Chalked look={look} outline={FINGER} seed="finger" width={4} />
+      <Chalked look={look} outline={FINGER} part="finger" side={side} width={4} />
       <path d={KNUCKLES.path()} />
-      <Chalked look={look} outline={KNUCKLES} seed="knuckles" width={4.5} />
+      <Chalked look={look} outline={KNUCKLES} part="knuckles" side={side} width={4.5} />
     </g>
   ),
 };
@@ -50,10 +50,10 @@ const Hand: FC<HandProps & Readonly<{ shape: HandShape }>> = ({ shape, side, loo
 };
 
 /** A rounded limb piece with its chalk line. */
-const Limb: FC<Readonly<{ look: Look; rectangle: Parameters<typeof Silhouette.roundedRect>[0]; corner: number; color: string; seed: string }>> = (props) => (
+const Limb: FC<Readonly<{ look: Look; rectangle: Parameters<typeof Silhouette.roundedRect>[0]; corner: number; color: string; part: string; side: -1 | 1 }>> = (props) => (
   <g>
     <rect {...props.rectangle} rx={props.corner} fill={props.color} />
-    <Chalked look={props.look} outline={Silhouette.roundedRect(props.rectangle, props.corner)} seed={props.seed} />
+    <Chalked look={props.look} outline={Silhouette.roundedRect(props.rectangle, props.corner)} part={props.part} side={props.side} />
   </g>
 );
 
@@ -62,7 +62,7 @@ const Forearm: FC<ArmProps> = ({ arm, side, look }) => {
   const color = short ? skinOf(look).base : look.outfitColor;
   return (
     <g transform={`translate(0 ${ARM.upper * arm.foreshortening}) rotate(${-side * arm.elbow})`}>
-      <Limb look={look} rectangle={{ x: -ARM.thickness / 2 + 1, y: -12, width: ARM.thickness - 2, height: ARM.fore + 6 }} corner={15} color={color} seed={`fore${side}`} />
+      <Limb look={look} rectangle={{ x: -ARM.thickness / 2 + 1, y: -12, width: ARM.thickness - 2, height: ARM.fore + 6 }} corner={15} color={color} part="fore" side={side} />
       {!short && <rect x={-ARM.thickness / 2} y={ARM.fore - 14} width={ARM.thickness} height={10} rx={5} fill={shade(color, -0.25)} />}
       <g transform={`rotate(${-side * arm.wrist} 0 ${ARM.fore})`}>
         <Hand shape={arm.hand} side={side} look={look} />
@@ -79,8 +79,8 @@ export const Arm: FC<ArmProps> = (props) => {
   const sleeve = look.outfit === 'tshirt' ? Math.min(length, 46) : length + 12;
   return (
     <g transform={`translate(${shoulder.x} ${shoulder.y}) rotate(${-side * arm.shoulder})`}>
-      <Limb look={look} rectangle={{ x: -ARM.thickness / 2, y: -14, width: ARM.thickness, height: length + 26 }} corner={16} color={skinOf(look).base} seed={`upper${side}`} />
-      <Limb look={look} rectangle={{ x: -ARM.thickness / 2 - 2, y: -16, width: ARM.thickness + 4, height: sleeve + 16 }} corner={17} color={look.outfitColor} seed={`sleeve${side}`} />
+      <Limb look={look} rectangle={{ x: -ARM.thickness / 2, y: -14, width: ARM.thickness, height: length + 26 }} corner={16} color={skinOf(look).base} part="upper" side={side} />
+      <Limb look={look} rectangle={{ x: -ARM.thickness / 2 - 2, y: -16, width: ARM.thickness + 4, height: sleeve + 16 }} corner={17} color={look.outfitColor} part="sleeve" side={side} />
       <Forearm {...props} />
     </g>
   );

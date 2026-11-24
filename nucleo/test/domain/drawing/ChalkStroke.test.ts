@@ -41,3 +41,24 @@ test('an amplitude of zero follows the shape exactly', () => {
   const points = ChalkStroke.for('head', 0).trace(CIRCLE, 10).points(5);
   for (const { x, y } of points) assert.ok(Math.abs(Math.hypot(x, y) - 100) < 0.6);
 });
+
+test('two characters (or two sides) get their own line: the seed carries the character id and the side', () => {
+  const ana = ChalkStroke.for(ChalkStroke.seed('ana', 'head'), 3).trace(CIRCLE, 10).path();
+  const beto = ChalkStroke.for(ChalkStroke.seed('beto', 'head'), 3).trace(CIRCLE, 10).path();
+  assert.notEqual(ana, beto);
+  const left = ChalkStroke.for(ChalkStroke.seed('ana', 'palm', -1), 3).trace(CIRCLE, 10).path();
+  const right = ChalkStroke.for(ChalkStroke.seed('ana', 'palm', 1), 3).trace(CIRCLE, 10).path();
+  assert.notEqual(left, right);
+  assert.equal(ChalkStroke.seed('ana', 'palm', 1), 'ana/palm/1');
+});
+
+test('the same trace is computed once and reused (backgrounds and still parts cost nothing on later frames)', () => {
+  const first = ChalkStroke.for('cached', 3).trace(CIRCLE, 10);
+  assert.equal(ChalkStroke.for('cached', 3).trace(CIRCLE, 10), first);
+  assert.notEqual(ChalkStroke.for('cached', 3).trace(CIRCLE, 12), first, 'another spacing is another line');
+});
+
+test('a spacing of zero (or less) is a readable error, not a RangeError', () => {
+  assert.throws(() => ChalkStroke.for('head', 3).trace(CIRCLE, 0), (error: Error) => error.name === 'DomainError' && /espaçamento/.test(error.message));
+  assert.throws(() => CIRCLE.points(-1), (error: Error) => error.name === 'DomainError');
+});

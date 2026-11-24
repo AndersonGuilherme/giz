@@ -1,3 +1,4 @@
+import { DomainError } from '../DomainError.ts';
 import type { Rectangle } from '../layout/Box.ts';
 import { parsePath, type Path, type Point, type Segment } from './PathData.ts';
 
@@ -104,6 +105,7 @@ export class Silhouette {
 
   /** Points along the outline about `spacing` apart, from the start to the end (back on the start when closed). */
   points(spacing: number): Point[] {
+    if (!(spacing > 0 && Number.isFinite(spacing))) throw new DomainError(`espaçamento ${spacing} inválido para o contorno (use um número maior que 0)`);
     return resample(dense(this.#path), spacing);
   }
 

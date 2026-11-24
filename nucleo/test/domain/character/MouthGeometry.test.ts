@@ -102,15 +102,25 @@ const listener = (expression: Expression) => CharacterState.of({
   pose: 'neutral', expression, look: 'other', speaking: false, viseme: 'X', opening: 0, blink: 0, body: { y: 0, rotation: 0, scale: 1 },
 });
 
-test('a listener keeps the mouth closed: happy and excited smile with closed lips (an open mouth reads as speaking)', () => {
-  for (const expression of EXPRESSIONS) {
-    const mouth = MouthGeometry.forState(listener(expression));
-    assert.equal(mouth.speaking ? true : mouth.shape.open, false, expression);
-  }
+const openOnListener = (expression: Expression) => {
+  const mouth = MouthGeometry.forState(listener(expression));
+  return mouth.speaking ? undefined : mouth.shape.open;
+};
+
+test('a listener closes only the open smiles: happy and excited smile with closed lips (an open smile reads as speaking)', () => {
+  assert.equal(openOnListener('happy'), false);
+  assert.equal(openOnListener('excited'), false);
   const happy = MouthGeometry.forState(listener('happy'));
   assert.ok(!happy.speaking && happy.shape.upper > 0, 'the closed smile still curves up');
   const excited = MouthGeometry.forState(listener('excited'));
   assert.ok(!excited.speaking && excited.shape.upper > happy.shape.upper, 'excited smiles wider than happy');
+});
+
+test('a listener keeps the open mouth of shock, fear and anger; every other expression stays as it is', () => {
+  for (const expression of ['surprised', 'scared', 'angry'] as const) assert.equal(openOnListener(expression), true, expression);
+  for (const expression of EXPRESSIONS.filter((name) => FaceGeometry.for(name).mouth.curve <= 0)) {
+    assert.deepEqual(MouthGeometry.forState(listener(expression)), { speaking: false, shape: MouthGeometry.silent(FaceGeometry.for(expression).mouth) }, expression);
+  }
 });
 
 test('the speaker between words (rest X) keeps the open expression mouth', () => {
