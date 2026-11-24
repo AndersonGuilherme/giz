@@ -6,19 +6,25 @@ import type { StagedFile } from './stagedBundle.ts';
 
 type BackgroundChange = Readonly<{ background?: Readonly<{ image?: string }> }>;
 
+/** An image the video shows and where it is declared (`fala 1, beats[0].background.image`), for the errors. */
+type Image = Readonly<{ path: string; field: string }>;
+
 // The image of the segment scene and the ones its beats switch to (a beat may change the background).
-function imagesOf(segment: SegmentJson): string[] {
-  const scene = segment.scene.type === 'scenario' ? segment.scene.background.image : undefined;
-  const beats = segment.beats.map((beat) => (beat.changes as BackgroundChange).background?.image);
-  return [scene, ...beats].filter((image): image is string => image !== undefined);
+function imagesOf(segment: SegmentJson): Image[] {
+  const scene = { path: segment.scene.type === 'scenario' ? segment.scene.background.image : undefined, field: 'scene' };
+  const beats = segment.beats.map((beat, order) => ({ path: (beat.changes as BackgroundChange).background?.image, field: `beats[${order}]` }));
+  const fieldOf = (where: string) => `fala ${segment.lineId}, ${where}.background.image`;
+  return [scene, ...beats].flatMap(({ path, field }) => (path ? [{ path, field: fieldOf(field) }] : []));
 }
+
+const firstOfEachPath = (image: Image, index: number, all: readonly Image[]) => all.findIndex((other) => other.path === image.path) === index;
 
 // The load already validated the paths; checked again here, since a path leaving the project would be copied from
 // outside it. A missing image is left out (the render falls back to the vector background); a folder is an error.
-function usable(folder: string, image: string): boolean {
-  const path = ProjectPath.of(image);
+function usable(folder: string, image: Image): boolean {
+  const path = ProjectPath.of(image.path);
   const found = statSync(join(folder, path.text()), { throwIfNoEntry: false });
-  if (found && !found.isFile()) throw new Error(`${image} não é um arquivo (background.image de um cenário)`);
+  if (found && !found.isFile()) throw new Error(`${image.path} não é um arquivo (${image.field})`);
   return found !== undefined;
 }
 
@@ -28,6 +34,6 @@ function usable(folder: string, image: string): boolean {
  */
 export function projectFiles(props: VideoProps, folder: string): StagedFile[] {
   const audios = props.segments.flatMap((segment) => (segment.audio ? [segment.audio] : []));
-  const images = [...new Set(props.segments.flatMap(imagesOf))].filter((image) => usable(folder, image));
-  return [...audios, ...images].map((path) => ({ from: join(folder, path), at: path, project: folder }));
+  const images = props.segments.flatMap(imagesOf).filter(firstOfEachPath).filter((image) => usable(folder, image));
+  return [...audios, ...images.map((image) => image.path)].map((path) => ({ from: join(folder, path), at: path, project: folder }));
 }

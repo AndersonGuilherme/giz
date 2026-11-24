@@ -69,6 +69,14 @@ test('a beat image leaving the project folder is refused, never copied (the repr
 
 test('an image path naming a folder is a readable error naming the file', async () => {
   const folder = await projectWith(['scenarios/room.png']);
-  assert.throws(() => projectFiles(props([segment({ scene: scenario('scenarios') })]), folder), /scenarios não é um arquivo/);
+  assert.throws(() => projectFiles(props([segment({ scene: scenario('scenarios') })]), folder), /scenarios não é um arquivo \(fala 1, scene\.background\.image\)/);
+  await rm(folder, { recursive: true, force: true });
+});
+
+test('a folder named by a beat image is an error naming the line and the beat field', async () => {
+  const folder = await projectWith(['scenarios/room.png']);
+  const beats = [{ frame: 5, changes: { pose: 'wave' } }, { frame: 10, changes: { background: { image: 'scenarios' } } }];
+  assert.throws(() => projectFiles(props([segment({ scene: scenario('scenarios/room.png'), beats })]), folder),
+    /scenarios não é um arquivo \(fala 1, beats\[1\]\.background\.image\)/);
   await rm(folder, { recursive: true, force: true });
 });

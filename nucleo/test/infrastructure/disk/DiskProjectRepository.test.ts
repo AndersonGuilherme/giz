@@ -127,6 +127,18 @@ test('a missing chapter is an error', async () => {
   await assert.rejects(loadWithScript({ lines: [{ id: '1', chapter: 3, speaker: 'ana', text: 'oi' }] }),
     /lines\[0\]\.chapter: capítulo 3 não existe \(há 1\)/);
 });
+test('a line id that could leave the voice folder is refused with the field; a plain id loads', async () => {
+  const withFirstId = (id: string) => loadWith('script.json', (json) => {
+    const [first, ...rest] = json.lines as Json[];
+    return { ...json, lines: [{ ...first, id }, ...rest] };
+  });
+  await assert.rejects(withFirstId('../x'), /script\.json › lines\[0\]\.id: id de fala "\.\.\/x" inválido/);
+  await assert.rejects(withFirstId('../../x'), /lines\[0\]\.id: id de fala "\.\.\/\.\.\/x" inválido/);
+  await assert.rejects(withFirstId('a/b'), /lines\[0\]\.id: id de fala "a\/b" inválido/);
+  await assert.rejects(withFirstId(''), /lines\[0\]\.id: id de fala "" inválido/);
+  const p = await withFirstId('intro_1');
+  assert.equal(p.script().lines().each()[0]?.id(), 'intro_1');
+});
 test('repeated line ids are an error', async () => {
   const lines = [{ id: '1', chapter: 1, speaker: 'ana', text: 'oi' }, { id: '1', chapter: 1, speaker: 'ana', text: 'de novo' }];
   await assert.rejects(loadWithScript({ lines }), /lines\[1\]\.id: id "1" repetido/);

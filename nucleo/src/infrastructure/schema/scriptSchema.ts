@@ -2,7 +2,8 @@ import { z } from 'zod';
 import { EXPRESSIONS, POSES } from '../../domain/cast/PoseAndExpression.ts';
 import { SOUND_EFFECTS, GAZES } from '../../domain/script/Line.ts';
 import { backgroundSchema, sceneSchema } from './sceneSchema.ts';
-import { characterIdSchema, nonEmptyText } from './refinements.ts';
+import { LineId } from '../../domain/values/LineId.ts';
+import { characterIdSchema, nonEmptyText, validatedByDomain } from './refinements.ts';
 
 const pose = z.enum(POSES);
 const expression = z.enum(EXPRESSIONS);
@@ -22,7 +23,8 @@ const holdSchema = z.object({ seconds: z.number().positive(), label: z.string() 
 
 export const lineSchema = z
   .object({
-    id: nonEmptyText,
+    // The id names files (voice/<id>.wav): the domain keeps it a plain file name.
+    id: validatedByDomain((text) => LineId.of(text)),
     chapter: z.number().int().min(1),
     speaker: characterIdSchema,
     text: nonEmptyText,
