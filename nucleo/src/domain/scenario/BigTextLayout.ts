@@ -10,14 +10,15 @@ import type { Frame } from '../values/Time.ts';
 export type BigTextDrawing = Readonly<{ rectangle: Rectangle; fit: Fit; font: Font; boxes: () => Boxes }>;
 
 // Below the HUD and above the caption: 9:16 → y 440–818; 16:9 → y 260–554, on the left like the reference thumbnails.
-const VERTICAL = { column: { x: 86, y: 440, width: 908 }, font: Font.of({ family: 'text', size: 120, lineHeight: 1.05, maximumLines: 3 }) };
-const HORIZONTAL = { column: { x: 96, y: 260, width: 1100 }, font: Font.of({ family: 'text', size: 140, lineHeight: 1.05, maximumLines: 2 }) };
+const VERTICAL = { column: { x: 86, y: 440, width: 908 }, font: Font.of({ family: 'display', size: 120, lineHeight: 1.05, maximumLines: 3 }) };
+const HORIZONTAL = { column: { x: 96, y: 260, width: 1100 }, font: Font.of({ family: 'display', size: 140, lineHeight: 1.05, maximumLines: 2 }) };
 
 export class BigTextLayout {
   static for(bigText: BigText, aspect: AspectRatio): BigTextDrawing {
     const { column, font } = aspect.vertical() ? VERTICAL : HORIZONTAL;
     const rectangle = { ...column, height: font.maximumHeight() };
-    const fit = TextFit.measure(bigText.text, font, column.width);
+    // Fitted narrower than the box by the pop overshoot, so the peak of the entrance still stays inside it.
+    const fit = TextFit.measure(bigText.text, font, column.width / Entrance.peakScale());
     return { rectangle, fit, font, boxes: () => Boxes.of([Box.withText('destaque', rectangle, { text: bigText.text, font })]) };
   }
 }
@@ -32,6 +33,8 @@ const OVERSHOOT = 1.70158;
 const easeOutBack = (fraction: number): number => 1 + (OVERSHOOT + 1) * (fraction - 1) ** 3 + OVERSHOOT * (fraction - 1) ** 2;
 const easeOutCubic = (fraction: number): number => 1 - (1 - fraction) ** 3;
 const RISE_IN_PIXELS = 80;
+// Every entrance has settled by then.
+const ENTRANCE_FRAMES = 30;
 
 const CURVES: ReadonlyMap<string, Curve> = new Map<string, Curve>([
   ['pop', (frame) => ({ scale: 0.6 + 0.4 * easeOutBack(progress(frame, 10)), y: 0, opacity: progress(frame, 5) })],
@@ -48,6 +51,12 @@ export class Entrance {
 
   static of(kind: BigText['entrance']): Entrance {
     return new Entrance(CURVES.get(kind ?? 'pop') ?? CURVES.get('pop')!);
+  }
+
+  /** The largest scale any entrance reaches (the pop overshoot): the layout leaves room for it. */
+  static peakScale(): number {
+    const frames = Array.from({ length: ENTRANCE_FRAMES }, (_empty, frame) => frame);
+    return Math.max(...[...CURVES.values()].flatMap((curve) => frames.map((frame) => curve(frame).scale)));
   }
 
   /** `frame` counted from the start of the scene. */

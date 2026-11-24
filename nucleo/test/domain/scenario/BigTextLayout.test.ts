@@ -43,3 +43,30 @@ test('pop grows from small to full size; rise comes up from below; both end stil
 test('without an entrance the text pops', () => {
   assert.deepEqual(Entrance.of(undefined).at(Frame.of(3)), Entrance.of('pop').at(Frame.of(3)));
 });
+
+// Heavy caps (Nunito 900 with an outline) are about 0.70 em wide, not the 0.58 em of the caption text.
+const HEAVY_CAPS_EM = 0.7;
+
+test('a long uppercase word in 9:16 shrinks whole instead of passing the frame edge, even at the pop peak', () => {
+  const aspect = AspectRatio.of('9:16');
+  const { rectangle, fit, font } = BigTextLayout.for({ text: 'INACREDITÁVEL' }, aspect);
+  assert.equal(font.family(), 'display');
+  assert.deepEqual(fit.lines, ['INACREDITÁVEL'], 'the word is not broken');
+  assert.ok(fit.size < 120, 'it shrank');
+  const peakWidth = 'INACREDITÁVEL'.length * fit.size * HEAVY_CAPS_EM * Entrance.peakScale();
+  assert.ok(peakWidth <= rectangle.width, `${peakWidth} > ${rectangle.width}`);
+  assert.ok(rectangle.x + peakWidth <= aspect.width());
+});
+
+test('every line of a long uppercase sentence fits its box at the pop peak, in both aspects', () => {
+  for (const aspect of ASPECTS) {
+    const { rectangle, fit } = BigTextLayout.for({ text: 'O INACREDITÁVEL ACONTECEU NA ALDEIA' }, aspect);
+    const widest = Math.max(...fit.lines.map((line) => line.length));
+    assert.ok(widest * fit.size * HEAVY_CAPS_EM * Entrance.peakScale() <= rectangle.width, aspect.text());
+  }
+});
+
+test('the pop peak is the largest scale of any entrance, a little above 1', () => {
+  assert.ok(Entrance.peakScale() > 1 && Entrance.peakScale() < 1.1);
+  for (const frame of [0, 3, 5, 6, 7, 8, 10, 20]) assert.ok(Entrance.of('pop').at(Frame.of(frame)).scale <= Entrance.peakScale());
+});

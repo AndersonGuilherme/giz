@@ -5,6 +5,7 @@ import {
   EFFECT_TYPES,
   MOVE_TYPES,
 } from '../../domain/script/SceneElements.ts';
+import { MAXIMUM_INTENSITY } from '../../domain/scenario/EffectStrength.ts';
 import { colorSchema, nonEmptyText } from './refinements.ts';
 
 export const pointSchema = z.object({ x: z.number(), y: z.number() }).strict();
@@ -25,7 +26,7 @@ export const cameraSchema = z
 export const effectSchema = z
   .object({
     type: z.enum(EFFECT_TYPES),
-    intensity: z.number().min(0).optional(),
+    intensity: z.number().min(0).max(MAXIMUM_INTENSITY).optional(),
     color: colorSchema.optional(),
     position: pointSchema.optional(),
   })

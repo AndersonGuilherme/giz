@@ -154,6 +154,10 @@ test('a HUD bar above 100 is an error', async () => {
   const scene = { type: 'scenario', background: {}, characters: [], hud: { fields: [], bar: { label: 'x', value: 120 } } };
   await assert.rejects(loadWithScene(scene), /scene\.hud\.bar\.value: deve ser no máximo 100/);
 });
+test('an effect intensity above 3 is an error with its path', async () => {
+  const scene = { type: 'scenario', background: {}, characters: [], effects: [{ type: 'rain', intensity: 100 }] };
+  await assert.rejects(loadWithScene(scene), /scene\.effects\[0\]\.intensity: deve ser no máximo 3/);
+});
 
 const NARRATOR = { id: 'narrator', name: 'Narrador', voice: { id: 'narrator' }, defaultExpression: 'neutral' };
 async function folderWithNarrator(changeScript: (json: Json) => Json = (json) => json): Promise<string> {

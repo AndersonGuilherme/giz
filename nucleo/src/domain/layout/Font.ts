@@ -1,7 +1,10 @@
 import { DomainError } from '../DomainError.ts';
 
-/** `text` is the proportional family of captions and titles; `mono`, the one for code. */
-export const FAMILIES = ['text', 'mono'] as const;
+/**
+ * `text` is the proportional family of captions and titles; `mono`, the one for code; `display`, heavy capitals with an
+ * outline (big text, HUD), which are wider and never break a word in the middle.
+ */
+export const FAMILIES = ['text', 'mono', 'display'] as const;
 export type Family = (typeof FAMILIES)[number];
 
 /** `lineHeight` is a multiple of the size (1.25 = 125%); `maximumLines` is how many fit in the box. */

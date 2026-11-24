@@ -13,16 +13,16 @@ export type HudDrawing = Readonly<{ panel: Rectangle; fields: HudText; bar?: Hud
 
 type Measures = Readonly<{ width: number; padding: number; gap: number; track: number; percent: number; fields: Font; bar: Font }>;
 
-// The panel takes about 40% of the 16:9 width and 80% of the 9:16 safe area, like the reference HUDs.
+// The HUD lines are heavy capitals, measured as `display`. The panel takes about 40% of the 16:9 width and 80% of the 9:16 safe area, like the reference HUDs.
 const HORIZONTAL: Measures = {
   width: 720, padding: 18, gap: 8, track: 14, percent: 96,
-  fields: Font.of({ family: 'text', size: 34, lineHeight: 1.25, maximumLines: 1 }),
-  bar: Font.of({ family: 'text', size: 24, lineHeight: 1.25, maximumLines: 1 }),
+  fields: Font.of({ family: 'display', size: 34, lineHeight: 1.25, maximumLines: 1 }),
+  bar: Font.of({ family: 'display', size: 24, lineHeight: 1.25, maximumLines: 1 }),
 };
 const VERTICAL: Measures = {
   width: 760, padding: 20, gap: 10, track: 16, percent: 110,
-  fields: Font.of({ family: 'text', size: 38, lineHeight: 1.25, maximumLines: 1 }),
-  bar: Font.of({ family: 'text', size: 28, lineHeight: 1.25, maximumLines: 1 }),
+  fields: Font.of({ family: 'display', size: 38, lineHeight: 1.25, maximumLines: 1 }),
+  bar: Font.of({ family: 'display', size: 28, lineHeight: 1.25, maximumLines: 1 }),
 };
 const SEPARATOR = ' · ';
 

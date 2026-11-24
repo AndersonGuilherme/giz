@@ -43,3 +43,23 @@ test('20 lines of code in 9:16 fit or report an error, never pass silently', () 
 test('Font rejects a non-positive size', () => {
   assert.throws(() => Font.of({ family: 'text', size: 0, lineHeight: 1, maximumLines: 1 }), /fonte/);
 });
+
+test('the display family (heavy caps) is measured wider and shrinks a long word whole instead of breaking it', () => {
+  const display = Font.of({ family: 'display', size: 120, lineHeight: 1.05, maximumLines: 3 });
+  const fit = TextFit.measure('INACREDITÁVEL', display, 908);
+  assert.deepEqual(fit.lines, ['INACREDITÁVEL']);
+  assert.ok(fit.fits);
+  assert.ok('INACREDITÁVEL'.length * fit.size * 0.7 <= 908);
+});
+
+test('the display family still breaks a word that does not fit even at 60%, and reports it', () => {
+  const display = Font.of({ family: 'display', size: 120, lineHeight: 1.05, maximumLines: 1 });
+  const fit = TextFit.measure('A'.repeat(40), display, 908);
+  assert.equal(fit.fits, false);
+});
+
+test('the text family keeps its 0.58 em estimate', () => {
+  const text = Font.of({ family: 'text', size: 100, lineHeight: 1.2, maximumLines: 1 });
+  assert.equal(TextFit.measure('a'.repeat(17), text, 1000).size, 100);
+  assert.notEqual(TextFit.measure('a'.repeat(18), text, 1000).size, 100);
+});
