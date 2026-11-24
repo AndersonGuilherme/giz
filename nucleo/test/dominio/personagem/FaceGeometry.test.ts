@@ -49,3 +49,25 @@ test('looking at the camera centers the pupil; looking at the other goes to the 
     assert.ok(Math.abs(x) <= 1 && Math.abs(y) <= 1, gaze);
   }
 });
+
+test('eyes: the gaze target adds the expression offset and is clamped to [-1, 1]', () => {
+  const thinking = FaceGeometry.eyes('pensativa', 'outro', 0);
+  assert.deepEqual([thinking.pupil.x, thinking.pupil.y], [1, -0.7]);
+  const camera = FaceGeometry.eyes('confusa', 'camera', 0);
+  assert.deepEqual([camera.pupil.x, camera.pupil.y], [0.3, -0.3]);
+  assert.equal(FaceGeometry.eyes('surpresa', 'camera', 0).pupil.scale, 0.7);
+});
+
+test('eyes: a blink closes the upper lid over any expression, but never opens a sleepier lid', () => {
+  assert.equal(FaceGeometry.eyes('neutra', 'camera', 1).left.upper, 1);
+  assert.equal(FaceGeometry.eyes('cetica', 'camera', 0.2).left.upper, 0.42);
+  assert.equal(FaceGeometry.eyes('feliz', 'camera', 0).left.lower, 0.3);
+});
+
+test('eyes: the upper lid tilts with the brow, at 60% of its inner angle, per side', () => {
+  const angry = FaceGeometry.eyes('brava', 'camera', 0);
+  assert.equal(angry.left.tilt, 22 * 0.6);
+  const skeptical = FaceGeometry.eyes('cetica', 'camera', 0);
+  assert.equal(skeptical.left.tilt, 14 * 0.6);
+  assert.equal(skeptical.right.tilt, 4 * 0.6);
+});

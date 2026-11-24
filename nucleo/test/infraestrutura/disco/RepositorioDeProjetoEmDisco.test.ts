@@ -18,13 +18,21 @@ const pastasTemporarias: string[] = [];
 
 after(() => Promise.all(pastasTemporarias.map((pasta) => rm(pasta, { recursive: true, force: true }))));
 
+async function alterarArquivo(pasta: string, arquivo: string, alterar: (json: Json) => Json): Promise<void> {
+  const caminho = join(pasta, arquivo);
+  const json = JSON.parse(await readFile(caminho, 'utf8')) as Json;
+  await writeFile(caminho, JSON.stringify(alterar(json)));
+}
+
+// A fixture usa o rig de produção (ball-head); estes testes usam o catálogo falso, então a cópia troca a Ana para o rig "teste".
+const ANA_NO_RIG_DE_TESTE: Json = { rig: 'teste', parametros: { pele: '#f0c8a0' } };
+
 async function copiaAlterada(arquivo: string, alterar: (json: Json) => Json): Promise<string> {
   const pasta = await mkdtemp(join(tmpdir(), 'giz-projeto-'));
   pastasTemporarias.push(pasta);
   await cp(fixture('projeto-minimo'), pasta, { recursive: true });
-  const caminho = join(pasta, arquivo);
-  const json = JSON.parse(await readFile(caminho, 'utf8')) as Json;
-  await writeFile(caminho, JSON.stringify(alterar(json)));
+  await alterarArquivo(pasta, 'elenco/ana.json', (json) => ({ ...json, ...ANA_NO_RIG_DE_TESTE }));
+  await alterarArquivo(pasta, arquivo, alterar);
   return pasta;
 }
 
@@ -50,7 +58,7 @@ async function capturar(promessa: Promise<unknown>): Promise<ErroDeProjeto> {
 }
 
 test('carrega o projeto mínimo', async () => {
-  const p = await repositorio().carregar(fixture('projeto-minimo'));
+  const p = await carregarComPersonagem({});
   assert.equal(p.idioma().codigo(), 'pt-BR');
   assert.equal(p.roteiro().falas().quantidade(), 2);
   assert.ok(p.elenco().contem(IdPersonagem.de('ana')));
@@ -174,7 +182,7 @@ test('narrador em cena é erro legível', async () => {
     /falas\[0\]\.cena\.personagens\[0\]\.quem: narrador não tem corpo e não pode aparecer em cena/);
 });
 test('personagem sem rig que não é o narrador é erro', async () => {
-  await assert.rejects(carregarCom('elenco/ana.json', (json) => ({ ...json, rig: undefined })),
+  await assert.rejects(carregarComPersonagem({ rig: undefined }),
     /elenco\/ana\.json › rig: obrigatório \(só o narrador pode não ter rig\)/);
 });
 test('narrador sem rig com parâmetros é erro', async () => {

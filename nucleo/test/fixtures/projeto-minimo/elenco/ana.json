@@ -1,8 +1,8 @@
 {
   "id": "ana",
   "nome": "Ana",
-  "rig": "teste",
-  "parametros": { "pele": "#f0c8a0" },
+  "rig": "ball-head",
+  "parametros": { "outfit": "tunic", "outfitColor": "#b4472e", "hair": "scarf" },
   "voz": { "id": "vivian" },
   "expressaoPadrao": "neutra"
 }

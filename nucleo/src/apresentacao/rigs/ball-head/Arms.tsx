@@ -40,7 +40,9 @@ const Forearm: FC<ArmProps> = ({ arm, side, look }) => {
     <g transform={`translate(0 ${ARM.upper * arm.foreshortening}) rotate(${-side * arm.elbow})`}>
       <rect x={-ARM.thickness / 2 + 1} y={-12} width={ARM.thickness - 2} height={ARM.fore + 6} rx={15} fill={color} />
       {!short && <rect x={-ARM.thickness / 2} y={ARM.fore - 14} width={ARM.thickness} height={10} rx={5} fill={shade(color, -0.25)} />}
-      <Hand shape={arm.hand} side={side} color={look.headColor} />
+      <g transform={`rotate(${-side * arm.wrist} 0 ${ARM.fore})`}>
+        <Hand shape={arm.hand} side={side} color={look.headColor} />
+      </g>
     </g>
   );
 };

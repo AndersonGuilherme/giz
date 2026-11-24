@@ -55,6 +55,18 @@ const GAZES: Readonly<Record<Olhar, Point>> = {
   conteudo: { x: 0.75, y: -0.35 },
 };
 
+/** Upper and lower lid (0 open to 1 closed) and the upper lid's tilt in degrees (positive lowers the inner end). */
+export type Lids = Readonly<{ upper: number; lower: number; tilt: number }>;
+/** Final pupil position (-1 to 1, positive x toward the facing side) and size, plus each eye's lids. */
+export type EyesState = Readonly<{ pupil: Readonly<{ x: number; y: number; scale: number }>; left: Lids; right: Lids }>;
+
+const LID_TILT_PER_BROW_ANGLE = 0.6;
+const clamp = (value: number) => Math.max(-1, Math.min(1, value));
+
+function lidsOf(face: Face, brow: Brow, blink: number): Lids {
+  return { upper: Math.max(face.lids.upper, blink), lower: face.lids.lower, tilt: brow.innerAngle * LID_TILT_PER_BROW_ANGLE };
+}
+
 export class FaceGeometry {
   static for(expression: Expressao): Face {
     return FACES[expression];
@@ -62,5 +74,13 @@ export class FaceGeometry {
 
   static gaze(gaze: Olhar): Point {
     return GAZES[gaze];
+  }
+
+  /** The gaze plus the expression's pupil offset (clamped); a blink closes over the expression's lids. */
+  static eyes(expression: Expressao, gaze: Olhar, blink: number): EyesState {
+    const face = FACES[expression];
+    const target = GAZES[gaze];
+    const pupil = { x: clamp(target.x + face.pupil.offset.x), y: clamp(target.y + face.pupil.offset.y), scale: face.pupil.scale };
+    return { pupil, left: lidsOf(face, face.brows.left, blink), right: lidsOf(face, face.brows.right, blink) };
   }
 }

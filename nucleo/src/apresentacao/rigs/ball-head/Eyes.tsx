@@ -1,10 +1,11 @@
 import type { FC } from 'react';
-import type { Face, Point } from '../../../dominio/personagem/FaceGeometry.ts';
+import type { EyesState } from '../../../dominio/personagem/FaceGeometry.ts';
 import { EYES, HEAD } from './measures.ts';
 import type { Look } from './parameters.ts';
 import { useSvgId } from './svg.ts';
 
-type EyesProps = Readonly<{ face: Face; gaze: Point; blink: number; look: Look }>;
+type EyesProps = Readonly<{ eyes: EyesState; look: Look }>;
+type Pupil = EyesState['pupil'];
 type Ellipse = Readonly<{ cx: number; cy: number; rx: number; ry: number }>;
 
 const PUPIL_COLOR = '#101010';
@@ -13,10 +14,10 @@ function eyeEllipse(side: -1 | 1, scale: number): Ellipse {
   return { cx: HEAD.x + side * EYES.spacing, cy: EYES.y, rx: EYES.radiusX * scale, ry: EYES.radiusY * scale };
 }
 
-const Pupil: FC<Readonly<{ eye: Ellipse; gaze: Point; scale: number }>> = ({ eye, gaze, scale }) => {
-  const radius = EYES.pupil * scale;
-  const x = eye.cx + gaze.x * EYES.travel.x * (eye.rx / EYES.radiusX);
-  const y = eye.cy + 4 + gaze.y * EYES.travel.y * (eye.ry / EYES.radiusY);
+const Pupil: FC<Readonly<{ eye: Ellipse; pupil: Pupil; eyeScale: number }>> = ({ eye, pupil, eyeScale }) => {
+  const radius = EYES.pupil * pupil.scale * eyeScale;
+  const x = eye.cx + pupil.x * EYES.travel.x * eyeScale;
+  const y = eye.cy + 4 + pupil.y * EYES.travel.y * eyeScale;
   return (
     <g>
       <circle cx={x} cy={y} r={radius} fill={PUPIL_COLOR} />
@@ -39,17 +40,17 @@ const Lids: FC<LidsProps> = ({ eye, upper, lower, tilt, color }) => {
   );
 };
 
-const Eye: FC<EyesProps & Readonly<{ side: -1 | 1 }>> = ({ face, gaze, blink, look, side }) => {
+const Eye: FC<EyesProps & Readonly<{ side: -1 | 1 }>> = ({ eyes, look, side }) => {
   const clip = useSvgId('eye');
   const eye = eyeEllipse(side, look.eyeScale);
-  const tilt = -side * face.brows[side < 0 ? 'left' : 'right'].innerAngle * 0.6;
+  const lids = side < 0 ? eyes.left : eyes.right;
   return (
     <g>
       <clipPath id={clip}><ellipse {...eye} /></clipPath>
       <ellipse {...eye} fill="#ffffff" />
       <g clipPath={`url(#${clip})`}>
-        <Pupil eye={eye} gaze={gaze} scale={face.pupil.scale * look.eyeScale} />
-        <Lids eye={eye} upper={Math.max(face.lids.upper, blink)} lower={face.lids.lower} tilt={tilt} color={look.headColor} />
+        <Pupil eye={eye} pupil={eyes.pupil} eyeScale={look.eyeScale} />
+        <Lids eye={eye} upper={lids.upper} lower={lids.lower} tilt={-side * lids.tilt} color={look.headColor} />
       </g>
     </g>
   );

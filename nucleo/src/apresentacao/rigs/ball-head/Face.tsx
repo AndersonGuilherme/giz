@@ -1,14 +1,12 @@
 import type { FC } from 'react';
 import type { EstadoDoPersonagem } from '../../../dominio/personagem/EstadoDoPersonagem.ts';
-import { FaceGeometry, type Point } from '../../../dominio/personagem/FaceGeometry.ts';
+import { FaceGeometry } from '../../../dominio/personagem/FaceGeometry.ts';
 import { Brows } from './Brows.tsx';
 import { Eyes, Glasses } from './Eyes.tsx';
 import { HEAD } from './measures.ts';
 import { Mouth } from './Mouth.tsx';
 import type { Look } from './parameters.ts';
 import { shade, useSvgId } from './svg.ts';
-
-const clamp = (value: number) => Math.max(-1, Math.min(1, value));
 
 /** The ball: flat color, a soft light from the upper left and, with `shine`, a glossy highlight. */
 export const Ball: FC<Readonly<{ look: Look }>> = ({ look }) => {
@@ -41,14 +39,13 @@ const Sweat: FC = () => (
 /** Eyes, brows and mouth from the domain geometry of the state's expression. */
 export const Face: FC<Readonly<{ state: EstadoDoPersonagem; look: Look }>> = ({ state, look }) => {
   const face = FaceGeometry.for(state.expressao());
-  const target = FaceGeometry.gaze(state.olhaPara());
-  const gaze: Point = { x: clamp(target.x + face.pupil.offset.x), y: clamp(target.y + face.pupil.offset.y) };
+  const eyes = FaceGeometry.eyes(state.expressao(), state.olhaPara(), state.fechamentoDosOlhos());
   return (
     <g>
-      <Eyes face={face} gaze={gaze} blink={state.fechamentoDosOlhos()} look={look} />
+      <Eyes eyes={eyes} look={look} />
       {look.glasses && <Glasses look={look} />}
       <Brows pair={face.brows} look={look} />
-      <Mouth state={state} shape={face.mouth} look={look} />
+      <Mouth state={state} look={look} />
       {face.sweat && <Sweat />}
     </g>
   );
