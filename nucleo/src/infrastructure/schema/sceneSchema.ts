@@ -35,7 +35,7 @@ function rejectUnknownColors(background: BackgroundJson, context: z.RefinementCt
     context.addIssue({ code: 'custom', path: ['colors', key], message: `cor desconhecida no fundo "${vector}" (use ${valid})` }));
 }
 
-const backgroundSchema = z
+export const backgroundSchema = z
   .object({
     // Relative to the project folder and inside it: the render serves it from there.
     image: nonEmptyText.pipe(validatedByDomain((text) => ProjectPath.of(text))).optional(),

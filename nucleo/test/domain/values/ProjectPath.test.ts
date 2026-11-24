@@ -20,3 +20,7 @@ test('a path resolving outside the project folder is refused', () => {
 test('a "./" segment is refused with the path to write instead (the render cannot serve it)', () => {
   assert.throws(() => ProjectPath.of('./scenarios/room.png'), /escreva "scenarios\/room\.png", sem "\.\/"/);
 });
+test('a leading public/ is refused: the project folder is the public folder of the render', () => {
+  assert.throws(() => ProjectPath.of('public/room.png'), /escreva "room\.png", sem "public\/"/);
+  assert.equal(ProjectPath.of('scenarios/public/room.png').text(), 'scenarios/public/room.png');
+});

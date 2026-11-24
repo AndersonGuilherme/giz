@@ -22,8 +22,16 @@ function jpegSegment(bytes: Buffer, offset: number): ImageSize | undefined {
 
 const jpegSize = (bytes: Buffer): ImageSize | undefined => (bytes[0] === 0xff && bytes[1] === 0xd8 ? jpegSegment(bytes, 2) : undefined);
 
+// A folder where a file was expected is the person's mistake: a readable message, not a raw EISDIR.
+function notAFile(path: string): (error: NodeJS.ErrnoException) => never {
+  return (error) => {
+    if (error.code === 'EISDIR') throw new Error(`${path} não é um arquivo`);
+    throw error;
+  };
+}
+
 /** The size of a PNG or JPEG, read from its header; `undefined` for another format (or a broken header). */
 export async function imageSize(path: string): Promise<ImageSize | undefined> {
-  const bytes = await readFile(path);
+  const bytes = await readFile(path).catch(notAFile(path));
   return pngSize(bytes) ?? jpegSize(bytes);
 }

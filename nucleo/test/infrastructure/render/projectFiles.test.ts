@@ -37,8 +37,8 @@ test('the scenario images of the script are staged at the same relative path as 
   const folder = await projectWith(['scenarios/room.png', 'voice/1.wav']);
   const files = projectFiles(props([segment({ scene: scenario('scenarios/room.png'), audio: 'voice/1.wav' })]), folder);
   assert.deepEqual(files, [
-    { from: join(folder, 'voice/1.wav'), at: 'voice/1.wav' },
-    { from: join(folder, 'scenarios/room.png'), at: 'scenarios/room.png' },
+    { from: join(folder, 'voice/1.wav'), at: 'voice/1.wav', project: folder },
+    { from: join(folder, 'scenarios/room.png'), at: 'scenarios/room.png', project: folder },
   ]);
   await rm(folder, { recursive: true, force: true });
 });
@@ -56,5 +56,19 @@ test('a missing image is not staged (the render falls back to the vector backgro
   const lesson = { type: 'title' as const, title: 'Oi' } as unknown as SegmentJson['scene'];
   const files = projectFiles(props([segment({ scene: scenario('missing.png') }), segment({ scene: lesson }), segment({ scene: scenario() })]), folder);
   assert.deepEqual(files, []);
+  await rm(folder, { recursive: true, force: true });
+});
+
+test('a beat image leaving the project folder is refused, never copied (the reproduction of the review)', async () => {
+  const folder = await projectWith(['a/inside.png']);
+  const beats = [{ frame: 0, changes: { background: { image: 'a/../../outside/x.png' } } }];
+  assert.throws(() => projectFiles(props([segment({ scene: scenario(), beats })]), folder),
+    /"a\/\.\.\/\.\.\/outside\/x\.png" sai da pasta do projeto/);
+  await rm(folder, { recursive: true, force: true });
+});
+
+test('an image path naming a folder is a readable error naming the file', async () => {
+  const folder = await projectWith(['scenarios/room.png']);
+  assert.throws(() => projectFiles(props([segment({ scene: scenario('scenarios') })]), folder), /scenarios não é um arquivo/);
   await rm(folder, { recursive: true, force: true });
 });

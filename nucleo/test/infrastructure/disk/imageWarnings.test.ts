@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { imageWarnings } from '../../../src/infrastructure/disk/imageWarnings.ts';
@@ -66,5 +66,25 @@ test('a missing image still warns that the render uses the vector background', a
   const folder = await folderWith({});
   const warnings = await imageWarnings(folder, scriptWith(['missing.png']), AspectRatio.HORIZONTAL);
   assert.match(warnings.join('\n'), /missing\.png não encontrada \(fala 1\); o render usa o fundo vetorial padrão/);
+  await rm(folder, { recursive: true, force: true });
+});
+
+test('beat images are checked too: missing and wrong aspect, with the beat path', async () => {
+  const folder = await folderWith({ 'ok.png': png(1080, 1920), 'wide.png': png(1920, 1080) });
+  const script = scriptWith(['ok.png']);
+  (script.lines[0] as { beats?: unknown }).beats = [{ background: { image: 'wide.png' } }, { pose: 'wave' }, { background: { image: 'gone.png' } }];
+  const warnings = await imageWarnings(folder, script, AspectRatio.VERTICAL);
+  assert.equal(warnings.length, 2);
+  assert.match(warnings[0], /lines\[0\]\.beats\[0\]\.background\.image: wide\.png tem 1920×1080.*fala 1/);
+  assert.match(warnings[1], /lines\[0\]\.beats\[2\]\.background\.image: gone\.png não encontrada/);
+  await rm(folder, { recursive: true, force: true });
+});
+
+test('an image path naming a folder is a readable warning, not a raw EISDIR', async () => {
+  const folder = await folderWith({});
+  await mkdir(join(folder, 'scenarios'));
+  const warnings = await imageWarnings(folder, scriptWith(['scenarios']), AspectRatio.VERTICAL);
+  assert.match(warnings.join('\n'), /lines\[0\]\.scene\.background\.image: scenarios não é um arquivo \(fala 1\)/);
+  await assert.rejects(imageSize(join(folder, 'scenarios')), /scenarios não é um arquivo/);
   await rm(folder, { recursive: true, force: true });
 });

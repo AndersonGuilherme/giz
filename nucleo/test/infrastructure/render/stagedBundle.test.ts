@@ -48,3 +48,14 @@ test('an error in the use (a webpack or render failure) still removes the tempor
   assert.deepEqual(await readdir(scratch), []);
   await cleanup();
 });
+
+test('a staged file outside the public dir, or taken from outside the project, is refused before any copy', async () => {
+  const { root, sources, scratch, cleanup } = await setup();
+  const escaping = [{ from: join(root, 'voz.wav'), at: '../escaped.wav' }];
+  await assert.rejects(withPublicDir(sources, escaping, async () => undefined), /"\.\.\/escaped\.wav" sai da pasta pública/);
+  const outside = [{ from: join(root, 'voz.wav'), at: 'voice/1.wav', project: join(root, 'project') }];
+  await assert.rejects(withPublicDir(sources, outside, async () => undefined), /voz\.wav está fora da pasta do projeto/);
+  assert.equal(existsSync(join(root, 'escaped.wav')), false);
+  assert.deepEqual(await readdir(scratch), []);
+  await cleanup();
+});

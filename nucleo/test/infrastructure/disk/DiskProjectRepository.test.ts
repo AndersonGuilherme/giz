@@ -90,6 +90,17 @@ test('a scenario image outside the project folder is refused with the field and 
   await assert.rejects(absolute, /background\.image: caminho absoluto "\/tmp\/room\.png"/);
 });
 
+test('a beat background image goes through the same path rules as the scene image', async () => {
+  const beatImage = (image: string) => loadWith('script.json', (json) => {
+    const [first, ...rest] = json.lines as Json[];
+    return { ...json, lines: [{ ...first, text: 'Oi, [eu] sou a Ana.', beats: [{ background: { image } }] }, ...rest] };
+  });
+  await assert.rejects(beatImage('../../../../etc/passwd'),
+    /script\.json › lines\[0\]\.beats\[0\]\.background\.image: "\.\.\/\.\.\/\.\.\/\.\.\/etc\/passwd" sai da pasta do projeto/);
+  await assert.rejects(beatImage('/etc/passwd'), /beats\[0\]\.background\.image: caminho absoluto/);
+  const p = await beatImage('scenarios/beat-missing.png');
+  assert.match(p.warnings().join('\n'), /lines\[0\]\.beats\[0\]\.background\.image: scenarios\/beat-missing\.png não encontrada \(fala 1\)/);
+});
 test('with the qwen voice, a cast voice that Qwen does not have is an error naming the valid voices', async () => {
   await assert.rejects(loadWithCharacter({ voice: { id: 'roberto' } }),
     /cast\/ana\.json › voice\.id: a voz "roberto" não existe no Qwen \(use serena, vivian, uncle_fu, ryan, aiden, ono_anna, sohee, eric, dylan\)/);

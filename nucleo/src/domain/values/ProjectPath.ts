@@ -15,11 +15,14 @@ function leavesFolder(text: string): boolean {
 }
 
 const withoutDots = (text: string): string => segmentsOf(text).filter((segment) => segment !== '.').join('/');
+const withoutFirst = (text: string): string => segmentsOf(text).slice(1).join('/');
 
 function refusal(text: string): string | undefined {
   if (ABSOLUTE.test(text)) return `caminho absoluto "${text}": use um caminho relativo à pasta do projeto ${EXAMPLE}`;
   if (leavesFolder(text)) return `"${text}" sai da pasta do projeto: use um caminho dentro dela ${EXAMPLE}`;
   if (segmentsOf(text).includes('.')) return `escreva "${withoutDots(text)}", sem "./"`;
+  // The project folder is served as the render public folder: a path naming "public/" first would not be found.
+  if (segmentsOf(text)[0] === 'public') return `escreva "${withoutFirst(text)}", sem "public/" (o caminho é relativo à pasta do projeto)`;
   return undefined;
 }
 

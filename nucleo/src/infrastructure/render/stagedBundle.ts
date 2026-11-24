@@ -1,6 +1,6 @@
 import { cp, mkdir, mkdtemp, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, join } from 'node:path';
+import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
 import { bundle } from '@remotion/bundler';
 
 /**
@@ -10,10 +10,25 @@ import { bundle } from '@remotion/bundler';
  */
 export type RemotionSources = Readonly<{ entryPoint: string; publicFolder: string; scratch?: string; browserExecutable?: string }>;
 
-/** A file to serve: `from` on disk, served at `at` (relative to the public folder, as `staticFile` asks for it). */
-export type StagedFile = Readonly<{ from: string; at: string }>;
+/**
+ * A file to serve: `from` on disk, served at `at` (relative to the public folder, as `staticFile` asks for it). With
+ * `project`, `from` must be inside that folder.
+ */
+export type StagedFile = Readonly<{ from: string; at: string; project?: string }>;
 
 const removed = (folder: string): Promise<void> => rm(folder, { recursive: true, force: true });
+
+const isInside = (folder: string, path: string): boolean => {
+  const way = relative(folder, path);
+  return way !== '' && !way.startsWith('..') && !isAbsolute(way);
+};
+
+// The safety net under the schema: nothing is copied from outside its project nor to outside the public folder.
+function refuseEscape(file: StagedFile): void {
+  const publicFolder = resolve('/giz-public');
+  if (!isInside(publicFolder, resolve(publicFolder, file.at))) throw new Error(`"${file.at}" sai da pasta pública do render`);
+  if (file.project && !isInside(resolve(file.project), resolve(file.from))) throw new Error(`${file.from} está fora da pasta do projeto (${file.project})`);
+}
 
 async function copyInto(folder: string, sources: RemotionSources, files: readonly StagedFile[]): Promise<void> {
   await cp(sources.publicFolder, folder, { recursive: true });
@@ -29,6 +44,7 @@ async function copyInto(folder: string, sources: RemotionSources, files: readonl
  * folder is removed whatever happens: a missing file while copying, or a failure in `use`.
  */
 export async function withPublicDir<T>(sources: RemotionSources, files: readonly StagedFile[], use: (publicDir: string) => Promise<T>): Promise<T> {
+  files.forEach(refuseEscape);
   const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'giz-public-'));
   try {
     await copyInto(folder, sources, files);

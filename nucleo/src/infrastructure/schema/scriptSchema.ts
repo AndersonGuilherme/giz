@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { EXPRESSIONS, POSES } from '../../domain/cast/PoseAndExpression.ts';
 import { SOUND_EFFECTS, GAZES } from '../../domain/script/Line.ts';
-import { sceneSchema } from './sceneSchema.ts';
+import { backgroundSchema, sceneSchema } from './sceneSchema.ts';
 import { characterIdSchema, nonEmptyText } from './refinements.ts';
 
 const pose = z.enum(POSES);
@@ -13,8 +13,9 @@ const reactionSchema = z
   .object({ expression: expression.optional(), pose: pose.optional(), look: look.optional() })
   .strict();
 
+// The other scene fields a beat changes pass through; its background is checked like a scene's (the image path rules).
 const beatSchema = z
-  .object({ expression: expression.optional(), pose: pose.optional(), sfx: sfx.optional() })
+  .object({ expression: expression.optional(), pose: pose.optional(), sfx: sfx.optional(), background: backgroundSchema.optional() })
   .passthrough();
 
 const holdSchema = z.object({ seconds: z.number().positive(), label: z.string() }).strict();
