@@ -194,3 +194,9 @@ test('a narrator without a rig but with parameters is an error', async () => {
   await writeFile(join(folder, 'cast/narrator.json'), JSON.stringify({ ...NARRATOR, parameters: { skin: '#000' } }));
   await assert.rejects(repository().load(folder), /cast\/narrator\.json › parameters: o narrador sem rig não tem parâmetros/);
 });
+test('captionStyle is optional: without it the format picks the default, with it the declared style wins', async () => {
+  const omit = (json: Json) => Object.fromEntries(Object.entries(json).filter(([key]) => key !== 'captionStyle'));
+  assert.equal((await loadWith('project.json', omit)).captionStyle(), 'words');
+  assert.equal((await loadWith('project.json', (json) => ({ ...omit(json), format: 'lesson' }))).captionStyle(), 'blocks');
+  assert.equal((await loadWithProject({ captionStyle: 'blocks' })).captionStyle(), 'blocks');
+});

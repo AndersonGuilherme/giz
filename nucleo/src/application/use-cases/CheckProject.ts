@@ -4,14 +4,14 @@ import { SafeArea } from '../../domain/layout/SafeArea.ts';
 import type { Box } from '../../domain/layout/Box.ts';
 import { Boxes } from '../../domain/layout/Boxes.ts';
 import type { LayoutRegistry } from '../../domain/layout/LayoutRegistry.ts';
-import type { Format, Project } from '../../domain/project/Project.ts';
+import type { CaptionStyle, Project } from '../../domain/project/Project.ts';
 import type { Line } from '../../domain/script/Line.ts';
 
 /** Empty `line`: the problem belongs to the project (for example, a load warning). */
 export type Problem = Readonly<{ line: string; message: string }>;
 export type CheckReport = { errors: Problem[]; warnings: Problem[] };
-/** `captions`: the caption layout of each format, the same one the renderer draws with. */
-type Dependencies = Readonly<{ layouts: LayoutRegistry; captions: Readonly<Record<Format, CaptionLayout>> }>;
+/** `captions`: the caption layout of each style, the same one the renderer draws with. */
+type Dependencies = Readonly<{ layouts: LayoutRegistry; captions: Readonly<Record<CaptionStyle, CaptionLayout>> }>;
 
 function layoutMessages(boxes: Boxes, safeArea: Box): string[] {
   const overflowing = boxes.overflowingTexts().map((box) => `${box.label} não cabe na caixa nem com a letra a 60%`);
@@ -55,11 +55,11 @@ export class CheckProject {
     }
   }
 
-  // The caption layout of the project format: words in a story, blocks in a lesson.
+  // The caption layout of the project style (declared, or the default of the format), placed for the format.
   #captionBox(project: Project, line: Line): Box {
     const { captions } = this.#dependencies;
-    const layout = captions[project.format()];
-    return layout.box(line.text(), project.aspect());
+    const layout = captions[project.captionStyle()];
+    return layout.box(line.text(), project.aspect(), project.format());
   }
 
   // Only the line that declares the scene checks it: lines that inherit the scene do not repeat the same errors.

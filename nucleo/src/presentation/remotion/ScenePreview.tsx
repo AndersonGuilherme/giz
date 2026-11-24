@@ -4,7 +4,7 @@ import { AspectRatio } from '../../domain/values/AspectRatio.ts';
 import { Language } from '../../domain/values/Language.ts';
 import { Words } from '../../domain/speech/Words.ts';
 import { Frame } from '../../domain/values/Time.ts';
-import { CAPTION_VIEWS } from '../captions/captionRegistry.ts';
+import { CaptionView } from '../captions/captionRegistry.tsx';
 import { sceneRegistry } from '../scenes/scenes.ts';
 import type { ScenePreviewProps } from './previewScene.ts';
 import { previewState } from './previewState.ts';
@@ -17,9 +17,8 @@ export const previewMetadata: CalculateMetadataFunction<ScenePreviewProps> = ({ 
 
 // Without recorded times, the caption spreads the words over the preview by letters (the fallback of old voices).
 const PreviewCaption: FC<Readonly<{ caption: NonNullable<ScenePreviewProps['caption']>; aspect: AspectRatio; frames: number; frame: number }>> = ({ caption, aspect, frames, frame }) => {
-  const View = CAPTION_VIEWS[caption.format];
   const words = Words.fromText(caption.text).texts().map((text) => ({ text, start: 0, end: 0 }));
-  return <View words={words} lineDuration={frames} aspect={aspect} frame={Frame.of(frame)} />;
+  return <CaptionView style={caption.style} format={caption.format} words={words} lineDuration={frames} aspect={aspect} frame={Frame.of(frame)} />;
 };
 
 /** One scene JSON alone, for N frames, with fixed character states (no audio): for checking a scene by eye. */

@@ -12,7 +12,7 @@ export const projectSchema = z
     language: validatedByDomain((text) => Language.of(text)),
     aspect: validatedByDomain((text) => AspectRatio.of(text)),
     brand: nonEmptyText.optional(),
-    captionStyle: z.enum(CAPTION_STYLES),
+    captionStyle: z.enum(CAPTION_STYLES).optional(),
     cast: z.array(characterIdSchema).min(1),
     voice: z.object({ provider: z.enum(VOICE_PROVIDERS), model: z.enum(VOICE_MODELS).optional() }).strict(),
   })

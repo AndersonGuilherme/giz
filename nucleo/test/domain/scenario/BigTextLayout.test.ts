@@ -16,7 +16,7 @@ test('the big text stays in the safe area and clear of the HUD and the caption',
     const big = Box.of('destaque', BigTextLayout.for({ text: 'A PESTE CHEGOU' }, aspect).rectangle);
     assert.ok(big.isInside(SafeArea.for(aspect)), aspect.text());
     assert.equal(big.overlaps(Box.of('hud', HudLayout.for(HUD, aspect).panel)), false, aspect.text());
-    const captions = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('legenda', aspect));
+    const captions = Object.values(CAPTION_LAYOUTS).map((layout) => layout.box('legenda', aspect, 'story'));
     assert.ok(captions.every((caption) => !big.overlaps(caption)), aspect.text());
   }
 });

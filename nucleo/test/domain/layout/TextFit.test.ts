@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { TextFit } from '../../../src/domain/layout/TextFit.ts';
+import { characterUnits, TextFit } from '../../../src/domain/layout/TextFit.ts';
 import { Font } from '../../../src/domain/layout/Font.ts';
 
 // A 9:16 caption-sized text font: 48 px, up to 6 lines.
@@ -48,4 +48,18 @@ test('the text family keeps its 0.58 em estimate', () => {
   const text = Font.of({ family: 'text', size: 100, lineHeight: 1.2, maximumLines: 1 });
   assert.equal(TextFit.measure('a'.repeat(17), text, 1000).size, 100);
   assert.notEqual(TextFit.measure('a'.repeat(18), text, 1000).size, 100);
+});
+test('wide display capitals (M, W) count as more than one character; other families are unchanged', () => {
+  assert.equal(characterUnits('MW', 'text'), 2);
+  assert.equal(characterUnits('MW', 'mono'), 2);
+  assert.ok(characterUnits('MW', 'display') > 2.9);
+  assert.equal(characterUnits('VOCE', 'display'), 4, 'ordinary capitals keep the 0.70 average');
+  assert.equal(characterUnits('mw', 'display'), characterUnits('MW', 'display'), 'measured as capitals');
+});
+test('a display line of wide capitals that would pass by length alone needs a smaller size', () => {
+  const display = Font.of({ family: 'display', size: 80, lineHeight: 1.1, maximumLines: 1 });
+  // 14 characters fit 825 px at 80 px by length (14 × 56 = 784), but 8 M and 4 W are about 11.6 em wide.
+  const fit = TextFit.measure('MMMM WWWW MMMM', display, 825);
+  assert.ok(fit.size < 80);
+  assert.ok(characterUnits('MMMM WWWW MMMM', 'display') * fit.size * 0.7 <= 825);
 });

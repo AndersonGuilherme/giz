@@ -36,11 +36,21 @@ test('punctuation closes the group, as in "DOENÇA."', () => {
   assert.deepEqual(comma.groupAt(Frame.of(0)).words, ['Sim,']);
 });
 
-test('before the first word starts there is no caption; after the last, the last group stays', () => {
+test('before the first word starts there is no caption; after the last, the last group stays without highlight', () => {
   const late = Words.fromText('Oi Ana').withTimes([Seconds.of(1), Seconds.of(1.5)], [Seconds.of(1.4), Seconds.of(2)]);
   const caption = WordCaption.of(late, 908);
   assert.deepEqual(caption.groupAt(Frame.of(0)), { words: [], active: -1 });
-  assert.deepEqual(caption.groupAt(Frame.of(300)), { words: ['Oi', 'Ana'], active: 1 });
+  assert.deepEqual(caption.groupAt(Frame.of(50)), { words: ['Oi', 'Ana'], active: 1 });
+  assert.deepEqual(caption.groupAt(Frame.of(300)), { words: ['Oi', 'Ana'], active: -1 });
+});
+
+test('in a pause between words the group stays but nothing is highlighted', () => {
+  // "Oi" from 0 to 0.3 s, pause, "Ana" from 1 s.
+  const paused = Words.fromText('Oi Ana').withTimes([Seconds.of(0), Seconds.of(1)], [Seconds.of(0.3), Seconds.of(1.4)]);
+  const caption = WordCaption.of(paused, 908);
+  assert.deepEqual(caption.groupAt(Frame.of(3)), { words: ['Oi', 'Ana'], active: 0 });
+  assert.deepEqual(caption.groupAt(Frame.of(15)), { words: ['Oi', 'Ana'], active: -1 });
+  assert.deepEqual(caption.groupAt(Frame.of(31)), { words: ['Oi', 'Ana'], active: 1 });
 });
 
 test('a group that fits stays at the base size of the display family', () => {
@@ -74,4 +84,11 @@ test('the spoken word gets room on each side in proportion to its length', () =>
   assert.ok(ACTIVE_WORD_SCALE > 1);
   assert.ok(activeWordMargin('A') < activeWordMargin('DOENÇA.'));
   assert.ok(activeWordMargin('DOENÇA.') < 0.3);
+});
+
+test('a group heavy with wide capitals gets fewer words instead of running out of the line', () => {
+  const caption = WordCaption.of(words('mmmm wwww mmmm', 0.3), 908);
+  assert.deepEqual(caption.groupAt(Frame.of(0)).words, ['mmmm', 'wwww']);
+  assert.deepEqual(caption.groupAt(Frame.of(19)).words, ['mmmm']);
+  assert.equal(caption.fits(), true);
 });

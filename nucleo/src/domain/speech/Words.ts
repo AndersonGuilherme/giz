@@ -33,6 +33,11 @@ export class Word {
     return this.#span.start.value() <= instant.value();
   }
 
+  /** Being said at `instant`: started and not yet ended. */
+  saidAt(instant: Seconds): boolean {
+    return this.startedBy(instant) && instant.value() < this.#span.end.value();
+  }
+
   toJson(): WordJson {
     return { text: this.#text, start: this.#span.start.value(), end: this.#span.end.value() };
   }
@@ -71,6 +76,11 @@ export class Words {
   /** Index of the last word already started at `instant`; -1 before the first. */
   activeAt(instant: Seconds): number {
     return this.#words.reduce((active, word, index) => (word.startedBy(instant) ? index : active), -1);
+  }
+
+  /** Index of the word being said at `instant`; -1 in a pause, before the first word and after the last. */
+  spokenAt(instant: Seconds): number {
+    return this.#words.findIndex((word) => word.saidAt(instant));
   }
 
   texts(): string[] {

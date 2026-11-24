@@ -38,17 +38,20 @@ export class WordCaption {
     return new WordCaption(words, wordGroups(words.texts(), rule));
   }
 
-  /** The group on screen at `frame` (relative to the line) and which of its words is being said; none before the first word. */
+  /** The group on screen at `frame` (relative to the line) and which of its words is being said (-1 in a pause); none before the first word. */
   groupAt(frame: Frame): GroupInFrame {
-    const active = this.#activeWord(frame);
-    const group = this.#groupOf(active);
+    const instant = frame.toSeconds(Fps.DEFAULT);
+    const started = this.#words.activeAt(instant);
+    const group = this.#groupOf(started);
     if (!group) return NOTHING;
-    return { words: [...group.texts], active: active - group.first };
+    // In a pause the group stays on screen, but no word is highlighted once the last one said has ended.
+    const spoken = this.#words.spokenAt(instant);
+    return { words: [...group.texts], active: spoken === started ? started - group.first : -1 };
   }
 
   /** The letter size of the group on screen: the base size, or smaller for a long word alone. */
   sizeAt(frame: Frame): number {
-    const group = this.#groupOf(this.#activeWord(frame));
+    const group = this.#groupOf(this.#startedWord(frame));
     return group?.fit.size ?? WORD_CAPTION_FONT.baseSize();
   }
 
@@ -57,7 +60,7 @@ export class WordCaption {
     return this.#groups.every((group) => group.fit.fits);
   }
 
-  #activeWord(frame: Frame): number {
+  #startedWord(frame: Frame): number {
     return this.#words.activeAt(frame.toSeconds(Fps.DEFAULT));
   }
 

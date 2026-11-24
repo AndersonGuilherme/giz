@@ -1,4 +1,4 @@
-import type { Format } from '../../domain/project/Project.ts';
+import type { CaptionStyle, Format } from '../../domain/project/Project.ts';
 import type { Scene } from '../../domain/script/Scene.ts';
 import type { AspectRatioText } from '../../domain/values/AspectRatio.ts';
 import type { CastMember } from '../scenes/SceneRegistry.ts';
@@ -11,8 +11,8 @@ export type ScenePreviewProps = Readonly<{
   frames: number;
   cast: readonly CastMember[];
   states: Readonly<Record<string, PreviewState>>;
-  /** A line said over the whole preview, drawn with the caption of `format` (words spread by letters, no audio). */
-  caption?: Readonly<{ text: string; format: Format }>;
+  /** A line said over the whole preview, with the caption `style` (or the default of `format`); words spread by letters, no audio. */
+  caption?: Readonly<{ text: string; format: Format; style?: CaptionStyle }>;
 }>;
 
 // The test scene of Task 12: a village at dusk with a campfire, the HUD of a chronicle and two worried villagers.

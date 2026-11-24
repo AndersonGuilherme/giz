@@ -50,3 +50,11 @@ test('fromJson keeps the times of words already timed', () => {
   assert.deepEqual(words.toJson(), json);
   assert.equal(words.activeAt(Seconds.of(0.5)), 1);
 });
+
+test('spokenAt is the word being said, and -1 in a pause or after the end', () => {
+  const words = Words.fromText('um dois').withTimes(s(0, 0.5), s(0.3, 0.9));
+  assert.equal(words.spokenAt(Seconds.of(0.1)), 0);
+  assert.equal(words.spokenAt(Seconds.of(0.3)), -1);
+  assert.equal(words.spokenAt(Seconds.of(0.6)), 1);
+  assert.equal(words.spokenAt(Seconds.of(2)), -1);
+});

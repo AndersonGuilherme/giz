@@ -5,7 +5,7 @@ import { ACTIVE_WORD_SCALE, activeWordMargin, WORD_CAPTION_FONT } from '../../do
 import { TEXT_FONT } from '../scenes/fonts.ts';
 import type { CaptionProps } from './captionProps.ts';
 
-const LAYOUT = CAPTION_LAYOUTS.story;
+const LAYOUT = CAPTION_LAYOUTS.words;
 // White heavy capitals with a dark outline and shadow, so they read over any scene; the spoken word in a warm yellow.
 const COLORS = { text: '#ffffff', active: '#ffc93c', outline: '#120b07' } as const;
 const SHADOW = '0 0 2px #120b07, 0 5px 0 rgba(18, 11, 7, 0.6), 0 0 22px rgba(0, 0, 0, 0.6)';
@@ -23,12 +23,12 @@ const Word: FC<Readonly<{ text: string; active: boolean; size: number }>> = ({ t
   </span>
 );
 
-/** The word-by-word caption (story): the group and the active word come from `WordCaption`; this only draws them. */
-export const WordCaptionView: FC<CaptionProps> = ({ words, lineDuration, aspect, frame }) => {
-  const caption = LAYOUT.caption(captionWords(words, lineDuration), aspect);
+/** The word-by-word caption: the group and the active word come from `WordCaption`; this only draws them. */
+export const WordCaptionView: FC<CaptionProps> = ({ words, lineDuration, aspect, format, frame }) => {
+  const caption = LAYOUT.caption(captionWords(words, lineDuration), aspect, format);
   const group = caption.groupAt(frame);
   const size = caption.sizeAt(frame);
-  const rectangle = LAYOUT.rectangle(aspect);
+  const rectangle = LAYOUT.rectangle(aspect, format);
   return (
     <div
       style={{

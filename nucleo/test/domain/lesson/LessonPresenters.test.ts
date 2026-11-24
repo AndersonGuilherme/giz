@@ -16,7 +16,7 @@ test('the content area is inside the safe area and above the caption', () => {
   for (const aspect of ASPECTS) {
     const content = Box.of('conteúdo', LessonStage.for(aspect).content());
     assert.ok(content.isInside(SafeArea.for(aspect)), aspect.text());
-    assert.equal(content.overlaps(BLOCK_CAPTIONS.box('Olá.', aspect)), false, aspect.text());
+    assert.equal(content.overlaps(BLOCK_CAPTIONS.box('Olá.', aspect, 'lesson')), false, aspect.text());
   }
 });
 

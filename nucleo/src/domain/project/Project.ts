@@ -9,6 +9,14 @@ export type Format = (typeof FORMATS)[number];
 export const CAPTION_STYLES = ['words', 'blocks'] as const;
 export type CaptionStyle = (typeof CAPTION_STYLES)[number];
 
+// Without a declared style: a story speaks word by word (as the reference videos), a lesson in blocks (as the motor).
+const DEFAULT_CAPTION_STYLE: Readonly<Record<Format, CaptionStyle>> = { story: 'words', lesson: 'blocks' };
+
+/** The caption style of a video: the declared one, or the default of its format. The `check` and the renderer both use it. */
+export function captionStyleOf(format: Format, declared?: CaptionStyle): CaptionStyle {
+  return declared ?? DEFAULT_CAPTION_STYLE[format];
+}
+
 export const VOICE_PROVIDERS = ['qwen', 'recording'] as const;
 export const VOICE_MODELS = ['0.6b', '1.7b'] as const;
 export type ProjectVoice = Readonly<{
@@ -22,7 +30,8 @@ export type ProjectProfile = Readonly<{
   language: Language;
   aspect: AspectRatio;
   brand?: string;
-  captionStyle: CaptionStyle;
+  /** Optional: without it, `captionStyleOf` picks the default of the format. */
+  captionStyle?: CaptionStyle;
   voice: ProjectVoice;
 }>;
 
@@ -62,8 +71,9 @@ export class Project {
     return this.#profile.brand;
   }
 
+  /** The resolved style (declared, or the default of the format). */
   captionStyle(): CaptionStyle {
-    return this.#profile.captionStyle;
+    return captionStyleOf(this.#profile.format, this.#profile.captionStyle);
   }
 
   voice(): ProjectVoice {
