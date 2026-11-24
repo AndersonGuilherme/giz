@@ -45,15 +45,17 @@ function titleIn(scene: CodeScene, bar: Rectangle, measures: Measures): TextBloc
   return TextBlock.at('código (título)', place, { text: scene.title, font: measures.title });
 }
 
-/** The code window: bar with the file name, then each line with its "+" mark, its number and its colored tokens. */
+/** The code window, as tall as its lines: bar with the file name, then each line with its "+" mark, its number and its colored tokens. */
 export class CodeLayout {
   static for(scene: CodeScene, aspect: AspectRatio): CodeDrawing {
-    const panel = LessonStage.for(aspect).content();
+    const stage = LessonStage.for(aspect);
     const measures = aspect.vertical() ? VERTICAL : HORIZONTAL;
+    const chrome = measures.bar + 2 * measures.padding;
+    const textWidth = stage.content().width - measures.padding - gutterWidth(measures.gutter);
+    const fitted = MonospaceBlock.fit(scene.lines, { width: textWidth, height: stage.content().height - chrome }, { size: measures.size, lineHeight: LINE_HEIGHT });
+    const panel = stage.panelFor(chrome + scene.lines.length * fitted.rowHeight);
     const bar = { ...panel, height: measures.bar };
-    const body = { x: panel.x, y: panel.y + measures.bar + measures.padding, width: panel.width - measures.padding, height: panel.height - measures.bar - 2 * measures.padding };
-    const textWidth = body.width - gutterWidth(measures.gutter);
-    const fitted = MonospaceBlock.fit(scene.lines, { width: textWidth, height: body.height }, { size: measures.size, lineHeight: LINE_HEIGHT });
+    const body = { x: panel.x, y: panel.y + measures.bar + measures.padding, width: panel.width - measures.padding, height: panel.height - chrome };
     const rows = rowsOf(scene, fitted, body);
     const title = titleIn(scene, bar, measures);
     const code = { x: body.x + gutterWidth(measures.gutter), y: body.y, width: textWidth, height: Math.min(rows.length * fitted.rowHeight, body.height) };

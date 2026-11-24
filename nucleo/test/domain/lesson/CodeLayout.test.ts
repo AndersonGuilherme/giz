@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { CodeLayout } from '../../../src/domain/lesson/CodeLayout.ts';
+import { LessonStage } from '../../../src/domain/lesson/LessonStage.ts';
 import type { CodeScene } from '../../../src/domain/script/LessonScenes.ts';
 import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 
@@ -39,4 +40,16 @@ test('rows stack inside the body and the letters shrink for a long line', () => 
 test('the language of the tokens comes from the title', () => {
   const python = CodeLayout.for({ type: 'code', title: 'frete.py', lines: ['def frete(): pass'] }, AspectRatio.HORIZONTAL);
   assert.equal(python.rows[0].tokens[0].kind, 'keyword');
+});
+
+test('the window is as tall as its rows, centered in the content area, and the rows follow the fitted size', () => {
+  const content = LessonStage.for(AspectRatio.VERTICAL).content();
+  const layout = CodeLayout.for(SCENE, AspectRatio.VERTICAL);
+  assert.ok(layout.panel.height < content.height);
+  assert.equal(layout.panel.y - content.y, content.y + content.height - (layout.panel.y + layout.panel.height));
+  assert.equal(layout.rows[0].rectangle.height, layout.size * 1.5);
+  const last = layout.rows.at(-1)!.rectangle;
+  assert.equal(last.y + last.height, layout.body.y + layout.body.height);
+  const long = CodeLayout.for({ ...SCENE, lines: Array.from({ length: 40 }, () => 'x') }, AspectRatio.VERTICAL);
+  assert.equal(long.panel.height, content.height, 'never taller than the content area');
 });

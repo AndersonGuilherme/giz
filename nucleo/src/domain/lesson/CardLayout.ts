@@ -1,4 +1,4 @@
-import type { Rectangle } from '../layout/Box.ts';
+import { Box, type Rectangle } from '../layout/Box.ts';
 import { Boxes } from '../layout/Boxes.ts';
 import { Font } from '../layout/Font.ts';
 import { fixedTexts, type FixedTexts } from '../i18n/fixedTexts.ts';
@@ -6,6 +6,7 @@ import type { CardScene } from '../script/LessonScenes.ts';
 import type { AspectRatio } from '../values/AspectRatio.ts';
 import type { Language } from '../values/Language.ts';
 import { LessonStage } from './LessonStage.ts';
+import { Reveal } from './Reveal.ts';
 import { TextBlock } from './TextBlock.ts';
 
 type Variant = CardScene['variant'];
@@ -54,6 +55,27 @@ function itemsBelow(scene: CardScene, top: number, context: Readonly<{ column: C
   }, []);
 }
 
+// Items that run past the bottom of the panel shrink with their bullets (down to 60%, like `TextFit`); past that, the check
+// reports them with a box on the panel's bottom edge (no area: it only carries the error, it overlaps nothing).
+const ITEM_SCALES = [1, 0.9, 0.8, 0.7, 0.6];
+const OVERFLOW_LABEL = 'lista de itens do cartão';
+
+function scaled(measures: Measures, scale: number): Measures {
+  const { item } = measures;
+  const font = Font.of({ family: 'text', size: item.baseSize() * scale, lineHeight: item.lineHeight(), maximumLines: item.maximumLines() });
+  return { ...measures, bullet: measures.bullet * scale, gap: measures.gap * scale, item: font };
+}
+
+const bottomOf = (items: readonly CardItem[]): number => Math.max(...items.map((item) => Math.max(item.bullet.y + item.bullet.height, item.text.bottom())));
+
+type ItemsPlace = Readonly<{ top: number; bottom: number; column: Column; measures: Measures }>;
+
+function fittedItems(scene: CardScene, place: ItemsPlace): Readonly<{ items: CardItem[]; fits: boolean }> {
+  const attempts = ITEM_SCALES.map((scale) => itemsBelow(scene, place.top, { column: place.column, measures: scaled(place.measures, scale) }));
+  const fitting = attempts.find((items) => items.length === 0 || bottomOf(items) <= place.bottom);
+  return { items: fitting ?? attempts.at(-1)!, fits: fitting !== undefined };
+}
+
 /** The card (objective, summary, challenge, next, ticket, rule): label pill, title and the items with their bullets. */
 export class CardLayout {
   static for(scene: CardScene, aspect: AspectRatio, language: Language): CardDrawing {
@@ -64,8 +86,15 @@ export class CardLayout {
     const pill = { x: column.x + PILL_PADDING.x, y: panel.y + measures.padding + PILL_PADDING.y, width: column.width - 2 * PILL_PADDING.x };
     const label = TextBlock.at('cartão (rótulo)', pill, { text: labelText, font: measures.label });
     const title = TextBlock.at('cartão (título)', { ...column, y: label.bottom() + PILL_PADDING.y + 28 }, { text: scene.title, font: measures.title });
-    const items = itemsBelow(scene, title.bottom() + 36, { column, measures });
+    const bottom = panel.y + panel.height - measures.padding;
+    const { items, fits } = fittedItems(scene, { top: title.bottom() + 36, bottom, column, measures });
+    const edge = Box.fitted(OVERFLOW_LABEL, { x: panel.x, y: bottom, width: 0, height: 0 }, { fits });
     const blocks = [label, title, ...items.map((item) => item.text)];
-    return { panel, label, title, items, boxes: () => Boxes.of(blocks.map((block) => block.box())) };
+    return { panel, label, title, items, boxes: () => Boxes.of([...blocks.map((block) => block.box()), edge]) };
+  }
+
+  /** The first `shown` items (every one when the scene does not say), the newest popping in. */
+  static reveal(scene: CardScene): Reveal {
+    return Reveal.of({ shown: scene.shown ?? scene.items.length, animatesNewest: true });
   }
 }

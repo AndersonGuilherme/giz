@@ -1,6 +1,5 @@
 import type { FC } from 'react';
 import { AbsoluteFill } from 'remotion';
-import { Reveal } from '../../../domain/lesson/Reveal.ts';
 import { SymptomsLayout, type SymptomCell } from '../../../domain/lesson/SymptomsLayout.ts';
 import type { SymptomsScene } from '../../../domain/script/LessonScenes.ts';
 import type { SceneProps } from '../SceneRegistry.ts';
@@ -38,7 +37,7 @@ export const SymptomsView: FC<SceneProps<SymptomsScene>> = (props) => {
   const { scene } = props;
   const { age, fps } = useSceneClock(props.changedAt);
   const { cells } = SymptomsLayout.for(scene, props.aspect, props.language);
-  const reveal = Reveal.of({ shown: scene.shown, animatesNewest: scene.focus === undefined });
+  const reveal = SymptomsLayout.reveal(scene);
   return (
     <LessonFrame props={props}>
       <AbsoluteFill>

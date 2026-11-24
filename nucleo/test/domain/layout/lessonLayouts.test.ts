@@ -4,8 +4,10 @@ import { Box } from '../../../src/domain/layout/Box.ts';
 import { createLayoutRegistry } from '../../../src/domain/layout/defaultLayoutRegistry.ts';
 import { captionBox } from '../../../src/domain/layout/lessonLayouts.ts';
 import { SafeArea } from '../../../src/domain/layout/SafeArea.ts';
+import { CardLayout } from '../../../src/domain/lesson/CardLayout.ts';
+import { LessonStage } from '../../../src/domain/lesson/LessonStage.ts';
 import { TableLayout } from '../../../src/domain/lesson/TableLayout.ts';
-import type { LessonScene, TableScene } from '../../../src/domain/script/LessonScenes.ts';
+import type { CardScene, LessonScene, TableScene } from '../../../src/domain/script/LessonScenes.ts';
 import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 import { Language } from '../../../src/domain/values/Language.ts';
 
@@ -91,11 +93,15 @@ test('a 6-column table in 9:16 shrinks its letters or reports an error', () => {
   assert.match(overflowing[0].label, /tabela/);
 });
 
-test('too many card items do not fit in the panel and the check sees it', () => {
-  const items = Array.from({ length: 12 }, (_, i) => `Item número ${i + 1} do cartão`);
-  const card: LessonScene = { type: 'card', variant: 'summary', title: 'Resumo', items };
-  const boxes = boxesOf(card, AspectRatio.VERTICAL)!.with(captionBox('Olá.', AspectRatio.VERTICAL));
-  assert.ok(boxes.overlappingPairs().some(([a, b]) => /cartão/.test(a.label) && b.label === 'legenda'));
+test('too many card items shrink to stay in the panel; past 60% the check reports them', () => {
+  const card = (count: number): LessonScene => ({ type: 'card', variant: 'summary', title: 'Resumo', items: Array.from({ length: count }, (_, i) => `Item número ${i + 1} do cartão`) });
+  const panel = LessonStage.for(AspectRatio.VERTICAL).content();
+  const shrunk = CardLayout.for(card(9) as CardScene, AspectRatio.VERTICAL, Language.PORTUGUESE);
+  assert.ok(shrunk.items[0].text.fit.size < 40, 'the items shrank');
+  for (const item of shrunk.items) assert.ok(item.text.bottom() <= panel.y + panel.height, `item ${item.mark} inside the panel`);
+  assert.deepEqual(boxesOf(card(9), AspectRatio.VERTICAL)!.overflowingTexts(), []);
+  const overflowing = boxesOf(card(20), AspectRatio.VERTICAL)!.overflowingTexts().map((box) => box.label);
+  assert.ok(overflowing.includes('lista de itens do cartão'), overflowing.join(', '));
 });
 
 test('20 lines of code in 9:16 shrink to fit; 40 lines are a check error', () => {

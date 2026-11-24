@@ -1,7 +1,6 @@
 import type { FC } from 'react';
 import { AbsoluteFill } from 'remotion';
 import { Motion } from '../../../domain/lesson/Motion.ts';
-import { Reveal } from '../../../domain/lesson/Reveal.ts';
 import { TableLayout, type CellTone, type TableCell, type TableRow } from '../../../domain/lesson/TableLayout.ts';
 import type { TableScene } from '../../../domain/script/LessonScenes.ts';
 import type { SceneProps } from '../SceneRegistry.ts';
@@ -39,7 +38,7 @@ export const TableView: FC<SceneProps<TableScene>> = (props) => {
   const { scene } = props;
   const { frame, age, fps } = useSceneClock(props.changedAt);
   const drawing = TableLayout.for(scene, props.aspect);
-  const reveal = Reveal.of({ shown: scene.shownRows ?? scene.rows.length, animatesNewest: scene.highlightedColumn === undefined });
+  const reveal = TableLayout.reveal(scene);
   const highlight = { column: scene.highlightedColumn, row: scene.highlightedRow, strength: TableLayout.highlightProgress(scene, age) };
   return (
     <LessonFrame props={props}>

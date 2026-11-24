@@ -14,15 +14,17 @@ const VERTICAL: Measures = { padding: 40, size: 28 };
 const LINE_HEIGHT = 1.7;
 const PROMPT = '$ ';
 
-/** The terminal: the typed command after the prompt, then its output lines; nothing wraps, the letters shrink. */
+/** The terminal, as tall as its lines: the typed command after the prompt, then its output lines; nothing wraps, the letters shrink. */
 export class TerminalLayout {
   static for(scene: TerminalScene, aspect: AspectRatio): TerminalDrawing {
-    const panel = LessonStage.for(aspect).content();
+    const stage = LessonStage.for(aspect);
     const { padding, size } = aspect.vertical() ? VERTICAL : HORIZONTAL;
-    const inner = { x: panel.x + padding, y: panel.y + padding, width: panel.width - 2 * padding, height: panel.height - 2 * padding };
+    const room = { width: stage.content().width - 2 * padding, height: stage.content().height - 2 * padding };
     // One more character after the command: the cursor.
     const texts = [`${PROMPT}${scene.command} `, ...scene.lines.map((line) => line.text)];
-    const fitted = MonospaceBlock.fit(texts, inner, { size, lineHeight: LINE_HEIGHT });
+    const fitted = MonospaceBlock.fit(texts, room, { size, lineHeight: LINE_HEIGHT });
+    const panel = stage.panelFor(2 * padding + texts.length * fitted.rowHeight);
+    const inner = { x: panel.x + padding, y: panel.y + padding, width: room.width, height: panel.height - 2 * padding };
     const rowAt = (index: number): Rectangle => ({ ...inner, y: inner.y + index * fitted.rowHeight, height: fitted.rowHeight });
     const rows = scene.lines.map((line, index) => ({ text: line.text, tone: line.tone ?? 'dim', rectangle: rowAt(index + 1) }));
     const block = { ...inner, height: Math.min(texts.length * fitted.rowHeight, inner.height) };

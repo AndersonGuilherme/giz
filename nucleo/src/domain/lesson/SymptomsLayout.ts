@@ -7,6 +7,7 @@ import type { AspectRatio } from '../values/AspectRatio.ts';
 import type { Language } from '../values/Language.ts';
 import { Motion } from './Motion.ts';
 import { LessonStage } from './LessonStage.ts';
+import { Reveal } from './Reveal.ts';
 import { TextBlock } from './TextBlock.ts';
 
 export type SymptomCell = Readonly<{ rectangle: Rectangle; clue: TextBlock; name: TextBlock; description: TextBlock }>;
@@ -74,5 +75,10 @@ export class SymptomsLayout {
     const progress = Motion.ramp(age, [0, FOCUS_FRAMES]);
     const [from, to] = scene.focus === index ? [DIMMED, 1] : [1, DIMMED];
     return from + (to - from) * progress;
+  }
+
+  /** The first `shown` clues; the newest pops in only when no clue is in focus. */
+  static reveal(scene: SymptomsScene): Reveal {
+    return Reveal.of({ shown: scene.shown, animatesNewest: scene.focus === undefined });
   }
 }

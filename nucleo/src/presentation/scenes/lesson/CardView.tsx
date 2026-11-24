@@ -2,7 +2,6 @@ import type { FC } from 'react';
 import { AbsoluteFill } from 'remotion';
 import { CardLayout, PILL_PADDING, type CardItem } from '../../../domain/lesson/CardLayout.ts';
 import { Motion } from '../../../domain/lesson/Motion.ts';
-import { Reveal } from '../../../domain/lesson/Reveal.ts';
 import type { CardScene } from '../../../domain/script/LessonScenes.ts';
 import type { SceneProps } from '../SceneRegistry.ts';
 import { TEXT_FONT } from '../fonts.ts';
@@ -28,7 +27,7 @@ export const CardView: FC<SceneProps<CardScene>> = (props) => {
   const { scene } = props;
   const { frame, age, fps } = useSceneClock(props.changedAt);
   const drawing = CardLayout.for(scene, props.aspect, props.language);
-  const reveal = Reveal.of({ shown: scene.shown ?? scene.items.length, animatesNewest: true });
+  const reveal = CardLayout.reveal(scene);
   const color = COLORS[scene.variant];
   const pill = drawing.label.rectangle;
   return (

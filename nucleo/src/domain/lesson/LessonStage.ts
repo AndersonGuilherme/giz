@@ -22,4 +22,10 @@ export class LessonStage {
   content(): Rectangle {
     return { ...this.#content };
   }
+
+  /** A panel as tall as what it holds (at most the content area), centered on the height of the content area. */
+  panelFor(height: number): Rectangle {
+    const fitted = Math.min(height, this.#content.height);
+    return { ...this.#content, y: this.#content.y + (this.#content.height - fitted) / 2, height: fitted };
+  }
 }

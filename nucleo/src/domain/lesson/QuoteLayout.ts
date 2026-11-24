@@ -7,8 +7,8 @@ import type { AspectRatio } from '../values/AspectRatio.ts';
 import { LessonStage } from './LessonStage.ts';
 import { TextBlock } from './TextBlock.ts';
 
-/** A drawn line of the quote; `paragraph` staggers the entrance and the last paragraph is drawn in the brand color. */
-export type QuoteLine = Readonly<{ text: string; paragraph: number; last: boolean }>;
+/** A drawn line of the quote: it enters `delay` frames into the scene; the last paragraph is drawn in the brand color. */
+export type QuoteLine = Readonly<{ text: string; paragraph: number; last: boolean; delay: number }>;
 export type QuoteDrawing = Readonly<{ mark: Rectangle; markSize: number; text: TextBlock; lines: readonly QuoteLine[]; boxes: () => Boxes }>;
 
 type Measures = Readonly<{ mark: number; font: Font }>;
@@ -17,6 +17,9 @@ const VERTICAL: Measures = { mark: 200, font: Font.of({ family: 'text', size: 68
 // The quote mark glyph sits in the top third of its size; the text follows 18 px below it.
 const MARK_HEIGHT = 0.34;
 const GAP = 18;
+// Each paragraph enters 22 frames after the previous one, starting 12 frames into the scene (the motor).
+const FIRST_DELAY = 12;
+const PARAGRAPH_DELAY = 22;
 
 // The lines of each paragraph at the size `TextFit` chose for the whole text (same wrap, paragraph by paragraph).
 function linesOf(text: string, block: TextBlock): QuoteLine[] {
@@ -24,7 +27,10 @@ function linesOf(text: string, block: TextBlock): QuoteLine[] {
   const font = Font.of({ family: 'text', size: block.fit.size, lineHeight: 1, maximumLines: block.fit.lines.length });
   const counts = paragraphs.map((paragraph) => TextFit.measure(paragraph, font, block.rectangle.width).lines.length);
   const owners = counts.flatMap((count, paragraph) => Array.from({ length: count }, () => paragraph));
-  return block.fit.lines.map((line, index) => ({ text: line, paragraph: owners[index] ?? 0, last: owners[index] === paragraphs.length - 1 }));
+  return block.fit.lines.map((line, index) => {
+    const paragraph = owners[index] ?? 0;
+    return { text: line, paragraph, last: paragraph === paragraphs.length - 1, delay: FIRST_DELAY + paragraph * PARAGRAPH_DELAY };
+  });
 }
 
 /** The key sentence: a big quote mark and the lines, centered on the height of the content area. */

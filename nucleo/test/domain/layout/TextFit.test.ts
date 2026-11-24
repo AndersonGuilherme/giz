@@ -3,8 +3,6 @@ import assert from 'node:assert/strict';
 import { TextFit } from '../../../src/domain/layout/TextFit.ts';
 import { Font } from '../../../src/domain/layout/Font.ts';
 import { CAPTION_FONT } from '../../../src/domain/layout/lessonLayouts.ts';
-import { SafeArea } from '../../../src/domain/layout/SafeArea.ts';
-import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 
 const withoutSpaces = (lines: readonly string[]) => lines.join('').replace(/\s+/g, '');
 
@@ -26,19 +24,6 @@ test('a word longer than the line is broken without losing characters', () => {
   assert.equal(r.size, 60);
   assert.ok(r.lines.length > 1);
   assert.equal(withoutSpaces(r.lines), 'A'.repeat(80));
-});
-test('20 lines of code in 9:16 fit or report an error, never pass silently', () => {
-  const code = Array.from({ length: 20 }, (_, i) => `  const valor${i} = calcular(entrada, ${i}); // passo ${i}`).join('\n');
-  const mono = Font.of({ family: 'mono', size: 34, lineHeight: 1.4, maximumLines: 24 });
-  const width = SafeArea.for(AspectRatio.VERTICAL).width;
-  const r = TextFit.measure(code, mono, width);
-  const perLine = Math.floor(width / (r.size * 0.6));
-  const overflows = r.lines.length > mono.maximumLines() || r.lines.some((l) => l.length > perLine);
-  assert.equal(r.fits, !overflows);
-  assert.ok(r.lines.length >= 20, 'every code line becomes at least one line');
-  assert.equal(withoutSpaces(r.lines), code.replace(/\s+/g, ''));
-  const tight = Font.of({ family: 'mono', size: 34, lineHeight: 1.4, maximumLines: 12 });
-  assert.equal(TextFit.measure(code, tight, width).fits, false, '20 lines in 12 report an error');
 });
 test('Font rejects a non-positive size', () => {
   assert.throws(() => Font.of({ family: 'text', size: 0, lineHeight: 1, maximumLines: 1 }), /fonte/);

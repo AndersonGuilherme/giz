@@ -11,8 +11,6 @@ import { useSceneClock } from './sceneClock.ts';
 import { fadeUp, THEME } from './theme.ts';
 
 const CURVE_COLORS: Readonly<Record<ChartCurve['kind'], string>> = { healthy: THEME.ok, rotten: THEME.danger };
-// The curve label appears when its curve is almost drawn.
-const LABEL_AT = 0.9;
 
 const pathOf = (curve: ChartCurve): string => curve.points.map((point, index) => `${index ? 'L' : 'M'}${point.x},${point.y}`).join(' ');
 
@@ -25,13 +23,13 @@ const Curve: FC<Readonly<{ curve: ChartCurve; progress: number }>> = ({ curve, p
 );
 
 const Labels: FC<Readonly<{ drawing: ChartDrawing; progress: readonly number[] }>> = ({ drawing, progress }) => {
-  const { yLabel, plot } = drawing;
+  const { yLabel, yOrigin } = drawing;
   return (
     <>
       <FittedText block={drawing.xLabel} weight={700} style={{ color: THEME.muted, textAlign: 'right' }} />
-      <FittedText block={yLabel} weight={700} style={{ color: THEME.muted, left: plot.left - 34 - yLabel.lineHeight(), top: plot.base, transformOrigin: 'top left', transform: 'rotate(-90deg)' }} />
+      <FittedText block={yLabel} weight={700} style={{ color: THEME.muted, left: yOrigin.x, top: yOrigin.y, transformOrigin: 'top left', transform: 'rotate(-90deg)' }} />
       {drawing.curves.map((curve, index) => (
-        <FittedText key={curve.kind} block={curve.label} weight={900} style={{ color: CURVE_COLORS[curve.kind], textAlign: 'right', opacity: progress[index]! > LABEL_AT ? 1 : 0 }} />
+        <FittedText key={curve.kind} block={curve.label} weight={900} style={{ color: CURVE_COLORS[curve.kind], textAlign: 'right', opacity: ChartLayout.labelVisible(progress[index]!) ? 1 : 0 }} />
       ))}
     </>
   );

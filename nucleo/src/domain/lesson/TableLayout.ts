@@ -5,6 +5,7 @@ import type { TableScene } from '../script/LessonScenes.ts';
 import type { AspectRatio } from '../values/AspectRatio.ts';
 import { LessonStage } from './LessonStage.ts';
 import { Motion } from './Motion.ts';
+import { Reveal } from './Reveal.ts';
 import { CELL_PADDING, cellFont, headerFont, tableSizes, type TableSizes } from './TableFit.ts';
 import { TextBlock } from './TextBlock.ts';
 
@@ -56,11 +57,19 @@ function rowOf(row: TableScene['rows'][number], index: number, context: Readonly
 // A highlighted column or row lights up in 10 frames after the change that set it.
 const HIGHLIGHT_FRAMES = 10;
 
-/** The comparison table: optional title, the column names, then each row with its label and cells. */
+/** The comparison table, in a panel as tall as its rows: optional title, the column names, then each row with its label and cells. */
 export class TableLayout {
+  /** Laid out once in the whole content area, then again in a panel as tall as what it used, centered. */
   static for(scene: TableScene, aspect: AspectRatio): TableDrawing {
-    const panel = LessonStage.for(aspect).content();
+    const stage = LessonStage.for(aspect);
     const measures = aspect.vertical() ? VERTICAL : HORIZONTAL;
+    const full = TableLayout.#in(scene, stage.content(), measures);
+    const last = full.rows.at(-1)?.rectangle;
+    const used = (last ? last.y + last.height : full.headerBase) + measures.padding - full.panel.y;
+    return TableLayout.#in(scene, stage.panelFor(used), measures);
+  }
+
+  static #in(scene: TableScene, panel: Rectangle, measures: Measures): TableDrawing {
     const inner = { x: panel.x + measures.padding, y: panel.y + measures.padding, width: panel.width - 2 * measures.padding };
     const title = scene.title === undefined ? undefined : TextBlock.at('tabela (título)', inner, { text: scene.title, font: measures.title });
     const headerTop = title ? title.bottom() + TITLE_GAP : inner.y;
@@ -76,5 +85,10 @@ export class TableLayout {
   static highlightProgress(scene: TableScene, age: number): number {
     if (scene.highlightedColumn === undefined && scene.highlightedRow === undefined) return 0;
     return Motion.ramp(age, [0, HIGHLIGHT_FRAMES]);
+  }
+
+  /** The first `shownRows` rows (all by default); the newest slides in unless a column is being highlighted. */
+  static reveal(scene: TableScene): Reveal {
+    return Reveal.of({ shown: scene.shownRows ?? scene.rows.length, animatesNewest: scene.highlightedColumn === undefined });
   }
 }

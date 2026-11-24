@@ -14,8 +14,9 @@ import { TextBlock } from './TextBlock.ts';
 type CurveKind = (typeof CHART_CURVES)[number];
 export type ChartCurve = Readonly<{ kind: CurveKind; points: readonly Point[]; label: TextBlock }>;
 export type Plot = Readonly<{ left: number; top: number; right: number; base: number }>;
+/** `yOrigin` is where the y label starts (bottom left of `yStrip`): the view turns it −90° around that point. */
 export type ChartDrawing = Readonly<{
-  panel: Rectangle; plot: Plot; xLabel: TextBlock; yLabel: TextBlock; curves: readonly ChartCurve[]; boxes: () => Boxes;
+  panel: Rectangle; plot: Plot; xLabel: TextBlock; yLabel: TextBlock; yStrip: Rectangle; yOrigin: Point; curves: readonly ChartCurve[]; boxes: () => Boxes;
 }>;
 
 // The motor's cost-of-change curves: healthy grows a little, rotten explodes at the end.
@@ -48,10 +49,13 @@ function curveOf(kind: CurveKind, plot: Plot, label: string): ChartCurve {
   return { kind, points, label: block };
 }
 
-// The y label is drawn turned 90°: its box is the narrow vertical strip it takes, and keeps whether it fitted along the axis.
-function yLabelBox(label: TextBlock, plot: Plot): Box {
-  const strip = { x: plot.left - 34 - label.lineHeight(), y: plot.top, width: label.lineHeight(), height: plot.base - plot.top };
-  return Box.fitted('gráfico (eixo Y)', strip, label.fit);
+// The y label is drawn turned 90°, left of the axis: it takes a narrow vertical strip as tall as the plot.
+const Y_LABEL_GAP = 34;
+// A curve's label shows up when the curve is almost drawn.
+const LABEL_AT = 0.9;
+
+function yStripOf(label: TextBlock, plot: Plot): Rectangle {
+  return { x: plot.left - Y_LABEL_GAP - label.lineHeight(), y: plot.top, width: label.lineHeight(), height: plot.base - plot.top };
 }
 
 /** The chart of the cost of change: axes, their labels and the curves already shown. */
@@ -63,8 +67,14 @@ export class ChartLayout {
     const xLabel = TextBlock.at('gráfico (eixo X)', { x: plot.left, y: plot.base + 20, width: plot.right - plot.left }, { text: `${scene.xAxisLabel} →`, font: AXIS_FONT });
     const yLabel = TextBlock.at('gráfico (eixo Y)', { x: plot.left, y: plot.top, width: plot.base - plot.top }, { text: `${scene.yAxisLabel} →`, font: AXIS_FONT });
     const curves = scene.curves.map((kind) => curveOf(kind, plot, texts[kind]));
-    const boxes = () => Boxes.of([xLabel.box(), yLabelBox(yLabel, plot), ...curves.map((curve) => curve.label.box())]);
-    return { panel, plot, xLabel, yLabel, curves, boxes };
+    const yStrip = yStripOf(yLabel, plot);
+    // The strip box keeps whether the label fitted along the axis.
+    const boxes = () => Boxes.of([xLabel.box(), Box.fitted('gráfico (eixo Y)', yStrip, yLabel.fit), ...curves.map((curve) => curve.label.box())]);
+    return { panel, plot, xLabel, yLabel, yStrip, yOrigin: { x: yStrip.x, y: yStrip.y + yStrip.height }, curves, boxes };
+  }
+
+  static labelVisible(progress: number): boolean {
+    return progress > LABEL_AT;
   }
 
   /** How much of a curve is drawn: the newest one draws itself in 1.6 s from the last change, the others are complete. */

@@ -3,6 +3,7 @@ import { TextFit, type Fit } from '../layout/TextFit.ts';
 
 type Area = Readonly<{ width: number; height: number }>;
 type Measures = Omit<FontMeasures, 'maximumLines'>;
+/** `rowHeight` follows the size the letters were fitted to (tight rows); lines that do not fit keep the rows of the unshrunk size. */
 export type MonospaceFit = Readonly<{ font: Font; fit: Fit; measured: string; rowHeight: number }>;
 
 // Below this size a line of code stops being readable: the block keeps it and reports the lines that do not fit.
@@ -21,7 +22,8 @@ export class MonospaceBlock {
     const maximumLines = Math.max(1, Math.min(lines.length, rows));
     const font = Font.of({ family: 'mono', size, lineHeight: measures.lineHeight, maximumLines });
     const measured = MonospaceBlock.measuredText(lines);
-    return { font, fit: TextFit.measure(measured, font, area.width), measured, rowHeight: size * measures.lineHeight };
+    const fitted = TextFit.measure(measured, font, area.width);
+    return { font, fit: fitted, measured, rowHeight: (fitted.fits ? fitted.size : size) * measures.lineHeight };
   }
 
   static measuredText(lines: readonly string[]): string {
