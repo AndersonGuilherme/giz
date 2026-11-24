@@ -1,3 +1,4 @@
+import { createHash } from 'node:crypto';
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -14,8 +15,19 @@ export class RecordingVoice implements VoiceProvider {
   }
 
   async generate(request: VoiceRequest): Promise<Audio> {
-    const path = join(this.#folder, 'recordings', `${request.lineId}.wav`);
+    const path = this.#pathOf(request);
     if (!existsSync(path)) throw new Error(`fala ${request.lineId}: gravação não encontrada; grave "${request.text}" em ${path}`);
     return fromWav(await readFile(path));
+  }
+
+  // A new take of the line (the file content changed) generates it again; without a recording there is none yet.
+  async fingerprint(request: VoiceRequest): Promise<string> {
+    const path = this.#pathOf(request);
+    if (!existsSync(path)) return '';
+    return createHash('sha1').update(await readFile(path)).digest('hex');
+  }
+
+  #pathOf(request: VoiceRequest): string {
+    return join(this.#folder, 'recordings', `${request.lineId}.wav`);
   }
 }

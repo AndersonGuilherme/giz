@@ -21,10 +21,16 @@ function line(toneSeconds: number): Float32Array {
 export class FakeVoice implements VoiceProvider {
   calls = 0;
   readonly requests: VoiceRequest[] = [];
+  /** What the source gives per line beyond the request (a recording take); none by default. */
+  fingerprints: Record<string, string> = {};
 
   async generate(request: VoiceRequest): Promise<Audio> {
     this.calls++;
     this.requests.push(request);
     return Audio.of(line(0.05 * request.text.length), RATE);
+  }
+
+  async fingerprint(request: VoiceRequest): Promise<string> {
+    return this.fingerprints[request.lineId] ?? '';
   }
 }

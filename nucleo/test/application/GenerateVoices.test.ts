@@ -17,16 +17,16 @@ import { InMemoryVoiceStore } from '../doubles/InMemoryVoiceStore.ts';
 import { FakePhonemizer } from '../doubles/FakePhonemizer.ts';
 import { FakeVoice } from '../doubles/FakeVoice.ts';
 
-type Options = { texts?: string[]; style?: string; provider?: 'qwen' | 'recording'; pronunciation?: string };
+type Options = { texts?: string[]; style?: string; provider?: 'qwen' | 'recording'; model?: '0.6b' | '1.7b'; pronunciation?: string };
 
-function project({ texts = ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.'], style, provider = 'qwen', pronunciation }: Options = {}): Project {
+function project({ texts = ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.'], style, provider = 'qwen', model, pronunciation }: Options = {}): Project {
   const ana = CharacterId.of('ana');
   const character = Character.of(ana, {
     name: 'Ana', rig: 'test', parameters: {}, voice: { id: 'vivian', style }, defaultExpression: 'neutral',
   });
   const lines = texts.map((text, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, pronunciation: i === 0 ? pronunciation : undefined }));
   return Project.of(
-    { title: 'T', format: 'story', language: Language.PORTUGUESE, aspect: AspectRatio.VERTICAL, captionStyle: 'words', voice: { provider } },
+    { title: 'T', format: 'story', language: Language.PORTUGUESE, aspect: AspectRatio.VERTICAL, captionStyle: 'words', voice: { provider, model } },
     { cast: Cast.of([character]), script: Script.of(['Abertura'], Lines.of(lines)), warnings: [] },
   );
 }
@@ -61,6 +61,24 @@ test('changing style, pronunciation or provider regenerates', async () => {
   await useCase.run(project({ style: 'excited', pronunciation: 'Oi, eu sou a Âna.' }));
   await useCase.run(project({ style: 'excited', pronunciation: 'Oi, eu sou a Âna.', provider: 'recording' }));
   assert.equal(voice.calls, 2 + 2 + 1 + 2);
+});
+
+test('changing the voice model regenerates every line (0.6b and 1.7b sound different)', async () => {
+  const { voice, useCase } = build();
+  await useCase.run(project({ model: '0.6b' }));
+  const report = await useCase.run(project({ model: '1.7b' }));
+  assert.deepEqual(report.generated, ['1', '2']);
+  await useCase.run(project({ model: '1.7b' }));
+  assert.equal(voice.calls, 4);
+});
+
+test('a new take of a recording (another fingerprint from the provider) regenerates only that line', async () => {
+  const { voice, useCase } = build();
+  voice.fingerprints = { '1': 'take-1', '2': 'take-1' };
+  await useCase.run(project({ provider: 'recording' }));
+  voice.fingerprints = { '1': 'take-2', '2': 'take-1' };
+  const report = await useCase.run(project({ provider: 'recording' }));
+  assert.deepEqual(report, { generated: ['1'], skipped: ['2'] });
 });
 
 test('the request uses the pronunciation, voice, style and language', async () => {
@@ -125,7 +143,8 @@ test('a line with [span] beats sends the voice its text without brackets, and th
 test('a line whose spoken text did not change keeps its hash: bracket-free lines are not re-recorded by the bracket fix', async () => {
   const { store, voice, useCase } = build();
   await useCase.run(project({ texts: ['Oi, eu sou a Ana.'] }));
-  // The hash before the fix: text | pronunciation (the text itself) | voice | style | language | provider.
+  // The hash before the fix: text | pronunciation (the text itself) | voice | style | language | provider. Without a
+  // model and a fingerprint (a recording), nothing is added to it.
   const before = createHash('sha1').update(['Oi, eu sou a Ana.', 'Oi, eu sou a Ana.', 'vivian', '', 'pt-BR', 'qwen'].join('|')).digest('hex');
   assert.equal((await store.read('1')).hash, before);
   await useCase.run(project({ texts: ['Oi, eu sou a Ana.'] }));

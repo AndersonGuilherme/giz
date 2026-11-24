@@ -6,4 +6,9 @@ export type VoiceRequest = Readonly<{ lineId: string; text: string; voice: strin
 
 export interface VoiceProvider {
   generate(request: VoiceRequest): Promise<Audio>;
+  /**
+   * What, beyond the request, decides the audio of the line (a recording: the content of its file), so that a change
+   * there generates the line again. Absent or empty: nothing beyond the request.
+   */
+  fingerprint?(request: VoiceRequest): Promise<string>;
 }

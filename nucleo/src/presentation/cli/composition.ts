@@ -21,14 +21,21 @@ import { RemotionSheet } from '../../infrastructure/render/RemotionSheet.ts';
 import { headlessShellIn } from '../../infrastructure/render/browserLocation.ts';
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
 import { RecordingVoice } from '../../infrastructure/voice/RecordingVoice.ts';
-import { QwenVoice } from '../../infrastructure/voice/QwenVoice.ts';
+import { LazyVoice } from '../../infrastructure/voice/LazyVoice.ts';
 import { RigCatalogFromRegistry } from '../rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../rigs/rigRegistry.ts';
 
 type Provider = ReturnType<Project['voice']>['provider'];
 
+// QwenVoice imports motor/scripts/qwen3-tts.ts (onnxruntime from motor/node_modules): it is imported only when a line
+// is generated, so check, build, render and sheet run without the motor installed.
+async function qwenVoice(project: Project): Promise<VoiceProvider> {
+  const { QwenVoice } = await import('../../infrastructure/voice/QwenVoice.ts');
+  return new QwenVoice(project.voice().model);
+}
+
 const PROVIDERS: Readonly<Record<Provider, (folder: string, project: Project) => VoiceProvider>> = {
-  qwen: (_folder, project) => new QwenVoice(project.voice().model),
+  qwen: (_folder, project) => new LazyVoice(() => qwenVoice(project)),
   recording: (folder) => new RecordingVoice(folder),
 };
 

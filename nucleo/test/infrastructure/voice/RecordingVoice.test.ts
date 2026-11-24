@@ -23,3 +23,15 @@ test('RecordingVoice reads the line recording', async () => {
   const audio = await new RecordingVoice(folder).generate(request('3'));
   assert.equal(audio.duration().value(), 0.5);
 });
+
+test('the fingerprint is the content of the recording: a new take changes it, a missing one has none', async () => {
+  const voice = new RecordingVoice(folder);
+  await mkdir(join(folder, 'recordings'), { recursive: true });
+  await writeFile(join(folder, 'recordings', '5.wav'), toWav(Audio.of(new Float32Array(2400), 24000)));
+  const first = await voice.fingerprint(request('5'));
+  assert.match(first, /^[0-9a-f]{40}$/);
+  assert.equal(await voice.fingerprint(request('5')), first);
+  await writeFile(join(folder, 'recordings', '5.wav'), toWav(Audio.of(new Float32Array(4800), 24000)));
+  assert.notEqual(await voice.fingerprint(request('5')), first);
+  assert.equal(await voice.fingerprint(request('404')), '');
+});

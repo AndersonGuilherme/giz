@@ -1,6 +1,6 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -90,6 +90,24 @@ test('a scenario image outside the project folder is refused with the field and 
   await assert.rejects(absolute, /background\.image: caminho absoluto "\/tmp\/room\.png"/);
 });
 
+test('with the qwen voice, a cast voice that Qwen does not have is an error naming the valid voices', async () => {
+  await assert.rejects(loadWithCharacter({ voice: { id: 'roberto' } }),
+    /cast\/ana\.json › voice\.id: a voz "roberto" não existe no Qwen \(use serena, vivian, uncle_fu, ryan, aiden, ono_anna, sohee, eric, dylan\)/);
+});
+test('with recordings, any voice id is fine, and a missing or broken recording is a warning naming the file and the line', async () => {
+  const folder = await changedCopy('project.json', (json) => ({ ...json, voice: { provider: 'recording' } }));
+  await changeFile(folder, 'cast/ana.json', (json) => ({ ...json, voice: { id: 'minha-voz' } }));
+  await mkdir(join(folder, 'recordings'));
+  await writeFile(join(folder, 'recordings', '2.wav'), 'não é wav');
+  const warnings = (await repository().load(folder)).warnings().join('\n');
+  assert.match(warnings, /recordings\/1\.wav: gravação não encontrada \(fala 1\): grave "Oi, eu sou a Ana\."/);
+  assert.match(warnings, /recordings\/2\.wav: gravação inválida \(fala 2\): não é um arquivo WAV/);
+});
+test('with the qwen voice, recordings are not looked at', async () => {
+  const p = await loadWithProject({});
+  assert.doesNotMatch(p.warnings().join('\n'), /recordings/);
+});
+
 test('a missing required field gives the path', async () => {
   const error = await capture(loadWithScript({ lines: [{ id: '1', chapter: 1, speaker: 'ana' }] }));
   assert.match(error.message, /script\.json › lines\[0\]\.text: obrigatório/);
@@ -174,7 +192,7 @@ test('an effect intensity above 3 is an error with its path', async () => {
   await assert.rejects(loadWithScene(scene), /scene\.effects\[0\]\.intensity: deve ser no máximo 3/);
 });
 
-const NARRATOR = { id: 'narrator', name: 'Narrador', voice: { id: 'narrator' }, defaultExpression: 'neutral' };
+const NARRATOR = { id: 'narrator', name: 'Narrador', voice: { id: 'eric' }, defaultExpression: 'neutral' };
 async function folderWithNarrator(changeScript: (json: Json) => Json = (json) => json): Promise<string> {
   const folder = await changedCopy('project.json', (json) => ({ ...json, cast: ['ana', 'narrator'] }));
   await writeFile(join(folder, 'cast/narrator.json'), JSON.stringify(NARRATOR));

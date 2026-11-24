@@ -12,6 +12,7 @@ import { rigParameters, requiredRigPresent } from '../schema/rigParameters.ts';
 import { characterToDomain, projectToDomain, scriptToDomain } from '../schema/toDomain.ts';
 import { checkCharactersOnStage, checkSpeakers } from '../schema/castReferences.ts';
 import { imageWarnings } from './imageWarnings.ts';
+import { checkQwenVoices, recordingWarnings } from './voiceChecks.ts';
 import { readValidated } from './fileReading.ts';
 
 type Loaded = Readonly<{ project: ProjectJson; script: ScriptJson; characters: readonly Character[] }>;
@@ -54,8 +55,11 @@ export class DiskProjectRepository implements ProjectRepository {
     const script = scriptToDomain(loaded.script);
     checkSpeakers(script, cast, collector);
     checkCharactersOnStage(loaded.script, cast, collector);
+    const recording = loaded.project.voice.provider === 'recording';
+    if (!recording) checkQwenVoices(cast, collector);
     collector.failIfAny();
-    const warnings = await imageWarnings(folder, loaded.script, AspectRatio.of(loaded.project.aspect));
-    return projectToDomain(loaded.project, { cast, script, warnings });
+    const images = await imageWarnings(folder, loaded.script, AspectRatio.of(loaded.project.aspect));
+    const recordings = recording ? await recordingWarnings(folder, script) : [];
+    return projectToDomain(loaded.project, { cast, script, warnings: [...images, ...recordings] });
   }
 }
