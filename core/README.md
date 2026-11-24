@@ -25,17 +25,22 @@ cd core
 ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install
 ```
 
-A voz local (Qwen3-TTS) ainda roda pelo `motor/`: para gerar vozes com `"provider": "qwen"`, instale e configure o
-motor uma vez (detalhes em [`motor/README.md`](../motor/README.md)):
+Depois, a configuração guiada desta máquina (uma vez; pode rodar de novo quando quiser mudar algo):
 
 ```bash
-cd motor
-npm install
-npm run setup   # cria o giz.config.json na raiz do repositório: pasta dos modelos, cuda ou cpu, modelo padrão
+npx giz setup             # pergunta e grava o giz.config.json na raiz do repositório (fora do git)
+npx giz setup --dry-run   # só mostra as perguntas e a configuração que resultaria
 ```
 
-A voz usa a GPU e baixa o modelo na primeira vez. Só a geração de voz Qwen precisa do motor: `check`, `build`,
-`render`, `sheet` e os projetos com `"provider": "recording"` funcionam sem ele.
+O `setup` escolhe a pasta dos modelos (`~/.cache/giz` por padrão), CPU ou GPU NVIDIA, o modelo de voz Qwen3-TTS
+(`0.6b` ou `1.7b`), baixa o modelo e testa a voz. Com GPU, baixa o provider CUDA do ONNX Runtime e as bibliotecas da
+NVIDIA em `<pasta-dos-modelos>/cuda/<versão>/lib`, sem sudo (só o driver precisa estar instalado; no WSL ele vem do
+Windows). Sem o `giz.config.json`, a voz roda na CPU com os padrões. Um `giz.config.json` feito pelo antigo
+`motor/` continua valendo: as chaves são as mesmas.
+
+A voz local baixa o modelo sozinha na primeira fala gerada; `npx giz models` (com `--whisper`, também o Whisper)
+adianta o download. `check`, `build`, `render`, `sheet` e os projetos com `"provider": "recording"` não carregam a
+voz.
 
 ## 2. Criar um projeto
 
@@ -78,6 +83,15 @@ ou `node src/presentation/cli/giz.ts <comando> ...`).
 | `render <pasta>` | Renderiza `output/video.mp4` e `output/captions.srt` com as vozes que já existem. |
 | `produce <pasta>` | Faz tudo em ordem: `check`, vozes, linha do tempo, render e legendas. Para no primeiro erro do `check`. |
 | `sheet <rig> [personagem.json]` | Desenha a ficha de um rig (poses, expressões, bocas) em `output/sheet-<nome>.png`. |
+| `setup [--defaults] [--dry-run]` | A configuração guiada desta máquina (seção 1). `--defaults` aceita todas as respostas padrão. |
+| `models [--whisper]` | Baixa agora o modelo de voz do `giz.config.json` (e o Whisper, com `--whisper`). |
+| `gpu info \| install` | Mostra o que a configuração da GPU vê, ou instala o provider CUDA e as bibliotecas da NVIDIA. |
+| `qa asr <pasta>` | O "ouvido" automático: o Whisper transcreve cada voz e conta as palavras erradas contra a legenda; grava `output/asr.txt` e `output/asr.json`. |
+| `qa asr-aggregate <pasta>` | Junta os `output/asr.json` dos projetos de uma pasta (as aulas de um curso) e lista as palavras erradas em duas ou mais. |
+| `qa pitch <pasta>` | Quantos semitons o fim de cada pergunta sobe (+) ou desce (−). |
+| `qa voices [saída] [voz1,voz2] [estilo]` | Gera as mesmas frases com cada voz Qwen e mede quanto o Whisper entende. |
+| `qa lexicon [testes.json] [voz]` | Testa grafias para o dicionário de pronúncia: `[{"word":"deploy","frame":"Fiz o X ontem.","candidates":["deploy","diplói"]}]`. |
+| `sounds [pasta]` | Sintetiza os efeitos sonoros (`pop`, `whoosh`, `ding`...) em `public/sounds/`, iguais byte a byte aos versionados. |
 
 Exemplos:
 
@@ -120,8 +134,22 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 | `captionStyle` | não | `words`, `blocks` | O estilo da legenda (seção 9). Sem ele, `story` usa `words` e `lesson` usa `blocks`. |
 | `brand` | não | texto | Uma marca no canto superior esquerdo. Só aparece em aula 16:9. |
 | `cast` | sim | lista de ids | Quem participa. Cada id precisa de um `cast/<id>.json`. |
-| `voice.provider` | sim | `qwen`, `recording` | `qwen`: voz local gerada na GPU. `recording`: você grava cada fala em `recordings/<id-da-fala>.wav` (WAV PCM de 16 bits); o `check` avisa sobre gravação ausente ou inválida, e uma gravação refeita gera a fala de novo. |
+| `voice.provider` | sim | `qwen`, `recording`, `elevenlabs`, `fish` | `qwen`: voz local gerada na GPU (ou CPU). `recording`: você grava cada fala em `recordings/<id-da-fala>.wav` (WAV PCM de 16 bits); o `check` avisa sobre gravação ausente ou inválida, e uma gravação refeita gera a fala de novo. `elevenlabs` e `fish`: os serviços pagos (veja abaixo). |
 | `voice.model` | não | `0.6b`, `1.7b` | O modelo Qwen. O `1.7b` é mais natural e é o único que segue o `style` da voz. Sem ele, vale o `giz.config.json`. Trocar o modelo aqui gera as vozes de novo. |
+
+**Serviços de voz pagos.** Com `elevenlabs` ou `fish`, o `voice.id` de cada personagem é o id da voz no serviço. A
+chave vem de `ELEVENLABS_API_KEY` / `FISH_API_KEY` ou de `~/.config/giz/elevenlabs.key` / `~/.config/giz/fish.key`
+(fora do repositório; o giz nunca a mostra). Falhas de rede são tentadas de novo até 4 vezes, e respostas 429 e 5xx
+até 3. Na ElevenLabs, cada fim de frase e dois-pontos ganha uma pausa `<break>` de 0,15 s (`GIZ_SENTENCE_PAUSE`;
+vírgula: `GIZ_COMMA_PAUSE`, 0 por padrão). O modelo: `GIZ_ELEVENLABS_MODEL` (padrão `eleven_multilingual_v2`) e
+`GIZ_FISH_MODEL` (padrão `s1`). Os nomes antigos do motor (`ELEVEN_MODEL`, `FISH_MODEL`, `PAUSA_PONTO`,
+`PAUSA_VIRGULA`) também valem. Trocar modelo ou pausa gera as vozes de novo.
+
+**Dicionário de pronúncia.** Cada serviço tem o seu, na pasta do projeto: `pronunciation.json` (Qwen),
+`pronunciation.elevenlabs.json` e `pronunciation.fish.json` — um objeto `{"palavra": "grafia para a voz"}`. A
+palavra é trocada inteira, sem diferenciar maiúsculas, só no que a voz fala; a legenda mantém o roteiro. As grafias
+feitas para o Qwen ("gê pê tê") confundem vozes que já leem nomes em inglês, por isso cada serviço tem o seu arquivo.
+Mudar o dicionário gera de novo só as falas que ele afeta.
 
 ## 5. Personagens (`cast/<id>.json`)
 
@@ -146,7 +174,7 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 | `name` | sim | O nome que aparece na legenda do `.srt`. |
 | `rig` | não | O desenho do corpo (seção 6). Sem `rig`, o personagem é só voz, como um narrador, e não pode entrar em cena. |
 | `parameters` | não | A aparência, conforme o rig. Os que faltam usam o padrão do rig. |
-| `voice.id` | sim | A voz Qwen: `serena`, `vivian`, `uncle_fu`, `ryan`, `aiden`, `ono_anna`, `sohee`, `eric` ou `dylan`. As mesmas vozes falam pt-BR e inglês (o idioma vem do projeto). Com `"provider": "qwen"`, outro valor é erro do `check`. |
+| `voice.id` | sim | A voz Qwen: `serena`, `vivian`, `uncle_fu`, `ryan`, `aiden`, `ono_anna`, `sohee`, `eric` ou `dylan`. As mesmas vozes falam pt-BR e inglês (o idioma vem do projeto). Com `"provider": "qwen"`, outro valor é erro do `check`; com `elevenlabs` ou `fish`, é o id da voz no serviço. |
 | `voice.style` | não | Uma instrução de como falar (sotaque, ritmo, humor). Só o modelo `1.7b` a segue. Em pt-BR, peça o sotaque brasileiro. |
 | `personality` | não | Uma nota para quem escreve o roteiro. O vídeo não usa. |
 | `defaultExpression` | sim | A expressão de quando ninguém pede outra (seção 7). |
@@ -670,18 +698,23 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
 
 ## Para quem desenvolve o motor
 
-- Camadas `domain`, `application`, `infrastructure` e `presentation`. A única exceção à regra das camadas é
-  `src/presentation/cli/composition.ts`, imposta pelo dependency-cruiser.
+- Camadas `domain`, `application`, `infrastructure` e `presentation`. A única exceção à regra das camadas é o ponto de
+  composição, `src/presentation/cli/composition.ts` e as suas partes em `composition/`, imposta pelo dependency-cruiser.
 - `npm run verify` roda typecheck, lint (ESLint + dependency-cruiser) e testes. As regras de Object Calisthenics e
   SOLID são impostas pelo ESLint. Uma exceção só vale com `// calisthenics-exceção: <motivo>`.
 - Node >= 22.18 roda o TypeScript direto: só sintaxe apagável, e os imports levam a extensão `.ts`/`.tsx`.
 - O código fica em inglês (identificadores, arquivos, chaves dos JSON do projeto, subcomandos). Os textos que a pessoa
   usuária vê ficam em pt-BR.
 - Render: `@remotion/bundler` e `@remotion/renderer` chamados direto (sem `npx`). A pasta pública do render é
-  temporária: os sons de `public/sounds/` (copiados de `motor/assets/sfx/`) mais as vozes e as imagens de cenário do
+  temporária: os sons de `public/sounds/` (sintetizados por `giz sounds`) mais as vozes e as imagens de cenário do
   projeto, no mesmo caminho relativo.
-- `QwenVoice` importa `motor/scripts/qwen3-tts.ts` e é carregada com `import()` só quando uma fala é gerada
-  (`composition.ts`): os outros comandos não tocam no `motor/`.
+- A voz Qwen3-TTS fica em `src/infrastructure/voice/qwen/` (tokenizador, embeddings, sessões ONNX, talker, code
+  predictor). `QwenVoice` é carregada com `import()` só quando uma fala é gerada (`composition/voices.ts`): os outros
+  comandos não carregam o onnxruntime. A GPU (`src/infrastructure/gpu/`) pré-carrega as bibliotecas da NVIDIA com
+  `process.dlopen`; o ONNX Runtime 1.31.1 pede CUDA 13. O vocoder tenta a GPU e, na falha conhecida do nó `Pad` do
+  export, passa para a CPU e fica lá.
+- O pacote instala com `ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install` (sem o provider CUDA, ~270 MB); o
+  `giz setup` (ou `giz gpu install`) baixa o provider quando a GPU é escolhida.
 - Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-giz.png --props='{"rig":"giz"}'`.
   Acrescente `"character":"cast/<id>.json"` e `--public-dir=<projeto>` para usar os parâmetros de um personagem.
 - Galeria de elencos prontos (uma por época), com os presets como pasta pública:

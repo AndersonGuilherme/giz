@@ -5,10 +5,12 @@ import { basename, extname, join, resolve } from 'node:path';
 import type { Progress } from '../../application/use-cases/GenerateVoices.ts';
 import type { Problem } from '../../application/use-cases/CheckProject.ts';
 import { buildTimeline, characterSheet, checkProject, generateVoices, produceVideo, projectRepository, renderVideo } from './composition.ts';
+import { qaCommand } from './commands/qaCommands.ts';
+import { gpuCommand, modelsCommand, soundsCommand } from './commands/toolCommands.ts';
+import { setupCommand } from './setup/setupCommand.ts';
+import { UsageError } from './usage.ts';
 
 type Subcommand = (args: readonly string[]) => Promise<void>;
-
-class UsageError extends Error {}
 
 function folderOf(folder: string | undefined, subcommand: string): string {
   if (!folder) throw new UsageError(`uso: giz ${subcommand} <pasta-do-projeto>`);
@@ -82,7 +84,10 @@ async function sheet([rig, character]: readonly string[]): Promise<void> {
   console.log(`ficha: ${output}`);
 }
 
-const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = { voice, check, build, render, produce, sheet };
+const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = {
+  voice, check, build, render, produce, sheet,
+  setup: setupCommand, models: modelsCommand, gpu: gpuCommand, qa: qaCommand, sounds: soundsCommand,
+};
 
 async function main([name = '', ...args]: readonly string[]): Promise<void> {
   const subcommand = SUBCOMMANDS[name];

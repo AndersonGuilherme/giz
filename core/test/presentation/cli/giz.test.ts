@@ -1,6 +1,9 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
+import { cpSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
 const NUCLEO = fileURLToPath(new URL('../../../', import.meta.url));
@@ -26,6 +29,33 @@ test('check runs without loading anything from motor/ (the Qwen voice is importe
   assert.doesNotMatch(run.stderr, /motor carregado/);
   assert.match(run.stdout, /0 erro\(s\)/);
   assert.equal(run.status, 0);
+});
+
+// The fixture voices were recorded before project.json named the model (the hash of a line without a model leaves it
+// out), so the copy drops `voice.model`: then both lines are up to date and the voice never loads.
+test('voice runs without motor/: with every line up to date, no voice model is even loaded', () => {
+  const folder = mkdtempSync(join(tmpdir(), 'giz-voice-'));
+  cpSync(join(NUCLEO, 'test/fixtures/minimal-project'), folder, { recursive: true });
+  const project = JSON.parse(readFileSync(join(folder, 'project.json'), 'utf8'));
+  writeFileSync(join(folder, 'project.json'), JSON.stringify({ ...project, voice: { provider: 'qwen' } }));
+  const run = gizWithoutMotor(['voice', folder]);
+  assert.doesNotMatch(run.stderr, /motor carregado/);
+  assert.match(run.stdout, /0 gerada\(s\), 2 já em dia/);
+  assert.equal(run.status, 0);
+});
+
+test('setup --help, and the tool subcommands answer a wrong call with their usage (exit 2)', () => {
+  const help = gizWithoutMotor(['setup', '--help']);
+  assert.match(help.stdout, /uso: giz setup \[--defaults\] \[--dry-run\]/);
+  assert.equal(help.status, 0);
+  const qa = gizWithoutMotor(['qa']);
+  assert.match(qa.stderr, /giz qa asr <pasta-do-projeto>/);
+  assert.equal(qa.status, 2);
+  const gpu = gizWithoutMotor(['gpu', 'nada']);
+  assert.match(gpu.stderr, /uso: giz gpu info \| install/);
+  assert.equal(gpu.status, 2);
+  const usage = gizWithoutMotor(['nada']);
+  assert.match(usage.stderr, /setup \| models \| gpu \| qa \| sounds/);
 });
 
 test('the hook does catch a motor import (the test above would otherwise prove nothing)', () => {
