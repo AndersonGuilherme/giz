@@ -1,0 +1,18 @@
+{
+  "id": "dora",
+  "name": "Dora",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "1920s",
+    "skin": "tan",
+    "headShape": "oval",
+    "hair": "short",
+    "hairColor": "#14100c",
+    "eyeColor": "#5a3a1e"
+  },
+  "voice": {
+    "id": "serena"
+  },
+  "personality": "cantora de jazz que transforma qualquer conversa em música",
+  "defaultExpression": "excited"
+}

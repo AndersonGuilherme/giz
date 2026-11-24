@@ -1,0 +1,20 @@
+{
+  "id": "lumi",
+  "name": "Lumi",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "utopian",
+    "headwear": "crown",
+    "headwearColor": "#c9ced6",
+    "skin": "fair",
+    "headShape": "oval",
+    "hair": "long",
+    "hairColor": "#d7dbe2",
+    "eyeColor": "#7fc4b8"
+  },
+  "voice": {
+    "id": "sohee"
+  },
+  "personality": "conselheira da cidade do futuro, calma e cheia de ideias",
+  "defaultExpression": "thinking"
+}

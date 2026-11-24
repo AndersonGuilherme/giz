@@ -1,0 +1,20 @@
+{
+  "id": "leo",
+  "name": "Leo",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "renaissance",
+    "headwear": "beret",
+    "skin": "fair",
+    "headShape": "bean",
+    "hair": "curly",
+    "facialHair": "goatee",
+    "hairColor": "#7a4a2a",
+    "eyeColor": "#6b8f4a"
+  },
+  "voice": {
+    "id": "dylan"
+  },
+  "personality": "pintor distraído, sempre com tinta no nariz",
+  "defaultExpression": "thinking"
+}

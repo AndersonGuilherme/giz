@@ -172,16 +172,34 @@ quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vir
 | `cheeks` | sim/não | `true` | bochechas rosadas |
 | `freckles` | sim/não | `false` | sardas |
 | `chalk` | sim/não | `true` | o contorno de giz |
-| `outfit` | opção | `tshirt` | `tshirt`, `tunic`, `dress`, `hoodie` |
-| `outfitColor` | cor | `#2f8f83` | |
-| `hair` | opção | `short` | `none`, `bun`, `short`, `scarf`, `hat` |
-| `accessoryColor` | cor | `#f2b134` | a cor do lenço, do chapéu, do prendedor do coque e do cinto |
+| `outfit` | opção | `casual` | a roupa, por época (lista abaixo) |
+| `outfitColor` | cor | `auto` | a cor principal da roupa; `auto` usa a paleta da própria roupa (mangas e calça da mesma cor acompanham) |
+| `accessoryColor` | cor | `auto` | os detalhes da roupa (gravata, cinto, botões), o prendedor do cabelo e os óculos |
+| `hair` | opção | `short` | `bald`, `short`, `long`, `curly`, `afro`, `braids`, `bun`, `ponytail`, `mohawk` |
+| `headwear` | opção | `none` | chapéus, capacetes e acessórios de cabeça (lista abaixo) |
+| `headwearColor` | cor | `auto` | a cor principal do chapéu; `auto` usa a dele |
+| `facialHair` | opção | `none` | `beard`, `mustache`, `goatee`, `stubble` (barba por fazer) |
 | `glasses` | sim/não | `false` | |
 | `eyeScale` | número | `1` | de `0.8` a `1.4` |
 
 ```json
 { "rig": "giz", "parameters": { "skin": "tan", "headShape": "soft-square", "eyeColor": "#4c9a5a", "outfit": "hoodie", "hair": "short", "glasses": true } }
 ```
+
+Roupas (`outfit`), cada uma com a sua paleta:
+
+- passado: `caveman`, `ancient-egypt`, `toga`, `viking`, `knight`, `commoner`, `renaissance`, `pirate`, `victorian`,
+  `1920s`, `1950s`;
+- presente: `casual`, `hoodie`, `dress`, `suit`, `school-uniform`, `lab-coat`, `scrubs`, `chef`, `athlete`, `hi-vis`;
+- futuro: `spacesuit`, `cyber`, `robot-armor`, `utopian`.
+
+Na cabeça (`headwear`): `crown`, `laurel`, `viking-helmet`, `knight-helmet`, `pirate-hat`, `top-hat`, `flat-cap`,
+`beret`, `cap`, `chef-hat`, `hard-hat`, `space-helmet`, `visor`, `headphones`, `witch-hat`, `hat`, `scarf`. O cabelo,
+a barba e o que vai na cabeça acompanham o formato da cabeça (`headShape`). O visor e o capacete espacial são
+transparentes: os olhos continuam aparecendo.
+
+Personagens prontos: `casts/presets/past/`, `present/` e `future/` têm elencos de exemplo (nome, personalidade e voz
+do Qwen). Copie o arquivo para o `cast/` do projeto, acrescente o `id` em `project.json` e ajuste o que quiser.
 
 ### `lia-style` (estilo Lia)
 
@@ -571,4 +589,8 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
   temporária: os sons de `public/sounds/` (copiados de `motor/assets/sfx/`) mais as vozes do projeto.
 - Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-giz.png --props='{"rig":"giz"}'`.
   Acrescente `"character":"cast/<id>.json"` e `--public-dir=<projeto>` para usar os parâmetros de um personagem.
+- Galeria de elencos prontos (uma por época): primeiro o bundle com os presets como pasta pública,
+  `npx remotion bundle src/presentation/remotion/index.ts --out-dir=/tmp/giz-bundle --public-dir=casts/presets`, depois
+  `npx remotion still /tmp/giz-bundle PresetSheet output/presets-past.png --props=casts/presets/sheets/past.json`
+  (troque `past` por `present` ou `future`). A composição `PresetSheet` lê os arquivos listados em `characters`.
 - `test/examples.test.ts` garante que os quatro exemplos carregam e passam no `check` sem erros.

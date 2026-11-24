@@ -1,0 +1,18 @@
+{
+  "id": "yumi",
+  "name": "Yumi",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "school-uniform",
+    "skin": "fair",
+    "headShape": "oval",
+    "hair": "ponytail",
+    "hairColor": "#1f1714",
+    "eyeColor": "#3a2418"
+  },
+  "voice": {
+    "id": "ono_anna"
+  },
+  "personality": "aluna dedicada que sempre tem uma pergunta a mais",
+  "defaultExpression": "neutral"
+}

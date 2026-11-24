@@ -1,0 +1,21 @@
+{
+  "id": "zed",
+  "name": "Zed",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "cyber",
+    "outfitColor": "#3a2552",
+    "accessoryColor": "#ff5fa2",
+    "headwear": "headphones",
+    "headwearColor": "#ff5fa2",
+    "skin": "tan",
+    "headShape": "round",
+    "hair": "afro",
+    "hairColor": "#2a1a40"
+  },
+  "voice": {
+    "id": "dylan"
+  },
+  "personality": "DJ da estação orbital, transforma alarmes em batida",
+  "defaultExpression": "excited"
+}

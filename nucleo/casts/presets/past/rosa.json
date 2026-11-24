@@ -1,0 +1,18 @@
+{
+  "id": "rosa",
+  "name": "Rosa",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "1950s",
+    "skin": "medium",
+    "headShape": "round",
+    "hair": "ponytail",
+    "hairColor": "#7a2e1e",
+    "eyeColor": "#4c9a5a"
+  },
+  "voice": {
+    "id": "vivian"
+  },
+  "personality": "garçonete da lanchonete, sabe a fofoca da cidade inteira",
+  "defaultExpression": "happy"
+}

@@ -1,0 +1,20 @@
+{
+  "id": "vega",
+  "name": "Vega",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "spacesuit",
+    "outfitColor": "#f2b134",
+    "accessoryColor": "#2f5c9e",
+    "skin": "medium",
+    "headShape": "bean",
+    "hair": "short",
+    "hairColor": "#b4532a",
+    "freckles": true
+  },
+  "voice": {
+    "id": "ono_anna"
+  },
+  "personality": "piloto de nave que estaciona sempre torto",
+  "defaultExpression": "happy"
+}

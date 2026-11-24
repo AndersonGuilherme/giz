@@ -1,0 +1,20 @@
+{
+  "id": "sigrid",
+  "name": "Sigrid",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "viking",
+    "headwear": "viking-helmet",
+    "skin": "light",
+    "headShape": "soft-square",
+    "hair": "braids",
+    "hairColor": "#d9a441",
+    "eyeColor": "#3f7fc4",
+    "freckles": true
+  },
+  "voice": {
+    "id": "sohee"
+  },
+  "personality": "navegadora que conhece todas as estrelas e nenhum atalho",
+  "defaultExpression": "excited"
+}

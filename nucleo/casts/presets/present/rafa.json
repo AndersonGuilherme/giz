@@ -1,0 +1,18 @@
+{
+  "id": "rafa",
+  "name": "Rafa",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "scrubs",
+    "skin": "brown",
+    "headShape": "oval",
+    "hair": "curly",
+    "hairColor": "#20140e",
+    "eyeColor": "#5a3a1e"
+  },
+  "voice": {
+    "id": "eric"
+  },
+  "personality": "enfermeiro calmo que nunca perde o bom humor",
+  "defaultExpression": "happy"
+}

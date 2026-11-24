@@ -4,6 +4,7 @@ import { CharacterSheet, type CharacterSheetProps } from './CharacterSheet.tsx';
 import { PREVIEW_DEFAULTS } from './previewScene.ts';
 import { catalogMetadata, FRAMES_PER_SCENE, SceneCatalog } from './SceneCatalog.tsx';
 import { CATALOG_SAMPLES } from './catalogSamples.ts';
+import { PresetSheet, presetSheetMetadata } from './PresetSheet.tsx';
 import { previewMetadata, ScenePreview } from './ScenePreview.tsx';
 import { EMPTY_VIDEO } from './emptyVideo.ts';
 import { Video, videoMetadata } from './Video.tsx';
@@ -62,11 +63,26 @@ const VideoComposition: FC = () => (
   <Composition id="Video" component={Video} width={1080} height={1920} fps={30} durationInFrames={1} defaultProps={EMPTY_VIDEO} calculateMetadata={videoMetadata} />
 );
 
+// A gallery of cast files (`characters`: paths relative to the public folder, e.g. `--public-dir=casts/presets`).
+const PresetSheetComposition: FC = () => (
+  <Composition
+    id="PresetSheet"
+    component={PresetSheet}
+    width={1920}
+    height={1080}
+    fps={30}
+    durationInFrames={1}
+    defaultProps={{ title: 'passado', characters: [] }}
+    calculateMetadata={presetSheetMetadata}
+  />
+);
+
 export const Root: FC = () => (
   <>
     <VideoComposition />
     <SheetComposition />
     <PreviewComposition />
     <CatalogComposition />
+    <PresetSheetComposition />
   </>
 );

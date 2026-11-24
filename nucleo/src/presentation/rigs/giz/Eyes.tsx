@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import type { EyesState } from '../../../domain/character/FaceGeometry.ts';
 import { EYES, HEAD } from './measures.ts';
-import { skinOf, type Look } from './parameters.ts';
+import { accentOf, skinOf, type Look } from './parameters.ts';
 import { shade, useSvgId } from '../svg.ts';
 
 type EyesProps = Readonly<{ eyes: EyesState; look: Look }>;
@@ -80,12 +80,12 @@ export const Eyes: FC<EyesProps> = (props) => (
   </g>
 );
 
-/** Round glasses around the eyes, in the accessory color. */
+/** Round glasses around the eyes, in a deep tone of the outfit's accent (light accents would vanish on light skin). */
 export const Glasses: FC<Readonly<{ look: Look }>> = ({ look }) => {
   const [left, right] = [eyeBox(-1, look.eyeScale), eyeBox(1, look.eyeScale)];
   const radius = Math.max(left.halfWidth, left.halfHeight) + 8;
   return (
-    <g fill="none" stroke={look.accessoryColor} strokeWidth={7}>
+    <g fill="none" stroke={shade(accentOf(look), -0.4)} strokeWidth={7}>
       <circle cx={left.cx} cy={left.cy} r={radius} />
       <circle cx={right.cx} cy={right.cy} r={radius} />
       <path d={`M${left.cx + radius - 6},${left.cy - 8} Q${HEAD.x},${left.cy - 16} ${right.cx - radius + 6},${right.cy - 8}`} />

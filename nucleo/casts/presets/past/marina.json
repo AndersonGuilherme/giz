@@ -1,0 +1,19 @@
+{
+  "id": "marina",
+  "name": "Marina",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "pirate",
+    "headwear": "pirate-hat",
+    "skin": "brown",
+    "headShape": "bean",
+    "hair": "long",
+    "hairColor": "#1f1410",
+    "eyeColor": "#7a4a26"
+  },
+  "voice": {
+    "id": "vivian"
+  },
+  "personality": "capitã pirata que vive perdendo o próprio mapa",
+  "defaultExpression": "happy"
+}

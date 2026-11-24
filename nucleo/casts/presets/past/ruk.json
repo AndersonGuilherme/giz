@@ -1,0 +1,19 @@
+{
+  "id": "ruk",
+  "name": "Ruk",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "caveman",
+    "skin": "tan",
+    "headShape": "soft-square",
+    "hair": "curly",
+    "facialHair": "beard",
+    "hairColor": "#3a2418",
+    "eyeColor": "#5a3a1e"
+  },
+  "voice": {
+    "id": "uncle_fu"
+  },
+  "personality": "inventor da roda, orgulhoso e desconfiado de tudo que é novo",
+  "defaultExpression": "happy"
+}

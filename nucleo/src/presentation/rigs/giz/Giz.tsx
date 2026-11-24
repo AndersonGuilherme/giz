@@ -1,31 +1,48 @@
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import { ArmGeometry } from '../../../domain/character/ArmGeometry.ts';
 import type { CharacterState } from '../../../domain/character/CharacterState.ts';
 import type { RigProps } from '../RigModel.ts';
 import { Arm } from './Arms.tsx';
 import { Face } from './Face.tsx';
 import { Head } from './Head.tsx';
-import { Hair } from './Hair.tsx';
+import { FacialHair, Hair } from './Hair.tsx';
+import { Headwear } from './headwear/Headwear.tsx';
 import { FEET, NECK, VIEW_BOX } from './measures.ts';
 import { lookOf, type Look } from './parameters.ts';
 import { Outfit } from './Outfit.tsx';
 
 type BodyProps = Readonly<{ state: CharacterState; look: Look }>;
 
-// Back to front: shadow, arms behind the head, legs and torso, head with hair and face, arms in front of the head.
+const Tilted: FC<Readonly<{ tilt: number; children: ReactNode }>> = ({ tilt, children }) => (
+  <g transform={`rotate(${tilt} ${NECK.x} ${NECK.y})`}>{children}</g>
+);
+
+// The head with its beard, hair and headwear, the face, then see-through headwear over the face.
+const HeadAndFace: FC<BodyProps> = ({ state, look }) => (
+  <g>
+    <Head look={look} />
+    <FacialHair look={look} />
+    <Hair look={look} layer="front" />
+    <Headwear look={look} layer="front" />
+    <Face state={state} look={look} />
+    <Headwear look={look} layer="over" />
+  </g>
+);
+
+// Back to front: hair and headwear behind the head (behind the body too: long hair falls down the back), legs and
+// torso, arms behind the head, the head, arms in front of the head.
 const Body: FC<BodyProps> = ({ state, look }) => {
   const { left, right, headTilt } = ArmGeometry.for(state.pose());
   return (
     <g>
+      <Tilted tilt={headTilt}>
+        <Hair look={look} layer="back" />
+        <Headwear look={look} layer="back" />
+      </Tilted>
       <Outfit look={look} />
       {!left.inFront && <Arm arm={left} side={-1} look={look} />}
       {!right.inFront && <Arm arm={right} side={1} look={look} />}
-      <g transform={`rotate(${headTilt} ${NECK.x} ${NECK.y})`}>
-        <Hair look={look} layer="back" />
-        <Head look={look} />
-        <Hair look={look} layer="front" />
-        <Face state={state} look={look} />
-      </g>
+      <Tilted tilt={headTilt}><HeadAndFace state={state} look={look} /></Tilted>
       {left.inFront && <Arm arm={left} side={-1} look={look} />}
       {right.inFront && <Arm arm={right} side={1} look={look} />}
     </g>

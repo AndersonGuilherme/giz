@@ -1,0 +1,22 @@
+{
+  "id": "atlas",
+  "name": "Atlas",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "robot-armor",
+    "outfitColor": "#c9a64b",
+    "accessoryColor": "#ff7a3d",
+    "headwear": "visor",
+    "headwearColor": "#5a4c3e",
+    "skin": "medium",
+    "headShape": "round",
+    "hair": "short",
+    "facialHair": "stubble",
+    "hairColor": "#2a1a12"
+  },
+  "voice": {
+    "id": "uncle_fu"
+  },
+  "personality": "engenheiro veterano que já desmontou três robôs de curiosidade",
+  "defaultExpression": "neutral"
+}

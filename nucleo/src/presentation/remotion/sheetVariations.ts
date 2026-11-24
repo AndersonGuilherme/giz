@@ -19,7 +19,7 @@ const GIZ: readonly Variation[] = [
   },
   {
     label: 'redonda · bege', pose: 'shrug', expression: 'surprised', side: 1,
-    parameters: { skin: 'fair', headShape: 'round', eyeColor: '#7f8fa3', hair: 'hat', outfit: 'tshirt', outfitColor: '#c9a227', accessoryColor: '#5a6b8c' },
+    parameters: { skin: 'fair', headShape: 'round', eyeColor: '#7f8fa3', headwear: 'hat', outfit: 'casual', outfitColor: '#c9a227', accessoryColor: '#5a6b8c' },
   },
 ];
 

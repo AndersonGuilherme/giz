@@ -1,0 +1,19 @@
+{
+  "id": "bento",
+  "name": "Bento",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "knight",
+    "headwear": "knight-helmet",
+    "skin": "medium",
+    "headShape": "round",
+    "hair": "short",
+    "facialHair": "mustache",
+    "hairColor": "#2a1a12"
+  },
+  "voice": {
+    "id": "ryan"
+  },
+  "personality": "cavaleiro corajoso que morre de medo de aranha",
+  "defaultExpression": "neutral"
+}

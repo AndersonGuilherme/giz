@@ -10,8 +10,11 @@ type Parameters = Record<string, ParameterValue>;
 type Validator = (value: ParameterValue, definition: ParameterDefinition) => string | undefined;
 type Source = Readonly<{ file: string; collector: ProblemCollector }>;
 
-const color: Validator = (value) =>
-  typeof value === 'string' ? domainMessage(() => HexColor.of(value)) : `esperava uma cor em texto, veio ${value}`;
+// A color whose default is a word (`auto`: the rig picks it) also accepts that word.
+const color: Validator = (value, { defaultValue }) => {
+  if (value === defaultValue) return undefined;
+  return typeof value === 'string' ? domainMessage(() => HexColor.of(value)) : `esperava uma cor em texto, veio ${value}`;
+};
 
 const number: Validator = (value, { min = -Infinity, max = Infinity }) => {
   if (typeof value !== 'number') return `esperava um número, veio ${JSON.stringify(value)}`;

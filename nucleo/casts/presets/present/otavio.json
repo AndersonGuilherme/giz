@@ -1,0 +1,19 @@
+{
+  "id": "otavio",
+  "name": "Otávio",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "suit",
+    "skin": "light",
+    "headShape": "soft-square",
+    "hair": "short",
+    "facialHair": "stubble",
+    "hairColor": "#6a6460",
+    "eyeColor": "#5a6b8c"
+  },
+  "voice": {
+    "id": "ryan"
+  },
+  "personality": "executivo apressado que marca reunião para falar de reunião",
+  "defaultExpression": "skeptical"
+}

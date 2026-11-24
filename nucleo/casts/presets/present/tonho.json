@@ -1,0 +1,19 @@
+{
+  "id": "tonho",
+  "name": "Tonho",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "hi-vis",
+    "headwear": "hard-hat",
+    "skin": "tan",
+    "headShape": "soft-square",
+    "hair": "short",
+    "facialHair": "beard",
+    "hairColor": "#3a2418"
+  },
+  "voice": {
+    "id": "dylan"
+  },
+  "personality": "mestre de obras que mede tudo três vezes antes de cortar",
+  "defaultExpression": "neutral"
+}

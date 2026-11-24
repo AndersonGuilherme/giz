@@ -1,0 +1,19 @@
+{
+  "id": "livia",
+  "name": "Lívia",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "toga",
+    "headwear": "laurel",
+    "skin": "fair",
+    "headShape": "oval",
+    "hair": "bun",
+    "hairColor": "#5a3520",
+    "eyeColor": "#4c9a5a"
+  },
+  "voice": {
+    "id": "serena"
+  },
+  "personality": "oradora do fórum que adora um discurso comprido",
+  "defaultExpression": "neutral"
+}

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, rm, writeFile } from 'node:fs/promises';
+import { cp, mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -29,6 +29,29 @@ test('the minimal fixture project loads with the production catalog (giz)', asyn
   assert.equal(ana.parameters().outfit, 'hoodie');
   assert.equal(ana.parameters().skin, 'tan');
   assert.equal(ana.parameters().chalk, true, 'the defaults fill what the cast leaves out');
+});
+
+async function loadGizCharacter(parameters: Record<string, unknown>) {
+  const folder = await mkdtemp(join(tmpdir(), 'giz-auto-color-'));
+  try {
+    await mkdir(join(folder, 'cast'));
+    const character = { id: 'ana', name: 'Ana', rig: 'giz', parameters, voice: { id: 'vivian' }, defaultExpression: 'neutral' };
+    const project = { version: 2, title: 'Cores', format: 'story', language: 'pt-BR', aspect: '9:16', captionStyle: 'words', cast: ['ana'], voice: { provider: 'qwen', model: '0.6b' } };
+    await writeFile(join(folder, 'cast', 'ana.json'), JSON.stringify(character));
+    await writeFile(join(folder, 'project.json'), JSON.stringify(project));
+    await writeFile(join(folder, 'script.json'), JSON.stringify({ chapters: ['Um'], lines: [{ id: '1', chapter: 1, speaker: 'ana', text: 'Oi.' }] }));
+    const repository = new DiskProjectRepository({ catalog: new RigCatalogFromRegistry(rigRegistry) });
+    return (await repository.load(folder)).cast().character(CharacterId.of('ana')).parameters();
+  } finally {
+    await rm(folder, { recursive: true, force: true });
+  }
+}
+
+test('a giz color left out or written "auto" keeps the outfit palette; any other word is still an invalid color', async () => {
+  assert.equal((await loadGizCharacter({})).outfitColor, 'auto');
+  assert.equal((await loadGizCharacter({ outfitColor: 'auto', headwear: 'crown', headwearColor: 'auto' })).headwearColor, 'auto');
+  assert.equal((await loadGizCharacter({ outfitColor: '#123456' })).outfitColor, '#123456');
+  await assert.rejects(loadGizCharacter({ outfitColor: 'roxo' }), /parameters\.outfitColor: cor "roxo"/);
 });
 
 // `giz check` loads a project with this catalog: a project whose cast is the example Lia and Téo must load clean.

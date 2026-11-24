@@ -1,0 +1,18 @@
+{
+  "id": "amon",
+  "name": "Amon",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "ancient-egypt",
+    "skin": "deep",
+    "headShape": "round",
+    "hair": "bald",
+    "eyeColor": "#d09a2e",
+    "cheeks": false
+  },
+  "voice": {
+    "id": "eric"
+  },
+  "personality": "escriba meticuloso que anota tudo, até o que ninguém pediu",
+  "defaultExpression": "skeptical"
+}

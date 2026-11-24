@@ -1,0 +1,19 @@
+{
+  "id": "orion",
+  "name": "Órion",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "robot-armor",
+    "skin": "deep",
+    "headShape": "soft-square",
+    "hair": "bald",
+    "facialHair": "goatee",
+    "hairColor": "#14100c",
+    "eyeColor": "#5fe0ff"
+  },
+  "voice": {
+    "id": "eric"
+  },
+  "personality": "guarda de armadura robótica, sério por fora e brincalhão por dentro",
+  "defaultExpression": "neutral"
+}

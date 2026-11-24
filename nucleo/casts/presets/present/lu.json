@@ -1,0 +1,20 @@
+{
+  "id": "lu",
+  "name": "Lu",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "dress",
+    "outfitColor": "#d0573f",
+    "headwear": "flat-cap",
+    "skin": "medium",
+    "headShape": "bean",
+    "hair": "long",
+    "hairColor": "#5a3520",
+    "freckles": true
+  },
+  "voice": {
+    "id": "vivian"
+  },
+  "personality": "fotógrafa de rua que repara no que ninguém vê",
+  "defaultExpression": "happy"
+}

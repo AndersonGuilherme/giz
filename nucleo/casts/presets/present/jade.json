@@ -1,0 +1,18 @@
+{
+  "id": "jade",
+  "name": "Jade",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "athlete",
+    "outfitColor": "#2f7fbf",
+    "skin": "brown",
+    "headShape": "soft-square",
+    "hair": "braids",
+    "hairColor": "#1a120e"
+  },
+  "voice": {
+    "id": "sohee"
+  },
+  "personality": "atleta competitiva que transforma tudo em corrida",
+  "defaultExpression": "excited"
+}

@@ -1,0 +1,21 @@
+{
+  "id": "adelaide",
+  "name": "Adelaide",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "victorian",
+    "headwear": "hat",
+    "headwearColor": "#4a5a8c",
+    "skin": "light",
+    "headShape": "oval",
+    "hair": "bun",
+    "hairColor": "#b4532a",
+    "eyeColor": "#4c7fb0",
+    "glasses": true
+  },
+  "voice": {
+    "id": "ono_anna"
+  },
+  "personality": "dama curiosa que inventa engenhocas nas horas vagas",
+  "defaultExpression": "neutral"
+}

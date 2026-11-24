@@ -1,0 +1,18 @@
+{
+  "id": "kai",
+  "name": "Kai",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "cyber",
+    "headwear": "visor",
+    "skin": "light",
+    "headShape": "soft-square",
+    "hair": "mohawk",
+    "hairColor": "#3ff0d8"
+  },
+  "voice": {
+    "id": "aiden"
+  },
+  "personality": "hacker que conserta qualquer coisa e não explica como",
+  "defaultExpression": "skeptical"
+}

@@ -1,12 +1,14 @@
+import { FACIAL_HAIRS, FacialHair, type FacialHairName } from '../../../domain/character/hair/FacialHair.ts';
+import { HAIRS, HairStyle, type HairName } from '../../../domain/character/hair/HairStyle.ts';
+import { HEADWEARS, Headwear, type HeadwearName } from '../../../domain/character/headwear/Headwear.ts';
+import type { HeadwearPalette } from '../../../domain/character/headwear/HeadwearDesign.ts';
 import { HEAD_SHAPES, type HeadShapeName } from '../../../domain/character/HeadShape.ts';
+import { AUTO } from '../../../domain/character/Palette.ts';
 import { SKIN_TONES, SkinTone, type SkinColors, type SkinToneName } from '../../../domain/character/SkinTone.ts';
+import type { OutfitPalette } from '../../../domain/character/wardrobe/OutfitDesign.ts';
+import { OUTFITS, Wardrobe, type OutfitName } from '../../../domain/character/wardrobe/Wardrobe.ts';
 import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
 import { FEET, VIEW_BOX } from './measures.ts';
-
-export const OUTFITS = ['tshirt', 'tunic', 'dress', 'hoodie'] as const;
-export const HAIRS = ['none', 'bun', 'short', 'scarf', 'hat'] as const;
-export type Outfit = (typeof OUTFITS)[number];
-export type Hair = (typeof HAIRS)[number];
 
 export const gizDefinition: RigDefinition = {
   id: 'giz',
@@ -19,10 +21,14 @@ export const gizDefinition: RigDefinition = {
     cheeks: { type: 'boolean', defaultValue: true },
     freckles: { type: 'boolean', defaultValue: false },
     chalk: { type: 'boolean', defaultValue: true },
-    outfitColor: { type: 'color', defaultValue: '#2f8f83' },
-    outfit: { type: 'option', defaultValue: 'tshirt', options: [...OUTFITS] },
-    hair: { type: 'option', defaultValue: 'short', options: [...HAIRS] },
-    accessoryColor: { type: 'color', defaultValue: '#f2b134' },
+    // `auto` colors come from the outfit's and the headwear's own palette.
+    outfitColor: { type: 'color', defaultValue: AUTO },
+    outfit: { type: 'option', defaultValue: Wardrobe.DEFAULT, options: [...OUTFITS] },
+    hair: { type: 'option', defaultValue: HairStyle.DEFAULT, options: [...HAIRS] },
+    headwear: { type: 'option', defaultValue: Headwear.DEFAULT, options: [...HEADWEARS] },
+    headwearColor: { type: 'color', defaultValue: AUTO },
+    facialHair: { type: 'option', defaultValue: FacialHair.DEFAULT, options: [...FACIAL_HAIRS] },
+    accessoryColor: { type: 'color', defaultValue: AUTO },
     glasses: { type: 'boolean', defaultValue: false },
     eyeScale: { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 },
   },
@@ -40,8 +46,11 @@ export type Look = Readonly<{
   freckles: boolean;
   chalk: boolean;
   outfitColor: string;
-  outfit: Outfit;
-  hair: Hair;
+  outfit: OutfitName;
+  hair: HairName;
+  headwear: HeadwearName;
+  headwearColor: string;
+  facialHair: FacialHairName;
   accessoryColor: string;
   glasses: boolean;
   eyeScale: number;
@@ -58,3 +67,16 @@ export function lookOf(parameters: ValidatedParameters, id = 'giz'): Look {
 export function skinOf(look: Look): SkinColors {
   return SkinTone.colors(look.skin);
 }
+
+/** The outfit's colors, with the ones the character file chose. */
+export function outfitPaletteOf(look: Look): OutfitPalette {
+  return Wardrobe.palette(look.outfit, { main: look.outfitColor, accent: look.accessoryColor });
+}
+
+/** The headwear's colors, with the one the character file chose. */
+export function headwearPaletteOf(look: Look): HeadwearPalette {
+  return Headwear.palette(look.headwear, look.headwearColor);
+}
+
+/** The accent of the outfit, for small pieces that match it (hair ties, glasses' shine). */
+export const accentOf = (look: Look): string => outfitPaletteOf(look).accent;

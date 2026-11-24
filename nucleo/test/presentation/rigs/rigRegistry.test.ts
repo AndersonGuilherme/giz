@@ -17,12 +17,22 @@ test('the giz rig comes registered with the house-style parameters: skin tones, 
   assert.deepEqual(parameters.cheeks, { type: 'boolean', defaultValue: true });
   assert.deepEqual(parameters.freckles, { type: 'boolean', defaultValue: false });
   assert.deepEqual(parameters.chalk, { type: 'boolean', defaultValue: true });
-  assert.deepEqual(parameters.outfit, { type: 'option', defaultValue: 'tshirt', options: ['tshirt', 'tunic', 'dress', 'hoodie'] });
-  assert.deepEqual(parameters.hair, { type: 'option', defaultValue: 'short', options: ['none', 'bun', 'short', 'scarf', 'hat'] });
+  const [outfit, headwear] = [parameters.outfit!, parameters.headwear!];
+  assert.equal(outfit.defaultValue, 'casual');
+  assert.deepEqual(outfit.options!.slice(0, 3), ['caveman', 'ancient-egypt', 'toga']);
+  assert.equal(outfit.options!.length, 25);
+  assert.deepEqual(parameters.hair, { type: 'option', defaultValue: 'short', options: ['bald', 'short', 'long', 'curly', 'afro', 'braids', 'bun', 'ponytail', 'mohawk'] });
+  assert.equal(headwear.defaultValue, 'none');
+  assert.ok(headwear.options!.includes('space-helmet'));
+  assert.deepEqual(parameters.facialHair, { type: 'option', defaultValue: 'none', options: ['none', 'beard', 'mustache', 'goatee', 'stubble'] });
+  for (const color of ['outfitColor', 'accessoryColor', 'headwearColor']) {
+    assert.deepEqual(parameters[color], { type: 'color', defaultValue: 'auto' }, `${color}: the outfit's or headwear's own palette`);
+  }
   assert.deepEqual(parameters.glasses, { type: 'boolean', defaultValue: false });
   assert.deepEqual(parameters.eyeScale, { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 });
   assert.deepEqual(Object.keys(parameters).sort(), [
-    'accessoryColor', 'chalk', 'cheeks', 'eyeColor', 'eyeScale', 'freckles', 'glasses', 'hair', 'hairColor', 'headShape', 'outfit', 'outfitColor', 'skin',
+    'accessoryColor', 'chalk', 'cheeks', 'eyeColor', 'eyeScale', 'facialHair', 'freckles', 'glasses', 'hair', 'hairColor', 'headShape', 'headwear',
+    'headwearColor', 'outfit', 'outfitColor', 'skin',
   ]);
 });
 

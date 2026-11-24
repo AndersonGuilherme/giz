@@ -1,0 +1,19 @@
+{
+  "id": "nova",
+  "name": "Nova",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "spacesuit",
+    "headwear": "space-helmet",
+    "skin": "brown",
+    "headShape": "oval",
+    "hair": "ponytail",
+    "hairColor": "#1a120e",
+    "eyeColor": "#d09a2e"
+  },
+  "voice": {
+    "id": "serena"
+  },
+  "personality": "astronauta que fala com as plantas da estação",
+  "defaultExpression": "happy"
+}

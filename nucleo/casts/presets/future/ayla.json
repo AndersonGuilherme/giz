@@ -1,0 +1,20 @@
+{
+  "id": "ayla",
+  "name": "Ayla",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "utopian",
+    "outfitColor": "#c9d8f0",
+    "accessoryColor": "#e8735a",
+    "skin": "deep",
+    "headShape": "bean",
+    "hair": "braids",
+    "hairColor": "#14100c",
+    "eyeColor": "#d09a2e"
+  },
+  "voice": {
+    "id": "vivian"
+  },
+  "personality": "jardineira de terraços suspensos, otimista sem remédio",
+  "defaultExpression": "happy"
+}

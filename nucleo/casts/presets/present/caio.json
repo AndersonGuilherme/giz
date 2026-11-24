@@ -1,0 +1,18 @@
+{
+  "id": "caio",
+  "name": "Caio",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "casual",
+    "headwear": "cap",
+    "skin": "medium",
+    "headShape": "round",
+    "hair": "short",
+    "hairColor": "#2a1a12"
+  },
+  "voice": {
+    "id": "aiden"
+  },
+  "personality": "skatista otimista que acha que tudo dá para resolver amanhã",
+  "defaultExpression": "happy"
+}

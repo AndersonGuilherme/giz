@@ -1,0 +1,19 @@
+{
+  "id": "helena",
+  "name": "Helena",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "lab-coat",
+    "skin": "tan",
+    "headShape": "bean",
+    "hair": "bun",
+    "hairColor": "#3a2418",
+    "glasses": true,
+    "eyeColor": "#4c9a5a"
+  },
+  "voice": {
+    "id": "serena"
+  },
+  "personality": "cientista paciente que explica tudo com um exemplo de cozinha",
+  "defaultExpression": "thinking"
+}
