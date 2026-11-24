@@ -1,0 +1,50 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { srtOf } from '../../../src/domain/caption/Srt.ts';
+import type { SegmentJson, VideoProps, WordInFrames } from '../../../src/domain/timeline/VideoProps.ts';
+
+function segment(speaker: string, start: number, words: WordInFrames[]): SegmentJson {
+  const lineDuration = words.at(-1)?.end ?? 0;
+  return {
+    lineId: `${speaker}-${start}`, speaker, start, lineDuration, totalDuration: lineDuration + 10,
+    scene: { type: 'talk' }, sceneKey: 0, words, beats: [], states: {},
+  };
+}
+
+function props(segments: SegmentJson[], format: VideoProps['format'] = 'lesson'): VideoProps {
+  return {
+    fps: 30, width: 1920, height: 1080, language: 'pt-BR', format, captionStyle: 'blocks', title: 'T', chapters: ['A'],
+    totalFrames: 600, segments, soundEffects: [],
+    cast: [
+      { id: 'ana', name: 'Ana', rig: 'ball-head', parameters: {}, defaultExpression: 'neutral' },
+      { id: 'narrator', name: 'Narrador', parameters: {}, defaultExpression: 'neutral' },
+    ],
+  };
+}
+
+test('the srt uses the real times of the words', () => {
+  const srt = srtOf(props([segment('ana', 30, [{ text: 'Oi,', start: 6, end: 15 }, { text: 'Téo.', start: 18, end: 40 }])]));
+  assert.equal(srt, '1\n00:00:01,200 --> 00:00:02,333\nAna: Oi, Téo.\n');
+});
+
+test('cues are numbered across segments; the narrator (no body) has no name before the text', () => {
+  const srt = srtOf(props([
+    segment('ana', 0, [{ text: 'Oi.', start: 0, end: 9 }]),
+    segment('narrator', 3600 * 30 + 61 * 30, [{ text: 'Fim.', start: 3, end: 12 }]),
+  ]));
+  assert.equal(srt, '1\n00:00:00,000 --> 00:00:00,300\nAna: Oi.\n\n2\n01:01:01,100 --> 01:01:01,400\nFim.\n');
+});
+
+test('a long line becomes sentence blocks, each from its first word to the next block (story too)', () => {
+  const texts = 'Você nasceu numa aldeia pequena, perto de um rio largo e frio. A peste chegou no verão de mil trezentos e quarenta e oito.'.split(' ');
+  const words = texts.map((text, index) => ({ text, start: index * 10, end: index * 10 + 8 }));
+  const srt = srtOf(props([segment('narrator', 0, words)], 'story'));
+  const cues = srt.trim().split('\n\n');
+  assert.equal(cues.length, 2);
+  assert.equal(cues[0], '1\n00:00:00,000 --> 00:00:04,000\nVocê nasceu numa aldeia pequena, perto de um rio largo e frio.');
+  assert.match(cues[1], /^2\n00:00:04,000 --> 00:00:07,933\nA peste chegou/);
+});
+
+test('a segment without words (old props) adds no cue', () => {
+  assert.equal(srtOf(props([segment('ana', 0, [])])), '');
+});

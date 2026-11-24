@@ -2,8 +2,9 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { TextFit } from '../../../src/domain/layout/TextFit.ts';
 import { Font } from '../../../src/domain/layout/Font.ts';
-import { CAPTION_FONT } from '../../../src/domain/layout/lessonLayouts.ts';
 
+// A 9:16 caption-sized text font: 48 px, up to 6 lines.
+const CAPTION_FONT = Font.of({ family: 'text', size: 48, lineHeight: 1.25, maximumLines: 6 });
 const withoutSpaces = (lines: readonly string[]) => lines.join('').replace(/\s+/g, '');
 
 test('a short text stays at the base size on one line', () => {

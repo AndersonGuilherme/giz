@@ -7,7 +7,8 @@ import { Box } from '../../src/domain/layout/Box.ts';
 import { Boxes } from '../../src/domain/layout/Boxes.ts';
 import { LayoutRegistry } from '../../src/domain/layout/LayoutRegistry.ts';
 import { createLayoutRegistry } from '../../src/domain/layout/defaultLayoutRegistry.ts';
-import { Project } from '../../src/domain/project/Project.ts';
+import { CAPTION_LAYOUTS, type CaptionLayout } from '../../src/domain/caption/captionLayouts.ts';
+import { Project, type Format } from '../../src/domain/project/Project.ts';
 import { Chapter } from '../../src/domain/script/Chapter.ts';
 import type { Scene } from '../../src/domain/script/Scene.ts';
 import { Line } from '../../src/domain/script/Line.ts';
@@ -19,19 +20,21 @@ import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
 
 type TestLine = { text?: string; scene?: Scene };
 
-function project(lines: TestLine[], aspect: string, warnings: string[] = []): Project {
+type Extras = Readonly<{ warnings?: string[]; format?: Format }>;
+
+function project(lines: TestLine[], aspect: string, { warnings = [], format = 'lesson' }: Extras = {}): Project {
   const ana = CharacterId.of('ana');
   const character = Character.of(ana, { name: 'Ana', rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
   const list = lines.map(({ text = 'Olá.', scene }, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene }));
   return Project.of(
-    { title: 'T', format: 'lesson', language: Language.PORTUGUESE, aspect: AspectRatio.of(aspect), captionStyle: 'blocks', voice: { provider: 'qwen' } },
+    { title: 'T', format, language: Language.PORTUGUESE, aspect: AspectRatio.of(aspect), captionStyle: 'blocks', voice: { provider: 'qwen' } },
     { cast: Cast.of([character]), script: Script.of(['Abertura'], Lines.of(list)), warnings },
   );
 }
 
 const title = (text: string): Scene => ({ type: 'title', overline: 'Aula 1', title: text, subtitle: 'Uma introdução' });
 const projectWithTitle = (text: string, aspect: string) => project([{ scene: title(text) }], aspect);
-const check = (p: Project, layouts = createLayoutRegistry()) => new CheckProject({ layouts }).run(p);
+const check = (p: Project, layouts = createLayoutRegistry(), captions: Readonly<Record<Format, CaptionLayout>> = CAPTION_LAYOUTS) => new CheckProject({ layouts, captions }).run(p);
 
 test('an 80-character title without spaces does not fit and is a check error', () => {
   const r = check(projectWithTitle('A'.repeat(80), '9:16'));
@@ -54,9 +57,26 @@ test('three characters in a 9:16 scenario are a line error, not a crash', () => 
   assert.deepEqual(r.errors.map((e) => e.line), ['1']);
   assert.match(r.errors[0].message, /no máximo 2 personagens em 9:16/);
 });
-test('a caption that does not fit is a line error', () => {
-  const r = check(project([{ text: 'palavra '.repeat(80) }], '9:16'));
-  assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'legenda não cabe na caixa nem com a letra a 60%']]);
+test('a word caption (story) with a word too long even at 60% is a line error', () => {
+  for (const aspect of ['9:16', '16:9']) {
+    const r = check(project([{ text: 'Oi pneumoultramicroscopicossilicovulcanoconiótico.' }], aspect, { format: 'story' }));
+    assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'legenda não cabe na caixa nem com a letra a 60%']], aspect);
+  }
+});
+test('a long lesson line is shown in blocks, so it fits', () => {
+  assert.deepEqual(check(project([{ text: 'palavra '.repeat(80) }], '9:16')).errors, []);
+});
+test('the caption box comes from the injected layouts, chosen by the project format', () => {
+  const seen: string[] = [];
+  const spy = (format: Format): CaptionLayout => ({
+    box: (text, aspect) => {
+      seen.push(`${format}:${text}`);
+      return Box.of('legenda', { x: 0, y: 0, width: aspect.width(), height: 10 });
+    },
+  });
+  const r = check(project([{ text: 'Olá.' }], '9:16', { format: 'story' }), createLayoutRegistry(), { story: spy('story'), lesson: spy('lesson') });
+  assert.deepEqual(seen, ['story:Olá.']);
+  assert.deepEqual(r.errors.map((e) => e.message), ['legenda sai da área segura']);
 });
 test('an inherited scene does not repeat the error', () => {
   const r = check(project([{ scene: title('A'.repeat(80)) }, {}, { scene: { type: 'quote', text: 'x' } }], '9:16'));
@@ -72,7 +92,7 @@ test('overlap and leaving the safe area are errors with the labels', () => {
   assert.deepEqual(r.errors.map((e) => e.message), ['autor sobrepõe legenda', 'aspas sai da área segura']);
 });
 test('project warnings (missing image) come in as warnings', () => {
-  const r = check(project([{}], '9:16', ['fundo.png não encontrada (fala 1)']));
+  const r = check(project([{}], '9:16', { warnings: ['fundo.png não encontrada (fala 1)'] }));
   assert.deepEqual(r, { errors: [], warnings: [{ line: '', message: 'fundo.png não encontrada (fala 1)' }] });
 });
 test('20 lines of code in 9:16 go through the real code layout: they shrink and fit; 40 lines are a line error', () => {

@@ -25,3 +25,7 @@ test('a zero or tiny duration becomes a positive frame 0, never -0', () => {
   assert.ok(Object.is(Seconds.of(0).toFrames(Fps.DEFAULT).value(), 0));
   assert.ok(Object.is(Seconds.of(1e-12).toFrames(Fps.DEFAULT).value(), 0));
 });
+test('a frame converts to the instant where it starts', () => {
+  assert.equal(Frame.of(45).toSeconds(Fps.DEFAULT).value(), 1.5);
+  assert.equal(Frame.of(0).toSeconds(Fps.DEFAULT).value(), 0);
+});

@@ -52,6 +52,11 @@ export class Words {
     return new Words(texts.map((word) => Word.of(word)));
   }
 
+  /** Words already timed (in seconds), such as a recorded voice or a segment converted from frames. */
+  static fromJson(json: readonly WordJson[]): Words {
+    return new Words(json.map(({ text, start, end }) => Word.of(text, { start: Seconds.of(start), end: Seconds.of(end) })));
+  }
+
   withTimes(starts: readonly Seconds[], ends: readonly Seconds[]): Words {
     const total = this.#words.length;
     if (starts.length !== total || ends.length !== total) {

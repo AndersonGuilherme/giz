@@ -1,16 +1,17 @@
 import { DomainError } from '../../domain/DomainError.ts';
+import type { CaptionLayout } from '../../domain/caption/captionLayouts.ts';
 import { SafeArea } from '../../domain/layout/SafeArea.ts';
 import type { Box } from '../../domain/layout/Box.ts';
 import { Boxes } from '../../domain/layout/Boxes.ts';
-import { captionBox } from '../../domain/layout/lessonLayouts.ts';
 import type { LayoutRegistry } from '../../domain/layout/LayoutRegistry.ts';
-import type { Project } from '../../domain/project/Project.ts';
+import type { Format, Project } from '../../domain/project/Project.ts';
 import type { Line } from '../../domain/script/Line.ts';
 
 /** Empty `line`: the problem belongs to the project (for example, a load warning). */
 export type Problem = Readonly<{ line: string; message: string }>;
 export type CheckReport = { errors: Problem[]; warnings: Problem[] };
-type Dependencies = Readonly<{ layouts: LayoutRegistry }>;
+/** `captions`: the caption layout of each format, the same one the renderer draws with. */
+type Dependencies = Readonly<{ layouts: LayoutRegistry; captions: Readonly<Record<Format, CaptionLayout>> }>;
 
 function layoutMessages(boxes: Boxes, safeArea: Box): string[] {
   const overflowing = boxes.overflowingTexts().map((box) => `${box.label} não cabe na caixa nem com a letra a 60%`);
@@ -48,11 +49,17 @@ export class CheckProject {
   // A scene the layout refuses (too many characters, camera target out of the scene) is an error of that line, not a crash.
   #lineMessages(project: Project, line: Line, safeArea: Box): string[] {
     try {
-      const caption = captionBox(line.text(), project.aspect());
-      return layoutMessages(this.#sceneBoxes(project, line).with(caption), safeArea);
+      return layoutMessages(this.#sceneBoxes(project, line).with(this.#captionBox(project, line)), safeArea);
     } catch (error) {
       return [refusalMessage(error)];
     }
+  }
+
+  // The caption layout of the project format: words in a story, blocks in a lesson.
+  #captionBox(project: Project, line: Line): Box {
+    const { captions } = this.#dependencies;
+    const layout = captions[project.format()];
+    return layout.box(line.text(), project.aspect());
   }
 
   // Only the line that declares the scene checks it: lines that inherit the scene do not repeat the same errors.

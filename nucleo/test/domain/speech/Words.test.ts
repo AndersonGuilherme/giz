@@ -43,3 +43,10 @@ test('toJson returns a copy', () => {
   words.toJson()[0]!.text = 'mudou';
   assert.deepEqual(words.texts(), ['um']);
 });
+
+test('fromJson keeps the times of words already timed', () => {
+  const json = [{ text: 'Oi', start: 0, end: 0.3 }, { text: 'Ana', start: 0.5, end: 1 }];
+  const words = Words.fromJson(json);
+  assert.deepEqual(words.toJson(), json);
+  assert.equal(words.activeAt(Seconds.of(0.5)), 1);
+});

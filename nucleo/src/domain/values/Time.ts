@@ -42,6 +42,11 @@ export class Frame {
     return this.#value < other.#value;
   }
 
+  /** The instant where the frame starts. */
+  toSeconds(fps: Fps): Seconds {
+    return Seconds.of(this.#value / fps.value());
+  }
+
   value(): number {
     return this.#value;
   }

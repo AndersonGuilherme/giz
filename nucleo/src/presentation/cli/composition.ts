@@ -3,6 +3,7 @@ import { GenerateVoices } from '../../application/use-cases/GenerateVoices.ts';
 import { CheckProject } from '../../application/use-cases/CheckProject.ts';
 import type { VoiceProvider } from '../../application/ports/VoiceProvider.ts';
 import type { ProjectRepository } from '../../application/ports/ProjectRepository.ts';
+import { CAPTION_LAYOUTS } from '../../domain/caption/captionLayouts.ts';
 import { createLayoutRegistry } from '../../domain/layout/defaultLayoutRegistry.ts';
 import type { Project } from '../../domain/project/Project.ts';
 import { EnvelopeAligner } from '../../infrastructure/alignment/EnvelopeAligner.ts';
@@ -36,5 +37,5 @@ export function generateVoices(folder: string, project: Project): GenerateVoices
 }
 
 export function checkProject(): CheckProject {
-  return new CheckProject({ layouts: createLayoutRegistry() });
+  return new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS });
 }

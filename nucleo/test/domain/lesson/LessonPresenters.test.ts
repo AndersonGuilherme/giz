@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Box } from '../../../src/domain/layout/Box.ts';
-import { captionBox } from '../../../src/domain/layout/lessonLayouts.ts';
+import { BLOCK_CAPTIONS } from '../../../src/domain/caption/captionLayouts.ts';
 import { SafeArea } from '../../../src/domain/layout/SafeArea.ts';
 import { LessonPresenters } from '../../../src/domain/lesson/LessonPresenters.ts';
 import { LessonStage } from '../../../src/domain/lesson/LessonStage.ts';
@@ -16,7 +16,7 @@ test('the content area is inside the safe area and above the caption', () => {
   for (const aspect of ASPECTS) {
     const content = Box.of('conteúdo', LessonStage.for(aspect).content());
     assert.ok(content.isInside(SafeArea.for(aspect)), aspect.text());
-    assert.equal(content.overlaps(captionBox('Olá.', aspect)), false, aspect.text());
+    assert.equal(content.overlaps(BLOCK_CAPTIONS.box('Olá.', aspect)), false, aspect.text());
   }
 });
 

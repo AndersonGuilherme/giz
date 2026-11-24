@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Box } from '../../../src/domain/layout/Box.ts';
 import { createLayoutRegistry } from '../../../src/domain/layout/defaultLayoutRegistry.ts';
-import { captionBox } from '../../../src/domain/layout/lessonLayouts.ts';
+import { BLOCK_CAPTIONS } from '../../../src/domain/caption/captionLayouts.ts';
 import { SafeArea } from '../../../src/domain/layout/SafeArea.ts';
 import { CardLayout } from '../../../src/domain/lesson/CardLayout.ts';
 import { LessonStage } from '../../../src/domain/lesson/LessonStage.ts';
@@ -71,7 +71,7 @@ test('every lesson scene has a layout in both aspect ratios', () => {
 test('the example of every lesson scene fits, stays in the safe area and leaves room for the caption', () => {
   for (const { type, aspect } of CASES) {
     const where = `${type} ${aspect.text()}`;
-    const boxes = boxesOf(EXAMPLES[type], aspect)!.with(captionBox('Uma fala comum de duas linhas.', aspect));
+    const boxes = boxesOf(EXAMPLES[type], aspect)!.with(BLOCK_CAPTIONS.box('Uma fala comum de duas linhas.', aspect));
     assert.deepEqual(boxes.overflowingTexts().map((box) => box.label), [], where);
     assert.deepEqual(boxes.overlappingPairs().map(([a, b]) => `${a.label} × ${b.label}`), [], where);
     assert.deepEqual(boxes.outsideOf(SafeArea.for(aspect)).map((box) => box.label), [], where);
