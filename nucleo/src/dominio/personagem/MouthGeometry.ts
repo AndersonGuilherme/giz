@@ -37,7 +37,8 @@ const TEMPLATES: Readonly<Record<Visema, Template>> = {
 
 // Even at the end of a syllable the vowel must still read as open.
 const MINIMUM_OPENING = 0.25;
-const TONGUE_FROM_HEIGHT = 8;
+// The tongue shows only on a wide-open mouth (A or O at a good volume), not at the end of a syllable.
+const TONGUE_FROM_HEIGHT = 14;
 const SILENT_TEETH_FROM_WIDTH = 24;
 const SILENT_TONGUE_FROM_OPENING = 14;
 const LINE_BEND = 1.6;

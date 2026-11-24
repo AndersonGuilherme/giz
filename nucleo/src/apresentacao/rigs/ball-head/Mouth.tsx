@@ -1,6 +1,6 @@
-import type { FC } from 'react';
+import type { FC, ReactNode } from 'react';
 import type { EstadoDoPersonagem } from '../../../dominio/personagem/EstadoDoPersonagem.ts';
-import { MouthGeometry, type SilentMouth, type SpeechShape } from '../../../dominio/personagem/MouthGeometry.ts';
+import { MouthLayout, type MouthOutline, type MouthParts, type Oval, type Rect } from '../../../dominio/personagem/MouthLayout.ts';
 import { HEAD, MOUTH } from './measures.ts';
 import type { Look } from './parameters.ts';
 import { contrast, useSvgId } from './svg.ts';
@@ -10,78 +10,63 @@ const TONGUE = '#e2707d';
 const TEETH = '#ffffff';
 const LIPS = '#d0606f';
 
-// Pixel box of the interior: teeth hang from `top`, the tongue rises from `bottom`, the tucked lip covers the lower part.
-type Interior = Readonly<{ path: string; top: number; bottom: number; teeth: boolean; tongue: boolean; lipTuck: boolean }>;
-
-const InteriorParts: FC<Interior> = ({ top, bottom, teeth, tongue, lipTuck }) => {
-  const height = bottom - top;
-  return (
-    <g>
-      {teeth && <rect x={HEAD.x - 60} y={top - 2} width={120} height={Math.min(14, height * (lipTuck ? 0.55 : 0.34)) + 2} fill={TEETH} />}
-      {tongue && <ellipse cx={HEAD.x} cy={bottom + 2} rx={24} ry={Math.max(8, height * 0.35)} fill={TONGUE} />}
-      {lipTuck && <rect x={HEAD.x - 60} y={top + height * 0.55} width={120} height={height} fill={LIPS} />}
-    </g>
-  );
-};
-
-// Dark interior with pink lips (teeth stay readable against them), clipped to the mouth outline.
-const OpenMouth: FC<Interior> = (interior) => {
-  const clip = useSvgId('mouth');
-  return (
-    <g>
-      <clipPath id={clip}><path d={interior.path} /></clipPath>
-      <path d={interior.path} fill={INSIDE} />
-      <g clipPath={`url(#${clip})`}><InteriorParts {...interior} /></g>
-      <path d={interior.path} fill="none" stroke={LIPS} strokeWidth={4} strokeLinejoin="round" />
-    </g>
-  );
-};
-
+// Face units → pixels: x from the head center, y from the mouth line.
 const px = (units: number) => units * MOUTH.unit;
+const at = (x: number, y: number) => `${HEAD.x + px(x)},${MOUTH.y + px(y)}`;
 
-function closedPath({ width, tilt, wave, upper }: SilentMouth): string {
-  const [x0, x1] = [HEAD.x - px(width / 2), HEAD.x + px(width / 2)];
-  const [y0, y1] = [MOUTH.y + px(tilt / 2), MOUTH.y - px(tilt / 2)];
-  if (wave > 0) return `M${x0},${y0} Q${(x0 + HEAD.x) / 2},${y0 - px(wave)} ${HEAD.x},${MOUTH.y} T${x1},${y1}`;
-  return `M${x0},${y0} Q${HEAD.x},${MOUTH.y + px(upper)} ${x1},${y1}`;
-}
+type Outline<Kind extends MouthOutline['kind']> = Extract<MouthOutline, { kind: Kind }>;
 
-function silentInterior(mouth: SilentMouth): Interior {
-  const [x0, x1, y1] = [HEAD.x - px(mouth.width / 2), HEAD.x + px(mouth.width / 2), MOUTH.y - px(mouth.tilt / 2)];
-  const [upper, lower] = [MOUTH.y + px(mouth.upper), MOUTH.y + px(mouth.lower)];
-  const path = `M${x0},${MOUTH.y} C${x0 + 4},${upper} ${x1 - 4},${upper} ${x1},${y1} C${x1 - 2},${lower} ${x0 + 2},${lower} ${x0},${MOUTH.y} Z`;
-  // A cubic with both controls at y reaches 3/4 of the way: the interior box follows the drawn edges.
-  const [top, bottom] = [MOUTH.y + px(mouth.upper) * 0.75, MOUTH.y + px(mouth.lower) * 0.75];
-  return { path, top, bottom, teeth: mouth.teeth, tongue: mouth.tongue, lipTuck: false };
-}
-
-const Silent: FC<Readonly<{ mouth: SilentMouth; line: string }>> = ({ mouth, line }) => {
-  if (mouth.open) return <OpenMouth {...silentInterior(mouth)} />;
-  return <path d={closedPath(mouth)} fill="none" stroke={line} strokeWidth={7} strokeLinecap="round" />;
+const PATHS: Readonly<{ [Kind in MouthOutline['kind']]: (outline: Outline<Kind>) => string }> = {
+  pressed: ({ width }) => `M${at(-width / 2, 0)} L${at(width / 2, 0)}`,
+  line: ({ width, tilt, bend }) => `M${at(-width / 2, tilt / 2)} Q${at(0, bend)} ${at(width / 2, -tilt / 2)}`,
+  wave: ({ width, tilt, wave }) => `M${at(-width / 2, tilt / 2)} Q${at(-width / 4, tilt / 2 - wave)} ${at(0, 0)} T${at(width / 2, -tilt / 2)}`,
+  cubic: ({ width, tilt, upper, lower }) => {
+    const [left, right] = [-width / 2, width / 2];
+    return `M${at(left, 0)} C${at(left + 2, upper)} ${at(right - 2, upper)} ${at(right, -tilt / 2)}`
+      + ` C${at(right - 1, lower)} ${at(left + 1, lower)} ${at(left, 0)} Z`;
+  },
+  oval: ({ width, height, center }) => {
+    const [rx, ry] = [px(width / 2), px(height / 2)];
+    return `M${at(-width / 2, center)} A${rx},${ry} 0 1,0 ${at(width / 2, center)} A${rx},${ry} 0 1,0 ${at(-width / 2, center)} Z`;
+  },
+  rounded: ({ width, height, center, corner }) => {
+    const [x0, y0, x1, y1] = [-width / 2, center - height / 2, width / 2, center + height / 2];
+    return `M${at(x0 + corner, y0)} L${at(x1 - corner, y0)} Q${at(x1, y0)} ${at(x1, y0 + corner)} L${at(x1, y1 - corner)}`
+      + ` Q${at(x1, y1)} ${at(x1 - corner, y1)} L${at(x0 + corner, y1)} Q${at(x0, y1)} ${at(x0, y1 - corner)}`
+      + ` L${at(x0, y0 + corner)} Q${at(x0, y0)} ${at(x0 + corner, y0)} Z`;
+  },
 };
 
-function speechInterior({ width, height, teeth, tongue, outline, lipTuck }: SpeechShape): Interior {
-  const [rx, ry] = [px(width / 2), px(height / 2)];
-  const cy = MOUTH.y + ry * 0.3;
-  const corner = outline === 'wide' ? Math.min(ry, 10) : ry;
-  const [x0, x1, y0, y1] = [HEAD.x - rx, HEAD.x + rx, cy - ry, cy + ry];
-  const path = `M${x0 + corner},${y0} H${x1 - corner} Q${x1},${y0} ${x1},${y0 + corner} V${y1 - corner} Q${x1},${y1} ${x1 - corner},${y1}`
-    + ` H${x0 + corner} Q${x0},${y1} ${x0},${y1 - corner} V${y0 + corner} Q${x0},${y0} ${x0 + corner},${y0} Z`;
-  return { path: outline === 'wide' ? path : ellipsePath(rx, ry, cy), top: y0, bottom: y1 - 2, teeth, tongue, lipTuck };
-}
+const pathOf = (outline: MouthOutline) => (PATHS[outline.kind] as (outline: MouthOutline) => string)(outline);
 
-const ellipsePath = (rx: number, ry: number, cy: number) =>
-  `M${HEAD.x - rx},${cy} A${rx},${ry} 0 1,0 ${HEAD.x + rx},${cy} A${rx},${ry} 0 1,0 ${HEAD.x - rx},${cy} Z`;
+const Band: FC<Readonly<{ rect: Rect; fill: string }>> = ({ rect, fill }) =>
+  <rect x={HEAD.x + px(rect.x)} y={MOUTH.y + px(rect.y)} width={px(rect.width)} height={px(rect.height)} fill={fill} />;
+const Tongue: FC<Readonly<{ oval: Oval }>> = ({ oval }) =>
+  <ellipse cx={HEAD.x + px(oval.cx)} cy={MOUTH.y + px(oval.cy)} rx={px(oval.rx)} ry={px(oval.ry)} fill={TONGUE} />;
 
-const Speaking: FC<Readonly<{ shape: SpeechShape; line: string }>> = ({ shape, line }) => {
-  if (shape.height > 0) return <OpenMouth {...speechInterior(shape)} />;
-  const half = px(shape.width / 2);
-  return <path d={`M${HEAD.x - half},${MOUTH.y} L${HEAD.x + half},${MOUTH.y}`} stroke={line} strokeWidth={8} strokeLinecap="round" />;
+// Dark interior with pink lips (teeth stay readable against them); the parts are clipped to the outline.
+const OpenMouth: FC<Readonly<{ parts: MouthParts }>> = ({ parts }) => {
+  const clip = useSvgId('mouth');
+  const path = pathOf(parts.outline);
+  return (
+    <g>
+      <clipPath id={clip}><path d={path} /></clipPath>
+      <path d={path} fill={INSIDE} />
+      <g clipPath={`url(#${clip})`}>
+        {parts.teeth && <Band rect={parts.teeth} fill={TEETH} />}
+        {parts.tongue && <Tongue oval={parts.tongue} />}
+        {parts.lip && <Band rect={parts.lip} fill={LIPS} />}
+      </g>
+      <path d={path} fill="none" stroke={LIPS} strokeWidth={4} strokeLinejoin="round" />
+    </g>
+  );
 };
 
-/** Draws the mouth the domain picked for this state: the viseme while speaking, otherwise the expression's mouth. */
-export const Mouth: FC<Readonly<{ state: EstadoDoPersonagem; look: Look }>> = ({ state, look }) => {
-  const mouth = MouthGeometry.forState(state);
-  const line = contrast(look.headColor);
-  return mouth.speaking ? <Speaking shape={mouth.shape} line={line} /> : <Silent mouth={mouth.shape} line={line} />;
+const CLOSED: ReadonlySet<MouthOutline['kind']> = new Set(['pressed', 'line', 'wave']);
+
+/** Draws the mouth the domain laid out for this state: a stroked line when closed, an open mouth otherwise. */
+export const Mouth: FC<Readonly<{ state: EstadoDoPersonagem; look: Look }>> = ({ state, look }): ReactNode => {
+  const parts = MouthLayout.for(state);
+  if (!CLOSED.has(parts.outline.kind)) return <OpenMouth parts={parts} />;
+  return <path d={pathOf(parts.outline)} fill="none" stroke={contrast(look.headColor)} strokeWidth={7} strokeLinecap="round" />;
 };

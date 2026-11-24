@@ -71,3 +71,10 @@ test('eyes: the upper lid tilts with the brow, at 60% of its inner angle, per si
   assert.equal(skeptical.left.tilt, 14 * 0.6);
   assert.equal(skeptical.right.tilt, 4 * 0.6);
 });
+
+test('eyes: the catchlight scales with the pupil but never gets smaller than its minimum', () => {
+  const neutral = FaceGeometry.eyes('neutra', 'camera', 0).pupil.catchlight;
+  assert.deepEqual(neutral, { radius: 0.3, x: 0.35, y: -0.4 });
+  const scared = FaceGeometry.eyes('assustada', 'camera', 0).pupil.catchlight;
+  assert.equal(scared.radius, 0.18);
+});

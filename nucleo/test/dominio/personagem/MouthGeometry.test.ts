@@ -55,9 +55,13 @@ test('F tucks the lower lip under the top teeth, and only F does', () => {
   assert.ok(others.every((tuck) => !tuck));
 });
 
-test('the tongue only shows when the mouth is open enough', () => {
-  assert.equal(MouthGeometry.for('A', 1).tongue, true);
-  assert.equal(MouthGeometry.for('O', 0).tongue, true);
+test('the tongue only shows when the mouth is open enough (height 14 face units)', () => {
+  assert.equal(MouthGeometry.for('A', 0.3).height < 14, true);
+  assert.equal(MouthGeometry.for('A', 0.3).tongue, false);
+  assert.equal(MouthGeometry.for('A', 0.45).height > 14, true);
+  assert.equal(MouthGeometry.for('A', 0.45).tongue, true);
+  assert.equal(MouthGeometry.for('O', 0.2).tongue, false);
+  assert.equal(MouthGeometry.for('O', 0.4).tongue, true);
   assert.equal(MouthGeometry.for('E', 1).tongue, false);
 });
 

@@ -58,9 +58,15 @@ const GAZES: Readonly<Record<Olhar, Point>> = {
 /** Upper and lower lid (0 open to 1 closed) and the upper lid's tilt in degrees (positive lowers the inner end). */
 export type Lids = Readonly<{ upper: number; lower: number; tilt: number }>;
 /** Final pupil position (-1 to 1, positive x toward the facing side) and size, plus each eye's lids. */
-export type EyesState = Readonly<{ pupil: Readonly<{ x: number; y: number; scale: number }>; left: Lids; right: Lids }>;
+/** Catchlight in units of the base pupil radius, relative to the pupil center. */
+export type Catchlight = Readonly<{ radius: number; x: number; y: number }>;
+export type EyesState = Readonly<{ pupil: Readonly<{ x: number; y: number; scale: number; catchlight: Catchlight }>; left: Lids; right: Lids }>;
 
 const LID_TILT_PER_BROW_ANGLE = 0.6;
+const MINIMUM_CATCHLIGHT = 0.18; // a tiny scared pupil still keeps a visible highlight
+
+const catchlightOf = (scale: number): Catchlight =>
+  ({ radius: Math.max(MINIMUM_CATCHLIGHT, 0.3 * scale), x: 0.35 * scale, y: -0.4 * scale });
 const clamp = (value: number) => Math.max(-1, Math.min(1, value));
 
 function lidsOf(face: Face, brow: Brow, blink: number): Lids {
@@ -80,7 +86,8 @@ export class FaceGeometry {
   static eyes(expression: Expressao, gaze: Olhar, blink: number): EyesState {
     const face = FACES[expression];
     const target = GAZES[gaze];
-    const pupil = { x: clamp(target.x + face.pupil.offset.x), y: clamp(target.y + face.pupil.offset.y), scale: face.pupil.scale };
+    const { scale } = face.pupil;
+    const pupil = { x: clamp(target.x + face.pupil.offset.x), y: clamp(target.y + face.pupil.offset.y), scale, catchlight: catchlightOf(scale) };
     return { pupil, left: lidsOf(face, face.brows.left, blink), right: lidsOf(face, face.brows.right, blink) };
   }
 }

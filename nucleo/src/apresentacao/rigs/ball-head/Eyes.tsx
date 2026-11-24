@@ -15,13 +15,15 @@ function eyeEllipse(side: -1 | 1, scale: number): Ellipse {
 }
 
 const Pupil: FC<Readonly<{ eye: Ellipse; pupil: Pupil; eyeScale: number }>> = ({ eye, pupil, eyeScale }) => {
-  const radius = EYES.pupil * pupil.scale * eyeScale;
+  const base = EYES.pupil * eyeScale;
+  const radius = base * pupil.scale;
+  const { catchlight } = pupil;
   const x = eye.cx + pupil.x * EYES.travel.x * eyeScale;
   const y = eye.cy + 4 + pupil.y * EYES.travel.y * eyeScale;
   return (
     <g>
       <circle cx={x} cy={y} r={radius} fill={PUPIL_COLOR} />
-      <circle cx={x + radius * 0.35} cy={y - radius * 0.4} r={Math.max(2.5, radius * 0.3)} fill="#ffffff" />
+      <circle cx={x + base * catchlight.x} cy={y + base * catchlight.y} r={base * catchlight.radius} fill="#ffffff" />
     </g>
   );
 };
