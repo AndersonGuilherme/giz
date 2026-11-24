@@ -1,0 +1,30 @@
+{
+  "name": "vila de manhã",
+  "description": "Manhã clara na vila do morro, com poeira dourada no ar.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "village"
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-in",
+      "to": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1.1
+      },
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "particles",
+        "intensity": 0.4
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.4
+      }
+    ]
+  }
+}

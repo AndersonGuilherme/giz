@@ -40,8 +40,8 @@ export const Glow: FC<GlowProps> = ({ id, x, y, radius, color, opacity = 1 }) =>
 );
 
 type RidgeProps = Readonly<{ points: readonly (readonly [number, number])[]; base: number; fill: string; opacity?: number; chalk?: Chalk }>;
-/** A chalk line on a background shape: its seed and width (in the units of the drawing it is in). */
-export type Chalk = Readonly<{ seed: string; width: number }>;
+/** A chalk line on a background shape: its seed, width (in the units of the drawing it is in) and color (chalk by default). */
+export type Chalk = Readonly<{ seed: string; width: number; color?: string }>;
 
 // The top curve of a ridge: smooth through the midpoints between the given points.
 function ridgeTop(points: RidgeProps['points']): string {
@@ -61,7 +61,7 @@ export const Ridge: FC<RidgeProps> = ({ points, base, fill, opacity, chalk }) =>
   return (
     <>
       <path d={`M ${firstX} ${base} L ${top.slice(2)} L ${lastX} ${base} Z`} fill={fill} opacity={opacity} />
-      {chalk && <ChalkLine outline={Silhouette.parse(top)} seed={chalk.seed} width={chalk.width} />}
+      {chalk && <ChalkLine outline={Silhouette.parse(top)} seed={chalk.seed} width={chalk.width} color={chalk.color} />}
     </>
   );
 };
@@ -72,7 +72,7 @@ type BoxProps = Readonly<{ x: number; y: number; width: number; height: number; 
 export const ChalkBox: FC<BoxProps> = ({ x, y, width, height, corner = 0, fill, chalk }) => (
   <>
     {fill && <rect x={x} y={y} width={width} height={height} rx={corner} fill={fill} />}
-    <ChalkLine outline={Silhouette.roundedRect({ x, y, width, height }, corner)} seed={chalk.seed} width={chalk.width} />
+    <ChalkLine outline={Silhouette.roundedRect({ x, y, width, height }, corner)} seed={chalk.seed} width={chalk.width} color={chalk.color} />
   </>
 );
 
@@ -82,7 +82,7 @@ type ShapeProps = Readonly<{ path: string; fill?: string; opacity?: number; chal
 export const ChalkShape: FC<ShapeProps> = ({ path, fill, opacity, chalk }) => (
   <>
     {fill && <path d={path} fill={fill} opacity={opacity} />}
-    <ChalkLine outline={Silhouette.parse(path)} seed={chalk.seed} width={chalk.width} />
+    <ChalkLine outline={Silhouette.parse(path)} seed={chalk.seed} width={chalk.width} color={chalk.color} />
   </>
 );
 
@@ -90,7 +90,7 @@ export const ChalkShape: FC<ShapeProps> = ({ path, fill, opacity, chalk }) => (
 export const ChalkDisc: FC<Readonly<{ x: number; y: number; radius: number; fill?: string; chalk: Chalk }>> = ({ x, y, radius, fill, chalk }) => (
   <>
     {fill && <circle cx={x} cy={y} r={radius} fill={fill} />}
-    <ChalkLine outline={Silhouette.ellipse({ x, y }, radius, radius)} seed={chalk.seed} width={chalk.width} />
+    <ChalkLine outline={Silhouette.ellipse({ x, y }, radius, radius)} seed={chalk.seed} width={chalk.width} color={chalk.color} />
   </>
 );
 

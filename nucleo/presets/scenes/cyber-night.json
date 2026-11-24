@@ -1,0 +1,30 @@
+{
+  "name": "cidade cyber à noite",
+  "description": "Garoa de neon na cidade do futuro, com o holograma girando acima da rua.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "cyber-city"
+    },
+    "characters": [],
+    "camera": {
+      "type": "pan",
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "rain",
+        "intensity": 0.6
+      },
+      {
+        "type": "glow",
+        "color": "#3ff0e6",
+        "intensity": 0.6
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.6
+      }
+    ]
+  }
+}

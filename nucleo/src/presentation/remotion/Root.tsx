@@ -1,5 +1,6 @@
 import type { FC } from 'react';
 import { Composition, staticFile, type CalculateMetadataFunction } from 'remotion';
+import { BackgroundGallery, backgroundGalleryMetadata } from './BackgroundGallery.tsx';
 import { CharacterSheet, type CharacterSheetProps } from './CharacterSheet.tsx';
 import { PREVIEW_DEFAULTS } from './previewScene.ts';
 import { catalogMetadata, FRAMES_PER_SCENE, SceneCatalog } from './SceneCatalog.tsx';
@@ -77,6 +78,20 @@ const PresetSheetComposition: FC = () => (
   />
 );
 
+// Every vector background as a thumbnail (`--props='{"aspect":"9:16"}'` for the vertical sheet).
+const BackgroundGalleryComposition: FC = () => (
+  <Composition
+    id="BackgroundGallery"
+    component={BackgroundGallery}
+    width={1920}
+    height={1080}
+    fps={30}
+    durationInFrames={1}
+    defaultProps={{ aspect: '16:9' }}
+    calculateMetadata={backgroundGalleryMetadata}
+  />
+);
+
 export const Root: FC = () => (
   <>
     <VideoComposition />
@@ -84,5 +99,6 @@ export const Root: FC = () => (
     <PreviewComposition />
     <CatalogComposition />
     <PresetSheetComposition />
+    <BackgroundGalleryComposition />
   </>
 );

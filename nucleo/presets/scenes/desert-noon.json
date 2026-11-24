@@ -1,0 +1,26 @@
+{
+  "name": "deserto ao meio-dia",
+  "description": "Sol forte sobre as pirâmides e as dunas, com poeira no ar.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "ancient-egypt"
+    },
+    "characters": [],
+    "camera": {
+      "type": "pan",
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "glow",
+        "color": "#fff1c4",
+        "intensity": 0.8
+      },
+      {
+        "type": "particles",
+        "intensity": 0.5
+      }
+    ]
+  }
+}

@@ -1,0 +1,34 @@
+{
+  "name": "caverna à luz da fogueira",
+  "description": "Fim de tarde na caverna: a fogueira estala no canto e a luz quente dança nas pinturas.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "cave"
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-in",
+      "to": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1.12
+      },
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "fire"
+      },
+      {
+        "type": "tint",
+        "color": "#ff9a4a",
+        "intensity": 0.5
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.7
+      }
+    ]
+  }
+}

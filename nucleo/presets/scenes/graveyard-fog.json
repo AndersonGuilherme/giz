@@ -1,0 +1,35 @@
+{
+  "name": "cemitério com névoa",
+  "description": "Noite de lua no cemitério da capelinha: névoa baixa, morcegos e abóboras sorrindo.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "graveyard"
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-in",
+      "to": {
+        "x": 0,
+        "y": 0.02,
+        "zoom": 1.1
+      },
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "particles",
+        "intensity": 0.6
+      },
+      {
+        "type": "tint",
+        "color": "#6a7ab8",
+        "intensity": 0.4
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.8
+      }
+    ]
+  }
+}

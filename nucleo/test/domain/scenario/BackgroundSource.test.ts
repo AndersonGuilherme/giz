@@ -3,7 +3,11 @@ import assert from 'node:assert/strict';
 import { BackgroundSource, VECTOR_BACKGROUNDS } from '../../../src/domain/scenario/BackgroundSource.ts';
 
 test('the vector backgrounds have English names', () => {
-  assert.deepEqual([...VECTOR_BACKGROUNDS], ['room', 'street', 'field', 'night-sky', 'lab', 'village']);
+  assert.deepEqual([...VECTOR_BACKGROUNDS], [
+    'room', 'street', 'field', 'night-sky', 'lab', 'village',
+    'cave', 'ancient-egypt', 'ancient-rome', 'medieval-castle', 'pirate-ship', 'victorian-street', 'fifties-diner',
+    'classroom', 'office', 'city-night', 'space-station', 'cyber-city', 'graveyard', 'haunted-house',
+  ]);
 });
 
 test('an image that loads is drawn as an image', () => {

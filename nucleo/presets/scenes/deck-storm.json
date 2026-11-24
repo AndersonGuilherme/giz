@@ -1,0 +1,37 @@
+{
+  "name": "convés em tempestade",
+  "description": "O navio balança na tempestade: chuva forte, céu escuro e a câmera tremendo.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "pirate-ship",
+      "colors": {
+        "skyTop": "#1f2e3d",
+        "skyBottom": "#56707a",
+        "seaFar": "#2f5a66",
+        "sea": "#1f4650",
+        "cloud": "#8a99a3"
+      }
+    },
+    "characters": [],
+    "camera": {
+      "type": "shake",
+      "intensity": 0.8
+    },
+    "effects": [
+      {
+        "type": "rain",
+        "intensity": 2
+      },
+      {
+        "type": "tint",
+        "color": "#2f4a5a",
+        "intensity": 0.6
+      },
+      {
+        "type": "vignette",
+        "intensity": 1
+      }
+    ]
+  }
+}

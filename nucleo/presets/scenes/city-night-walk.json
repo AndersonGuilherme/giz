@@ -1,0 +1,25 @@
+{
+  "name": "cidade à noite",
+  "description": "Rua da cidade à noite, com lua, prédios acesos e postes iluminando a calçada.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "city-night"
+    },
+    "characters": [],
+    "camera": {
+      "type": "pan",
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "particles",
+        "intensity": 0.3
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.6
+      }
+    ]
+  }
+}

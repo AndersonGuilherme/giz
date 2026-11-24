@@ -1,0 +1,24 @@
+{
+  "name": "acampamento sob as estrelas",
+  "description": "Noite estrelada no morro com uma fogueira acesa ao lado da cabana.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "night-sky"
+    },
+    "characters": [],
+    "camera": {
+      "type": "still"
+    },
+    "effects": [
+      {
+        "type": "fire",
+        "intensity": 0.9
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.6
+      }
+    ]
+  }
+}

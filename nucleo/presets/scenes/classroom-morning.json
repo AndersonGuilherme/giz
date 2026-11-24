@@ -1,0 +1,25 @@
+{
+  "name": "sala de aula de manhã",
+  "description": "Sol da manhã entrando pelas janelas da sala, quadro com desenhos de giz.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "classroom"
+    },
+    "characters": [],
+    "camera": {
+      "type": "still"
+    },
+    "effects": [
+      {
+        "type": "glow",
+        "color": "#fff1c4",
+        "intensity": 0.7
+      },
+      {
+        "type": "particles",
+        "intensity": 0.3
+      }
+    ]
+  }
+}

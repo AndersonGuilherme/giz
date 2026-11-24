@@ -373,6 +373,25 @@ Os fundos vetoriais têm três camadas que se movem em velocidades diferentes co
 | `night-sky` | céu estrelado com lua e cabana |
 | `lab` | laboratório com frascos e bancada |
 | `village` | vila num morro de manhã, com moinho, poço e barraca de frutas |
+| `cave` | caverna com pinturas, estalactites, abertura para o pôr do sol e um círculo de pedras para a fogueira |
+| `ancient-egypt` | deserto à beira do rio, com pirâmides, obelisco e palmeiras |
+| `ancient-rome` | fórum com colunatas e um templo no morro |
+| `medieval-castle` | castelo com torres e bandeirolas num morro, muralha e pátio de grama |
+| `pirate-ship` | convés de um veleiro, com vela, cordas, amurada e o mar |
+| `victorian-street` | rua dos anos 1800, com sobrados, relógio e lampiões a gás |
+| `fifties-diner` | lanchonete dos anos 50, com neon, balcão, banquetas, piso xadrez e jukebox |
+| `classroom` | sala de aula de manhã, com quadro de giz, janelas e carteiras |
+| `office` | escritório moderno, com janelão para a cidade, mesas e plantas |
+| `city-night` | cidade à noite, com lua, torre de antena, prédios acesos e postes |
+| `space-station` | estação espacial, com janela redonda para um planeta, consoles e caixotes |
+| `cyber-city` | cidade do futuro à noite, com neon, holograma e carros voadores |
+| `graveyard` | cemitério à noite (assustador, mas fofo), com capelinha, lua, névoa e abóboras |
+| `haunted-house` | salão de casarão assombrado, com janela de lua, retratos, relógio e velas |
+
+Todos os fundos seguem a mesma planta (`BackdropLayout`, no domínio): o chão onde os pés pisam, o horizonte 150
+unidades acima dele, o palco onde os personagens ficam livres de objetos da frente, os dois cantos de baixo para os
+objetos da camada da frente e o ponto de destaque (uma janela, um monumento) entre os personagens em 16:9 e acima das
+cabeças, abaixo do HUD, em 9:16. Assim cada fundo funciona nas duas proporções.
 
 `colors` troca cores da paleta, uma a uma. Os nomes ficam no começo de cada arquivo em
 `src/presentation/scenes/scenario/backgrounds/` (por exemplo `skyTop`, `skyBottom` e `window` na `street`).
@@ -387,6 +406,49 @@ Uma imagem própria fica dentro da pasta do projeto e deve ter a proporção do 
 ```json
 { "background": { "image": "images/praia.png", "vector": "field" } }
 ```
+
+#### Cenas prontas (`presets/scenes/`)
+
+`presets/scenes/<nome>.json` guarda cenários prontos: fundo, efeitos, movimento de câmera e, às vezes, cores trocadas.
+Cada arquivo tem `name` e `description` em pt-BR e uma `scene` completa com `"characters": []`:
+
+| Arquivo | Cena |
+|---|---|
+| `cave-campfire` | caverna à luz da fogueira |
+| `desert-noon` | deserto ao meio-dia |
+| `forum-noon` | fórum ao meio-dia |
+| `castle-rain` | castelo sob chuva |
+| `deck-storm` | convés em tempestade |
+| `victorian-fog` | rua vitoriana na névoa |
+| `diner-evening` | lanchonete dos anos 50 |
+| `classroom-morning` | sala de aula de manhã |
+| `office-late` | escritório no fim da tarde |
+| `city-night-walk` | cidade à noite |
+| `station-alert` | estação espacial em alerta |
+| `cyber-night` | cidade cyber à noite |
+| `graveyard-fog` | cemitério com névoa |
+| `haunted-candlelight` | casarão assombrado à luz de vela |
+| `village-morning` | vila de manhã |
+| `starry-camp` | acampamento sob as estrelas |
+
+Para usar uma, copie o objeto `scene` do arquivo para a `scene` da fala e preencha `characters` (e, se quiser, `hud`
+ou `highlight`). Por exemplo, com `presets/scenes/castle-rain.json`:
+
+```json
+{
+  "id": "4", "chapter": 1, "speaker": "bento", "text": "Lá vem chuva de novo.",
+  "scene": {
+    "type": "scenario",
+    "background": { "vector": "medieval-castle", "colors": { "skyTop": "#2f3a4f", "skyBottom": "#7d8b99", "cloud": "#9aa6b2" } },
+    "characters": [{ "character": "bento", "position": "left" }, { "character": "adelaide", "position": "right" }],
+    "camera": { "type": "zoom-out", "easing": "smooth" },
+    "effects": [{ "type": "rain", "intensity": 1.2 }, { "type": "tint", "color": "#4a6a8a", "intensity": 0.5 }, { "type": "vignette", "intensity": 0.8 }]
+  }
+}
+```
+
+Depois de copiar, a cena é sua: mude o que quiser. Os testes garantem que toda cena pronta passa no esquema do roteiro e
+no `check` de layout, vazia e com o máximo de personagens de cada proporção.
 
 ### 8.3 Câmera
 
@@ -608,4 +670,13 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
   (troque `past` por `present`, `future` ou `creatures`). A composição `PresetSheet` lê os arquivos listados em `characters`.
   A ficha de uma criatura sai do mesmo bundle:
   `npx remotion still /tmp/giz-bundle CharacterSheet output/sheet-zombie.png --props='{"rig":"giz","character":"creatures/zuzu.json"}'`.
+- Galeria de fundos (todos os fundos vetoriais em miniatura, uma folha por proporção), do mesmo bundle:
+  `npx remotion still /tmp/giz-bundle BackgroundGallery output/backgrounds-16x9.png --props='{"aspect":"16:9"}'` e
+  `npx remotion still /tmp/giz-bundle BackgroundGallery output/backgrounds-9x16.png --props='{"aspect":"9:16"}'`.
+  Uma cena pronta com personagens: monte as props do `ScenePreview` com a `scene` do preset, os `characters` e o
+  `cast` (os `parameters` dos arquivos de `casts/presets/`), e rode
+  `npx remotion still /tmp/giz-bundle ScenePreview output/preview.png --frame=80 --props=<arquivo>.json`.
+- Um fundo novo: um arquivo em `src/presentation/scenes/scenario/backgrounds/` com `palette` e as três camadas, o nome
+  em `VECTOR_BACKGROUNDS` (domínio) e no `backgroundRegistry`. Desenhe sobre o `backdrop` das camadas (horizonte,
+  ponto de destaque, cantos com `CornerProps`) para o fundo valer nas duas proporções.
 - `test/examples.test.ts` garante que os quatro exemplos carregam e passam no `check` sem erros.

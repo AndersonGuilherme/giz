@@ -1,0 +1,39 @@
+{
+  "name": "casarão assombrado à luz de vela",
+  "description": "O salão do casarão à noite, só com a luz das velas e da lua.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "haunted-house"
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-in",
+      "to": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1.12
+      },
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "glow",
+        "color": "#ffd98a",
+        "intensity": 0.5,
+        "position": {
+          "x": 0.9,
+          "y": 0.6
+        }
+      },
+      {
+        "type": "particles",
+        "intensity": 0.4
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.9
+      }
+    ]
+  }
+}

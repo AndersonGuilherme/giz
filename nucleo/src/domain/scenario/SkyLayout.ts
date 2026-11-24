@@ -5,7 +5,7 @@ import { Placement } from './Placement.ts';
 export type Disc = Readonly<{ x: number; y: number; radius: number }>;
 
 // The tallest HUD a scene can have (one line of fields and the bar): the moon keeps clear of its panel.
-const TALLEST_HUD = { fields: [{ label: 'HUD', value: '1' }], bar: { label: 'HUD', value: 1 } };
+export const TALLEST_HUD = { fields: [{ label: 'HUD', value: '1' }], bar: { label: 'HUD', value: 1 } };
 const MOON = { x: 0.75, groundShare: 0.3, radius: 80 } as const;
 // Room between the panel and the moon, in units (1/1000 of the shorter side).
 const CLEARANCE = 40;

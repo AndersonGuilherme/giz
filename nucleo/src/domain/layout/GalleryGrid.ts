@@ -14,4 +14,10 @@ export class GalleryGrid {
     const card = { width: (area.width - gap * (columns - 1)) / columns, height: (area.height - gap * (rows - 1)) / rows };
     return { columns, rows, card };
   }
+
+  /** A `frame` scaled to fit inside `card` with its proportion kept (a thumbnail of a video frame). */
+  static contain(frame: Size, card: Size): Readonly<{ scale: number; width: number; height: number }> {
+    const scale = Math.min(card.width / frame.width, card.height / frame.height);
+    return { scale, width: frame.width * scale, height: frame.height * scale };
+  }
 }

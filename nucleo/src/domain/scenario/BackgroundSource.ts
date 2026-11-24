@@ -1,6 +1,11 @@
 import type { Background } from '../script/Scene.ts';
 
-export const VECTOR_BACKGROUNDS = ['room', 'street', 'field', 'night-sky', 'lab', 'village'] as const;
+// The first six are the everyday settings; the others, a setting per era or mood (past, present, future, spooky).
+export const VECTOR_BACKGROUNDS = [
+  'room', 'street', 'field', 'night-sky', 'lab', 'village',
+  'cave', 'ancient-egypt', 'ancient-rome', 'medieval-castle', 'pirate-ship', 'victorian-street', 'fifties-diner',
+  'classroom', 'office', 'city-night', 'space-station', 'cyber-city', 'graveyard', 'haunted-house',
+] as const;
 export type VectorBackground = (typeof VECTOR_BACKGROUNDS)[number];
 
 /** `colors` override the palette of the vector background, color by color. */

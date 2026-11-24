@@ -1,0 +1,27 @@
+{
+  "name": "fórum ao meio-dia",
+  "description": "Praça de mármore com o templo no morro, luz clara e céu limpo.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "ancient-rome"
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-in",
+      "to": {
+        "x": 0,
+        "y": 0.02,
+        "zoom": 1.1
+      },
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "glow",
+        "color": "#fff6d8",
+        "intensity": 0.6
+      }
+    ]
+  }
+}

@@ -1,0 +1,35 @@
+{
+  "name": "castelo sob chuva",
+  "description": "Céu fechado sobre o castelo, chuva caindo e cores frias.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "medieval-castle",
+      "colors": {
+        "skyTop": "#2f3a4f",
+        "skyBottom": "#7d8b99",
+        "cloud": "#9aa6b2"
+      }
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-out",
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "rain",
+        "intensity": 1.2
+      },
+      {
+        "type": "tint",
+        "color": "#4a6a8a",
+        "intensity": 0.5
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.8
+      }
+    ]
+  }
+}

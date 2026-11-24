@@ -1,0 +1,32 @@
+{
+  "name": "escritório no fim da tarde",
+  "description": "Escritório moderno com o sol baixo dourando a janela.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "office",
+      "colors": {
+        "glassTop": "#f2a86b",
+        "glassBottom": "#ffe3b8",
+        "city": "#b07a6a"
+      }
+    },
+    "characters": [],
+    "camera": {
+      "type": "zoom-in",
+      "to": {
+        "x": 0,
+        "y": 0,
+        "zoom": 1.08
+      },
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "tint",
+        "color": "#ff9a4a",
+        "intensity": 0.35
+      }
+    ]
+  }
+}

@@ -1,0 +1,30 @@
+{
+  "name": "rua vitoriana na névoa",
+  "description": "Fim de tarde nos anos 1800: lampiões acesos e névoa cinzenta na rua de pedra.",
+  "scene": {
+    "type": "scenario",
+    "background": {
+      "vector": "victorian-street"
+    },
+    "characters": [],
+    "camera": {
+      "type": "pan",
+      "easing": "smooth"
+    },
+    "effects": [
+      {
+        "type": "particles",
+        "intensity": 0.8
+      },
+      {
+        "type": "tint",
+        "color": "#b7b3c2",
+        "intensity": 0.6
+      },
+      {
+        "type": "vignette",
+        "intensity": 0.7
+      }
+    ]
+  }
+}
