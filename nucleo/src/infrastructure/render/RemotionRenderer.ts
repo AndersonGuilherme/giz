@@ -29,9 +29,10 @@ export class RemotionRenderer implements Renderer {
   async render(props: VideoProps, output: string, onProgress: (fraction: number) => void): Promise<void> {
     await mkdir(dirname(output), { recursive: true });
     await withBundle(this.#sources, voiceFiles(props, this.#folder), async (serveUrl) => {
-      const composition = await selectComposition({ serveUrl, id: COMPOSITION, inputProps: props });
+      const browserExecutable = this.#sources.browserExecutable ?? null;
+      const composition = await selectComposition({ serveUrl, id: COMPOSITION, inputProps: props, browserExecutable });
       const reportProgress = ({ progress }: { progress: number }) => onProgress(progress);
-      await renderMedia({ composition, serveUrl, codec: 'h264', outputLocation: output, inputProps: props, onProgress: reportProgress });
+      await renderMedia({ composition, serveUrl, codec: 'h264', outputLocation: output, inputProps: props, onProgress: reportProgress, browserExecutable });
     });
   }
 }

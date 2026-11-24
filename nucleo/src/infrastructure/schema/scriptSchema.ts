@@ -46,14 +46,14 @@ function existingChapters(script: RawScript, context: z.RefinementCtx): void {
   script.lines.forEach((line, index) => {
     if (line.chapter <= total) return;
     const message = `capítulo ${line.chapter} não existe (há ${total})`;
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ['lines', index, 'chapter'], message });
+    context.addIssue({ code: 'custom', path: ['lines', index, 'chapter'], message });
   });
 }
 
 function uniqueIds(script: RawScript, context: z.RefinementCtx): void {
   script.lines.forEach((line, index) => {
     if (script.lines.findIndex((other) => other.id === line.id) === index) return;
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ['lines', index, 'id'], message: `id "${line.id}" repetido` });
+    context.addIssue({ code: 'custom', path: ['lines', index, 'id'], message: `id "${line.id}" repetido` });
   });
 }
 

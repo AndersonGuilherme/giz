@@ -11,7 +11,7 @@ export const characterSchema = z
     id: characterIdSchema,
     name: nonEmptyText,
     rig: nonEmptyText.optional(),
-    parameters: z.record(z.union([z.string(), z.number(), z.boolean()])).default({}),
+    parameters: z.record(z.string(), z.union([z.string(), z.number(), z.boolean()])).default({}),
     voice: z.object({ id: nonEmptyText, style: nonEmptyText.optional() }).strict(),
     personality: z.string().optional(),
     defaultExpression: z.enum(EXPRESSIONS),

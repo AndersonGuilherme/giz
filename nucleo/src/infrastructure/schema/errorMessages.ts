@@ -1,48 +1,57 @@
-import type { ZodIssue } from 'zod';
+import type { z } from 'zod';
 import { ProjectError, type Problem } from '../../application/ports/ProjectError.ts';
 
-type Translator = (issue: ZodIssue) => string | undefined;
+/** A zod 4 issue; parsed with `reportInput: true`, so each one carries the `input` it refused. */
+type Issue = z.core.$ZodIssue;
+type Translator = (issue: Issue) => string | undefined;
 
 const TYPE_NAMES: Record<string, string> = {
   string: 'texto', number: 'número', boolean: 'verdadeiro ou falso', object: 'objeto', array: 'lista', null: 'nulo',
 };
 const typeName = (type: string) => TYPE_NAMES[type] ?? type;
 
+// zod 4 no longer says what came: the type is read from the refused input.
+function receivedType(input: unknown): string {
+  if (input === null) return 'null';
+  return Array.isArray(input) ? 'array' : typeof input;
+}
+
 const required: Translator = (issue) =>
-  issue.code === 'invalid_type' && issue.received === 'undefined' ? 'obrigatório' : undefined;
+  issue.code === 'invalid_type' && issue.input === undefined ? 'obrigatório' : undefined;
 const wrongType: Translator = (issue) =>
-  issue.code === 'invalid_type' ? `esperava ${typeName(issue.expected)}, veio ${typeName(issue.received)}` : undefined;
+  issue.code === 'invalid_type' ? `esperava ${typeName(issue.expected)}, veio ${typeName(receivedType(issue.input))}` : undefined;
+// An enum and a literal both refuse with `invalid_value`: a literal has a single value.
 const invalidOption: Translator = (issue) =>
-  issue.code === 'invalid_enum_value' ? `"${issue.received}" inválido (use ${issue.options.join(', ')})` : undefined;
-const invalidSceneType: Translator = (issue) =>
-  issue.code === 'invalid_union_discriminator' ? `tipo inválido (use ${issue.options.join(', ')})` : undefined;
+  issue.code === 'invalid_value' && issue.values.length > 1 ? `"${String(issue.input)}" inválido (use ${issue.values.join(', ')})` : undefined;
 const invalidLiteral: Translator = (issue) =>
-  issue.code === 'invalid_literal'
-    ? `esperava ${JSON.stringify(issue.expected)}, veio ${JSON.stringify(issue.received)}`
+  issue.code === 'invalid_value' ? `esperava ${JSON.stringify(issue.values[0])}, veio ${JSON.stringify(issue.input)}` : undefined;
+const invalidSceneType: Translator = (issue) =>
+  issue.code === 'invalid_union' && issue.discriminator !== undefined && 'options' in issue && issue.options
+    ? `tipo inválido (use ${issue.options.join(', ')})`
     : undefined;
 const tooSmall: Translator = (issue) => {
   if (issue.code !== 'too_small') return undefined;
-  if (issue.type === 'string') return 'não pode ser vazio';
-  return issue.type === 'array' ? `precisa de pelo menos ${issue.minimum} item(ns)` : `deve ser no mínimo ${issue.minimum}`;
+  if (issue.origin === 'string') return 'não pode ser vazio';
+  return issue.origin === 'array' ? `precisa de pelo menos ${issue.minimum} item(ns)` : `deve ser no mínimo ${issue.minimum}`;
 };
 const tooBig: Translator = (issue) =>
   issue.code === 'too_big' ? `deve ser no máximo ${issue.maximum}` : undefined;
 
-const TRANSLATORS = [required, wrongType, invalidOption, invalidSceneType, invalidLiteral, tooSmall, tooBig];
+const TRANSLATORS = [required, wrongType, invalidOption, invalidLiteral, invalidSceneType, tooSmall, tooBig];
 
-function issueMessage(issue: ZodIssue): string {
+function issueMessage(issue: Issue): string {
   return TRANSLATORS.map((translate) => translate(issue)).find(Boolean) ?? issue.message;
 }
 
 /** `['lines', 0, 'speaker']` becomes `lines[0].speaker`. */
-export function readablePath(parts: readonly (string | number)[]): string {
+export function readablePath(parts: readonly PropertyKey[]): string {
   return parts.reduce<string>((text, part) => {
     if (typeof part === 'number') return `${text}[${part}]`;
-    return text ? `${text}.${part}` : part;
+    return text ? `${text}.${String(part)}` : String(part);
   }, '');
 }
 
-function issueProblems(file: string, issue: ZodIssue): Problem[] {
+function issueProblems(file: string, issue: Issue): Problem[] {
   if (issue.code !== 'unrecognized_keys') {
     return [{ file, path: readablePath(issue.path), message: issueMessage(issue) }];
   }
@@ -57,7 +66,7 @@ export class ProblemCollector {
     this.#problems.push(problem);
   }
 
-  addFromZod(file: string, issues: readonly ZodIssue[]): void {
+  addFromZod(file: string, issues: readonly Issue[]): void {
     issues.forEach((issue) => this.#problems.push(...issueProblems(file, issue)));
   }
 

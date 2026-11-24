@@ -20,8 +20,9 @@ export class RemotionSheet {
     const files = characterFile ? [{ from: characterFile, at: SERVED_CHARACTER }] : [];
     const inputProps = characterFile ? { rig, character: SERVED_CHARACTER } : { rig };
     await withBundle(this.#sources, files, async (serveUrl) => {
-      const composition = await selectComposition({ serveUrl, id: COMPOSITION, inputProps });
-      await renderStill({ composition, serveUrl, output, inputProps });
+      const browserExecutable = this.#sources.browserExecutable ?? null;
+      const composition = await selectComposition({ serveUrl, id: COMPOSITION, inputProps, browserExecutable });
+      await renderStill({ composition, serveUrl, output, inputProps, browserExecutable });
     });
   }
 }

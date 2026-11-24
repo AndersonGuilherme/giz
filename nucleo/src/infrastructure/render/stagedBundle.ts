@@ -5,9 +5,10 @@ import { bundle } from '@remotion/bundler';
 
 /**
  * Where the Remotion entry point and the package public folder (`sounds/`) are; given by the composition point.
- * `scratch` is where the temporary public folder is made (the system temp folder by default).
+ * `scratch` is where the temporary public folder is made (the system temp folder by default); `browserExecutable` is the
+ * Chrome Headless Shell of the package (absent: Remotion finds or downloads it from the working directory).
  */
-export type RemotionSources = Readonly<{ entryPoint: string; publicFolder: string; scratch?: string }>;
+export type RemotionSources = Readonly<{ entryPoint: string; publicFolder: string; scratch?: string; browserExecutable?: string }>;
 
 /** A file to serve: `from` on disk, served at `at` (relative to the public folder, as `staticFile` asks for it). */
 export type StagedFile = Readonly<{ from: string; at: string }>;

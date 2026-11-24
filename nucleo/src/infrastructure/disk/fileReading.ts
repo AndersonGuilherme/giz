@@ -29,10 +29,11 @@ async function readJson(source: Source): Promise<unknown> {
 }
 
 /** Reads and validates a JSON file from the project folder; problems go to the collector and the result is `undefined`. */
-export async function readValidated<T>(source: Source, schema: z.ZodType<T, z.ZodTypeDef, unknown>): Promise<T | undefined> {
+export async function readValidated<T>(source: Source, schema: z.ZodType<T, unknown>): Promise<T | undefined> {
   const content = await readJson(source);
   if (content === undefined) return undefined;
-  const result = schema.safeParse(content);
+  // `reportInput`: the pt-BR messages say what came (zod 4 leaves the refused input out by default).
+  const result = schema.safeParse(content, { reportInput: true });
   if (result.success) return result.data;
   source.collector.addFromZod(source.file, result.error.issues);
   return undefined;

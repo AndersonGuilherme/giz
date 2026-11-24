@@ -30,14 +30,14 @@ function rejectUnknownColors({ vector, colors }: BackgroundJson, context: z.Refi
   if (!colors || !isVector(vector)) return;
   const valid = BackgroundPalette.keys(vector).join(', ');
   BackgroundPalette.unknownKeys(vector, colors).forEach((key) =>
-    context.addIssue({ code: z.ZodIssueCode.custom, path: ['colors', key], message: `cor desconhecida no fundo "${vector}" (use ${valid})` }));
+    context.addIssue({ code: 'custom', path: ['colors', key], message: `cor desconhecida no fundo "${vector}" (use ${valid})` }));
 }
 
 const backgroundSchema = z
   .object({
     image: nonEmptyText.optional(),
     vector: nonEmptyText.optional(),
-    colors: z.record(colorSchema).optional(),
+    colors: z.record(z.string(), colorSchema).optional(),
   })
   .strict()
   .superRefine(rejectUnknownColors);
@@ -54,7 +54,7 @@ const scenarioSchema = z
   })
   .strict();
 
-export const sceneSchema: z.ZodType<Scene, z.ZodTypeDef, unknown> = z.discriminatedUnion('type', [
+export const sceneSchema: z.ZodType<Scene, unknown> = z.discriminatedUnion('type', [
   scenarioSchema,
   ...lessonSceneSchemas,
 ]);

@@ -18,6 +18,7 @@ import { DiskProjectRepository } from '../../infrastructure/disk/DiskProjectRepo
 import { SrtCaptionWriter } from '../../infrastructure/disk/SrtCaptionWriter.ts';
 import { RemotionRenderer } from '../../infrastructure/render/RemotionRenderer.ts';
 import { RemotionSheet } from '../../infrastructure/render/RemotionSheet.ts';
+import { headlessShellIn } from '../../infrastructure/render/browserLocation.ts';
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
 import { RecordingVoice } from '../../infrastructure/voice/RecordingVoice.ts';
 import { QwenVoice } from '../../infrastructure/voice/QwenVoice.ts';
@@ -51,10 +52,13 @@ export function buildTimeline(folder: string): BuildTimeline {
   return new BuildTimeline({ store: new DiskVoiceStore(folder) });
 }
 
-// The Remotion entry point (the compositions) and the package public folder (the sound effects).
+// The Remotion entry point (the compositions), the package public folder (the sound effects) and the package's Chrome
+// Headless Shell: all resolved from the package, so `giz` works from any working directory (and later from Electron).
+const PACKAGE_FOLDER = fileURLToPath(new URL('../../..', import.meta.url));
 const REMOTION = {
   entryPoint: fileURLToPath(new URL('../remotion/index.ts', import.meta.url)),
   publicFolder: fileURLToPath(new URL('../../../public', import.meta.url)),
+  browserExecutable: headlessShellIn(PACKAGE_FOLDER),
 };
 
 export function renderVideo(folder: string): RenderVideo {

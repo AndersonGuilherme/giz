@@ -667,19 +667,20 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
   temporária: os sons de `public/sounds/` (copiados de `motor/assets/sfx/`) mais as vozes do projeto.
 - Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-giz.png --props='{"rig":"giz"}'`.
   Acrescente `"character":"cast/<id>.json"` e `--public-dir=<projeto>` para usar os parâmetros de um personagem.
-- Galeria de elencos prontos (uma por época): primeiro o bundle com os presets como pasta pública,
-  `npx remotion bundle src/presentation/remotion/index.ts --out-dir=/tmp/giz-bundle --public-dir=casts/presets`, depois
-  `npx remotion still /tmp/giz-bundle PresetSheet output/presets-past.png --props=casts/presets/sheets/past.json`
+- Galeria de elencos prontos (uma por época), com os presets como pasta pública:
+  `npx remotion still src/presentation/remotion/index.ts PresetSheet output/presets-past.png --props=casts/presets/sheets/past.json --public-dir=casts/presets`
   (troque `past` por `present`, `future` ou `creatures`). A composição `PresetSheet` lê os arquivos listados em `characters`.
-  A ficha de uma criatura sai do mesmo bundle:
-  `npx remotion still /tmp/giz-bundle CharacterSheet output/sheet-zombie.png --props='{"rig":"giz","character":"creatures/zuzu.json"}'`.
-- Galeria de fundos (todos os fundos vetoriais em miniatura, uma folha por proporção), do mesmo bundle:
-  `npx remotion still /tmp/giz-bundle BackgroundGallery output/backgrounds-16x9.png --props='{"aspect":"16:9"}'` e
-  `npx remotion still /tmp/giz-bundle BackgroundGallery output/backgrounds-9x16.png --props='{"aspect":"9:16"}'`.
+  A ficha de uma criatura:
+  `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-zombie.png --props='{"rig":"giz","character":"creatures/zuzu.json"}' --public-dir=casts/presets`.
+- Galeria de fundos (todos os fundos vetoriais em miniatura, uma folha por proporção):
+  `npx remotion still src/presentation/remotion/index.ts BackgroundGallery output/backgrounds-16x9.png --props='{"aspect":"16:9"}'` e
+  `npx remotion still src/presentation/remotion/index.ts BackgroundGallery output/backgrounds-9x16.png --props='{"aspect":"9:16"}'`.
   Uma cena pronta com personagens: monte as props do `ScenePreview` com a `scene` do preset, os `characters` e o
   `cast` (os `parameters` dos arquivos de `casts/presets/`), e rode
-  `npx remotion still /tmp/giz-bundle ScenePreview output/preview.png --frame=80 --props=<arquivo>.json`.
-- Um fundo novo: um arquivo em `src/presentation/scenes/scenario/backgrounds/` com `palette` e as três camadas, o nome
-  em `VECTOR_BACKGROUNDS` (domínio) e no `backgroundRegistry`. Desenhe sobre o `backdrop` das camadas (horizonte,
+  `npx remotion still src/presentation/remotion/index.ts ScenePreview output/preview.png --frame=80 --props=<arquivo>.json`.
+- O zod do nucleo é a mesma versão que o Remotion fixa (4.6.7): com versões diferentes, o `remotion still` simples falha
+  na verificação de versão.
+- Um fundo novo: um arquivo em `src/presentation/scenes/scenario/backgrounds/` com as três camadas, a paleta em
+  `src/domain/scenario/palettes/`, o nome em `VECTOR_BACKGROUNDS` (domínio) e no `backgroundRegistry`. Desenhe sobre o `backdrop` das camadas (horizonte,
   ponto de destaque, cantos com `CornerProps`) para o fundo valer nas duas proporções.
 - `test/examples.test.ts` garante que os quatro exemplos carregam e passam no `check` sem erros.

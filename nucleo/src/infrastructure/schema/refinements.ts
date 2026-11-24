@@ -22,7 +22,7 @@ export function domainMessage(factory: () => unknown): string | undefined {
 export function validatedByDomain(factory: (text: string) => unknown) {
   return z.string().superRefine((text, context) => {
     const message = domainMessage(() => factory(text));
-    if (message) context.addIssue({ code: z.ZodIssueCode.custom, message: message });
+    if (message) context.addIssue({ code: 'custom', message: message });
   });
 }
 
