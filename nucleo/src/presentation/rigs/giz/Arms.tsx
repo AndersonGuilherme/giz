@@ -5,6 +5,7 @@ import { Chalked } from './Chalked.tsx';
 import { ARM, SHOULDERS } from './measures.ts';
 import { outfitPaletteOf, skinOf, sleeveOf, type Look } from './parameters.ts';
 import { shade } from '../svg.ts';
+import { LimbWraps } from './species/LimbWraps.tsx';
 import { SPECIES_OVERLAYS } from './species/speciesOverlays.ts';
 
 type ArmProps = Readonly<{ arm: ArmShape; side: -1 | 1; look: Look }>;
@@ -52,10 +53,11 @@ const Hand: FC<HandProps & Readonly<{ shape: HandShape }>> = ({ shape, side, loo
   );
 };
 
-/** A rounded limb piece with its chalk line. */
+/** A rounded limb piece with the species' wraps (if any) and its chalk line. */
 const Limb: FC<Readonly<{ look: Look; rectangle: Parameters<typeof Silhouette.roundedRect>[0]; corner: number; color: string; part: string; side: -1 | 1 }>> = (props) => (
   <g>
     <rect {...props.rectangle} rx={props.corner} fill={props.color} />
+    <LimbWraps look={props.look} rectangle={props.rectangle} corner={props.corner} />
     <Chalked look={props.look} outline={Silhouette.roundedRect(props.rectangle, props.corner)} part={props.part} side={props.side} />
   </g>
 );

@@ -166,7 +166,7 @@ quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vir
 | Parâmetro | Tipo | Padrão | Valores |
 |---|---|---|---|
 | `species` | opção | `human` | `human`, `zombie`, `vampire`, `werewolf`, `mummy`, `ghost`, `robot`, `alien`, `slime-monster` (criaturas, abaixo) |
-| `skin` | opção | `medium` | `light`, `fair`, `medium`, `tan`, `brown`, `deep` (do mais claro ao mais escuro); peles de criatura: `grey-green`, `pale`, `fur`, `linen`, `mist`, `steel`, `green`, `lilac`, `lime` |
+| `skin` | opção | `medium` | `light`, `fair`, `medium`, `tan`, `brown`, `deep` (do mais claro ao mais escuro); peles de criatura: `grey-green`, `pale`, `fur`, `linen`, `mist`, `steel`, `green`, `lilac`, `lime`, `tangerine` |
 | `headShape` | opção | `round` | `round`, `oval`, `soft-square`, `bean` |
 | `eyeColor` | cor | `#7a4a26` | a cor da íris |
 | `hairColor` | cor | `#3a2418` | o cabelo e as sobrancelhas |
@@ -205,11 +205,11 @@ Cada uma tem a sua pele (escolher outra pele de criatura troca a cor, como um al
 - `zombie`: pele verde-acinzentada, pontos de costura, um olho caído de sono e a roupa rasgada;
 - `vampire`: pele pálida, orelhas pontudas, presinhas e capa com gola alta;
 - `werewolf`: orelhas e tufos de pelo, focinho, nariz grande e garras;
-- `mummy`: faixas na cabeça e no corpo todo (não usa roupa);
+- `mummy`: faixas na cabeça e no corpo todo, braços e pernas enfaixados (não usa roupa);
 - `ghost`: transparente, sem pernas, flutua balançando devagar (não usa roupa);
 - `robot`: cabeça de metal, antena, parafusos e olhos de LED na cor `eyeColor`;
 - `alien`: olhos grandes, duas antenas e pele colorida;
-- `slime-monster`: corpo de gosma com pingos e bolhas, sem pernas (não usa roupa).
+- `slime-monster`: corpo de gosma laranja com pingos e bolhas, sem pernas (não usa roupa; `lime` ou `green` também servem).
 
 Personagens prontos: `casts/presets/past/`, `present/` e `future/` têm elencos de exemplo, e `casts/presets/creatures/`
 tem as criaturas (nome, personalidade e voz do Qwen). Copie o arquivo para o `cast/` do projeto, acrescente o `id` em `project.json` e ajuste o que quiser.

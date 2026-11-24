@@ -6,12 +6,12 @@
     "species": "slime-monster",
     "hair": "bald",
     "headShape": "round",
-    "eyeColor": "#3a5a1a",
-    "hairColor": "#355a17"
+    "eyeColor": "#5a2d0c",
+    "hairColor": "#8a4318"
   },
   "voice": {
     "id": "dylan"
   },
-  "personality": "monstro de gosma alegre, grudento e sempre com fome",
+  "personality": "monstro de gosma que coleciona meias perdidas e adora um trocadilho ruim",
   "defaultExpression": "excited"
 }

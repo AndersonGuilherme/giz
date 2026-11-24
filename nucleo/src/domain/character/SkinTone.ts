@@ -1,6 +1,6 @@
 export const SKIN_TONES = ['light', 'fair', 'medium', 'tan', 'brown', 'deep'] as const;
 /** Fantasy skins for creatures: each species has its own, and any creature may take another one. */
-export const CREATURE_TONES = ['grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime'] as const;
+export const CREATURE_TONES = ['grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime', 'tangerine'] as const;
 export type HumanToneName = (typeof SKIN_TONES)[number];
 export type CreatureToneName = (typeof CREATURE_TONES)[number];
 export type SkinToneName = HumanToneName | CreatureToneName;
@@ -26,6 +26,7 @@ const TONES: Readonly<Record<SkinToneName, SkinColors>> = {
   green: { base: '#94d68c', shade: '#76bd70', line: '#28562a', blush: '#e99da6' },
   lilac: { base: '#bba6e4', shade: '#9f89cd', line: '#3d2a64', blush: '#f09cc2' },
   lime: { base: '#addf62', shade: '#8cc443', line: '#365e14', blush: '#f2a39c' },
+  tangerine: { base: '#f4a65c', shade: '#df8a3e', line: '#6a3210', blush: '#ee7a70' },
 };
 
 const CREATURES: ReadonlySet<string> = new Set(CREATURE_TONES);

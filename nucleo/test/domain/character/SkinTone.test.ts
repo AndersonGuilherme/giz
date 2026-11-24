@@ -35,7 +35,7 @@ test('every color is a #rrggbb', () => {
 });
 
 test('creature skins: one per species idea, never black, the line still reads on them', () => {
-  assert.deepEqual([...CREATURE_TONES], ['grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime']);
+  assert.deepEqual([...CREATURE_TONES], ['grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime', 'tangerine']);
   assert.deepEqual(SkinTone.ALL, [...SKIN_TONES, ...CREATURE_TONES]);
   for (const tone of CREATURE_TONES) {
     const { base, shade, line } = SkinTone.colors(tone);

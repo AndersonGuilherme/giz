@@ -25,4 +25,4 @@ const mummyParts = (profile: HeadProfile): readonly HeadPart[] => [
 ];
 
 /** A sleepy mummy: bandages over the head and the whole body. */
-export const MUMMY = species({ tone: 'linen', clothed: false, parts: mummyParts });
+export const MUMMY = species({ tone: 'linen', clothed: false, wraps: 16, parts: mummyParts });

@@ -1,24 +1,25 @@
 import type { Expression, Pose } from '../../domain/cast/PoseAndExpression.ts';
 import type { ValidatedParameters } from '../rigs/RigModel.ts';
 
-type Variation = Readonly<{ label: string; parameters: ValidatedParameters; pose: Pose; expression: Expression; side: -1 | 1 }>;
+// `head`: the label without the skin, for creatures (they keep their own skin whatever the variation chooses).
+type Variation = Readonly<{ label: string; head?: string; parameters: ValidatedParameters; pose: Pose; expression: Expression; side: -1 | 1 }>;
 
 /** Giz variations: skin tones, head shapes and eye colors, with other outfits and hair. */
 const GIZ: readonly Variation[] = [
   {
-    label: 'oval · clara', pose: 'explain', expression: 'happy', side: 1,
+    label: 'oval · clara', head: 'oval', pose: 'explain', expression: 'happy', side: 1,
     parameters: { skin: 'light', headShape: 'oval', eyeColor: '#3f7fc4', hairColor: '#b4532a', freckles: true, outfit: 'hoodie', outfitColor: '#e8735a', accessoryColor: '#f6e7c8' },
   },
   {
-    label: 'quadrada · marrom', pose: 'wave', expression: 'excited', side: -1,
+    label: 'quadrada · marrom', head: 'quadrada', pose: 'wave', expression: 'excited', side: -1,
     parameters: { skin: 'brown', headShape: 'soft-square', eyeColor: '#4c9a5a', hairColor: '#1f1410', hair: 'bun', outfit: 'dress', outfitColor: '#6c4f9c', accessoryColor: '#f2b134' },
   },
   {
-    label: 'feijão · escura', pose: 'think', expression: 'skeptical', side: 1,
+    label: 'feijão · escura', head: 'feijão', pose: 'think', expression: 'skeptical', side: 1,
     parameters: { skin: 'deep', headShape: 'bean', eyeColor: '#d09a2e', hairColor: '#120c09', glasses: true, outfitColor: '#3d8c8a', accessoryColor: '#f3efe2', cheeks: false },
   },
   {
-    label: 'redonda · bege', pose: 'shrug', expression: 'surprised', side: 1,
+    label: 'redonda · bege', head: 'redonda', pose: 'shrug', expression: 'surprised', side: 1,
     parameters: { skin: 'fair', headShape: 'round', eyeColor: '#7f8fa3', headwear: 'hat', outfit: 'casual', outfitColor: '#c9a227', accessoryColor: '#5a6b8c' },
   },
 ];

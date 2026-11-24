@@ -34,6 +34,8 @@ export const SPECIES = Object.keys(DESIGNS) as SpeciesName[];
 
 /** The mouth the state's viseme or expression made, unchanged (lip-sync works the same), plus the species' fangs. */
 export type SpeciesMouth = Readonly<{ parts: MouthParts; fangs: readonly Fang[] }>;
+/** One wrap round a limb: how far along it (from its top, in drawing units) and which way it slants (-1 or 1). */
+export type Wrap = Readonly<{ at: number; slant: -1 | 1 }>;
 /** How far a floating creature is lifted (negative: up, in drawing units) and how much its ground shadow shrinks. */
 export type Lift = Readonly<{ y: number; shadow: number }>;
 
@@ -80,6 +82,14 @@ export class Species {
     if (!float) return GROUNDED;
     const height = float.height + Math.sin((seconds / float.period) * 2 * Math.PI) * float.bob;
     return { y: -height, shadow: 1 - height * SHADOW_PER_UNIT };
+  }
+
+  /** Bandage wraps along a limb `length` long, from end to end, slanting one way then the other (none if unwrapped). */
+  static wraps(name: SpeciesName, length: number): readonly Wrap[] {
+    const spacing = (DESIGNS[name] as SpeciesDesign).wraps;
+    if (spacing <= 0 || length <= 0) return [];
+    const count = Math.ceil(length / spacing);
+    return Array.from({ length: count }, (_empty, index) => ({ at: ((index + 0.5) * length) / count, slant: index % 2 === 0 ? 1 : -1 }));
   }
 
   static eyeStyle(name: SpeciesName): EyeStyle {

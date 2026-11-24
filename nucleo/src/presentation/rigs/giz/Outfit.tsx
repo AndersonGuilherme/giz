@@ -5,6 +5,7 @@ import { Silhouette } from '../../../domain/drawing/Silhouette.ts';
 import { Chalked } from './Chalked.tsx';
 import { FEET } from './measures.ts';
 import { OUTFIT_DRAWINGS } from './outfits/outfitDrawings.ts';
+import { LimbWraps } from './species/LimbWraps.tsx';
 import { outfitPaletteOf, skinOf, type Look } from './parameters.ts';
 import { shade } from '../svg.ts';
 
@@ -21,6 +22,7 @@ const Leg: FC<LegsProps & Readonly<{ x: number; side: -1 | 1 }>> = (props) => {
   return (
     <g>
       <rect {...rectangle} rx={14} fill={legColor(props)} />
+      <LimbWraps look={props.look} rectangle={rectangle} corner={14} />
       <Chalked look={props.look} outline={Silhouette.roundedRect(rectangle, 14)} part="leg" side={props.side} />
     </g>
   );

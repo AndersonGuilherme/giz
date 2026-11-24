@@ -4,7 +4,8 @@ import { EXPRESSIONS, type Expression } from '../../../../src/domain/cast/PoseAn
 import { CharacterState } from '../../../../src/domain/character/CharacterState.ts';
 import { FaceGeometry } from '../../../../src/domain/character/FaceGeometry.ts';
 import { HeadProfile } from '../../../../src/domain/character/HeadProfile.ts';
-import { MouthLayout } from '../../../../src/domain/character/MouthLayout.ts';
+import { MouthLayout, type MouthOutline } from '../../../../src/domain/character/MouthLayout.ts';
+import { fangsOf } from '../../../../src/domain/character/species/Fangs.ts';
 import { SkinTone } from '../../../../src/domain/character/SkinTone.ts';
 import { SPECIES, Species, type SpeciesName } from '../../../../src/domain/character/species/Species.ts';
 import { Wardrobe } from '../../../../src/domain/character/wardrobe/Wardrobe.ts';
@@ -31,6 +32,8 @@ test('humans keep the chosen skin; each creature has its own skin unless another
   assert.equal(Species.skin('zombie', 'tan'), 'grey-green');
   assert.equal(Species.skin('vampire', 'light'), 'pale');
   assert.equal(Species.skin('alien', 'lilac'), 'lilac');
+  assert.equal(Species.skin('slime-monster', 'medium'), 'tangerine', 'an orange slime by default');
+  assert.equal(Species.skin('slime-monster', 'lime'), 'lime', 'green is still an option');
   assert.equal(new Set(CREATURES.map((name) => Species.skin(name, 'medium'))).size, CREATURES.length, 'one skin per creature');
 });
 
@@ -102,11 +105,50 @@ test('only the vampire has fangs: two, one each side, on the top edge of every m
     assert.equal(mouth.fangs.length, 2, viseme);
     assert.equal(left!.x, -right!.x, viseme);
     assert.ok(right!.x + right!.width / 2 <= mouth.parts.outline.width / 2 + 1, `${viseme} inside the mouth`);
-    const { outline } = mouth.parts;
-    const top = outline.kind === 'oval' || outline.kind === 'rounded' ? outline.center - outline.height / 2 : right!.y;
-    assert.equal(right!.y, top, viseme);
+    assert.equal(right!.y, TOP_EDGE[mouth.parts.outline.kind](mouth.parts.outline as never), viseme);
   }
   for (const name of SPECIES.filter((other) => other !== 'vampire')) assert.deepEqual(Species.mouth(name, state({ speaking: true, viseme: 'A', opening: 1 })).fangs, [], name);
+});
+
+// The expected top edge per outline kind, written out: closed lines at 0, a bent line at half its bend (quadratic), a
+// cubic at 3/4 of its upper control, oval and rounded mouths at their center minus half their height.
+const TOP_EDGE: Readonly<Record<MouthOutline['kind'], (outline: never) => number>> = {
+  pressed: () => 0,
+  wave: () => 0,
+  line: ({ bend }: { bend: number }) => bend / 2,
+  cubic: ({ upper }: { upper: number }) => upper * 0.75,
+  oval: ({ center, height }: { center: number; height: number }) => center - height / 2,
+  rounded: ({ center, height }: { center: number; height: number }) => center - height / 2,
+};
+
+test('fangs hang from the top edge of every outline kind, at the expected height', () => {
+  const outlines: readonly MouthOutline[] = [
+    { kind: 'pressed', width: 24 },
+    { kind: 'wave', width: 26, tilt: 3, wave: 8 },
+    { kind: 'line', width: 26, tilt: 0, bend: 8 },
+    { kind: 'cubic', width: 34, tilt: 0, upper: -6, lower: 20 },
+    { kind: 'oval', width: 20, height: 18, center: 3 },
+    { kind: 'rounded', width: 38, height: 8, center: 1, corner: 4 },
+  ];
+  const expected = [0, 0, 4, -4.5, -6, -3];
+  outlines.forEach((outline, index) => {
+    const fangs = fangsOf(outline);
+    assert.equal(fangs.length, 2, outline.kind);
+    fangs.forEach((fang) => assert.equal(fang.y, expected[index], outline.kind));
+    assert.equal(fangs[0]!.x, -fangs[1]!.x, outline.kind);
+  });
+});
+
+test('the mummy wraps its arms and legs end to end, slanting one way then the other; nobody else does', () => {
+  const wraps = Species.wraps('mummy', 100);
+  assert.ok(wraps.length >= 5, 'close together');
+  assert.ok(wraps[0]!.at < 16 && wraps.at(-1)!.at > 84, 'from end to end');
+  wraps.slice(1).forEach((wrap, index) => {
+    assert.ok(wrap.at > wraps[index]!.at, 'in order');
+    assert.equal(wrap.slant, -wraps[index]!.slant, 'alternating');
+  });
+  assert.deepEqual(Species.wraps('mummy', 0), []);
+  for (const name of SPECIES.filter((other) => other !== 'mummy')) assert.deepEqual(Species.wraps(name, 100), [], name);
 });
 
 test('the species features on the head never cover the eyes, on every head shape', () => {

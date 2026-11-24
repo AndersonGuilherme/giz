@@ -19,5 +19,5 @@ const slimeParts = (profile: HeadProfile): readonly HeadPart[] => [
   part('shine', Silhouette.ellipse({ x: -44, y: -62 }, 16, 9)),
 ];
 
-/** A happy slime monster: a soft blob body with drips, no legs, and slightly bigger eyes. */
-export const SLIME_MONSTER = species({ tone: 'lime', legs: false, clothed: false, eyes: { scale: 1.12 }, parts: slimeParts });
+/** A happy slime monster: a soft orange blob body with drips, no legs, and slightly bigger eyes (`lime` or `green` work too). */
+export const SLIME_MONSTER = species({ tone: 'tangerine', legs: false, clothed: false, eyes: { scale: 1.12 }, parts: slimeParts });

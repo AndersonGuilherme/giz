@@ -1,6 +1,7 @@
 import type { CSSProperties, FC } from 'react';
 import { AbsoluteFill, staticFile, type CalculateMetadataFunction } from 'remotion';
 import type { Expression, Pose } from '../../domain/cast/PoseAndExpression.ts';
+import { Species } from '../../domain/character/species/Species.ts';
 import { GalleryGrid } from '../../domain/layout/GalleryGrid.ts';
 import type { ValidatedParameters } from '../rigs/RigModel.ts';
 import { rigModels } from '../rigs/rigModels.ts';
@@ -41,7 +42,7 @@ export const presetSheetMetadata: CalculateMetadataFunction<PresetSheetProps> = 
 
 const details = (parameters: ValidatedParameters) =>
   [parameters.species, parameters.outfit, parameters.headwear, parameters.hair, parameters.facialHair]
-    .filter((value) => value && value !== 'none' && value !== 'human').join(' · ');
+    .filter((value) => value && value !== 'none' && value !== Species.DEFAULT).join(' · ');
 
 const Card: FC<Readonly<{ card: PresetCard; index: number; size: Readonly<{ width: number; height: number }> }>> = ({ card, index, size }) => {
   const model = rigModels.get(card.rig);

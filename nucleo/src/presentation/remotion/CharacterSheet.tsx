@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { AbsoluteFill } from 'remotion';
 import { EXPRESSIONS, POSES } from '../../domain/cast/PoseAndExpression.ts';
+import { Species } from '../../domain/character/species/Species.ts';
 import type { Viseme } from '../../domain/speech/Visemes.ts';
 import type { RigModel, ValidatedParameters } from '../rigs/RigModel.ts';
 import { rigModels } from '../rigs/rigModels.ts';
@@ -69,13 +70,17 @@ const Visemes: FC<Sheet> = ({ model, parameters }) => {
   );
 };
 
+// A creature keeps its own skin, so its variation cards name only the head shape.
+const isCreature = (parameters: ValidatedParameters) => parameters.species !== undefined && parameters.species !== Species.DEFAULT;
+
 const Variations: FC<Sheet> = ({ model, parameters }) => {
   const [height, card] = [282, { width: 214, height: 300 }];
   const scale = scaleOf(height);
+  const creature = isCreature(parameters);
   return (
     <Section title="VARIAÇÕES (PARÂMETROS)" style={{ width: 920 }}>
       {(VARIATIONS[model.id] ?? []).map((variation) => (
-        <Card key={variation.label} {...card} label={variation.label}>
+        <Card key={variation.label} {...card} label={creature ? variation.head ?? variation.label : variation.label}>
           <Placed left={card.width / 2 - 260 * scale} top={card.height - 620 * scale - 4}>
             <model.Component state={stillState(variation)} parameters={{ ...parameters, ...variation.parameters }} height={height} side={variation.side} id={variation.label} />
           </Placed>

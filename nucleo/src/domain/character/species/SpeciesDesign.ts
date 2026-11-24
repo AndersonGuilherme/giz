@@ -14,7 +14,8 @@ export type FloatDesign = Readonly<{ height: number; bob: number; period: number
 /**
  * One species of the giz rig, drawn on the same body, so every pose, expression and viseme keeps working.
  * `tone`: its own skin (none: the chosen skin); `legs` false = no legs; `clothed` false = no outfit (the species draws
- * its own body); `fangs`: two small fangs on the mouth; `opacity` < 1 = see-through; `parts`: features on the head.
+ * its own body); `fangs`: two small fangs on the mouth; `opacity` < 1 = see-through; `wraps`: the spacing of bandage
+ * wraps round the arms and legs (0 = none); `parts`: features on the head.
  */
 export type SpeciesDesign = Readonly<{
   tone?: CreatureToneName;
@@ -24,11 +25,12 @@ export type SpeciesDesign = Readonly<{
   fangs: boolean;
   float?: FloatDesign;
   opacity: number;
+  wraps: number;
   parts: (profile: HeadProfile) => readonly HeadPart[];
 }>;
 
 const PLAIN: SpeciesDesign = {
-  legs: true, clothed: true, eyes: { style: 'iris', scale: 1, droop: 0 }, fangs: false, opacity: 1, parts: () => [],
+  legs: true, clothed: true, eyes: { style: 'iris', scale: 1, droop: 0 }, fangs: false, opacity: 1, wraps: 0, parts: () => [],
 };
 
 /** A species that differs from a plain human only where it says so. */

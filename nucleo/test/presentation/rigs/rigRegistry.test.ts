@@ -12,7 +12,7 @@ test('the giz rig comes registered with the house-style parameters: skin tones, 
   assert.equal(name['pt-BR'], 'Giz');
   assert.deepEqual(parameters.skin, {
     type: 'option', defaultValue: 'medium',
-    options: ['light', 'fair', 'medium', 'tan', 'brown', 'deep', 'grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime'],
+    options: ['light', 'fair', 'medium', 'tan', 'brown', 'deep', 'grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime', 'tangerine'],
   });
   assert.deepEqual(parameters.species, {
     type: 'option', defaultValue: 'human', options: ['human', 'zombie', 'vampire', 'werewolf', 'mummy', 'ghost', 'robot', 'alien', 'slime-monster'],
