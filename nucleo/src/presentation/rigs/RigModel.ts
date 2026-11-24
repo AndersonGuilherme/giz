@@ -19,6 +19,8 @@ export type RigDefinition = Readonly<{
   name: Readonly<{ 'pt-BR': string; en: string }>;
   parameters: ParameterDefinitions;
   stance: StanceData;
+  /** The highest point a character with these parameters draws, in rig units (a tall hat, a floating ghost); absent: the view box top. */
+  reach?: (parameters: ValidatedParameters) => number;
 }>;
 
 /** The full rig, with the component that draws it (only in the Remotion bundle). */

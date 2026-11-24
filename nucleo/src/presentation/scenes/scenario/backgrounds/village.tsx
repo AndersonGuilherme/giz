@@ -7,41 +7,6 @@ import type { LayerProps, VectorBackgroundModel } from './VectorBackgroundModel.
 // white houses on the central hill, a windmill on the far left, a road winding up to the houses, a stone well on the
 // left and a fruit stall on the right.
 
-const palette = {
-  skyTop: '#6fa6b4',
-  skyMiddle: '#a9cdc4',
-  horizon: '#f3e4c0',
-  sun: '#fbe3a1',
-  cloud: '#f6f1e4',
-  farHills: '#7ea592',
-  hill: '#93b98a',
-  meadow: '#9cc185',
-  meadowNear: '#7aa36a',
-  road: '#e6d2a6',
-  wall: '#f4efe2',
-  wallShade: '#dcd3c0',
-  roof: '#e8735a',
-  roof2: '#3d8c8a',
-  roofLine: '#b5523b',
-  door: '#6c4f7c',
-  window: '#5f8fa8',
-  flag: '#f2b134',
-  mill: '#e9dcc0',
-  millSail: '#c9b99a',
-  wood: '#7a5a42',
-  stone: '#a7a39a',
-  stoneShade: '#7f7b72',
-  awning: '#e8735a',
-  awning2: '#f6f1e4',
-  fruit1: '#f2b134',
-  fruit2: '#d9534a',
-  trunk: '#6b4a32',
-  leaves: '#5f9a63',
-  leavesShade: '#467a4e',
-  bush: '#4e7f55',
-  grass: '#3f6b47',
-};
-
 const Sky: FC<LayerProps> = (layer) => {
   const { colors, width, ground, unit } = layer;
   const stops = [[0, colors.skyTop], [0.6, colors.skyMiddle], [1, colors.horizon]] as const;
@@ -112,4 +77,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const village: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const village: VectorBackgroundModel = { layers: [Back, Middle, Front] };

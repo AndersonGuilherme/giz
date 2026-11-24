@@ -25,9 +25,32 @@ for (const text of ['9:16', '16:9'] as const) {
   });
 }
 
-test('16:9 keeps the moon where it was (right third, high), it only moves when the HUD is in the way', () => {
+// Every crowd a scene can have at the named positions (what the backdrop's stage is made of).
+const CROWDS = {
+  '9:16': [[{ character: 'a', position: 'left' }, { character: 'b', position: 'right' }], [{ character: 'a', position: 'center' }]],
+  '16:9': [
+    [{ character: 'a', position: 'left' }, { character: 'b', position: 'right' }],
+    [{ character: 'a', position: 'left' }, { character: 'b', position: 'right' }, { character: 'c', position: 'center' }],
+    [{ character: 'a', position: 'right' }],
+  ],
+} as const;
+
+for (const text of ['9:16', '16:9'] as const) {
+  test(`${text}: the moon never sits behind a character spot (graveyard, night-sky, city-night)`, () => {
+    const aspect = AspectRatio.of(text);
+    const moon = SkyLayout.moon(aspect);
+    const spots = CROWDS[text].flatMap((crowd) => Placement.for(crowd, aspect));
+    for (const spot of spots) {
+      const top = spot.y - spot.height;
+      assert.ok(moon.y + moon.radius < top, `${text} ${spot.character} at ${spot.x}: moon bottom ${moon.y + moon.radius} vs head top ${top}`);
+    }
+  });
+}
+
+test('16:9 keeps the moon in the right third, raised above the heads of the stage (it used to sit behind the right character)', () => {
   const aspect = AspectRatio.of('16:9');
   const moon = SkyLayout.moon(aspect);
   assert.equal(moon.x, aspect.width() * 0.75);
-  assert.equal(moon.y, Placement.groundOf(aspect) * 0.3);
+  assert.ok(moon.y < Placement.groundOf(aspect) * 0.3);
+  assert.ok(moon.y - moon.radius > 0);
 });

@@ -6,23 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A future city at night, giz style: a violet haze, giant towers with neon edges, a hologram ring behind the
 // characters, flying cars, near buildings with neon signs (shapes, no brands) and a wet street that reflects the neon.
 
-const palette = {
-  skyTop: '#140b2b',
-  skyBottom: '#5a2a6b',
-  haze: '#ff6bd6',
-  far: '#2a1b4a',
-  tower: '#22163e',
-  near: '#1a1233',
-  pink: '#ff5ec8',
-  cyan: '#3ff0e6',
-  yellow: '#f6e05e',
-  window: '#7fd9ff',
-  street: '#1a1530',
-  streetFar: '#2b1f48',
-  car: '#c9d3f0',
-  foreground: '#0b0818',
-};
-
 // Far towers: [x as a fraction of the width, width and height in units, neon color key].
 const TOWERS = [[0.04, 130, 560, 'cyan'], [0.16, 100, 680, 'pink'], [0.28, 140, 480, 'yellow'], [0.66, 120, 620, 'cyan'], [0.78, 150, 720, 'pink'], [0.92, 110, 520, 'cyan']] as const;
 
@@ -108,4 +91,4 @@ const Post: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Post colors={layer.colors} /></CornerProps>;
 
-export const cyberCity: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const cyberCity: VectorBackgroundModel = { layers: [Back, Middle, Front] };

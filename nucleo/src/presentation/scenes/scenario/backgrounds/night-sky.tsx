@@ -7,22 +7,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A starry night on a hill, giz style: blue-slate sky, a chalk moon clear of the HUD, hills with chalk ridges, pines
 // and a lit cabin.
 
-const palette = {
-  skyTop: '#16213b',
-  skyBottom: '#4d6f9c',
-  milkyWay: '#a7c4e8',
-  star: '#f3efe2',
-  moon: '#f3efe2',
-  moonGlow: '#a7c4e8',
-  farHills: '#2a4569',
-  hills: '#1d3150',
-  pine: '#1b3a45',
-  cabin: '#6c4f7c',
-  roof: '#3a2f4a',
-  window: '#f2c46b',
-  grass: '#142236',
-};
-
 const Moon: FC<LayerProps> = ({ colors, width, height, unit }) => {
   const moon = SkyLayout.moon(AspectRatio.ofSize(width, height));
   return (
@@ -90,4 +74,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const nightSky: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const nightSky: VectorBackgroundModel = { layers: [Back, Middle, Front] };

@@ -2,9 +2,8 @@ import type { Rectangle } from '../layout/Box.ts';
 import { NAMED_POSITIONS, type CharacterInScene } from '../script/Scene.ts';
 import type { Point } from '../drawing/PathData.ts';
 import type { AspectRatio } from '../values/AspectRatio.ts';
-import { HudLayout } from './HudLayout.ts';
+import { HudLayout, TALLEST_HUD } from './HudLayout.ts';
 import { Placement, type Spot } from './Placement.ts';
-import { TALLEST_HUD } from './SkyLayout.ts';
 
 /** Where a front prop stands (`x`, `y` in video pixels) and its `scale` (video pixels per prop unit). */
 export type Corner = Readonly<{ x: number; y: number; scale: number }>;

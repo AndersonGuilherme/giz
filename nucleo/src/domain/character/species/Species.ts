@@ -84,6 +84,12 @@ export class Species {
     return { y: -height, shadow: 1 - height * SHADOW_PER_UNIT };
   }
 
+  /** The highest a floating creature rises above the ground (its hover plus its bob, drawing units); 0 when grounded. */
+  static highestFloat(name: SpeciesName): number {
+    const float = (DESIGNS[name] as SpeciesDesign).float;
+    return float ? float.height + float.bob : 0;
+  }
+
   /** Bandage wraps along a limb `length` long, from end to end, slanting one way then the other (none if unwrapped). */
   static wraps(name: SpeciesName, length: number): readonly Wrap[] {
     const spacing = (DESIGNS[name] as SpeciesDesign).wraps;

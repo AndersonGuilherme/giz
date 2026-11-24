@@ -2,6 +2,7 @@ import type { FC } from 'react';
 import { Img, staticFile } from 'remotion';
 import type { Framing } from '../../../domain/camera/Framing.ts';
 import { BackdropLayout } from '../../../domain/scenario/BackdropLayout.ts';
+import { BackgroundPalette } from '../../../domain/scenario/BackgroundPalette.ts';
 import type { BackgroundChoice } from '../../../domain/scenario/BackgroundSource.ts';
 import { Parallax, type Layer } from '../../../domain/scenario/Parallax.ts';
 import type { AspectRatio } from '../../../domain/values/AspectRatio.ts';
@@ -29,7 +30,7 @@ const ImageBackground: FC<Readonly<{ image: string; camera: Framing; onImageErro
 
 function layerPropsFor(choice: Extract<BackgroundChoice, { kind: 'vector' }>, aspect: AspectRatio): LayerProps {
   const [width, height] = [aspect.width(), aspect.height()];
-  const colors = { ...backgroundRegistry[choice.vector].palette, ...choice.colors };
+  const colors = BackgroundPalette.with(choice.vector, choice.colors);
   const backdrop = BackdropLayout.for(aspect);
   return { colors, width, height, ground: backdrop.ground, unit: backdrop.unit, backdrop };
 }

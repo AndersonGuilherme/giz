@@ -1,5 +1,4 @@
 import type { FC, ReactNode } from 'react';
-import { useCurrentFrame, useVideoConfig } from 'remotion';
 import { ArmGeometry } from '../../../domain/character/ArmGeometry.ts';
 import type { CharacterState } from '../../../domain/character/CharacterState.ts';
 import { Species } from '../../../domain/character/species/Species.ts';
@@ -58,11 +57,12 @@ const Body: FC<BodyProps> = ({ state, look }) => {
 
 /**
  * The giz rig, the house style: colored head, chalk outline, big expressive eyes and a clothed body. The `species`
- * turns it into a creature on the same body; a floating one is lifted off the ground and its shadow shrinks.
+ * turns it into a creature on the same body; a floating one is lifted off the ground and its shadow shrinks, bobbing on
+ * the video time (so the bob runs on across segments instead of restarting at each `Sequence`).
  */
 export const Giz: FC<RigProps> = ({ state, parameters, height, side, id }) => {
   const look = lookOf(parameters, id);
-  const lift = Species.lift(look.species, useCurrentFrame() / useVideoConfig().fps);
+  const lift = Species.lift(look.species, state.videoSeconds());
   const { y, rotation, scale } = state.bodyOffset();
   const width = (height * VIEW_BOX.width) / VIEW_BOX.height;
   const body = `translate(0 ${y + lift.y}) translate(200 ${FEET.y}) rotate(${rotation}) scale(${scale}) translate(-200 -${FEET.y})`;

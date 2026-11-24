@@ -9,7 +9,8 @@ import { SPECIES, Species, type SpeciesName } from '../../../domain/character/sp
 import type { OutfitPalette, Sleeve } from '../../../domain/character/wardrobe/OutfitDesign.ts';
 import { OUTFITS, Wardrobe, type OutfitName } from '../../../domain/character/wardrobe/Wardrobe.ts';
 import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
-import { FEET, VIEW_BOX } from './measures.ts';
+import { HeadReach } from '../../../domain/character/HeadReach.ts';
+import { CHALK_WIDTH, FEET, HEAD, UNIT, VIEW_BOX } from './measures.ts';
 
 export const gizDefinition: RigDefinition = {
   id: 'giz',
@@ -35,6 +36,7 @@ export const gizDefinition: RigDefinition = {
     eyeScale: { type: 'number', defaultValue: 1, min: 0.8, max: 1.4 },
   },
   stance: { viewBox: VIEW_BOX, feet: { x: 200, y: FEET.y } },
+  reach: (parameters) => topOf(lookOf(parameters)),
 };
 
 /** The giz parameters, typed for drawing, plus the character's `id` (the seed of its chalk line). */
@@ -64,6 +66,11 @@ const defaults = Object.fromEntries(Object.entries(gizDefinition.parameters).map
 /** Fills in the defaults: the sheet and the tests may pass only some of the parameters. */
 export function lookOf(parameters: ValidatedParameters, id = 'giz'): Look {
   return { ...defaults, ...parameters, id } as Look;
+}
+
+// The head's highest point (hair, headwear, species features) in drawing units, lifted by the highest float, plus the chalk.
+function topOf(look: Look): number {
+  return HEAD.y - HeadReach.above(look) * UNIT - Species.highestFloat(look.species) - CHALK_WIDTH;
 }
 
 /** The skin colors of the look's tone (a creature's own skin, unless another creature skin was chosen). */

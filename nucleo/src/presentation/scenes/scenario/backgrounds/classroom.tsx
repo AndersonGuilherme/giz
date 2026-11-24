@@ -7,30 +7,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A classroom in the morning, giz style: a chalkboard with doodles behind the characters (our own chalk, on a board),
 // sunny windows, a clock, desks on the sides and a wooden floor; chalk lines on the furniture.
 
-const palette = {
-  wallTop: '#7fa898',
-  wall: '#a7c9bb',
-  wainscot: '#e9e2d0',
-  board: '#2f4a43',
-  boardFrame: '#a07a52',
-  chalk: '#f3efe2',
-  glass: '#d9f0f4',
-  sky: '#a7d8ec',
-  windowFrame: '#f3efe2',
-  sun: '#fff1c4',
-  clock: '#f3efe2',
-  poster: '#f2b134',
-  desk: '#d29a62',
-  deskLeg: '#4a4f5a',
-  floorFar: '#d8b48c',
-  floor: '#c09a72',
-  plank: '#a07a58',
-  plant: '#4f8a5b',
-  pot: '#e8735a',
-  book: '#3d6fb0',
-  foreground: '#2a3634',
-};
-
 // The chalkboard is drawn 232 units to each side and scaled into the backdrop's focus radius.
 const BOARD_HALF_WIDTH = 232;
 
@@ -109,4 +85,4 @@ const Plant: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Plant colors={layer.colors} /></CornerProps>;
 
-export const classroom: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const classroom: VectorBackgroundModel = { layers: [Back, Middle, Front] };

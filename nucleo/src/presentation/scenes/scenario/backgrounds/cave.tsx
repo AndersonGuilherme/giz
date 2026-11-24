@@ -8,24 +8,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A cave at dusk, giz style: plum rock walls with ochre paintings, stalactites, an opening on an orange sky, a sandy
 // floor and a stone fire pit right where the `fire` effect burns by default; chalk lines on the rocks.
 
-const palette = {
-  ceiling: '#241c29',
-  rockDark: '#2f2534',
-  rock: '#4f3e52',
-  rockLight: '#6d566b',
-  skyTop: '#3a5a78',
-  skyBottom: '#f0a868',
-  sun: '#ffd98a',
-  hills: '#5d6f6a',
-  paint: '#e0884f',
-  paint2: '#f3efe2',
-  floorFar: '#9c7a59',
-  floor: '#7d5f47',
-  stone: '#857078',
-  log: '#6b4630',
-  foreground: '#1b1520',
-};
-
 const MOUTH = 'M -170 150 Q -175 -40 -80 -130 Q 0 -185 85 -125 Q 175 -45 165 150 Z';
 
 const Opening: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
@@ -117,4 +99,4 @@ const Boulder: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Boulder colors={layer.colors} /></CornerProps>;
 
-export const cave: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const cave: VectorBackgroundModel = { layers: [Back, Middle, Front] };

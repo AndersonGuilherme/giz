@@ -5,25 +5,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A city street at dusk, giz style: a teal sky, a skyline with lit windows, two shops with striped awnings, a
 // sidewalk and a street lamp; chalk lines on the buildings.
 
-const palette = {
-  skyTop: '#2f4858',
-  skyBottom: '#9cc5b8',
-  skyline: '#46707a',
-  skylineNear: '#365a63',
-  window: '#f6dc8f',
-  shopWall: '#b5523b',
-  shopWall2: '#6c4f7c',
-  awning: '#f2b134',
-  awning2: '#3d8c8a',
-  shopLight: '#ffe7b0',
-  sidewalk: '#a6ada0',
-  curb: '#66726c',
-  asphalt: '#3d4a48',
-  lamp: '#ffe3a0',
-  post: '#22302f',
-  foreground: '#18211f',
-};
-
 // Towers of the skyline: [x as a fraction of the width, width and height in units].
 const TOWERS = [[0.02, 140, 420], [0.12, 110, 560], [0.22, 160, 380], [0.35, 120, 620], [0.47, 180, 450], [0.6, 130, 540], [0.72, 170, 400], [0.84, 120, 600], [0.94, 150, 470]] as const;
 
@@ -98,4 +79,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const street: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const street: VectorBackgroundModel = { layers: [Back, Middle, Front] };

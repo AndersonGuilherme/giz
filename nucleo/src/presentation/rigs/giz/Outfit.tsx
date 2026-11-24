@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import { Species } from '../../../domain/character/species/Species.ts';
-import { BARE_LEGS, type OutfitPalette } from '../../../domain/character/wardrobe/OutfitDesign.ts';
+import type { OutfitPalette } from '../../../domain/character/wardrobe/OutfitDesign.ts';
+import { Wardrobe } from '../../../domain/character/wardrobe/Wardrobe.ts';
 import { Silhouette } from '../../../domain/drawing/Silhouette.ts';
 import { Chalked } from './Chalked.tsx';
 import { FEET } from './measures.ts';
@@ -14,8 +15,8 @@ const RIGHT_SHOE = `M260,${FEET.y} C260,560 204,556 202,578 L202,${FEET.y} Z`;
 
 type LegsProps = Readonly<{ hem: number; palette: OutfitPalette; look: Look }>;
 
-const legColor = ({ palette, look }: LegsProps) => (palette.legs === BARE_LEGS ? skinOf(look).base : palette.legs);
-const shoeColor = ({ palette, look }: LegsProps) => (palette.shoes === BARE_LEGS ? skinOf(look).shade : palette.shoes);
+const legColor = ({ palette, look }: LegsProps) => (Wardrobe.bareLegs(palette) ? skinOf(look).base : palette.legs);
+const shoeColor = ({ palette, look }: LegsProps) => (Wardrobe.bareFeet(palette) ? skinOf(look).shade : palette.shoes);
 
 const Leg: FC<LegsProps & Readonly<{ x: number; side: -1 | 1 }>> = (props) => {
   const rectangle = { x: props.x, y: props.hem - 12, width: 34, height: FEET.y - props.hem - 4 };

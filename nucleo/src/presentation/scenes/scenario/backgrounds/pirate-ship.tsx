@@ -7,28 +7,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // The deck of a sailing ship, giz style: the sea and a far island behind the rail, the mast with a big sail marked with
 // a compass star behind the characters, rigging ropes, a plank deck and barrels; chalk lines on the wood and the sail.
 
-const palette = {
-  skyTop: '#2f5f7a',
-  skyBottom: '#b5dcd8',
-  cloud: '#f3efe2',
-  seaFar: '#5aa6ad',
-  sea: '#2f7f8a',
-  foam: '#e3eef0',
-  island: '#6f9a6a',
-  sail: '#f1e6cc',
-  sailShade: '#d8c7a3',
-  mark: '#3d6f8a',
-  mast: '#6b4630',
-  rope: '#d9c08c',
-  rail: '#5b3a26',
-  deckFar: '#b07c52',
-  deck: '#946540',
-  plank: '#6e4a30',
-  barrel: '#8a5a3a',
-  hoop: '#3a2a22',
-  foreground: '#3a2418',
-};
-
 const Back: FC<LayerProps> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon } = backdrop;
@@ -113,4 +91,4 @@ const Cargo: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Cargo colors={layer.colors} /></CornerProps>;
 
-export const pirateShip: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const pirateShip: VectorBackgroundModel = { layers: [Back, Middle, Front] };

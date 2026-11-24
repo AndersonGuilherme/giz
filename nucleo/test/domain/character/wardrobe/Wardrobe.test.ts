@@ -29,10 +29,10 @@ test('the palettes differ: no two outfits share the same main and accent', () =>
 
 test('a chosen color replaces the main or the accent; the parts sharing the main color follow it', () => {
   const scrubs = Wardrobe.palette('scrubs', { main: '#223344', accent: 'auto' });
-  assert.deepEqual([scrubs.main, scrubs.sleeve, scrubs.legs], ['#223344', '#223344', '#223344']);
+  assert.deepEqual([scrubs.main, scrubs.secondary, scrubs.legs], ['#223344', '#223344', '#223344']);
   const knight = Wardrobe.palette('knight', { main: '#aa0000', accent: '#00aa00' });
   assert.deepEqual([knight.main, knight.accent], ['#aa0000', '#00aa00']);
-  assert.equal(knight.sleeve, Wardrobe.palette('knight', AUTO).sleeve, 'the armored sleeves keep their metal');
+  assert.equal(knight.secondary, Wardrobe.palette('knight', AUTO).secondary, 'the armored sleeves keep their metal');
   assert.equal(knight.shoes, Wardrobe.palette('knight', AUTO).shoes);
 });
 
@@ -40,4 +40,25 @@ test('sleeves by outfit: bare arms in a toga, elbow sleeves in a t-shirt, long o
   assert.equal(Wardrobe.sleeve('toga'), 'bare');
   assert.equal(Wardrobe.sleeve('casual'), 'short');
   assert.equal(Wardrobe.sleeve('suit'), 'long');
+});
+
+test('only a long sleeve covers the forearm: short sleeves and bare arms show a skin forearm', () => {
+  assert.equal(Wardrobe.coversForearm('long'), true);
+  assert.equal(Wardrobe.coversForearm('short'), false);
+  assert.equal(Wardrobe.coversForearm('bare'), false);
+});
+
+test('sleeve length down the upper arm: none bare, about half when short (never past the elbow), past the elbow when long', () => {
+  assert.equal(Wardrobe.sleeveLength('bare', 88, 88), 0);
+  assert.ok(Math.abs(Wardrobe.sleeveLength('short', 88, 88) - 46) < 0.5);
+  assert.equal(Wardrobe.sleeveLength('short', 88, 30), 30, 'a foreshortened arm keeps the short sleeve above the elbow');
+  assert.ok(Math.abs(Wardrobe.sleeveLength('long', 88, 88) - 100) < 0.5);
+  assert.ok(Math.abs(Wardrobe.sleeveLength('long', 88, 30) - 42) < 0.5, 'past the visible elbow by the same overlap');
+});
+
+test('bare legs and bare feet are rules of the palette', () => {
+  assert.equal(Wardrobe.bareLegs(Wardrobe.palette('toga', AUTO)), true);
+  assert.equal(Wardrobe.bareLegs(Wardrobe.palette('suit', AUTO)), false);
+  assert.equal(Wardrobe.bareFeet(Wardrobe.palette('suit', AUTO)), false);
+  assert.equal(Wardrobe.bareFeet({ ...Wardrobe.palette('suit', AUTO), shoes: 'skin' }), true);
 });

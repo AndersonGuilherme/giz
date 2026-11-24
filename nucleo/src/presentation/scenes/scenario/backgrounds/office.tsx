@@ -6,34 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A modern office, giz style: a wide window on a made-up skyline behind the characters, a board of sticky notes, desks
 // with screens on the sides, pendant lamps and a carpet floor; chalk lines on the furniture.
 
-const palette = {
-  wallTop: '#8ea3ab',
-  wall: '#b9c7cc',
-  frame: '#3d4a52',
-  glassTop: '#8fc6dd',
-  glassBottom: '#e3f3f6',
-  city: '#86aebb',
-  cityNear: '#6d98a6',
-  board: '#f3efe2',
-  note1: '#f2b134',
-  note2: '#e8735a',
-  note3: '#8fe3b0',
-  desk: '#f3efe2',
-  deskLeg: '#3d4a52',
-  screen: '#2a3634',
-  screenLight: '#5fc4b0',
-  chair: '#3d6fb0',
-  lamp: '#2a3634',
-  light: '#fff1c4',
-  floorFar: '#7d8d94',
-  floor: '#6a7a82',
-  seam: '#56656c',
-  leaves: '#4f8a5b',
-  leavesDark: '#3c6e48',
-  pot: '#f2b134',
-  foreground: '#22302f',
-};
-
 // The window: glass, a skyline of plain towers and the mullions, `wide` × 300 units centered on (0, 0); the scene gives
 // it the backdrop's focus width, so it stays between the characters in 16:9.
 const Window: FC<Readonly<{ colors: Palette; wide: number }>> = ({ colors, wide }) => {
@@ -113,4 +85,4 @@ const Plant: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Plant colors={layer.colors} /></CornerProps>;
 
-export const office: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const office: VectorBackgroundModel = { layers: [Back, Middle, Front] };

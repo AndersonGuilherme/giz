@@ -58,3 +58,11 @@ test('a single presenter stands alone in the middle of its place; nobody is no s
 test('more than two presenters is a readable error', () => {
   assert.throws(() => LessonPresenters.beside(['lia', 'teo', 'ana'], AspectRatio.HORIZONTAL), /no máximo 2 apresentadores/);
 });
+
+test('16:9 talk stage: the presenters stand above the lesson block caption, so it never covers their feet', () => {
+  const caption = BLOCK_CAPTIONS.rectangle(AspectRatio.HORIZONTAL, 'lesson');
+  for (const spot of LessonPresenters.onStage(DUO, AspectRatio.HORIZONTAL)) {
+    assert.ok(spot.y <= caption.y, `feet at ${spot.y}, caption from ${caption.y}`);
+    assert.ok(spot.y - spot.height >= 0, 'the whole presenter stays in the frame');
+  }
+});

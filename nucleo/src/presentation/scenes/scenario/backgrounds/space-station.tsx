@@ -6,31 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // Inside a space station, giz style: a round window on a ringed planet behind the characters, wall panels with light
 // strips, consoles with screens on the sides, a grid floor and cargo crates; chalk lines on the hull.
 
-const palette = {
-  hullTop: '#2c3848',
-  hull: '#4a5c70',
-  panel: '#56697e',
-  seam: '#36465a',
-  strip: '#8fe3ff',
-  space: '#0d1328',
-  nebula: '#5a3f8a',
-  star: '#f3efe2',
-  planet: '#e8735a',
-  planetShade: '#b5523b',
-  ring: '#f2b134',
-  rim: '#a9b4bd',
-  floorFar: '#6b7787',
-  floor: '#56616f',
-  grid: '#8a96a6',
-  console: '#2a3442',
-  screen: '#5fe3c4',
-  screen2: '#f2b134',
-  button: '#ff6b6b',
-  crate: '#d8dde2',
-  hazard: '#f2b134',
-  foreground: '#141a24',
-};
-
 // The porthole: space with stars, a nebula and a ringed planet, inside a thick rim, 150 units in radius.
 const Porthole: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
@@ -104,4 +79,4 @@ const Crates: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Crates colors={layer.colors} /></CornerProps>;
 
-export const spaceStation: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const spaceStation: VectorBackgroundModel = { layers: [Back, Middle, Front] };

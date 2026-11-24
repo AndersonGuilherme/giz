@@ -33,7 +33,7 @@ export class Timeline {
     const context = { pose: state.pose, poseStart: Frame.of(start), speaking: mouth.speaking, opening: mouth.opening, phase: this.#phase(local.id), fps: Fps.DEFAULT };
     const blink = Blink.for(local.id);
     return CharacterState.of({
-      ...state, ...mouth, blink: blink.closureAt(frame, Fps.DEFAULT), body: body.offsetAt(frame, context),
+      ...state, ...mouth, blink: blink.closureAt(frame, Fps.DEFAULT), body: body.offsetAt(frame, context), seconds: frame.value() / Fps.DEFAULT.value(),
     });
   }
 

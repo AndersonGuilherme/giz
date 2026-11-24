@@ -7,32 +7,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // moon and curtains behind the characters, crooked portraits of a cat and of a round ghost, cobwebs, a grandfather
 // clock, a candelabra and a dusty rug; chalk lines on the furniture. Nothing gory.
 
-const palette = {
-  wallTop: '#2f2640',
-  wall: '#4a3f5e',
-  stripe: '#55496b',
-  trim: '#2a2236',
-  night: '#2b3a5c',
-  moon: '#f3efe2',
-  curtain: '#7a3b5a',
-  curtainShade: '#5e2c46',
-  frame: '#b08a4a',
-  portrait: '#6b5a7a',
-  cat: '#1c1626',
-  catEye: '#f2d16b',
-  ghost: '#e9e6f2',
-  web: '#d9d4e8',
-  wood: '#4a3328',
-  clockFace: '#efe6d2',
-  candle: '#f3efe2',
-  flame: '#ffd98a',
-  floorFar: '#6b5242',
-  floor: '#5b4537',
-  plank: '#45342a',
-  rug: '#6e3550',
-  foreground: '#17121f',
-};
-
 const Window: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -100 150 V -60 Q -100 -160 0 -160 Q 100 -160 100 -60 V 150 Z" fill={colors.night} chalk={{ seed: 'haunted-window', width: 5 }} />
@@ -136,4 +110,4 @@ const CandleStand: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><CandleStand colors={layer.colors} /></CornerProps>;
 
-export const hauntedHouse: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const hauntedHouse: VectorBackgroundModel = { layers: [Back, Middle, Front] };

@@ -17,12 +17,14 @@ import { Script } from '../../src/domain/script/Script.ts';
 import { CharacterId } from '../../src/domain/values/CharacterId.ts';
 import { Language } from '../../src/domain/values/Language.ts';
 import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
+import { FakeRigCatalog } from '../doubles/FakeRigCatalog.ts';
 
 type TestLine = { text?: string; scene?: Scene; beats?: Beat[]; holdAfter?: { seconds: number; label: string } };
 
 type Extras = Readonly<{ warnings?: string[]; format?: Format; captionStyle?: CaptionStyle; withBody?: string[]; chapters?: string[] }>;
 
-const member = (id: string) => Character.of(CharacterId.of(id), { name: id, rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
+const member = (id: string, parameters: Record<string, number> = {}) =>
+  Character.of(CharacterId.of(id), { name: id, rig: 'test', parameters, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
 
 const TALK: Scene = { type: 'talk' };
 const NO_EXTRAS = { warnings: [], format: 'lesson', withBody: ['ana'], chapters: ['Abertura'] } as const;
@@ -35,13 +37,13 @@ function project(lines: TestLine[], aspect: string, extras: Extras = {}): Projec
     Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene: scene ?? (i === 0 ? TALK : undefined), beats, holdAfter }));
   return Project.of(
     { title: 'T', format, language: Language.PORTUGUESE, aspect: AspectRatio.of(aspect), ...(captionStyle ? { captionStyle } : {}), voice: { provider: 'qwen' } },
-    { cast: Cast.of(withBody.map(member)), script: Script.of(chapters, Lines.of(list)), warnings },
+    { cast: Cast.of(withBody.map((id) => member(id))), script: Script.of(chapters, Lines.of(list)), warnings },
   );
 }
 
 const title = (text: string): Scene => ({ type: 'title', overline: 'Aula 1', title: text, subtitle: 'Uma introdução' });
 const projectWithTitle = (text: string, aspect: string) => project([{ scene: title(text) }], aspect);
-const check = (p: Project, layouts = createLayoutRegistry(), captions: Readonly<Record<CaptionStyle, CaptionLayout>> = CAPTION_LAYOUTS) => new CheckProject({ layouts, captions }).run(p);
+const check = (p: Project, layouts = createLayoutRegistry(), captions: Readonly<Record<CaptionStyle, CaptionLayout>> = CAPTION_LAYOUTS) => new CheckProject({ layouts, captions, rigs: new FakeRigCatalog() }).run(p);
 
 test('an 80-character title without spaces does not fit and is a check error', () => {
   const r = check(projectWithTitle('A'.repeat(80), '9:16'));
@@ -167,4 +169,32 @@ test('the hold label is checked against the scene, not against the caption it re
 test('code opening on screen gets the reading hold label in the check too', () => {
   const code: Scene = { type: 'code', title: 'a.ts', lines: ['const a = 1;'] };
   assert.deepEqual(check(project([{ scene: code }], '16:9')).errors, []);
+});
+test('a character whose drawing (a tall hat, a floating ghost) leaves the frame is a warning, not an error', () => {
+  const scenario: Scene = { type: 'scenario', background: { vector: 'village' }, characters: [{ character: 'ana', position: 'center' }] };
+  const fine = check(project([{ scene: scenario }], '16:9', { format: 'story' }));
+  assert.deepEqual(fine, { errors: [], warnings: [] });
+  // The test rig is 100 units tall: reaching 40 units above its view box puts the top above the 16:9 frame.
+  const tall = Project.of(
+    { title: 'T', format: 'story', language: Language.PORTUGUESE, aspect: AspectRatio.of('16:9'), voice: { provider: 'qwen' } },
+    { cast: Cast.of([member('ana', { top: -40 })]), script: Script.of(['Abertura'], Lines.of([Line.of(CharacterId.of('ana'), { id: '1', chapter: Chapter.of(1), text: 'Oi.', scene: scenario })])), warnings: [] },
+  );
+  const r = check(tall);
+  assert.deepEqual(r.errors, []);
+  assert.deepEqual(r.warnings, [{ line: '1', message: 'personagem ana sai do quadro (chapéu, antena e flutuação incluídos)' }]);
+});
+test('characters under the caption are fine: only leaving the frame warns', () => {
+  const scenario: Scene = { type: 'scenario', background: { vector: 'village' }, characters: [{ character: 'ana', position: 'left' }] };
+  assert.deepEqual(check(project([{ scene: scenario }], '9:16', { format: 'story' })).warnings, []);
+});
+test('lesson presenters leaving the frame warn once, on the first lesson scene of each arrangement', () => {
+  const lesson = Project.of(
+    { title: 'T', format: 'lesson', language: Language.PORTUGUESE, aspect: AspectRatio.of('16:9'), voice: { provider: 'qwen' } },
+    {
+      cast: Cast.of([member('ana', { top: -150 })]),
+      script: Script.of(['Abertura'], Lines.of(['1', '2', '3'].map((id) => Line.of(CharacterId.of('ana'), { id, chapter: Chapter.of(1), text: 'Oi.', scene: id === '3' ? TALK : title('Olá') })))),
+      warnings: [],
+    },
+  );
+  assert.deepEqual(check(lesson).warnings.map((w) => w.line), ['1', '3']);
 });

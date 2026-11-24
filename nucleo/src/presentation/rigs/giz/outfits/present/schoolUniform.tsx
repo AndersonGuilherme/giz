@@ -11,11 +11,11 @@ export const schoolUniform: Clothes = {
   hem: 452,
   Torso: ({ look, palette }) => (
     <g>
-      <Garment path={SHIRT} color={palette.sleeve} look={look} part="shirt" />
+      <Garment path={SHIRT} color={palette.secondary} look={look} part="shirt" />
       <Patch path={TIE} color={palette.accent} look={look} part="tie" width={3} />
       <Garment path={VEST} color={palette.main} look={look} part="vest" />
       <path d="M136,440 Q200,452 264,440" fill="none" stroke={shade(palette.main, 0.25)} strokeWidth={5} />
-      {COLLAR.map((path) => <path key={path} d={path} fill={shade(palette.sleeve, -0.08)} />)}
+      {COLLAR.map((path) => <path key={path} d={path} fill={shade(palette.secondary, -0.08)} />)}
     </g>
   ),
 };

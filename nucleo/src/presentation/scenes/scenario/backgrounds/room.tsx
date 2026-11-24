@@ -8,29 +8,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // rug and a lamp; chalk lines on the furniture.
 // It is also the fallback when a scenario image does not load.
 
-const palette = {
-  wall: '#5f8a7e',
-  wallShade: '#456a61',
-  wainscot: '#33524c',
-  trim: '#22393a',
-  night: '#2b3a5c',
-  moon: '#f3efe2',
-  frame: '#22393a',
-  picture: '#e8735a',
-  book1: '#e8735a',
-  book2: '#3d6fb0',
-  book3: '#f2b134',
-  floor: '#94694c',
-  floorFar: '#a77b5a',
-  plank: '#76523a',
-  rug: '#6c4f7c',
-  rugBorder: '#f2b134',
-  lamp: '#ffd98a',
-  wood: '#5b4033',
-  leaves: '#8fae8b',
-  foreground: '#1c2827',
-};
-
 const Window: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
     <rect x={-150} y={-230} width={300} height={260} rx={8} fill={colors.night} />
@@ -108,4 +85,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const room: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const room: VectorBackgroundModel = { layers: [Back, Middle, Front] };

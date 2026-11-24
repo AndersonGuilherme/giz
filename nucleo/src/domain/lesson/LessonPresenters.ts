@@ -13,8 +13,9 @@ const FACING_EACH_OTHER: readonly Side[] = [1, -1];
 const HORIZONTAL_BESIDE: Arrangement = { feet: 935, height: 430, x: [[0.154], [0.083, 0.224]], sides: [1, 1] };
 // 9:16 beside the content: below it, side by side, facing each other; the caption may cover their legs.
 const VERTICAL_BESIDE: Arrangement = { feet: 1700, height: 600, x: [[0.5], [0.3, 0.7]], sides: FACING_EACH_OTHER };
-// The `talk` scene has no content: the presenters take the stage, larger and centered.
-const HORIZONTAL_STAGE: Arrangement = { feet: 950, height: 700, x: [[0.5], [0.34, 0.66]], sides: FACING_EACH_OTHER };
+// The `talk` scene has no content: the presenters take the stage, larger and centered. In 16:9 their feet rest just
+// above the lesson block caption (y 826), so the caption never covers them.
+const HORIZONTAL_STAGE: Arrangement = { feet: 816, height: 660, x: [[0.5], [0.34, 0.66]], sides: FACING_EACH_OTHER };
 const VERTICAL_STAGE: Arrangement = { feet: 1580, height: 740, x: [[0.5], [0.27, 0.73]], sides: FACING_EACH_OTHER };
 
 function rejectCrowd(ids: readonly string[]): void {

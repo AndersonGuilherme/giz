@@ -6,26 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A 1950s diner, giz style: a mint wall with a coral stripe, a neon milkshake sign behind the characters, menu boards,
 // a long counter with stools, a checkered floor and a jukebox in each corner; chalk lines on the furniture.
 
-const palette = {
-  wallTop: '#4f9a90',
-  wall: '#7cc7b9',
-  stripe: '#e8735a',
-  neon: '#ff8cc6',
-  neonGlow: '#ffb3dc',
-  menu: '#2a3634',
-  menuLine: '#f3efe2',
-  clock: '#f3efe2',
-  counter: '#e8735a',
-  counterTop: '#f3efe2',
-  chrome: '#c9d3d8',
-  stool: '#e8735a',
-  floorLight: '#f3efe2',
-  floorDark: '#2f3b3a',
-  jukebox: '#f2b134',
-  jukeboxLight: '#ffe7a8',
-  foreground: '#3d2a2a',
-};
-
 // The neon sign: a milkshake glass with a straw and a cherry, in pink tubes.
 const Neon: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g fill="none" strokeLinecap="round" strokeLinejoin="round">
@@ -108,4 +88,4 @@ const Jukebox: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Jukebox colors={layer.colors} /></CornerProps>;
 
-export const fiftiesDiner: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const fiftiesDiner: VectorBackgroundModel = { layers: [Back, Middle, Front] };

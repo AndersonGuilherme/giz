@@ -150,6 +150,10 @@ test('an invalid color inside the scene points at the path', async () => {
   const scene = { type: 'scenario', background: { colors: { wall: 'bege' } }, characters: [] };
   await assert.rejects(loadWithScene(scene), /lines\[0\]\.scene\.background\.colors\.wall: cor "bege" inválida/);
 });
+test('a background color key the vector background does not have is an error naming the valid keys', async () => {
+  const scene = { type: 'scenario', background: { vector: 'graveyard', colors: { moon: '#ffeedd', mooon: '#ffeedd' } }, characters: [] };
+  await assert.rejects(loadWithScene(scene), /lines\[0\]\.scene\.background\.colors\.mooon: cor desconhecida no fundo "graveyard" \(use skyTop, skyBottom, star, moon,/);
+});
 test('a HUD bar above 100 is an error', async () => {
   const scene = { type: 'scenario', background: {}, characters: [], hud: { fields: [], bar: { label: 'x', value: 120 } } };
   await assert.rejects(loadWithScene(scene), /scene\.hud\.bar\.value: deve ser no máximo 100/);

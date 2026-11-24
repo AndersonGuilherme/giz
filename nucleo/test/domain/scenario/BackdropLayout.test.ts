@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { BackdropLayout, FOCUS_RADIUS, FRONT_PROP, type Corner } from '../../../src/domain/scenario/BackdropLayout.ts';
 import { HudLayout } from '../../../src/domain/scenario/HudLayout.ts';
-import { TALLEST_HUD } from '../../../src/domain/scenario/SkyLayout.ts';
+import { TALLEST_HUD } from '../../../src/domain/scenario/HudLayout.ts';
 import { Placement } from '../../../src/domain/scenario/Placement.ts';
 import type { Rectangle } from '../../../src/domain/layout/Box.ts';
 import type { CharacterInScene } from '../../../src/domain/script/Scene.ts';

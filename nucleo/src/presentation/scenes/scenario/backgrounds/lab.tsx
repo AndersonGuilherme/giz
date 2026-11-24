@@ -5,26 +5,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A science lab, giz style: lilac tiled wall, shelves of glowing flasks, a molecule poster, a bench with a microscope;
 // chalk lines on the furniture and the glass.
 
-const palette = {
-  wall: '#5d5378',
-  wallShade: '#463e5c',
-  tile: '#6b6189',
-  shelf: '#3a3348',
-  glass: '#e3eef0',
-  liquid1: '#8fe3b0',
-  liquid2: '#f2b134',
-  liquid3: '#ff8c73',
-  poster: '#f3efe2',
-  ink: '#2a2438',
-  floor: '#7c7488',
-  floorFar: '#8e869a',
-  bench: '#2f2a3a',
-  benchTop: '#e9e2d0',
-  metal: '#a9b4bd',
-  lamp: '#f2fff8',
-  foreground: '#1b1724',
-};
-
 const Flask: FC<Readonly<{ x: number; liquid: string; colors: Palette; tall?: number }>> = ({ x, liquid, colors, tall = 70 }) => (
   <g transform={`translate(${x} 0)`}>
     <circle cx={0} cy={-26} r={26} fill={colors.glass} opacity={0.5} />
@@ -101,4 +81,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const lab: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const lab: VectorBackgroundModel = { layers: [Back, Middle, Front] };

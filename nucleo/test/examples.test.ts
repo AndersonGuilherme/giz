@@ -13,8 +13,9 @@ const EXAMPLES = ['internet-story/pt-BR', 'internet-story/en', 'coupon-lesson/pt
 const folderOf = (example: string) => fileURLToPath(new URL(`../examples/${example}`, import.meta.url));
 
 test('the 4 examples load and pass the check without errors', async () => {
-  const repository = new DiskProjectRepository({ catalog: new RigCatalogFromRegistry(rigRegistry) });
-  const check = new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS });
+  const rigs = new RigCatalogFromRegistry(rigRegistry);
+  const repository = new DiskProjectRepository({ catalog: rigs });
+  const check = new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS, rigs });
   for (const example of EXAMPLES) {
     const project = await repository.load(folderOf(example));
     const { errors, warnings } = check.run(project);

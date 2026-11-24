@@ -23,5 +23,6 @@ export function previewState(characterId: string, given: PreviewState, frame: Fr
     opening: 0,
     blink: Blink.for(characterId).closureAt(frame, Fps.DEFAULT),
     body: BODY.offsetAt(frame, context),
+    seconds: frame.value() / Fps.DEFAULT.value(),
   });
 }

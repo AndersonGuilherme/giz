@@ -8,27 +8,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A desert by the river in ancient times, giz style: a big hazy pyramid behind the characters, two small ones, an
 // obelisk with made-up signs, palm trees and dunes; chalk lines on the monuments. Generic archetypes, no real landmark.
 
-const palette = {
-  skyTop: '#3d8fb0',
-  skyBottom: '#f6d9a0',
-  sun: '#fff1c4',
-  pyramid: '#e7bd78',
-  pyramidShade: '#c99a58',
-  block: '#b78a4c',
-  farDunes: '#ebcb8f',
-  dunes: '#dcad66',
-  sand: '#e6bb78',
-  sandNear: '#d29e5e',
-  river: '#4fa3b5',
-  stone: '#cfa56e',
-  glyph: '#7a5232',
-  trunk: '#8a5a3a',
-  leaves: '#4f8a5b',
-  leavesDark: '#3c6e48',
-  jar: '#c4673f',
-  foreground: '#5a3a26',
-};
-
 type Pyramid = Readonly<{ x: number; base: number; apex: number; seed: string }>;
 
 const PyramidShape: FC<Readonly<{ pyramid: Pyramid; colors: Palette; unit: number }>> = ({ pyramid, colors, unit }) => {
@@ -110,4 +89,4 @@ const Jar: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Jar colors={layer.colors} /></CornerProps>;
 
-export const ancientEgypt: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const ancientEgypt: VectorBackgroundModel = { layers: [Back, Middle, Front] };

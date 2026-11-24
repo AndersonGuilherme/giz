@@ -6,30 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A city at night, giz style: stars and a chalk moon clear of the HUD, a skyline of lit towers with a tall antenna
 // tower behind the characters, near buildings with a glowing shop window on each side, a sidewalk and street lamps.
 
-const palette = {
-  skyTop: '#141c33',
-  skyBottom: '#3b4f7a',
-  star: '#f3efe2',
-  moon: '#f3efe2',
-  moonGlow: '#a7c4e8',
-  far: '#26365a',
-  tower: '#2f4270',
-  near: '#1e2a45',
-  window: '#f6d38a',
-  window2: '#8fd3e8',
-  beacon: '#ff8c73',
-  shop: '#ffd9a0',
-  awning: '#e8735a',
-  sidewalk: '#4a5268',
-  curb: '#353c50',
-  road: '#262c3d',
-  stripe: '#f2b134',
-  lamp: '#ffe3a0',
-  post: '#151a26',
-  bin: '#3d6f8a',
-  foreground: '#0e121c',
-};
-
 // Far towers: [x as a fraction of the width, width and height in units].
 const SKYLINE = [[0.03, 120, 300], [0.12, 90, 420], [0.2, 130, 260], [0.32, 100, 360], [0.62, 110, 330], [0.71, 140, 450], [0.82, 100, 290], [0.92, 130, 400]] as const;
 
@@ -114,4 +90,4 @@ const Bin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Bin colors={layer.colors} /></CornerProps>;
 
-export const cityNight: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const cityNight: VectorBackgroundModel = { layers: [Back, Middle, Front] };

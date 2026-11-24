@@ -1,6 +1,7 @@
 import type { FC } from 'react';
 import type { Arm as ArmShape, Hand as HandShape } from '../../../domain/character/ArmGeometry.ts';
 import { Silhouette } from '../../../domain/drawing/Silhouette.ts';
+import { Wardrobe } from '../../../domain/character/wardrobe/Wardrobe.ts';
 import { Chalked } from './Chalked.tsx';
 import { ARM, SHOULDERS } from './measures.ts';
 import { outfitPaletteOf, skinOf, sleeveOf, type Look } from './parameters.ts';
@@ -63,12 +64,12 @@ const Limb: FC<Readonly<{ look: Look; rectangle: Parameters<typeof Silhouette.ro
 );
 
 const Forearm: FC<ArmProps> = ({ arm, side, look }) => {
-  const short = sleeveOf(look) !== 'long';
-  const color = short ? skinOf(look).base : outfitPaletteOf(look).sleeve;
+  const covered = Wardrobe.coversForearm(sleeveOf(look));
+  const color = covered ? outfitPaletteOf(look).secondary : skinOf(look).base;
   return (
     <g transform={`translate(0 ${ARM.upper * arm.foreshortening}) rotate(${-side * arm.elbow})`}>
       <Limb look={look} rectangle={{ x: -ARM.thickness / 2 + 1, y: -12, width: ARM.thickness - 2, height: ARM.fore + 6 }} corner={15} color={color} part="fore" side={side} />
-      {!short && <rect x={-ARM.thickness / 2} y={ARM.fore - 14} width={ARM.thickness} height={10} rx={5} fill={shade(color, -0.25)} />}
+      {covered && <rect x={-ARM.thickness / 2} y={ARM.fore - 14} width={ARM.thickness} height={10} rx={5} fill={shade(color, -0.25)} />}
       <g transform={`rotate(${-side * arm.wrist} 0 ${ARM.fore})`}>
         <Hand shape={arm.hand} side={side} look={look} />
       </g>
@@ -76,19 +77,16 @@ const Forearm: FC<ArmProps> = ({ arm, side, look }) => {
   );
 };
 
-// How far the sleeve reaches down the upper arm (`length`); a long sleeve covers the forearm too.
-const SLEEVE_LENGTHS = { bare: () => 0, short: (length: number) => Math.min(length, 46), long: (length: number) => length + 12 } as const;
-
 /** Upper arm (shoulder → elbow) and forearm, each with its own pivot; short sleeves and bare arms show the skin. */
 export const Arm: FC<ArmProps> = (props) => {
   const { arm, side, look } = props;
   const shoulder = side < 0 ? SHOULDERS.left : SHOULDERS.right;
   const length = ARM.upper * arm.foreshortening;
-  const sleeve = SLEEVE_LENGTHS[sleeveOf(look)](length);
+  const sleeve = Wardrobe.sleeveLength(sleeveOf(look), ARM.upper, length);
   return (
     <g transform={`translate(${shoulder.x} ${shoulder.y}) rotate(${-side * arm.shoulder})`}>
       <Limb look={look} rectangle={{ x: -ARM.thickness / 2, y: -14, width: ARM.thickness, height: length + 26 }} corner={16} color={skinOf(look).base} part="upper" side={side} />
-      {sleeve > 0 && <Limb look={look} rectangle={{ x: -ARM.thickness / 2 - 2, y: -16, width: ARM.thickness + 4, height: sleeve + 16 }} corner={17} color={outfitPaletteOf(look).sleeve} part="sleeve" side={side} />}
+      {sleeve > 0 && <Limb look={look} rectangle={{ x: -ARM.thickness / 2 - 2, y: -16, width: ARM.thickness + 4, height: sleeve + 16 }} corner={17} color={outfitPaletteOf(look).secondary} part="sleeve" side={side} />}
       <Forearm {...props} />
     </g>
   );

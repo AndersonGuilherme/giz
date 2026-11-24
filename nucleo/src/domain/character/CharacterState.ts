@@ -12,6 +12,8 @@ export type StateData = Readonly<{
   opening: number; // speech volume, from 0 to 1
   blink: number; // eye closure, from 0 to 1
   body: BodyOffset;
+  /** Video time of the state, in seconds from the start (absent in sheets and stills: 0). */
+  seconds?: number;
 }>;
 
 /** Everything that defines how a character looks in a frame; Task 9 builds it with `CharacterState.of(...)`. */
@@ -56,5 +58,10 @@ export class CharacterState {
 
   bodyOffset(): BodyOffset {
     return this.#data.body;
+  }
+
+  /** The time on the whole video: motion that must not restart with each segment (a ghost's bob) follows this. */
+  videoSeconds(): number {
+    return this.#data.seconds ?? 0;
   }
 }

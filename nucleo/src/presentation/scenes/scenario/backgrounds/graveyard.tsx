@@ -7,30 +7,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // windows behind the characters, a curly bare tree, two friendly bats, rounded headstones with a flower carved on
 // them, smiling pumpkin lanterns and bands of fog. No skulls, no bones, nothing gory.
 
-const palette = {
-  skyTop: '#1d1f3a',
-  skyBottom: '#4f5584',
-  star: '#f3efe2',
-  moon: '#f3efe2',
-  moonGlow: '#a7c4e8',
-  hills: '#2c3352',
-  chapel: '#3b3f63',
-  roof: '#262945',
-  window: '#ffd98a',
-  tree: '#1f2238',
-  bat: '#151729',
-  grassFar: '#3a5656',
-  grass: '#2f4a4a',
-  stone: '#8a8fa8',
-  stoneShade: '#6b6f88',
-  carving: '#5a5e78',
-  fence: '#1a1c2e',
-  pumpkin: '#f2a14a',
-  pumpkinFace: '#5a2e14',
-  fog: '#c9d3f0',
-  foreground: '#121424',
-};
-
 const Chapel: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -20 -250 L 0 -300 L 20 -250 Z" fill={colors.roof} chalk={{ seed: 'grave-spire', width: 4 }} />
@@ -127,4 +103,4 @@ const Front: FC<LayerProps> = (layer) => (
   </>
 );
 
-export const graveyard: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const graveyard: VectorBackgroundModel = { layers: [Back, Middle, Front] };

@@ -394,8 +394,8 @@ objetos da camada da frente e o ponto de destaque (uma janela, um monumento) ent
 cabeças, abaixo do HUD, em 9:16. O destaque cabe num raio de 150 unidades; um destaque largo (o janelão do escritório,
 a verga da vela) usa a largura de destaque, que fica entre os dois personagens em 16:9. Assim cada fundo funciona nas duas proporções.
 
-`colors` troca cores da paleta, uma a uma. Os nomes ficam no começo de cada arquivo em
-`src/presentation/scenes/scenario/backgrounds/` (por exemplo `skyTop`, `skyBottom` e `window` na `street`).
+`colors` troca cores da paleta, uma a uma. Os nomes ficam em `src/domain/scenario/palettes/` (por exemplo `skyTop`,
+`skyBottom` e `window` na `street`). Um nome que o fundo não tem é erro na validação, com a lista dos nomes válidos.
 
 ```json
 { "background": { "vector": "street", "colors": { "skyTop": "#0b1230", "skyBottom": "#3a2a5a" } } }

@@ -8,7 +8,7 @@ export const hiVis: Clothes = {
   hem: 452,
   Torso: ({ look, palette }) => (
     <g>
-      <Garment path={SHIRT} color={palette.sleeve} look={look} part="shirt" />
+      <Garment path={SHIRT} color={palette.secondary} look={look} part="shirt" />
       {VEST.map((path, index) => <Garment key={path} path={path} color={palette.main} look={look} part={`vest-${index}`} />)}
       {[372, 420].map((y) => (
         <g key={y} fill={palette.accent}>

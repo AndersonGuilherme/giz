@@ -5,26 +5,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // An open field on a warm afternoon, giz style: teal sky with chalk clouds, layered hills with chalk ridges, a meadow
 // with a lone tree, a fence and flowers.
 
-const palette = {
-  skyTop: '#6fa6b4',
-  skyBottom: '#efe4c4',
-  sun: '#fff1c1',
-  cloud: '#f6f1e4',
-  farHills: '#5e8f8a',
-  hills: '#7aa06a',
-  meadow: '#8db06a',
-  meadowNear: '#6c9152',
-  path: '#e6d2a6',
-  trunk: '#6b4a32',
-  leaves: '#4f8a5a',
-  leavesShade: '#3b6e47',
-  fence: '#8a6a50',
-  flower1: '#f2b134',
-  flower2: '#f3efe2',
-  flower3: '#e8735a',
-  grass: '#4b7340',
-};
-
 const Cloud: FC<Readonly<{ color: string; seed: string }>> = ({ color, seed }) => (
   <ChalkShape path="M -120 10 Q -140 -20 -92 -30 Q -80 -66 -36 -60 Q -8 -96 40 -80 Q 90 -86 96 -36 Q 136 -30 120 10 Z" fill={color} chalk={{ seed, width: 4 }} />
 );
@@ -85,4 +65,4 @@ const Front: FC<LayerProps> = ({ colors, width, height, unit }) => {
   );
 };
 
-export const field: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const field: VectorBackgroundModel = { layers: [Back, Middle, Front] };

@@ -75,3 +75,10 @@ test('the pose gesture does not restart when the pose continues into the next li
 test('whoever has no body (the narrator) has no state', () => {
   assert.throws(() => line([segment({ speaker: 'narrator' })]).stateOf(CharacterId.NARRATOR, Frame.of(2)), /narrator.*sem estado/);
 });
+
+test('the state carries the video time, not the segment time: motion like the ghost bob runs on across segments', () => {
+  const timeline = line([segment({}), segment({ lineId: '2', start: 20 })]);
+  assert.equal(timeline.stateOf(ana, Frame.of(19)).videoSeconds(), 19 / 30);
+  assert.equal(timeline.stateOf(ana, Frame.of(20)).videoSeconds(), 20 / 30);
+  assert.equal(timeline.stateOf(ana, Frame.of(35)).videoSeconds(), 35 / 30);
+});

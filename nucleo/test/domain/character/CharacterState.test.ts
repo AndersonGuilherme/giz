@@ -16,3 +16,9 @@ test('keeps what defines the character in the frame', () => {
   assert.equal(state.eyeClosure(), 0);
   assert.equal(state.bodyOffset().y, -1);
 });
+test('without a video time (sheets, stills) the state sits at second 0', () => {
+  const state = CharacterState.of({
+    pose: 'wave', expression: 'happy', look: 'camera', speaking: true, viseme: 'A', opening: 0.8, blink: 0, body: { y: 0, rotation: 0, scale: 1 },
+  });
+  assert.equal(state.videoSeconds(), 0);
+});

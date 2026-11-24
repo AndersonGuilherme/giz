@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { RigDefinition } from '../../../src/presentation/rigs/RigModel.ts';
 import { RigRegistry, rigRegistry } from '../../../src/presentation/rigs/rigRegistry.ts';
+import { RigCatalogFromRegistry } from '../../../src/presentation/rigs/RigCatalogFromRegistry.ts';
 
 const STANCE = { viewBox: { x: 0, y: 0, width: 100, height: 100 }, feet: { x: 50, y: 100 } };
 
@@ -85,4 +86,15 @@ test('every rig declares where its feet touch the ground, inside its view box (g
   }
   assert.equal(rigRegistry.get('giz').stance.feet.y, 590);
   assert.equal(rigRegistry.get('lia-style').stance.feet.y, 570);
+});
+
+test('the catalog gives each giz character its reach: tall hats and a floating ghost rise above a bald head', () => {
+  const catalog = new RigCatalogFromRegistry(rigRegistry);
+  const top = (parameters: Record<string, string>) => catalog.stance('giz', parameters)!.top!;
+  const bald = top({ hair: 'bald' });
+  assert.ok(top({ hair: 'bald', headwear: 'witch-hat' }) < bald - 50, `witch hat ${top({ hair: 'bald', headwear: 'witch-hat' })}`);
+  assert.ok(top({ hair: 'bald', species: 'ghost' }) < bald - 53, 'the ghost floats up to 53 units');
+  assert.ok(top({ hair: 'bald', species: 'robot' }) < bald, 'robot antennae');
+  assert.equal(catalog.stance('lia-style', {})!.top, undefined, 'lia-style keeps its view box');
+  assert.equal(catalog.stance('nope', {}), undefined);
 });

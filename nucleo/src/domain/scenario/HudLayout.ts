@@ -24,6 +24,8 @@ const VERTICAL: Measures = {
   fields: Font.of({ family: 'display', size: 38, lineHeight: 1.25, maximumLines: 1 }),
   bar: Font.of({ family: 'display', size: 28, lineHeight: 1.25, maximumLines: 1 }),
 };
+// The tallest HUD a scene can have (one line of fields and the bar): what the sky and the backdrop keep clear of.
+export const TALLEST_HUD: Hud = { fields: [{ label: 'HUD', value: '1' }], bar: { label: 'HUD', value: 1 } };
 const SEPARATOR = ' · ';
 
 const bottomOf = (rectangle: Rectangle): number => rectangle.y + rectangle.height;

@@ -7,24 +7,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A forum at noon, giz style: a small temple on a hill behind the characters, cypress trees, a colonnade on each side,
 // a paved square with a water basin; chalk lines on the marble. A generic ancient square, no real building.
 
-const palette = {
-  skyTop: '#4f9cc4',
-  skyBottom: '#d7ecef',
-  cloud: '#f3efe2',
-  hills: '#9bb889',
-  hillsFar: '#b6cda0',
-  cypress: '#3f6b4f',
-  marble: '#efe6d2',
-  marbleShade: '#cbbfa6',
-  roof: '#c4673f',
-  floorFar: '#e6d8b8',
-  floor: '#d4c09b',
-  paving: '#b8a586',
-  water: '#6fb7c9',
-  banner: '#c4673f',
-  foreground: '#4a3b33',
-};
-
 // A column `height` units tall standing on (0, 0): base, fluted shaft and capital.
 const Column: FC<Readonly<{ colors: Palette; height: number; seed: string }>> = ({ colors, height, seed }) => (
   <g>
@@ -100,4 +82,4 @@ const Ruin: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Ruin colors={layer.colors} /></CornerProps>;
 
-export const ancientRome: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const ancientRome: VectorBackgroundModel = { layers: [Back, Middle, Front] };

@@ -6,27 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A street of the 1800s at dusk, giz style: narrow row houses with bay windows and chimneys, a gable with a round
 // clock behind the characters, gas lamps, a cobbled street; chalk lines on the houses. A made-up street.
 
-const palette = {
-  skyTop: '#3c4a63',
-  skyBottom: '#b2b7c2',
-  house: '#6b5a6e',
-  house2: '#4f5d6e',
-  house3: '#8a4f45',
-  trim: '#2d2a35',
-  roof: '#3a3346',
-  window: '#f6d38a',
-  clock: '#f3efe2',
-  hands: '#2d2a35',
-  sidewalk: '#8e8c94',
-  cobbleFar: '#77757f',
-  cobble: '#65636e',
-  joint: '#4c4a55',
-  lamp: '#ffd98a',
-  post: '#22262e',
-  crate: '#7a5a3e',
-  foreground: '#1d1b22',
-};
-
 // A house front `wide` × `tall` units standing on (0, 0): roof, chimney, two rows of windows, a door.
 const House: FC<Readonly<{ colors: Palette; wall: string; wide: number; tall: number; seed: string }>> = ({ colors, wall, wide, tall, seed }) => (
   <g>
@@ -104,4 +83,4 @@ const Crate: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Crate colors={layer.colors} /></CornerProps>;
 
-export const victorianStreet: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const victorianStreet: VectorBackgroundModel = { layers: [Back, Middle, Front] };

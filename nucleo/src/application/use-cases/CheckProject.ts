@@ -2,12 +2,15 @@ import type { Project } from '../../domain/project/Project.ts';
 import type { Line } from '../../domain/script/Line.ts';
 import type { CheckReport, LineRule, Problem, ProjectRule } from './check/CheckRule.ts';
 import { layoutRule, type LayoutDependencies } from './check/layoutRule.ts';
+import type { RigCatalog } from '../ports/RigCatalog.ts';
+import { presenterFrameRule, scenarioFrameRule } from './check/characterRules.ts';
 import { beatRule, firstSceneRule, presenterRule } from './check/scriptRules.ts';
 
 export type { CheckReport, Problem } from './check/CheckRule.ts';
 
-type Dependencies = LayoutDependencies;
-type Rules = Readonly<{ projectErrors: readonly ProjectRule[]; lineErrors: readonly LineRule[] }>;
+/** `rigs`: where each character draws and how high it reaches (the characters' frame warnings). */
+type Dependencies = LayoutDependencies & Readonly<{ rigs: RigCatalog }>;
+type Rules = Readonly<Record<'projectErrors' | 'projectWarnings', readonly ProjectRule[]> & Record<'lineErrors' | 'lineWarnings', readonly LineRule[]>>;
 
 function chapterNumber(line: Line): number {
   const chapter = line.chapter();
@@ -33,13 +36,20 @@ export class CheckProject {
   readonly #rules: Rules;
 
   constructor(dependencies: Dependencies) {
-    this.#rules = { projectErrors: [firstSceneRule, presenterRule], lineErrors: [layoutRule(dependencies), beatRule] };
+    const { rigs } = dependencies;
+    this.#rules = {
+      projectErrors: [firstSceneRule, presenterRule],
+      lineErrors: [layoutRule(dependencies), beatRule],
+      projectWarnings: [presenterFrameRule(rigs)],
+      lineWarnings: [scenarioFrameRule(rigs)],
+    };
   }
 
   run(project: Project): CheckReport {
-    const { projectErrors, lineErrors } = this.#rules;
+    const { projectErrors, lineErrors, projectWarnings, lineWarnings } = this.#rules;
     const errors = [...projectErrors.flatMap((rule) => rule(project)), ...lineProblems(project, lineErrors)];
-    const warnings = project.warnings().map((message) => ({ line: '', message }));
+    const loadWarnings = project.warnings().map((message) => ({ line: '', message }));
+    const warnings = [...loadWarnings, ...projectWarnings.flatMap((rule) => rule(project)), ...lineProblems(project, lineWarnings)];
     return { errors, warnings };
   }
 }

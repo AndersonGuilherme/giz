@@ -6,7 +6,8 @@ import { fileURLToPath } from 'node:url';
 import { createLayoutRegistry } from '../../src/domain/layout/defaultLayoutRegistry.ts';
 import { Box } from '../../src/domain/layout/Box.ts';
 import { SafeArea } from '../../src/domain/layout/SafeArea.ts';
-import { VECTOR_BACKGROUNDS } from '../../src/domain/scenario/BackgroundSource.ts';
+import { BackgroundPalette } from '../../src/domain/scenario/BackgroundPalette.ts';
+import { VECTOR_BACKGROUNDS, type VectorBackground } from '../../src/domain/scenario/BackgroundSource.ts';
 import type { ScenarioScene } from '../../src/domain/script/Scene.ts';
 import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
 import { Language } from '../../src/domain/values/Language.ts';
@@ -81,4 +82,19 @@ test('every scene preset, with the most characters, a long HUD and a big text, p
       assert.ok(dressed.outsideOf(nowhere).length >= 3, `${file} ${aspect.text()}: the HUD and the big text are measured`);
     });
   }
+});
+
+test('every scene preset only overrides colors its background has (a typo would silently do nothing)', async () => {
+  const withVector = (await presets()).filter(({ scene }) => scene.background.vector);
+  for (const { file, scene } of withVector) {
+    assert.deepEqual(BackgroundPalette.unknownKeys(scene.background.vector as VectorBackground, scene.background.colors ?? {}), [], file);
+  }
+});
+
+test('every vector background has its palette as domain data, with colors in hex', () => {
+  for (const background of VECTOR_BACKGROUNDS) assert.ok(BackgroundPalette.keys(background).length >= 10, background);
+  const colors = VECTOR_BACKGROUNDS.flatMap((background) => Object.entries(BackgroundPalette.defaults(background)).map(([key, color]) => ({ background, key, color })));
+  for (const { background, key, color } of colors) assert.match(color, /^#[0-9a-f]{6}$/i, `${background}.${key}`);
+  assert.deepEqual(BackgroundPalette.unknownKeys('graveyard', { moon: '#000000', mooon: '#000000' }), ['mooon']);
+  assert.equal(BackgroundPalette.with('graveyard', { moon: '#000000' }).moon, '#000000');
 });

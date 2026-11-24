@@ -44,7 +44,7 @@ export function generateVoices(folder: string, project: Project): GenerateVoices
 }
 
 export function checkProject(): CheckProject {
-  return new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS });
+  return new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS, rigs: new RigCatalogFromRegistry(rigRegistry) });
 }
 
 export function buildTimeline(folder: string): BuildTimeline {

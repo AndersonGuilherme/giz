@@ -6,27 +6,6 @@ import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgro
 // A castle on a hill, giz style: a keep with two round towers and pennants behind the characters, stone walls on the
 // sides, a grassy yard with a dirt path; chalk lines on the stones. A made-up castle.
 
-const palette = {
-  skyTop: '#4b5f7a',
-  skyBottom: '#b3c4cf',
-  cloud: '#dfe6ea',
-  hills: '#6f8f7e',
-  stone: '#9a97a6',
-  stoneShade: '#77748a',
-  stoneDark: '#55536a',
-  roof: '#3d6f8a',
-  pennant: '#e8735a',
-  pennant2: '#f2b134',
-  window: '#f2c46b',
-  gate: '#5b4033',
-  grassFar: '#7da36f',
-  grass: '#5f8a5e',
-  path: '#b5a58a',
-  wood: '#7a5236',
-  hay: '#e6c36a',
-  foreground: '#23262e',
-};
-
 // Battlements along the top of a wall from `left` to `right` (units), at `top`.
 const merlons = (left: number, right: number, top: number) =>
   spread(Math.max(2, Math.round((right - left) / 44)), left, right - 24).map((x) => `M ${x} ${top} h 24 v -26 h -24 Z`).join(' ');
@@ -102,4 +81,4 @@ const Barrel: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 
 const Front: FC<LayerProps> = (layer) => <CornerProps layer={layer}><Barrel colors={layer.colors} /></CornerProps>;
 
-export const medievalCastle: VectorBackgroundModel = { palette, layers: [Back, Middle, Front] };
+export const medievalCastle: VectorBackgroundModel = { layers: [Back, Middle, Front] };
