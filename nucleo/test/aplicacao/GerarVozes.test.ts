@@ -11,6 +11,7 @@ import { Roteiro } from '../../src/dominio/roteiro/Roteiro.ts';
 import { IdPersonagem } from '../../src/dominio/valores/IdPersonagem.ts';
 import { Idioma } from '../../src/dominio/valores/Idioma.ts';
 import { Proporcao } from '../../src/dominio/valores/Proporcao.ts';
+import { AlinhadorFalso } from '../dublês/AlinhadorFalso.ts';
 import { ArmazemEmMemoria } from '../dublês/ArmazemEmMemoria.ts';
 import { FonetizadorFalso } from '../dublês/FonetizadorFalso.ts';
 import { VozFalsa } from '../dublês/VozFalsa.ts';
@@ -32,8 +33,9 @@ function projeto({ textos = ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.']
 function montar() {
   const voz = new VozFalsa();
   const armazem = new ArmazemEmMemoria();
-  const caso = new GerarVozes({ voz, fonetizador: new FonetizadorFalso(), armazem });
-  return { voz, armazem, caso };
+  const alinhador = new AlinhadorFalso();
+  const caso = new GerarVozes({ voz, fonetizador: new FonetizadorFalso(), armazem, alinhador });
+  return { voz, armazem, alinhador, caso };
 }
 
 test('fala com hash igual não é gerada de novo', async () => {
@@ -70,7 +72,7 @@ test('o registro tem um visema por quadro e X no silêncio', async () => {
   const { armazem, caso } = montar();
   await caso.executar(projeto());
   const registro = await armazem.ler('1');
-  assert.equal(registro.visemas.length, Math.ceil(registro.duracaoSegundos * 30));
+  assert.equal(registro.visemas.length, registro.envelope.length);
   assert.equal(registro.visemas[0], 'X');
   assert.equal(registro.visemas.at(-1), 'X');
   assert.match(registro.visemas, /^X+M[MA]+A+X+$/);
@@ -98,4 +100,13 @@ test('o progresso é avisado a cada fala', async () => {
     { feitas: 1, total: 2, idFala: '1', gerada: false },
     { feitas: 2, total: 2, idFala: '2', gerada: false },
   ]);
+});
+
+test('o registro tem o tempo de cada palavra do texto do roteiro (não da pronúncia)', async () => {
+  const { armazem, alinhador, caso } = montar();
+  await caso.executar(projeto({ pronuncia: 'Ói, eu sou a Âna.' }));
+  const registro = await armazem.ler('1');
+  assert.deepEqual(alinhador.textos, ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.']);
+  assert.deepEqual(registro.palavras?.map((p) => p.texto), ['Oi,', 'eu', 'sou', 'a', 'Ana.']);
+  assert.ok(registro.palavras!.at(-1)!.fim <= registro.duracaoSegundos + 1e-9);
 });

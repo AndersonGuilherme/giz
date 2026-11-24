@@ -5,12 +5,13 @@ import type { Projeto } from '../../dominio/projeto/Projeto.ts';
 import type { Fala } from '../../dominio/roteiro/Fala.ts';
 import { Fps } from '../../dominio/valores/Tempo.ts';
 import { arquivoDaVoz, type ArmazemDeVozes } from '../portas/ArmazemDeVozes.ts';
+import type { Alinhador } from '../portas/Alinhador.ts';
 import type { Fonetizador } from '../portas/Fonetizador.ts';
 import type { PedidoDeVoz, ProvedorVoz } from '../portas/ProvedorVoz.ts';
 
 export type Progresso = Readonly<{ feitas: number; total: number; idFala: string; gerada: boolean }>;
 export type RelatorioDeVozes = { geradas: string[]; puladas: string[] };
-type Dependencias = Readonly<{ voz: ProvedorVoz; fonetizador: Fonetizador; armazem: ArmazemDeVozes }>;
+type Dependencias = Readonly<{ voz: ProvedorVoz; fonetizador: Fonetizador; armazem: ArmazemDeVozes; alinhador: Alinhador }>;
 
 const nadaAFazer = () => undefined;
 
@@ -60,17 +61,21 @@ export class GerarVozes {
     const hash = await hashDaFala(projeto, fala, pedido);
     const { armazem } = this.#dependencias;
     if (armazem.hashGravado(fala.id()) === hash) return false;
-    await this.#gravar(pedido, hash);
+    await this.#gravar(fala, pedido, hash);
     return true;
   }
 
-  async #gravar(pedido: PedidoDeVoz, hash: string): Promise<void> {
-    const { voz, armazem } = this.#dependencias;
+  // As palavras vêm do texto do roteiro (o que a legenda mostra), não da pronúncia.
+  async #gravar(fala: Fala, pedido: PedidoDeVoz, hash: string): Promise<void> {
+    const { voz, armazem, alinhador } = this.#dependencias;
     const audio = tratado(await voz.gerar(pedido));
     const envelope = Envelope.medir(audio, Fps.PADRAO);
     const visemas = await this.#visemas(pedido, envelope);
+    const palavras = await alinhador.alinhar(audio, fala.texto(), pedido.idioma);
     const duracao = audio.duracao();
-    const registro = { arquivo: arquivoDaVoz(pedido.idFala), hash, duracaoSegundos: duracao.valor(), envelope: envelope.paraJson(), visemas };
+    const registro = {
+      arquivo: arquivoDaVoz(pedido.idFala), hash, duracaoSegundos: duracao.valor(), envelope: envelope.paraJson(), visemas, palavras: palavras.paraJson(),
+    };
     await armazem.gravar(pedido.idFala, registro, audio);
   }
 

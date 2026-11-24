@@ -3,6 +3,9 @@ import { GerarVozes } from '../../aplicacao/casos-de-uso/GerarVozes.ts';
 import type { ProvedorVoz } from '../../aplicacao/portas/ProvedorVoz.ts';
 import type { RepositorioDeProjeto } from '../../aplicacao/portas/RepositorioDeProjeto.ts';
 import type { Projeto } from '../../dominio/projeto/Projeto.ts';
+import { AlinhadorPorEnvelope } from '../../infraestrutura/alinhamento/AlinhadorPorEnvelope.ts';
+import { AlinhadorWhisper } from '../../infraestrutura/alinhamento/AlinhadorWhisper.ts';
+import { OuvidoWhisper } from '../../infraestrutura/alinhamento/OuvidoWhisper.ts';
 import { ArmazemDeVozesEmDisco } from '../../infraestrutura/disco/ArmazemDeVozesEmDisco.ts';
 import { RepositorioDeProjetoEmDisco } from '../../infraestrutura/disco/RepositorioDeProjetoEmDisco.ts';
 import { FonetizadorEspeak } from '../../infraestrutura/fonetica/FonetizadorEspeak.ts';
@@ -23,5 +26,6 @@ export function repositorioDeProjeto(): RepositorioDeProjeto {
 
 export function gerarVozes(pasta: string, projeto: Projeto): GerarVozes {
   const voz = PROVEDORES[projeto.voz().provedor](pasta, projeto);
-  return new GerarVozes({ voz, fonetizador: new FonetizadorEspeak(), armazem: new ArmazemDeVozesEmDisco(pasta) });
+  const alinhador = new AlinhadorWhisper(new AlinhadorPorEnvelope(), new OuvidoWhisper());
+  return new GerarVozes({ voz, fonetizador: new FonetizadorEspeak(), armazem: new ArmazemDeVozesEmDisco(pasta), alinhador });
 }
