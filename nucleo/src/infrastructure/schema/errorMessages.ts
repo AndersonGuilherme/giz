@@ -1,71 +1,71 @@
 import type { ZodIssue } from 'zod';
-import { ErroDeProjeto, type Problema } from '../../aplicacao/portas/ErroDeProjeto.ts';
+import { ProjectError, type Problem } from '../../application/ports/ProjectError.ts';
 
-type Tradutor = (issue: ZodIssue) => string | undefined;
+type Translator = (issue: ZodIssue) => string | undefined;
 
-const NOMES_DE_TIPO: Record<string, string> = {
+const TYPE_NAMES: Record<string, string> = {
   string: 'texto', number: 'número', boolean: 'verdadeiro ou falso', object: 'objeto', array: 'lista', null: 'nulo',
 };
-const nomeDoTipo = (tipo: string) => NOMES_DE_TIPO[tipo] ?? tipo;
+const typeName = (type: string) => TYPE_NAMES[type] ?? type;
 
-const obrigatorio: Tradutor = (issue) =>
+const required: Translator = (issue) =>
   issue.code === 'invalid_type' && issue.received === 'undefined' ? 'obrigatório' : undefined;
-const tipoErrado: Tradutor = (issue) =>
-  issue.code === 'invalid_type' ? `esperava ${nomeDoTipo(issue.expected)}, veio ${nomeDoTipo(issue.received)}` : undefined;
-const opcaoInvalida: Tradutor = (issue) =>
+const wrongType: Translator = (issue) =>
+  issue.code === 'invalid_type' ? `esperava ${typeName(issue.expected)}, veio ${typeName(issue.received)}` : undefined;
+const invalidOption: Translator = (issue) =>
   issue.code === 'invalid_enum_value' ? `"${issue.received}" inválido (use ${issue.options.join(', ')})` : undefined;
-const tipoDeCenaInvalido: Tradutor = (issue) =>
+const invalidSceneType: Translator = (issue) =>
   issue.code === 'invalid_union_discriminator' ? `tipo inválido (use ${issue.options.join(', ')})` : undefined;
-const literalInvalido: Tradutor = (issue) =>
+const invalidLiteral: Translator = (issue) =>
   issue.code === 'invalid_literal'
     ? `esperava ${JSON.stringify(issue.expected)}, veio ${JSON.stringify(issue.received)}`
     : undefined;
-const pequenoDemais: Tradutor = (issue) => {
+const tooSmall: Translator = (issue) => {
   if (issue.code !== 'too_small') return undefined;
   if (issue.type === 'string') return 'não pode ser vazio';
   return issue.type === 'array' ? `precisa de pelo menos ${issue.minimum} item(ns)` : `deve ser no mínimo ${issue.minimum}`;
 };
-const grandeDemais: Tradutor = (issue) =>
+const tooBig: Translator = (issue) =>
   issue.code === 'too_big' ? `deve ser no máximo ${issue.maximum}` : undefined;
 
-const TRADUTORES = [obrigatorio, tipoErrado, opcaoInvalida, tipoDeCenaInvalido, literalInvalido, pequenoDemais, grandeDemais];
+const TRANSLATORS = [required, wrongType, invalidOption, invalidSceneType, invalidLiteral, tooSmall, tooBig];
 
-function mensagemDaIssue(issue: ZodIssue): string {
-  return TRADUTORES.map((traduzir) => traduzir(issue)).find(Boolean) ?? issue.message;
+function issueMessage(issue: ZodIssue): string {
+  return TRANSLATORS.map((translate) => translate(issue)).find(Boolean) ?? issue.message;
 }
 
-/** `['falas', 0, 'quem']` vira `falas[0].quem`. */
-export function caminhoLegivel(partes: readonly (string | number)[]): string {
-  return partes.reduce<string>((texto, parte) => {
-    if (typeof parte === 'number') return `${texto}[${parte}]`;
-    return texto ? `${texto}.${parte}` : parte;
+/** `['lines', 0, 'speaker']` becomes `lines[0].speaker`. */
+export function readablePath(parts: readonly (string | number)[]): string {
+  return parts.reduce<string>((text, part) => {
+    if (typeof part === 'number') return `${text}[${part}]`;
+    return text ? `${text}.${part}` : part;
   }, '');
 }
 
-function problemasDaIssue(arquivo: string, issue: ZodIssue): Problema[] {
+function issueProblems(file: string, issue: ZodIssue): Problem[] {
   if (issue.code !== 'unrecognized_keys') {
-    return [{ arquivo, caminho: caminhoLegivel(issue.path), mensagem: mensagemDaIssue(issue) }];
+    return [{ file, path: readablePath(issue.path), message: issueMessage(issue) }];
   }
-  return issue.keys.map((chave) => ({ arquivo, caminho: caminhoLegivel([...issue.path, chave]), mensagem: 'campo desconhecido' }));
+  return issue.keys.map((key) => ({ file, path: readablePath([...issue.path, key]), message: 'campo desconhecido' }));
 }
 
-/** Junta os problemas de todos os arquivos para que saiam de uma vez. */
-export class ColetorDeProblemas {
-  readonly #problemas: Problema[] = [];
+/** Gathers the problems of every file so they come out at once. */
+export class ProblemCollector {
+  readonly #problems: Problem[] = [];
 
-  adicionar(problema: Problema): void {
-    this.#problemas.push(problema);
+  add(problem: Problem): void {
+    this.#problems.push(problem);
   }
 
-  adicionarDoZod(arquivo: string, issues: readonly ZodIssue[]): void {
-    issues.forEach((issue) => this.#problemas.push(...problemasDaIssue(arquivo, issue)));
+  addFromZod(file: string, issues: readonly ZodIssue[]): void {
+    issues.forEach((issue) => this.#problems.push(...issueProblems(file, issue)));
   }
 
-  falharSeHouver(): void {
-    if (this.#problemas.length > 0) this.falhar();
+  failIfAny(): void {
+    if (this.#problems.length > 0) this.fail();
   }
 
-  falhar(): never {
-    throw new ErroDeProjeto([...this.#problemas]);
+  fail(): never {
+    throw new ProjectError([...this.#problems]);
   }
 }

@@ -1,74 +1,74 @@
-import { EncaixeDeTexto } from './EncaixeDeTexto.ts';
-import type { Fonte } from './Fonte.ts';
+import { TextFit } from './TextFit.ts';
+import type { Font } from './Font.ts';
 
-/** Retângulo em pixels do vídeo (origem no canto superior esquerdo). */
-export type Retangulo = Readonly<{ x: number; y: number; largura: number; altura: number }>;
-export type TextoDaCaixa = Readonly<{ texto: string; fonte: Fonte }>;
-type Conteudo = Readonly<{ rotulo: string; texto?: TextoDaCaixa }>;
+/** Rectangle in video pixels (origin at the top left corner). */
+export type Rectangle = Readonly<{ x: number; y: number; width: number; height: number }>;
+export type BoxText = Readonly<{ text: string; font: Font }>;
+type Content = Readonly<{ label: string; text?: BoxText }>;
 
-/** Região que um elemento ocupa na tela; o rótulo aparece nas mensagens do `check`. */
-export class Caixa {
-  readonly #retangulo: Retangulo;
-  readonly #conteudo: Conteudo;
+/** Region an element takes on screen; the label shows up in the `check` messages. */
+export class Box {
+  readonly #rectangle: Rectangle;
+  readonly #content: Content;
 
-  private constructor(retangulo: Retangulo, conteudo: Conteudo) {
-    this.#retangulo = retangulo;
-    this.#conteudo = conteudo;
+  private constructor(rectangle: Rectangle, content: Content) {
+    this.#rectangle = rectangle;
+    this.#content = content;
   }
 
-  static de(rotulo: string, retangulo: Retangulo): Caixa {
-    return new Caixa({ ...retangulo }, { rotulo });
+  static of(label: string, rectangle: Rectangle): Box {
+    return new Box({ ...rectangle }, { label });
   }
 
-  static comTexto(rotulo: string, retangulo: Retangulo, texto: TextoDaCaixa): Caixa {
-    return new Caixa({ ...retangulo }, { rotulo, texto });
+  static withText(label: string, rectangle: Rectangle, text: BoxText): Box {
+    return new Box({ ...rectangle }, { label, text });
   }
 
   get x(): number {
-    return this.#retangulo.x;
+    return this.#rectangle.x;
   }
 
   get y(): number {
-    return this.#retangulo.y;
+    return this.#rectangle.y;
   }
 
-  get largura(): number {
-    return this.#retangulo.largura;
+  get width(): number {
+    return this.#rectangle.width;
   }
 
-  get altura(): number {
-    return this.#retangulo.altura;
+  get height(): number {
+    return this.#rectangle.height;
   }
 
-  get rotulo(): string {
-    return this.#conteudo.rotulo;
+  get label(): string {
+    return this.#content.label;
   }
 
-  /** Encostar na borda não é sobrepor. */
-  sobrepoe(outra: Caixa): boolean {
-    const separadasNaHorizontal = this.#direita() <= outra.x || outra.#direita() <= this.x;
-    const separadasNaVertical = this.#base() <= outra.y || outra.#base() <= this.y;
-    return !separadasNaHorizontal && !separadasNaVertical;
+  /** Touching the edge is not overlapping. */
+  overlaps(other: Box): boolean {
+    const apartHorizontally = this.#right() <= other.x || other.#right() <= this.x;
+    const apartVertically = this.#base() <= other.y || other.#base() <= this.y;
+    return !apartHorizontally && !apartVertically;
   }
 
-  dentroDe(outra: Caixa): boolean {
-    const naHorizontal = this.x >= outra.x && this.#direita() <= outra.#direita();
-    return naHorizontal && this.y >= outra.y && this.#base() <= outra.#base();
+  isInside(other: Box): boolean {
+    const horizontally = this.x >= other.x && this.#right() <= other.#right();
+    return horizontally && this.y >= other.y && this.#base() <= other.#base();
   }
 
-  /** Sem texto, não há o que encaixar. */
-  textoCabe(): boolean {
-    const conteudo = this.#conteudo.texto;
-    if (!conteudo) return true;
-    const encaixe = EncaixeDeTexto.medir(conteudo.texto, conteudo.fonte, this.largura);
-    return encaixe.cabe;
+  /** Without text, there is nothing to fit. */
+  textFits(): boolean {
+    const content = this.#content.text;
+    if (!content) return true;
+    const fit = TextFit.measure(content.text, content.font, this.width);
+    return fit.fits;
   }
 
-  #direita(): number {
-    return this.x + this.largura;
+  #right(): number {
+    return this.x + this.width;
   }
 
   #base(): number {
-    return this.y + this.altura;
+    return this.y + this.height;
   }
 }

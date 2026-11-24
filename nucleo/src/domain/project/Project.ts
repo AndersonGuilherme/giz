@@ -1,84 +1,84 @@
-import type { Elenco } from '../elenco/Elenco.ts';
-import type { Roteiro } from '../roteiro/Roteiro.ts';
-import type { Idioma } from '../valores/Idioma.ts';
-import type { Proporcao } from '../valores/Proporcao.ts';
+import type { Cast } from '../cast/Cast.ts';
+import type { Script } from '../script/Script.ts';
+import type { Language } from '../values/Language.ts';
+import type { AspectRatio } from '../values/AspectRatio.ts';
 
-export const FORMATOS = ['historia', 'aula'] as const;
-export type Formato = (typeof FORMATOS)[number];
+export const FORMATS = ['story', 'lesson'] as const;
+export type Format = (typeof FORMATS)[number];
 
-export const ESTILOS_DE_LEGENDA = ['palavras', 'blocos'] as const;
-export type EstiloDeLegenda = (typeof ESTILOS_DE_LEGENDA)[number];
+export const CAPTION_STYLES = ['words', 'blocks'] as const;
+export type CaptionStyle = (typeof CAPTION_STYLES)[number];
 
-export const PROVEDORES_DE_VOZ = ['qwen', 'arquivo'] as const;
-export const MODELOS_DE_VOZ = ['0.6b', '1.7b'] as const;
-export type VozDoProjeto = Readonly<{
-  provedor: (typeof PROVEDORES_DE_VOZ)[number];
-  modelo?: (typeof MODELOS_DE_VOZ)[number];
+export const VOICE_PROVIDERS = ['qwen', 'recording'] as const;
+export const VOICE_MODELS = ['0.6b', '1.7b'] as const;
+export type ProjectVoice = Readonly<{
+  provider: (typeof VOICE_PROVIDERS)[number];
+  model?: (typeof VOICE_MODELS)[number];
 }>;
 
-export type FichaDoProjeto = Readonly<{
-  titulo: string;
-  formato: Formato;
-  idioma: Idioma;
-  proporcao: Proporcao;
-  marca?: string;
-  estiloDeLegenda: EstiloDeLegenda;
-  voz: VozDoProjeto;
+export type ProjectProfile = Readonly<{
+  title: string;
+  format: Format;
+  language: Language;
+  aspect: AspectRatio;
+  brand?: string;
+  captionStyle: CaptionStyle;
+  voice: ProjectVoice;
 }>;
 
-/** `avisos` são problemas que não impedem a carga (por exemplo, uma imagem de cenário ausente). */
-export type ConteudoDoProjeto = Readonly<{ elenco: Elenco; roteiro: Roteiro; avisos: readonly string[] }>;
+/** `warnings` are problems that do not prevent loading (for example, a missing scenario image). */
+export type ProjectContent = Readonly<{ cast: Cast; script: Script; warnings: readonly string[] }>;
 
-export class Projeto {
-  readonly #ficha: FichaDoProjeto;
-  readonly #conteudo: ConteudoDoProjeto;
+export class Project {
+  readonly #profile: ProjectProfile;
+  readonly #content: ProjectContent;
 
-  private constructor(ficha: FichaDoProjeto, conteudo: ConteudoDoProjeto) {
-    this.#ficha = ficha;
-    this.#conteudo = conteudo;
+  private constructor(profile: ProjectProfile, content: ProjectContent) {
+    this.#profile = profile;
+    this.#content = content;
   }
 
-  static de(ficha: FichaDoProjeto, conteudo: ConteudoDoProjeto): Projeto {
-    return new Projeto(ficha, { ...conteudo, avisos: [...conteudo.avisos] });
+  static of(profile: ProjectProfile, content: ProjectContent): Project {
+    return new Project(profile, { ...content, warnings: [...content.warnings] });
   }
 
-  titulo(): string {
-    return this.#ficha.titulo;
+  title(): string {
+    return this.#profile.title;
   }
 
-  idioma(): Idioma {
-    return this.#ficha.idioma;
+  language(): Language {
+    return this.#profile.language;
   }
 
-  proporcao(): Proporcao {
-    return this.#ficha.proporcao;
+  aspect(): AspectRatio {
+    return this.#profile.aspect;
   }
 
-  formato(): Formato {
-    return this.#ficha.formato;
+  format(): Format {
+    return this.#profile.format;
   }
 
-  marca(): string | undefined {
-    return this.#ficha.marca;
+  brand(): string | undefined {
+    return this.#profile.brand;
   }
 
-  estiloDeLegenda(): EstiloDeLegenda {
-    return this.#ficha.estiloDeLegenda;
+  captionStyle(): CaptionStyle {
+    return this.#profile.captionStyle;
   }
 
-  voz(): VozDoProjeto {
-    return this.#ficha.voz;
+  voice(): ProjectVoice {
+    return this.#profile.voice;
   }
 
-  elenco(): Elenco {
-    return this.#conteudo.elenco;
+  cast(): Cast {
+    return this.#content.cast;
   }
 
-  roteiro(): Roteiro {
-    return this.#conteudo.roteiro;
+  script(): Script {
+    return this.#content.script;
   }
 
-  avisos(): readonly string[] {
-    return this.#conteudo.avisos;
+  warnings(): readonly string[] {
+    return this.#content.warnings;
   }
 }

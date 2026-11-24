@@ -1,5 +1,5 @@
-import type { Idioma } from '../../dominio/valores/Idioma.ts';
+import type { Language } from '../../domain/values/Language.ts';
 
-export interface Fonetizador {
-  ipa(texto: string, idioma: Idioma): Promise<string>;
+export interface Phonemizer {
+  ipa(text: string, language: Language): Promise<string>;
 }

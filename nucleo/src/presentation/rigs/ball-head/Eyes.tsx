@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { EyesState } from '../../../dominio/personagem/FaceGeometry.ts';
+import type { EyesState } from '../../../domain/character/FaceGeometry.ts';
 import { EYES, HEAD } from './measures.ts';
 import type { Look } from './parameters.ts';
 import { useSvgId } from './svg.ts';

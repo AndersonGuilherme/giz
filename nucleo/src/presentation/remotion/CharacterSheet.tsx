@@ -1,7 +1,7 @@
 import type { FC } from 'react';
 import { AbsoluteFill } from 'remotion';
-import { EXPRESSOES, POSES } from '../../dominio/elenco/PoseEExpressao.ts';
-import type { Visema } from '../../dominio/fala/Visemas.ts';
+import { EXPRESSIONS, POSES } from '../../domain/cast/PoseAndExpression.ts';
+import type { Viseme } from '../../domain/speech/Visemes.ts';
 import type { RigModel, ValidatedParameters } from '../rigs/RigModel.ts';
 import { rigModels } from '../rigs/rigModels.ts';
 import { Card, FONT, INK, Placed, Section, stillState } from './sheetParts.tsx';
@@ -11,7 +11,7 @@ export type CharacterSheetProps = Readonly<{ rig: string; character?: string; pa
 
 const EXPRESSION_LABELS = ['neutra', 'feliz', 'animada', 'surpresa', 'confusa', 'pensativa', 'cética', 'preocupada', 'brava', 'assustada'];
 const POSE_LABELS = ['neutra', 'explicar', 'apontar', 'acenar', 'levantar', 'pensar', 'ombros', 'comemorar', 'mão na cabeça', 'mãos na boca'];
-const VISEMES: readonly (readonly [Visema, string])[] = [
+const VISEMES: readonly (readonly [Viseme, string])[] = [
   ['X', 'X repouso'], ['M', 'M  m b p'], ['A', 'A  a'], ['E', 'E  e é'], ['I', 'I  i'],
   ['O', 'O  o ó'], ['U', 'U  u'], ['F', 'F  f v'], ['C', 'C  consoante'],
 ];
@@ -26,7 +26,7 @@ const Expressions: FC<Sheet> = ({ model, parameters }) => {
   const scale = scaleOf(height);
   return (
     <Section title="EXPRESSÕES">
-      {EXPRESSOES.map((expression, index) => (
+      {EXPRESSIONS.map((expression, index) => (
         <Card key={expression} {...card} label={EXPRESSION_LABELS[index] ?? expression} clip>
           <Placed left={card.width / 2 - 260 * scale} top={card.height * 0.56 - 195 * scale}>
             <model.Component state={stillState({ expression })} parameters={parameters} height={height} side={1} />

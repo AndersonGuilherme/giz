@@ -1,52 +1,52 @@
 import { createRequire } from 'node:module';
-import type { Fonetizador } from '../../aplicacao/portas/Fonetizador.ts';
-import type { Idioma } from '../../dominio/valores/Idioma.ts';
-import { normalizarGeral, normalizarPtBr } from './normalizacao.ts';
+import type { Phonemizer } from '../../application/ports/Phonemizer.ts';
+import type { Language } from '../../domain/values/Language.ts';
+import { normalizeGeneral, normalizePtBr } from './normalization.ts';
 
-type TrabalhadorEspeak = { set_voice(voz: string): void; synthesize_ipa(texto: string): { ipa: string } };
+type EspeakWorker = { set_voice(voice: string): void; synthesize_ipa(text: string): { ipa: string } };
 
-const NORMALIZADORES: Readonly<Record<string, (ipa: string) => string>> = {
-  'pt-BR': normalizarPtBr,
-  en: normalizarGeral,
+const NORMALIZERS: Readonly<Record<string, (ipa: string) => string>> = {
+  'pt-BR': normalizePtBr,
+  en: normalizeGeneral,
 };
 
-// O espeak é carregado (WASM) uma vez por processo e reaproveitado por todas as instâncias.
-let trabalhador: Promise<TrabalhadorEspeak> | undefined;
+// espeak is loaded (WASM) once per process and reused by every instance.
+let worker: Promise<EspeakWorker> | undefined;
 
-async function carregarEspeak(): Promise<TrabalhadorEspeak> {
-  const requisitar = createRequire(import.meta.url);
-  const fabrica = (await import(requisitar.resolve('@echogarden/espeak-ng-emscripten'))).default;
-  return new (await fabrica()).eSpeakNGWorker() as TrabalhadorEspeak;
+async function loadEspeak(): Promise<EspeakWorker> {
+  const require = createRequire(import.meta.url);
+  const factory = (await import(require.resolve('@echogarden/espeak-ng-emscripten'))).default;
+  return new (await factory()).eSpeakNGWorker() as EspeakWorker;
 }
 
-// O trabalhador tem uma voz ativa só: as chamadas entram numa fila para não trocar a voz no meio de outra.
-let fila: Promise<unknown> = Promise.resolve();
+// The worker has a single active voice: calls go into a queue so the voice is not switched in the middle of another call.
+let queue: Promise<unknown> = Promise.resolve();
 
-export class FonetizadorEspeak implements Fonetizador {
-  ipa(texto: string, idioma: Idioma): Promise<string> {
-    const resultado = fila.then(() => this.#fonetizar(texto, idioma));
-    fila = resultado.catch(() => undefined);
-    return resultado;
+export class EspeakPhonemizer implements Phonemizer {
+  ipa(text: string, language: Language): Promise<string> {
+    const result = queue.then(() => this.#phonemize(text, language));
+    queue = result.catch(() => undefined);
+    return result;
   }
 
-  async #fonetizar(texto: string, idioma: Idioma): Promise<string> {
-    trabalhador ??= carregarEspeak();
-    const espeak = await trabalhador;
-    espeak.set_voice(idioma.vozEspeak());
-    const normalizar = NORMALIZADORES[idioma.codigo()] ?? normalizarGeral;
-    const trechos = [...texto.matchAll(/([^,.;:!?…]+)([,.;:!?…]*)/g)];
-    const fonetizarTrecho = (palavras: string): string => {
-      const linhas = espeak.synthesize_ipa(palavras).ipa.split('\n').filter(Boolean);
-      return normalizar(linhas.map((linha) => linha.replace(/_/g, '')).join(' '));
+  async #phonemize(text: string, language: Language): Promise<string> {
+    worker ??= loadEspeak();
+    const espeak = await worker;
+    espeak.set_voice(language.espeakVoice());
+    const normalize = NORMALIZERS[language.code()] ?? normalizeGeneral;
+    const chunks = [...text.matchAll(/([^,.;:!?…]+)([,.;:!?…]*)/g)];
+    const phonemizeChunk = (words: string): string => {
+      const lines = espeak.synthesize_ipa(words).ipa.split('\n').filter(Boolean);
+      return normalize(lines.map((line) => line.replace(/_/g, '')).join(' '));
     };
-    return trechos
-      .map(([, palavras, pontuacao]) => this.#trecho(fonetizarTrecho, palavras!.trim(), pontuacao!))
+    return chunks
+      .map(([, words, punctuation]) => this.#chunk(phonemizeChunk, words!.trim(), punctuation!))
       .filter(Boolean)
       .join(' ');
   }
 
-  #trecho(fonetizar: (palavras: string) => string, palavras: string, pontuacao: string): string {
-    if (!palavras) return '';
-    return fonetizar(palavras) + pontuacao.replace('…', '...').slice(0, 3);
+  #chunk(phonemize: (words: string) => string, words: string, punctuation: string): string {
+    if (!words) return '';
+    return phonemize(words) + punctuation.replace('…', '...').slice(0, 3);
   }
 }

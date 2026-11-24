@@ -1,45 +1,45 @@
 import { z } from 'zod';
-import { DIRECOES, POSICOES_NOMEADAS, type Cena } from '../../dominio/roteiro/Cena.ts';
-import { esquemasDasCenasDeAula } from './esquemaDasCenasDeAula.ts';
+import { DIRECTIONS, NAMED_POSITIONS, type Scene } from '../../domain/script/Scene.ts';
+import { lessonSceneSchemas } from './lessonSceneSchemas.ts';
 import {
-  esquemaDeCamera,
-  esquemaDeEfeito,
-  esquemaDePonto,
-  esquemaDeTextoGrande,
-  esquemaDoHud,
-} from './esquemaDosElementosDeCena.ts';
-import { esquemaDeCor, esquemaDeIdDePersonagem, textoPreenchido } from './refinamentos.ts';
+  cameraSchema,
+  effectSchema,
+  pointSchema,
+  bigTextSchema,
+  hudSchema,
+} from './sceneElementSchemas.ts';
+import { colorSchema, characterIdSchema, nonEmptyText } from './refinements.ts';
 
-const esquemaDoPersonagemEmCena = z
+const characterInSceneSchema = z
   .object({
-    quem: esquemaDeIdDePersonagem,
-    posicao: z.union([z.enum(POSICOES_NOMEADAS), esquemaDePonto]),
-    escala: z.number().positive().optional(),
-    direcao: z.enum(DIRECOES).optional(),
+    character: characterIdSchema,
+    position: z.union([z.enum(NAMED_POSITIONS), pointSchema]),
+    scale: z.number().positive().optional(),
+    direction: z.enum(DIRECTIONS).optional(),
   })
   .strict();
 
-const esquemaDoFundo = z
+const backgroundSchema = z
   .object({
-    imagem: textoPreenchido.optional(),
-    vetorial: textoPreenchido.optional(),
-    cores: z.record(esquemaDeCor).optional(),
+    image: nonEmptyText.optional(),
+    vector: nonEmptyText.optional(),
+    colors: z.record(colorSchema).optional(),
   })
   .strict();
 
-const esquemaDoCenario = z
+const scenarioSchema = z
   .object({
-    tipo: z.literal('cenario'),
-    fundo: esquemaDoFundo,
-    personagens: z.array(esquemaDoPersonagemEmCena),
-    camera: esquemaDeCamera.optional(),
-    efeitos: z.array(esquemaDeEfeito).optional(),
-    hud: esquemaDoHud.optional(),
-    destaque: esquemaDeTextoGrande.optional(),
+    type: z.literal('scenario'),
+    background: backgroundSchema,
+    characters: z.array(characterInSceneSchema),
+    camera: cameraSchema.optional(),
+    effects: z.array(effectSchema).optional(),
+    hud: hudSchema.optional(),
+    highlight: bigTextSchema.optional(),
   })
   .strict();
 
-export const esquemaDaCena: z.ZodType<Cena, z.ZodTypeDef, unknown> = z.discriminatedUnion('tipo', [
-  esquemaDoCenario,
-  ...esquemasDasCenasDeAula,
+export const sceneSchema: z.ZodType<Scene, z.ZodTypeDef, unknown> = z.discriminatedUnion('type', [
+  scenarioSchema,
+  ...lessonSceneSchemas,
 ]);

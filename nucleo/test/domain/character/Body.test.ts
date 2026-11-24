@@ -1,47 +1,47 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Corpo, type ContextoDoCorpo } from '../../../src/dominio/personagem/Corpo.ts';
-import { Fps, Quadro } from '../../../src/dominio/valores/Tempo.ts';
+import { Body, type BodyContext } from '../../../src/domain/character/Body.ts';
+import { Fps, Frame } from '../../../src/domain/values/Time.ts';
 
-const base: ContextoDoCorpo = { pose: 'neutra', inicioDaPose: Quadro.de(0), falando: false, abertura: 0, fase: 0, fps: Fps.PADRAO };
-const corpo = new Corpo();
+const base: BodyContext = { pose: 'neutral', poseStart: Frame.of(0), speaking: false, opening: 0, phase: 0, fps: Fps.DEFAULT };
+const body = new Body();
 
-test('respiração fica em ±2 px e não gira nem escala', () => {
-  for (let numero = 0; numero < 300; numero += 7) {
-    const d = corpo.deslocamentoEm(Quadro.de(numero), base);
+test('breathing stays within ±2 px and neither rotates nor scales', () => {
+  for (let number = 0; number < 300; number += 7) {
+    const d = body.offsetAt(Frame.of(number), base);
     assert.ok(Math.abs(d.y) <= 2 + 1e-9);
-    assert.equal(d.rotacao, 0);
-    assert.equal(d.escala, 1);
+    assert.equal(d.rotation, 0);
+    assert.equal(d.scale, 1);
   }
 });
-test('o volume puxa o corpo até 5 px para cima, com rotação e escala leves', () => {
-  const calado = corpo.deslocamentoEm(Quadro.de(30), base);
-  const falando = corpo.deslocamentoEm(Quadro.de(30), { ...base, falando: true, abertura: 1 });
-  assert.ok(Math.abs(falando.y - (calado.y - 5)) < 1e-9);
-  assert.ok(Math.abs(falando.escala - 1.006) < 1e-9);
-  assert.ok(Math.abs(falando.rotacao) <= 0.6);
+test('the volume pulls the body up to 5 px, with light rotation and scale', () => {
+  const silent = body.offsetAt(Frame.of(30), base);
+  const speaking = body.offsetAt(Frame.of(30), { ...base, speaking: true, opening: 1 });
+  assert.ok(Math.abs(speaking.y - (silent.y - 5)) < 1e-9);
+  assert.ok(Math.abs(speaking.scale - 1.006) < 1e-9);
+  assert.ok(Math.abs(speaking.rotation) <= 0.6);
 });
-test('sem falar, a abertura é ignorada', () => {
-  assert.deepEqual(corpo.deslocamentoEm(Quadro.de(30), { ...base, abertura: 1 }), corpo.deslocamentoEm(Quadro.de(30), base));
+test('when not speaking, the opening is ignored', () => {
+  assert.deepEqual(body.offsetAt(Frame.of(30), { ...base, opening: 1 }), body.offsetAt(Frame.of(30), base));
 });
-test('comemorar sobe 18 px uma vez, no meio de 0,5 s', () => {
-  const contexto = { ...base, pose: 'comemorar' } as const;
-  const parado = corpo.deslocamentoEm(Quadro.de(15), base);
-  const pico = corpo.deslocamentoEm(Quadro.de(15), { ...contexto, inicioDaPose: Quadro.de(7) });
-  assert.ok(pico.y < parado.y - 17);
+test('celebrate rises 18 px once, halfway through 0.5 s', () => {
+  const context = { ...base, pose: 'celebrate' } as const;
+  const still = body.offsetAt(Frame.of(15), base);
+  const peak = body.offsetAt(Frame.of(15), { ...context, poseStart: Frame.of(7) });
+  assert.ok(peak.y < still.y - 17);
 });
-test('gesto da pose acontece uma vez: 2 s depois do início só sobra a respiração', () => {
-  for (const pose of ['comemorar', 'levantar', 'acenar', 'explicar', 'apontar', 'ombros', 'mao-na-cabeca', 'maos-na-boca'] as const) {
-    const depois = corpo.deslocamentoEm(Quadro.de(90), { ...base, pose, inicioDaPose: Quadro.de(30) });
-    assert.deepEqual(depois, corpo.deslocamentoEm(Quadro.de(90), base), pose);
+test('the pose gesture happens once: 2 s after the start only breathing is left', () => {
+  for (const pose of ['celebrate', 'raise', 'wave', 'explain', 'point', 'shrug', 'hand-on-head', 'hands-on-mouth'] as const) {
+    const later = body.offsetAt(Frame.of(90), { ...base, pose, poseStart: Frame.of(30) });
+    assert.deepEqual(later, body.offsetAt(Frame.of(90), base), pose);
   }
 });
-test('acenar balança e se acalma; pensar mantém a cabeça inclinada', () => {
-  const aceno = corpo.deslocamentoEm(Quadro.de(5), { ...base, pose: 'acenar' });
-  assert.ok(Math.abs(aceno.rotacao) > 0.5);
-  const pensando = corpo.deslocamentoEm(Quadro.de(600), { ...base, pose: 'pensar' });
-  assert.ok(pensando.rotacao > 1.3);
+test('wave swings and settles; think keeps the head tilted', () => {
+  const waving = body.offsetAt(Frame.of(5), { ...base, pose: 'wave' });
+  assert.ok(Math.abs(waving.rotation) > 0.5);
+  const thinkingFace = body.offsetAt(Frame.of(600), { ...base, pose: 'think' });
+  assert.ok(thinkingFace.rotation > 1.3);
 });
-test('fase muda a respiração', () => {
-  assert.notEqual(corpo.deslocamentoEm(Quadro.de(30), base).y, corpo.deslocamentoEm(Quadro.de(30), { ...base, fase: 1.7 }).y);
+test('phase changes the breathing', () => {
+  assert.notEqual(body.offsetAt(Frame.of(30), base).y, body.offsetAt(Frame.of(30), { ...base, phase: 1.7 }).y);
 });

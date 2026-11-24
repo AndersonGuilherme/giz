@@ -1,60 +1,60 @@
-import type { CatalogoDeRigs } from '../../aplicacao/portas/CatalogoDeRigs.ts';
-import type { RepositorioDeProjeto } from '../../aplicacao/portas/RepositorioDeProjeto.ts';
-import { Elenco } from '../../dominio/elenco/Elenco.ts';
-import type { Personagem } from '../../dominio/elenco/Personagem.ts';
-import type { Projeto } from '../../dominio/projeto/Projeto.ts';
-import { esquemaDoPersonagem } from '../esquema/esquemaDoPersonagem.ts';
-import { esquemaDoProjeto, type ProjetoJson } from '../esquema/esquemaDoProjeto.ts';
-import { esquemaDoRoteiro, type RoteiroJson } from '../esquema/esquemaDoRoteiro.ts';
-import { ColetorDeProblemas } from '../esquema/mensagensDeErro.ts';
-import { parametrosDoRig, rigExigidoPresente } from '../esquema/parametrosDoRig.ts';
-import { personagemParaDominio, projetoParaDominio, roteiroParaDominio } from '../esquema/paraDominio.ts';
-import { verificarPersonagensEmCena, verificarQuemFala } from '../esquema/referenciasAoElenco.ts';
-import { avisosDeImagens } from './avisosDeImagens.ts';
-import { lerValidado } from './leituraDeArquivos.ts';
+import type { RigCatalog } from '../../application/ports/RigCatalog.ts';
+import type { ProjectRepository } from '../../application/ports/ProjectRepository.ts';
+import { Cast } from '../../domain/cast/Cast.ts';
+import type { Character } from '../../domain/cast/Character.ts';
+import type { Project } from '../../domain/project/Project.ts';
+import { characterSchema } from '../schema/characterSchema.ts';
+import { projectSchema, type ProjectJson } from '../schema/projectSchema.ts';
+import { scriptSchema, type ScriptJson } from '../schema/scriptSchema.ts';
+import { ProblemCollector } from '../schema/errorMessages.ts';
+import { rigParameters, requiredRigPresent } from '../schema/rigParameters.ts';
+import { characterToDomain, projectToDomain, scriptToDomain } from '../schema/toDomain.ts';
+import { checkCharactersOnStage, checkSpeakers } from '../schema/castReferences.ts';
+import { imageWarnings } from './imageWarnings.ts';
+import { readValidated } from './fileReading.ts';
 
-type Lidos = Readonly<{ projeto: ProjetoJson; roteiro: RoteiroJson; personagens: readonly Personagem[] }>;
+type Loaded = Readonly<{ project: ProjectJson; script: ScriptJson; characters: readonly Character[] }>;
 
-/** Lê `projeto.json`, `roteiro.json` e `elenco/<id>.json`, valida tudo e devolve o projeto do domínio. */
-export class RepositorioDeProjetoEmDisco implements RepositorioDeProjeto {
-  readonly #catalogo: CatalogoDeRigs;
+/** Reads `project.json`, `script.json` and `cast/<id>.json`, validates everything and returns the domain project. */
+export class DiskProjectRepository implements ProjectRepository {
+  readonly #catalog: RigCatalog;
 
-  constructor({ catalogo }: Readonly<{ catalogo: CatalogoDeRigs }>) {
-    this.#catalogo = catalogo;
+  constructor({ catalog }: Readonly<{ catalog: RigCatalog }>) {
+    this.#catalog = catalog;
   }
 
-  async carregar(pasta: string): Promise<Projeto> {
-    const coletor = new ColetorDeProblemas();
-    const projeto = await lerValidado({ pasta, arquivo: 'projeto.json', coletor }, esquemaDoProjeto);
-    const roteiro = await lerValidado({ pasta, arquivo: 'roteiro.json', coletor }, esquemaDoRoteiro);
-    const personagens = await this.#lerPersonagens(pasta, projeto?.elenco ?? [], coletor);
-    if (!projeto || !roteiro || !personagens) return coletor.falhar();
-    return this.#montar(pasta, { projeto, roteiro, personagens }, coletor);
+  async load(folder: string): Promise<Project> {
+    const collector = new ProblemCollector();
+    const project = await readValidated({ folder, file: 'project.json', collector }, projectSchema);
+    const script = await readValidated({ folder, file: 'script.json', collector }, scriptSchema);
+    const characters = await this.#readCharacters(folder, project?.cast ?? [], collector);
+    if (!project || !script || !characters) return collector.fail();
+    return this.#build(folder, { project, script, characters }, collector);
   }
 
-  async #lerPersonagens(pasta: string, ids: readonly string[], coletor: ColetorDeProblemas) {
-    const personagens: (Personagem | undefined)[] = [];
-    for (const id of ids) personagens.push(await this.#lerPersonagem(pasta, id, coletor));
-    const lidos = personagens.filter((personagem): personagem is Personagem => personagem !== undefined);
-    return lidos.length === ids.length ? lidos : undefined;
+  async #readCharacters(folder: string, ids: readonly string[], collector: ProblemCollector) {
+    const characters: (Character | undefined)[] = [];
+    for (const id of ids) characters.push(await this.#readCharacter(folder, id, collector));
+    const loaded = characters.filter((character): character is Character => character !== undefined);
+    return loaded.length === ids.length ? loaded : undefined;
   }
 
-  async #lerPersonagem(pasta: string, id: string, coletor: ColetorDeProblemas): Promise<Personagem | undefined> {
-    const arquivo = `elenco/${id}.json`;
-    const json = await lerValidado({ pasta, arquivo, coletor }, esquemaDoPersonagem);
+  async #readCharacter(folder: string, id: string, collector: ProblemCollector): Promise<Character | undefined> {
+    const file = `cast/${id}.json`;
+    const json = await readValidated({ folder, file, collector }, characterSchema);
     if (!json) return undefined;
-    if (json.id !== id) coletor.adicionar({ arquivo, caminho: 'id', mensagem: `"${json.id}" difere do nome do arquivo (${id})` });
-    if (!rigExigidoPresente(json, { arquivo, coletor })) return undefined;
-    return personagemParaDominio(json, parametrosDoRig(json, this.#catalogo, { arquivo, coletor }));
+    if (json.id !== id) collector.add({ file, path: 'id', message: `"${json.id}" difere do nome do arquivo (${id})` });
+    if (!requiredRigPresent(json, { file, collector })) return undefined;
+    return characterToDomain(json, rigParameters(json, this.#catalog, { file, collector }));
   }
 
-  async #montar(pasta: string, lidos: Lidos, coletor: ColetorDeProblemas): Promise<Projeto> {
-    const elenco = Elenco.de(lidos.personagens);
-    const roteiro = roteiroParaDominio(lidos.roteiro);
-    verificarQuemFala(roteiro, elenco, coletor);
-    verificarPersonagensEmCena(lidos.roteiro, elenco, coletor);
-    coletor.falharSeHouver();
-    const avisos = await avisosDeImagens(pasta, lidos.roteiro);
-    return projetoParaDominio(lidos.projeto, { elenco, roteiro, avisos });
+  async #build(folder: string, loaded: Loaded, collector: ProblemCollector): Promise<Project> {
+    const cast = Cast.of(loaded.characters);
+    const script = scriptToDomain(loaded.script);
+    checkSpeakers(script, cast, collector);
+    checkCharactersOnStage(loaded.script, cast, collector);
+    collector.failIfAny();
+    const warnings = await imageWarnings(folder, loaded.script);
+    return projectToDomain(loaded.project, { cast, script, warnings });
   }
 }

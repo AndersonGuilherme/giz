@@ -1,48 +1,48 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
+import { DomainError } from '../DomainError.ts';
 
-/** `texto` é a família proporcional das legendas e títulos; `mono`, a do código. */
-export const FAMILIAS = ['texto', 'mono'] as const;
-export type Familia = (typeof FAMILIAS)[number];
+/** `text` is the proportional family of captions and titles; `mono`, the one for code. */
+export const FAMILIES = ['text', 'mono'] as const;
+export type Family = (typeof FAMILIES)[number];
 
-/** `alturaDaLinha` é múltiplo do tamanho (1.25 = 125%); `maximoDeLinhas` é quanto cabe na caixa. */
-export type MedidasDaFonte = Readonly<{ tamanho: number; alturaDaLinha: number; maximoDeLinhas: number }>;
-type DadosDaFonte = MedidasDaFonte & Readonly<{ familia: Familia }>;
+/** `lineHeight` is a multiple of the size (1.25 = 125%); `maximumLines` is how many fit in the box. */
+export type FontMeasures = Readonly<{ size: number; lineHeight: number; maximumLines: number }>;
+type FontData = FontMeasures & Readonly<{ family: Family }>;
 
-function recusarMedidaInvalida(medidas: MedidasDaFonte): void {
-  const positivas = [medidas.tamanho, medidas.alturaDaLinha, medidas.maximoDeLinhas].every((medida) => medida > 0);
-  if (positivas && Number.isInteger(medidas.maximoDeLinhas)) return;
-  throw new ErroDeDominio(`fonte inválida: ${JSON.stringify(medidas)} (tamanho, altura da linha e linhas devem ser positivos)`);
+function rejectInvalidMeasures(measures: FontMeasures): void {
+  const positive = [measures.size, measures.lineHeight, measures.maximumLines].every((measurement) => measurement > 0);
+  if (positive && Number.isInteger(measures.maximumLines)) return;
+  throw new DomainError(`fonte inválida: ${JSON.stringify(measures)} (tamanho, altura da linha e linhas devem ser positivos)`);
 }
 
-export class Fonte {
-  readonly #familia: Familia;
-  readonly #medidas: MedidasDaFonte;
+export class Font {
+  readonly #family: Family;
+  readonly #measures: FontMeasures;
 
-  private constructor(familia: Familia, medidas: MedidasDaFonte) {
-    this.#familia = familia;
-    this.#medidas = medidas;
+  private constructor(family: Family, measures: FontMeasures) {
+    this.#family = family;
+    this.#measures = measures;
   }
 
-  static de({ familia, ...medidas }: DadosDaFonte): Fonte {
-    recusarMedidaInvalida(medidas);
-    return new Fonte(familia, medidas);
+  static of({ family, ...measures }: FontData): Font {
+    rejectInvalidMeasures(measures);
+    return new Font(family, measures);
   }
 
-  familia(): Familia {
-    return this.#familia;
+  family(): Family {
+    return this.#family;
   }
 
-  tamanhoBase(): number {
-    return this.#medidas.tamanho;
+  baseSize(): number {
+    return this.#measures.size;
   }
 
-  maximoDeLinhas(): number {
-    return this.#medidas.maximoDeLinhas;
+  maximumLines(): number {
+    return this.#measures.maximumLines;
   }
 
-  /** Altura que o texto ocupa no tamanho base com todas as linhas permitidas. */
-  alturaMaxima(): number {
-    const { tamanho, alturaDaLinha, maximoDeLinhas } = this.#medidas;
-    return Math.round(tamanho * alturaDaLinha * maximoDeLinhas);
+  /** Height the text takes at the base size with every allowed line. */
+  maximumHeight(): number {
+    const { size, lineHeight, maximumLines } = this.#measures;
+    return Math.round(size * lineHeight * maximumLines);
   }
 }

@@ -1,74 +1,74 @@
-import type { Elenco } from '../elenco/Elenco.ts';
-import { Palavras } from '../fala/Palavras.ts';
-import type { Fala, PausaDepois } from '../roteiro/Fala.ts';
-import { Fps, Segundos } from '../valores/Tempo.ts';
-import { efeitosDoTrecho } from './EfeitosSonoros.ts';
-import { estadosDaFala } from './EstadosDaFala.ts';
-import { Marcas } from './Marcas.ts';
-import { pausaDaFala } from './PausaDeLeitura.ts';
-import type { CenaResolvida, EfeitoSonoroJson, TrechoJson } from './PropsDoVideo.ts';
-import type { CenaDaFala } from './SequenciaDeCenas.ts';
-import { TemposDaFala, type VozDaFala } from './TemposDaFala.ts';
+import type { Cast } from '../cast/Cast.ts';
+import { Words } from '../speech/Words.ts';
+import type { Line, HoldAfter } from '../script/Line.ts';
+import { Fps, Seconds } from '../values/Time.ts';
+import { segmentSoundEffects } from './SoundEffects.ts';
+import { lineStates } from './LineStates.ts';
+import { Beats } from './Beats.ts';
+import { lineHold } from './ReadingHold.ts';
+import type { ResolvedScene, SoundEffectJson, SegmentJson } from './VideoProps.ts';
+import type { LineScene } from './SceneSequence.ts';
+import { LineTimings, type LineVoice } from './LineTimings.ts';
 
-export type ContextoDoTrecho = Readonly<{ inicio: number; cena: CenaDaFala; elenco: Elenco }>;
+export type SegmentContext = Readonly<{ start: number; scene: LineScene; cast: Cast }>;
 
-const RESPIRO_EM_SEGUNDOS = 0.35;
+const BREATHER_IN_SECONDS = 0.35;
 
-const emQuadros = (segundos: number): number => Segundos.de(segundos).emQuadros(Fps.PADRAO).valor();
+const toFrames = (seconds: number): number => Seconds.of(seconds).toFrames(Fps.DEFAULT).value();
 
-function duracaoTotal(duracaoDaFala: number, pausa: PausaDepois | undefined): number {
-  return duracaoDaFala + Math.round((pausa?.segundos ?? 0) * Fps.PADRAO.valor()) + emQuadros(RESPIRO_EM_SEGUNDOS);
+function totalDuration(lineDuration: number, hold: HoldAfter | undefined): number {
+  return lineDuration + Math.round((hold?.seconds ?? 0) * Fps.DEFAULT.value()) + toFrames(BREATHER_IN_SECONDS);
 }
 
-// O que a fala tem que só depende dela e da voz gravada.
-function daFala(fala: Fala, voz: VozDaFala, cena: CenaDaFala) {
-  const quem = fala.quem();
-  const palavrasDoRoteiro = Palavras.doTexto(fala.texto());
-  const textos = palavrasDoRoteiro.textos();
-  const tempos = TemposDaFala.de(voz, textos);
-  const pausa = pausaDaFala(fala, cena.aberta ? cena.cena : undefined);
-  return { quem: quem.texto(), tempos, palavras: tempos.emQuadros(textos), pausa };
+// What the line has that depends only on itself and on the recorded voice.
+function fromLine(line: Line, voice: LineVoice, scene: LineScene) {
+  const speaker = line.speaker();
+  const scriptWords = Words.fromText(line.text());
+  const texts = scriptWords.texts();
+  const times = LineTimings.of(voice, texts);
+  const hold = lineHold(line, scene.opened ? scene.scene : undefined);
+  return { speaker: speaker.text(), times, words: times.toFrames(texts), hold };
 }
 
-/** Uma fala posta na linha do tempo: onde começa, quanto dura, a cena, as marcas e o estado de cada personagem. */
-export class TrechoDeFala {
-  readonly #json: TrechoJson;
-  readonly #efeitos: readonly EfeitoSonoroJson[];
+/** A line placed on the timeline: where it starts, how long it lasts, the scene, the beats and the state of each character. */
+export class LineSegment {
+  readonly #json: SegmentJson;
+  readonly #effects: readonly SoundEffectJson[];
 
-  private constructor(json: TrechoJson, efeitos: readonly EfeitoSonoroJson[]) {
+  private constructor(json: SegmentJson, effects: readonly SoundEffectJson[]) {
     this.#json = json;
-    this.#efeitos = efeitos;
+    this.#effects = effects;
   }
 
-  static montar(fala: Fala, voz: VozDaFala, contexto: ContextoDoTrecho): TrechoDeFala {
-    const { quem, tempos, palavras, pausa } = daFala(fala, voz, contexto.cena);
-    const marcas = Marcas.daFala(fala, tempos);
-    const { cena, chave } = contexto.cena;
-    const json: TrechoJson = {
-      idFala: fala.id(), quem, inicio: contexto.inicio, duracaoDaFala: tempos.quadros(), duracaoTotal: duracaoTotal(tempos.quadros(), pausa),
-      cena, chaveDaCena: chave, palavras, marcas: marcas.paraJson(), estados: estadosDaFala(fala, contexto.elenco, cena),
-      audio: voz.arquivo, envelope: [...voz.envelope], visemas: voz.visemas, ...(pausa ? { pausaDepois: pausa } : {}),
+  static build(line: Line, voice: LineVoice, context: SegmentContext): LineSegment {
+    const { speaker, times, words, hold } = fromLine(line, voice, context.scene);
+    const beats = Beats.fromLine(line, times);
+    const { scene, key } = context.scene;
+    const json: SegmentJson = {
+      lineId: line.id(), speaker, start: context.start, lineDuration: times.frames(), totalDuration: totalDuration(times.frames(), hold),
+      scene, sceneKey: key, words, beats: beats.toJson(), states: lineStates(line, context.cast, scene),
+      audio: voice.file, envelope: [...voice.envelope], visemes: voice.visemes, ...(hold ? { holdAfter: hold } : {}),
     };
-    return new TrechoDeFala(json, efeitosDoTrecho(fala, json, contexto.cena));
+    return new LineSegment(json, segmentSoundEffects(line, json, context.scene));
   }
 
-  /** O quadro (absoluto) em que o trecho seguinte começa. */
-  fim(): number {
-    return this.#json.inicio + this.#json.duracaoTotal;
+  /** The (absolute) frame where the next segment starts. */
+  end(): number {
+    return this.#json.start + this.#json.totalDuration;
   }
 
-  /** A cena com as mudanças das marcas deste trecho, para a fala seguinte que a herdar. */
-  cenaDepois(): CenaResolvida {
-    const marcas = Marcas.deJson(this.#json.marcas);
-    return marcas.aplicadasA(this.#json.cena);
+  /** The scene with the beat changes of this segment, for the next line that inherits it. */
+  sceneAfter(): ResolvedScene {
+    const beats = Beats.fromJson(this.#json.beats);
+    return beats.appliedTo(this.#json.scene);
   }
 
-  /** Os sons do trecho, em quadros absolutos. */
-  efeitosSonoros(): EfeitoSonoroJson[] {
-    return [...this.#efeitos];
+  /** The sounds of the segment, in absolute frames. */
+  soundEffects(): SoundEffectJson[] {
+    return [...this.#effects];
   }
 
-  paraJson(): TrechoJson {
+  toJson(): SegmentJson {
     return structuredClone(this.#json);
   }
 }

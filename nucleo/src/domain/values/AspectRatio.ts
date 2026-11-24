@@ -1,39 +1,39 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
+import { DomainError } from '../DomainError.ts';
 
-type TextoDeProporcao = '9:16' | '16:9';
+type AspectRatioText = '9:16' | '16:9';
 
-export class Proporcao {
-  static readonly VERTICAL = new Proporcao(1080, 1920);
-  static readonly HORIZONTAL = new Proporcao(1920, 1080);
+export class AspectRatio {
+  static readonly VERTICAL = new AspectRatio(1080, 1920);
+  static readonly HORIZONTAL = new AspectRatio(1920, 1080);
 
-  readonly #largura: number;
-  readonly #altura: number;
+  readonly #width: number;
+  readonly #height: number;
 
-  private constructor(largura: number, altura: number) {
-    this.#largura = largura;
-    this.#altura = altura;
+  private constructor(width: number, height: number) {
+    this.#width = width;
+    this.#height = height;
   }
 
-  static de(texto: string): Proporcao {
-    const suportadas = [Proporcao.VERTICAL, Proporcao.HORIZONTAL];
-    const encontrada = suportadas.find((proporcao) => proporcao.texto() === texto);
-    if (!encontrada) throw new ErroDeDominio(`proporção "${texto}" não suportada (use 9:16 ou 16:9)`);
-    return encontrada;
+  static of(text: string): AspectRatio {
+    const supported = [AspectRatio.VERTICAL, AspectRatio.HORIZONTAL];
+    const found = supported.find((aspect) => aspect.text() === text);
+    if (!found) throw new DomainError(`proporção "${text}" não suportada (use 9:16 ou 16:9)`);
+    return found;
   }
 
-  largura(): number {
-    return this.#largura;
+  width(): number {
+    return this.#width;
   }
 
-  altura(): number {
-    return this.#altura;
+  height(): number {
+    return this.#height;
   }
 
   vertical(): boolean {
-    return this.#altura > this.#largura;
+    return this.#height > this.#width;
   }
 
-  texto(): TextoDeProporcao {
+  text(): AspectRatioText {
     return this.vertical() ? '9:16' : '16:9';
   }
 }

@@ -1,38 +1,38 @@
-/** Regras de camada do núcleo. A única exceção é src/apresentacao/cli/composicao.ts. */
-const DOMINIO = '^src/dominio/';
-const APLICACAO = '^src/aplicacao/';
-const INFRA = '^src/infraestrutura/';
-const APRESENTACAO = '^src/apresentacao/';
-const COMPOSICAO = '^src/apresentacao/cli/composicao\\.ts$';
+/** Layer rules of the nucleo. The only exception is src/presentation/cli/composition.ts. */
+const DOMAIN = '^src/domain/';
+const APPLICATION = '^src/application/';
+const INFRASTRUCTURE = '^src/infrastructure/';
+const PRESENTATION = '^src/presentation/';
+const COMPOSITION = '^src/presentation/cli/composition\\.ts$';
 
 module.exports = {
   forbidden: [
     {
-      name: 'dominio-so-importa-dominio',
-      comment: 'dominio não importa nada fora de dominio (nem React, node:* ou zod).',
+      name: 'domain-imports-only-domain',
+      comment: 'domain imports nothing outside domain (no React, node:* or zod).',
       severity: 'error',
-      from: { path: DOMINIO },
-      to: { pathNot: DOMINIO },
+      from: { path: DOMAIN },
+      to: { pathNot: DOMAIN },
     },
     {
-      name: 'aplicacao-so-importa-dominio',
-      comment: 'aplicacao importa só dominio (e a si mesma).',
+      name: 'application-imports-only-domain',
+      comment: 'application imports only domain (and itself).',
       severity: 'error',
-      from: { path: APLICACAO },
-      to: { pathNot: [APLICACAO, DOMINIO] },
+      from: { path: APPLICATION },
+      to: { pathNot: [APPLICATION, DOMAIN] },
     },
     {
-      name: 'infraestrutura-nao-importa-apresentacao',
+      name: 'infrastructure-does-not-import-presentation',
       severity: 'error',
-      from: { path: INFRA },
-      to: { path: APRESENTACAO },
+      from: { path: INFRASTRUCTURE },
+      to: { path: PRESENTATION },
     },
     {
-      name: 'apresentacao-nao-importa-infraestrutura',
-      comment: 'Exceção única: o ponto de composição.',
+      name: 'presentation-does-not-import-infrastructure',
+      comment: 'Single exception: the composition point.',
       severity: 'error',
-      from: { path: APRESENTACAO, pathNot: COMPOSICAO },
-      to: { path: INFRA },
+      from: { path: PRESENTATION, pathNot: COMPOSITION },
+      to: { path: INFRASTRUCTURE },
     },
   ],
   options: {

@@ -1,27 +1,27 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Fps, Quadro, Segundos } from '../../../src/dominio/valores/Tempo.ts';
+import { Fps, Frame, Seconds } from '../../../src/domain/values/Time.ts';
 
-test('1,5 s a 30 fps são 45 quadros; 1,51 s arredonda para 46', () => {
-  assert.equal(Segundos.de(1.5).emQuadros(Fps.PADRAO).valor(), 45);
-  assert.equal(Segundos.de(1.51).emQuadros(Fps.PADRAO).valor(), 46);
+test('1.5 s at 30 fps is 45 frames; 1.51 s rounds up to 46', () => {
+  assert.equal(Seconds.of(1.5).toFrames(Fps.DEFAULT).value(), 45);
+  assert.equal(Seconds.of(1.51).toFrames(Fps.DEFAULT).value(), 46);
 });
-test('Quadro nunca fica negativo', () => assert.equal(Quadro.de(3).menos(Quadro.de(5)).valor(), 0));
-test('Quadro recusa fração e negativo', () => {
-  assert.throws(() => Quadro.de(1.5));
-  assert.throws(() => Quadro.de(-1));
+test('Frame never goes negative', () => assert.equal(Frame.of(3).minus(Frame.of(5)).value(), 0));
+test('Frame rejects a fraction and a negative', () => {
+  assert.throws(() => Frame.of(1.5));
+  assert.throws(() => Frame.of(-1));
 });
-test('Segundos soma e recusa negativo', () => {
-  assert.equal(Segundos.de(1).mais(Segundos.de(0.5)).valor(), 1.5);
-  assert.throws(() => Segundos.de(-1), /segundos/);
+test('Seconds adds and rejects a negative', () => {
+  assert.equal(Seconds.of(1).plus(Seconds.of(0.5)).value(), 1.5);
+  assert.throws(() => Seconds.of(-1), /segundos/);
 });
-test('Quadro soma e compara', () => {
-  assert.equal(Quadro.de(2).mais(Quadro.de(3)).valor(), 5);
-  assert.ok(Quadro.de(2).antesDe(Quadro.de(3)));
-  assert.ok(!Quadro.de(3).antesDe(Quadro.de(3)));
+test('Frame adds and compares', () => {
+  assert.equal(Frame.of(2).plus(Frame.of(3)).value(), 5);
+  assert.ok(Frame.of(2).isBefore(Frame.of(3)));
+  assert.ok(!Frame.of(3).isBefore(Frame.of(3)));
 });
-test('Fps padrão é 30', () => assert.equal(Fps.PADRAO.valor(), 30));
-test('duração zero ou ínfima vira quadro 0 positivo, nunca -0', () => {
-  assert.ok(Object.is(Segundos.de(0).emQuadros(Fps.PADRAO).valor(), 0));
-  assert.ok(Object.is(Segundos.de(1e-12).emQuadros(Fps.PADRAO).valor(), 0));
+test('the default Fps is 30', () => assert.equal(Fps.DEFAULT.value(), 30));
+test('a zero or tiny duration becomes a positive frame 0, never -0', () => {
+  assert.ok(Object.is(Seconds.of(0).toFrames(Fps.DEFAULT).value(), 0));
+  assert.ok(Object.is(Seconds.of(1e-12).toFrames(Fps.DEFAULT).value(), 0));
 });

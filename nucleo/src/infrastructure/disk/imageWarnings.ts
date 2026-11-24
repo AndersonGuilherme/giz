@@ -1,22 +1,22 @@
 import { access } from 'node:fs/promises';
 import { join } from 'node:path';
-import { linhaDoProblema } from '../../aplicacao/portas/ErroDeProjeto.ts';
-import type { FalaJson, RoteiroJson } from '../esquema/esquemaDoRoteiro.ts';
+import { problemLine } from '../../application/ports/ProjectError.ts';
+import type { LineJson, ScriptJson } from '../schema/scriptSchema.ts';
 
-const existe = (caminho: string) => access(caminho).then(() => true, () => false);
+const exists = (path: string) => access(path).then(() => true, () => false);
 
-async function avisoDaFala(pasta: string, fala: FalaJson, indice: number): Promise<string | undefined> {
-  const imagem = fala.cena?.tipo === 'cenario' ? fala.cena.fundo.imagem : undefined;
-  if (!imagem || (await existe(join(pasta, imagem)))) return undefined;
-  return linhaDoProblema({
-    arquivo: 'roteiro.json',
-    caminho: `falas[${indice}].cena.fundo.imagem`,
-    mensagem: `${imagem} não encontrada (fala ${fala.id}); o render usa o fundo vetorial padrão`,
+async function lineWarning(folder: string, line: LineJson, index: number): Promise<string | undefined> {
+  const image = line.scene?.type === 'scenario' ? line.scene.background.image : undefined;
+  if (!image || (await exists(join(folder, image)))) return undefined;
+  return problemLine({
+    file: 'script.json',
+    path: `lines[${index}].scene.background.image`,
+    message: `${image} não encontrada (fala ${line.id}); o render usa o fundo vetorial padrão`,
   });
 }
 
-/** Imagens de cenário ausentes não impedem a carga: viram avisos. */
-export async function avisosDeImagens(pasta: string, roteiro: RoteiroJson): Promise<string[]> {
-  const avisos = await Promise.all(roteiro.falas.map((fala, indice) => avisoDaFala(pasta, fala, indice)));
-  return avisos.filter((aviso): aviso is string => aviso !== undefined);
+/** Missing scenario images do not prevent loading: they become warnings. */
+export async function imageWarnings(folder: string, script: ScriptJson): Promise<string[]> {
+  const warnings = await Promise.all(script.lines.map((line, index) => lineWarning(folder, line, index)));
+  return warnings.filter((warning): warning is string => warning !== undefined);
 }

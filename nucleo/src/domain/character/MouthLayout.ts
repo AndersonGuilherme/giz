@@ -1,4 +1,4 @@
-import type { EstadoDoPersonagem } from './EstadoDoPersonagem.ts';
+import type { CharacterState } from './CharacterState.ts';
 import { MouthGeometry, type SilentMouth, type SpeechShape } from './MouthGeometry.ts';
 
 // Everything in face units: x from the mouth center, y from the mouth line (positive = down).
@@ -43,7 +43,7 @@ export class MouthLayout {
   static readonly MINIMUM_TONGUE = 3.7;
   static readonly MAXIMUM_CORNER = 4.6;
 
-  static for(state: EstadoDoPersonagem): MouthParts {
+  static for(state: CharacterState): MouthParts {
     const mouth = MouthGeometry.forState(state);
     return mouth.speaking ? MouthLayout.ofSpeech(mouth.shape) : MouthLayout.ofSilent(mouth.shape);
   }

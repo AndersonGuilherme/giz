@@ -1,67 +1,67 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { VerificarProjeto } from '../../src/aplicacao/casos-de-uso/VerificarProjeto.ts';
-import { Elenco } from '../../src/dominio/elenco/Elenco.ts';
-import { Personagem } from '../../src/dominio/elenco/Personagem.ts';
-import { Caixa } from '../../src/dominio/layout/Caixa.ts';
-import { Caixas } from '../../src/dominio/layout/Caixas.ts';
-import { RegistroDeLayouts } from '../../src/dominio/layout/RegistroDeLayouts.ts';
-import { criarRegistroDeLayouts } from '../../src/dominio/layout/registroPadrao.ts';
-import { Projeto } from '../../src/dominio/projeto/Projeto.ts';
-import { Capitulo } from '../../src/dominio/roteiro/Capitulo.ts';
-import type { Cena } from '../../src/dominio/roteiro/Cena.ts';
-import { Fala } from '../../src/dominio/roteiro/Fala.ts';
-import { Falas } from '../../src/dominio/roteiro/Falas.ts';
-import { Roteiro } from '../../src/dominio/roteiro/Roteiro.ts';
-import { IdPersonagem } from '../../src/dominio/valores/IdPersonagem.ts';
-import { Idioma } from '../../src/dominio/valores/Idioma.ts';
-import { Proporcao } from '../../src/dominio/valores/Proporcao.ts';
+import { CheckProject } from '../../src/application/use-cases/CheckProject.ts';
+import { Cast } from '../../src/domain/cast/Cast.ts';
+import { Character } from '../../src/domain/cast/Character.ts';
+import { Box } from '../../src/domain/layout/Box.ts';
+import { Boxes } from '../../src/domain/layout/Boxes.ts';
+import { LayoutRegistry } from '../../src/domain/layout/LayoutRegistry.ts';
+import { createLayoutRegistry } from '../../src/domain/layout/defaultLayoutRegistry.ts';
+import { Project } from '../../src/domain/project/Project.ts';
+import { Chapter } from '../../src/domain/script/Chapter.ts';
+import type { Scene } from '../../src/domain/script/Scene.ts';
+import { Line } from '../../src/domain/script/Line.ts';
+import { Lines } from '../../src/domain/script/Lines.ts';
+import { Script } from '../../src/domain/script/Script.ts';
+import { CharacterId } from '../../src/domain/values/CharacterId.ts';
+import { Language } from '../../src/domain/values/Language.ts';
+import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
 
-type FalaDeTeste = { texto?: string; cena?: Cena };
+type TestLine = { text?: string; scene?: Scene };
 
-function projeto(falas: FalaDeTeste[], proporcao: string, avisos: string[] = []): Projeto {
-  const ana = IdPersonagem.de('ana');
-  const personagem = Personagem.de(ana, { nome: 'Ana', rig: 'teste', parametros: {}, voz: { id: 'vivian' }, expressaoPadrao: 'neutra' });
-  const lista = falas.map(({ texto = 'Olá.', cena }, i) => Fala.de(ana, { id: String(i + 1), capitulo: Capitulo.de(1), texto, cena }));
-  return Projeto.de(
-    { titulo: 'T', formato: 'aula', idioma: Idioma.PORTUGUES, proporcao: Proporcao.de(proporcao), estiloDeLegenda: 'blocos', voz: { provedor: 'qwen' } },
-    { elenco: Elenco.de([personagem]), roteiro: Roteiro.de(['Abertura'], Falas.de(lista)), avisos },
+function project(lines: TestLine[], aspect: string, warnings: string[] = []): Project {
+  const ana = CharacterId.of('ana');
+  const character = Character.of(ana, { name: 'Ana', rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
+  const list = lines.map(({ text = 'Olá.', scene }, i) => Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene }));
+  return Project.of(
+    { title: 'T', format: 'lesson', language: Language.PORTUGUESE, aspect: AspectRatio.of(aspect), captionStyle: 'blocks', voice: { provider: 'qwen' } },
+    { cast: Cast.of([character]), script: Script.of(['Abertura'], Lines.of(list)), warnings },
   );
 }
 
-const titulo = (texto: string): Cena => ({ tipo: 'titulo', sobretitulo: 'Aula 1', titulo: texto, subtitulo: 'Uma introdução' });
-const projetoComTitulo = (texto: string, proporcao: string) => projeto([{ cena: titulo(texto) }], proporcao);
-const verificar = (p: Projeto, layouts = criarRegistroDeLayouts()) => new VerificarProjeto({ layouts }).executar(p);
+const title = (text: string): Scene => ({ type: 'title', overline: 'Aula 1', title: text, subtitle: 'Uma introdução' });
+const projectWithTitle = (text: string, aspect: string) => project([{ scene: title(text) }], aspect);
+const check = (p: Project, layouts = createLayoutRegistry()) => new CheckProject({ layouts }).run(p);
 
-test('título de 80 caracteres sem espaço não cabe e vira erro no check', () => {
-  const r = verificar(projetoComTitulo('A'.repeat(80), '9:16'));
-  assert.equal(r.erros.length, 1);
-  assert.equal(r.erros[0].fala, '1');
-  assert.match(r.erros[0].mensagem, /título não cabe/);
+test('an 80-character title without spaces does not fit and is a check error', () => {
+  const r = check(projectWithTitle('A'.repeat(80), '9:16'));
+  assert.equal(r.errors.length, 1);
+  assert.equal(r.errors[0].line, '1');
+  assert.match(r.errors[0].message, /título não cabe/);
 });
-test('título normal passa sem problemas nas duas proporções', () => {
-  for (const proporcao of ['9:16', '16:9']) {
-    assert.deepEqual(verificar(projetoComTitulo('Arquitetura hexagonal na prática', proporcao)), { erros: [], avisos: [] });
+test('a normal title passes without problems in both aspect ratios', () => {
+  for (const aspect of ['9:16', '16:9']) {
+    assert.deepEqual(check(projectWithTitle('Arquitetura hexagonal na prática', aspect)), { errors: [], warnings: [] });
   }
 });
-test('legenda que não cabe vira erro da fala', () => {
-  const r = verificar(projeto([{ texto: 'palavra '.repeat(80) }], '9:16'));
-  assert.deepEqual(r.erros.map((e) => [e.fala, e.mensagem]), [['1', 'legenda não cabe na caixa nem com a letra a 60%']]);
+test('a caption that does not fit is a line error', () => {
+  const r = check(project([{ text: 'palavra '.repeat(80) }], '9:16'));
+  assert.deepEqual(r.errors.map((e) => [e.line, e.message]), [['1', 'legenda não cabe na caixa nem com a letra a 60%']]);
 });
-test('cena herdada não repete o erro e cena sem layout é pulada', () => {
-  const r = verificar(projeto([{ cena: titulo('A'.repeat(80)) }, {}, { cena: { tipo: 'citacao', texto: 'x' } }], '9:16'));
-  assert.deepEqual(r.erros.map((e) => e.fala), ['1']);
+test('an inherited scene does not repeat the error and a scene without layout is skipped', () => {
+  const r = check(project([{ scene: title('A'.repeat(80)) }, {}, { scene: { type: 'quote', text: 'x' } }], '9:16'));
+  assert.deepEqual(r.errors.map((e) => e.line), ['1']);
 });
-test('sobreposição e saída da área segura viram erro com os rótulos', () => {
-  const layouts = RegistroDeLayouts.vazio();
-  layouts.registrar('citacao', () => Caixas.de([
-    Caixa.de('aspas', { x: 0, y: 0, largura: 200, altura: 200 }),
-    Caixa.de('autor', { x: 200, y: 1300, largura: 600, altura: 100 }),
+test('overlap and leaving the safe area are errors with the labels', () => {
+  const layouts = LayoutRegistry.empty();
+  layouts.register('quote', () => Boxes.of([
+    Box.of('aspas', { x: 0, y: 0, width: 200, height: 200 }),
+    Box.of('autor', { x: 200, y: 1300, width: 600, height: 100 }),
   ]));
-  const r = verificar(projeto([{ cena: { tipo: 'citacao', texto: 'x' } }], '9:16'), layouts);
-  assert.deepEqual(r.erros.map((e) => e.mensagem), ['autor sobrepõe legenda', 'aspas sai da área segura']);
+  const r = check(project([{ scene: { type: 'quote', text: 'x' } }], '9:16'), layouts);
+  assert.deepEqual(r.errors.map((e) => e.message), ['autor sobrepõe legenda', 'aspas sai da área segura']);
 });
-test('avisos do projeto (imagem ausente) entram como aviso', () => {
-  const r = verificar(projeto([{}], '9:16', ['fundo.png não encontrada (fala 1)']));
-  assert.deepEqual(r, { erros: [], avisos: [{ fala: '', mensagem: 'fundo.png não encontrada (fala 1)' }] });
+test('project warnings (missing image) come in as warnings', () => {
+  const r = check(project([{}], '9:16', ['fundo.png não encontrada (fala 1)']));
+  assert.deepEqual(r, { errors: [], warnings: [{ line: '', message: 'fundo.png não encontrada (fala 1)' }] });
 });

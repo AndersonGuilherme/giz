@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { Brow } from '../../../dominio/personagem/FaceGeometry.ts';
+import type { Brow } from '../../../domain/character/FaceGeometry.ts';
 import { EYES, HEAD, UNIT } from './measures.ts';
 import type { Look } from './parameters.ts';
 import { contrast } from './svg.ts';

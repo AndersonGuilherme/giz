@@ -1,18 +1,18 @@
-import type { CatalogoDeRigs, DefinicaoDeParametros } from '../../src/aplicacao/portas/CatalogoDeRigs.ts';
+import type { RigCatalog, ParameterDefinitions } from '../../src/application/ports/RigCatalog.ts';
 
-const RIG_DE_TESTE: DefinicaoDeParametros = {
-  pele: { tipo: 'cor', padrao: '#f0c8a0' },
-  altura: { tipo: 'numero', padrao: 1, min: 0.5, max: 1.5 },
-  cabelo: { tipo: 'opcao', padrao: 'curto', opcoes: ['curto', 'longo'] },
-  oculos: { tipo: 'booleano', padrao: false },
+const TEST_RIG: ParameterDefinitions = {
+  skin: { type: 'color', defaultValue: '#f0c8a0' },
+  height: { type: 'number', defaultValue: 1, min: 0.5, max: 1.5 },
+  hair: { type: 'option', defaultValue: 'short', options: ['short', 'long'] },
+  glasses: { type: 'boolean', defaultValue: false },
 };
 
-export class CatalogoDeRigsFalso implements CatalogoDeRigs {
-  definicao(idRig: string): DefinicaoDeParametros | undefined {
-    return idRig === 'teste' ? RIG_DE_TESTE : undefined;
+export class FakeRigCatalog implements RigCatalog {
+  definition(rigId: string): ParameterDefinitions | undefined {
+    return rigId === 'test' ? TEST_RIG : undefined;
   }
 
   ids(): string[] {
-    return ['teste'];
+    return ['test'];
   }
 }

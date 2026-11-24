@@ -1,21 +1,21 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Idioma } from '../../../src/dominio/valores/Idioma.ts';
-import { MapaDeVisemas, SequenciaDeVisemas } from '../../../src/dominio/fala/Visemas.ts';
+import { Language } from '../../../src/domain/values/Language.ts';
+import { VisemeMap, VisemeSequence } from '../../../src/domain/speech/Visemes.ts';
 
-const seq = (texto: string) => MapaDeVisemas.para(Idioma.PORTUGUES).converter(texto);
+const seq = (text: string) => VisemeMap.for(Language.PORTUGUESE).convert(text);
 
-test('pt-BR: "mapa" (ˈmapɐ) vira MAMA', () => assert.equal(MapaDeVisemas.para(Idioma.PORTUGUES).converter('ˈmapɐ').texto(), 'MAMA'));
-test('en: "mama" (mˈɑːmə) vira MAME', () => assert.equal(MapaDeVisemas.para(Idioma.INGLES).converter('mˈɑːmə').texto(), 'MAME'));
-test('en: θ ð viram C, ʌ æ viram A, ɜ ɚ viram E, w vira U', () => {
-  const ingles = MapaDeVisemas.para(Idioma.INGLES);
-  assert.equal(ingles.converter('θðʌæɜɚw').texto(), 'CCAAEEU');
+test('pt-BR: "mapa" (ˈmapɐ) becomes MAMA', () => assert.equal(VisemeMap.for(Language.PORTUGUESE).convert('ˈmapɐ').text(), 'MAMA'));
+test('en: "mama" (mˈɑːmə) becomes MAME', () => assert.equal(VisemeMap.for(Language.ENGLISH).convert('mˈɑːmə').text(), 'MAME'));
+test('en: θ ð become C, ʌ æ become A, ɜ ɚ become E, w becomes U', () => {
+  const english = VisemeMap.for(Language.ENGLISH);
+  assert.equal(english.convert('θðʌæɜɚw').text(), 'CCAAEEU');
 });
-test('pt-BR: ʌ não tem regra própria e vira C', () => assert.equal(seq('ʌ').texto(), 'C'));
-test('ignora espaços, pontuação, acentos tônicos e marcas de duração', () => assert.equal(seq('ˈa ˌe, i.ː!').texto(), 'AEI'));
-test('espalha 3 visemas sobre 6 quadros com voz e mantém X no silêncio', () => {
-  assert.equal(seq('aei').espalharSobre([false, true, true, true, true, true, true, false]), 'XAAEEIIX');
+test('pt-BR: ʌ has no rule of its own and becomes C', () => assert.equal(seq('ʌ').text(), 'C'));
+test('ignores spaces, punctuation, stress marks and length marks', () => assert.equal(seq('ˈa ˌe, i.ː!').text(), 'AEI'));
+test('spreads 3 visemes over 6 voiced frames and keeps X in silence', () => {
+  assert.equal(seq('aei').spreadOver([false, true, true, true, true, true, true, false]), 'XAAEEIIX');
 });
-test('sem visemas, todos os quadros ficam em X', () => assert.equal(seq('').espalharSobre([true, false, true]), 'XXX'));
-test('sem quadros com voz, tudo é X', () => assert.equal(seq('ae').espalharSobre([false, false]), 'XX'));
-test('SequenciaDeVisemas é exportada', () => assert.equal(typeof SequenciaDeVisemas, 'function'));
+test('without visemes, every frame is X', () => assert.equal(seq('').spreadOver([true, false, true]), 'XXX'));
+test('without voiced frames, everything is X', () => assert.equal(seq('ae').spreadOver([false, false]), 'XX'));
+test('VisemeSequence is exported', () => assert.equal(typeof VisemeSequence, 'function'));

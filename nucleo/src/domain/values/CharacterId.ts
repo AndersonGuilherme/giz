@@ -1,32 +1,32 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
+import { DomainError } from '../DomainError.ts';
 
-const FORMATO_VALIDO = /^[a-z0-9-]{1,32}$/;
+const VALID_FORMAT = /^[a-z0-9-]{1,32}$/;
 
-export class IdPersonagem {
-  static readonly NARRADOR = new IdPersonagem('narrador');
+export class CharacterId {
+  static readonly NARRATOR = new CharacterId('narrator');
 
-  readonly #texto: string;
+  readonly #text: string;
 
-  private constructor(texto: string) {
-    this.#texto = texto;
+  private constructor(text: string) {
+    this.#text = text;
   }
 
-  static de(texto: string): IdPersonagem {
-    if (!FORMATO_VALIDO.test(texto)) {
-      throw new ErroDeDominio(`id de personagem "${texto}" inválido (use de 1 a 32 caracteres entre a-z, 0-9 e "-")`);
+  static of(text: string): CharacterId {
+    if (!VALID_FORMAT.test(text)) {
+      throw new DomainError(`id de personagem "${text}" inválido (use de 1 a 32 caracteres entre a-z, 0-9 e "-")`);
     }
-    return new IdPersonagem(texto);
+    return new CharacterId(text);
   }
 
-  eNarrador(): boolean {
-    return this.igual(IdPersonagem.NARRADOR);
+  isNarrator(): boolean {
+    return this.equals(CharacterId.NARRATOR);
   }
 
-  texto(): string {
-    return this.#texto;
+  text(): string {
+    return this.#text;
   }
 
-  igual(outro: IdPersonagem): boolean {
-    return this.#texto === outro.#texto;
+  equals(other: CharacterId): boolean {
+    return this.#text === other.#text;
   }
 }

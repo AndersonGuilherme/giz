@@ -1,18 +1,18 @@
 import type { CSSProperties, FC, ReactNode } from 'react';
-import type { Expressao, Pose } from '../../dominio/elenco/PoseEExpressao.ts';
-import type { Visema } from '../../dominio/fala/Visemas.ts';
-import { EstadoDoPersonagem } from '../../dominio/personagem/EstadoDoPersonagem.ts';
+import type { Expression, Pose } from '../../domain/cast/PoseAndExpression.ts';
+import type { Viseme } from '../../domain/speech/Visemes.ts';
+import { CharacterState } from '../../domain/character/CharacterState.ts';
 
 export const INK = '#26221c';
 export const FONT = '"DejaVu Sans", "Liberation Sans", Arial, sans-serif';
 
-type StillOptions = Readonly<{ pose?: Pose; expression?: Expressao; viseme?: Visema }>;
+type StillOptions = Readonly<{ pose?: Pose; expression?: Expression; viseme?: Viseme }>;
 
 /** A still state for the sheet: no blink, no body motion; speaking only when a viseme is given. */
-export function stillState({ pose = 'neutra', expression = 'neutra', viseme = 'X' }: StillOptions): EstadoDoPersonagem {
-  return EstadoDoPersonagem.de({
-    pose, expressao: expression, olhar: 'camera', falando: viseme !== 'X', visema: viseme, abertura: 0.85, piscada: 0,
-    corpo: { y: 0, rotacao: 0, escala: 1 },
+export function stillState({ pose = 'neutral', expression = 'neutral', viseme = 'X' }: StillOptions): CharacterState {
+  return CharacterState.of({
+    pose, expression: expression, look: 'camera', speaking: viseme !== 'X', viseme: viseme, opening: 0.85, blink: 0,
+    body: { y: 0, rotation: 0, scale: 1 },
   });
 }
 

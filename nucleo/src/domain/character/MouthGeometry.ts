@@ -1,5 +1,5 @@
-import type { Visema } from '../fala/Visemas.ts';
-import type { EstadoDoPersonagem } from './EstadoDoPersonagem.ts';
+import type { Viseme } from '../speech/Visemes.ts';
+import type { CharacterState } from './CharacterState.ts';
 import { FaceGeometry, type MouthShape } from './FaceGeometry.ts';
 
 /**
@@ -23,7 +23,7 @@ export type MouthOfState = Readonly<{ speaking: true; shape: SpeechShape }> | Re
 type Template = Readonly<{ width: number; baseHeight: number; heightPerOpening: number }> & Partial<Pick<SpeechShape, 'teeth' | 'tongue' | 'outline' | 'lipTuck'>>;
 
 // Each viseme: fixed width, and height = fixed part + a part proportional to the frame's opening (volume).
-const TEMPLATES: Readonly<Record<Visema, Template>> = {
+const TEMPLATES: Readonly<Record<Viseme, Template>> = {
   'X': { width: 0, baseHeight: 0, heightPerOpening: 0 },
   'M': { width: 24, baseHeight: 0, heightPerOpening: 0 },
   'A': { width: 28, baseHeight: 6, heightPerOpening: 22, teeth: true, tongue: true },
@@ -53,7 +53,7 @@ function openEdges({ curve, opening }: MouthShape): Readonly<{ upper: number; lo
 }
 
 export class MouthGeometry {
-  static for(viseme: Visema, opening: number): SpeechShape {
+  static for(viseme: Viseme, opening: number): SpeechShape {
     const template = TEMPLATES[viseme];
     const clamped = Math.min(1, Math.max(MINIMUM_OPENING, opening));
     const height = template.baseHeight + template.heightPerOpening * clamped;
@@ -78,8 +78,8 @@ export class MouthGeometry {
   }
 
   /** The viseme replaces the expression's mouth only while speaking and not at rest (X). */
-  static forState(state: EstadoDoPersonagem): MouthOfState {
-    if (state.estaFalando() && state.visema() !== 'X') return { speaking: true, shape: MouthGeometry.for(state.visema(), state.abertura()) };
-    return { speaking: false, shape: MouthGeometry.silent(FaceGeometry.for(state.expressao()).mouth) };
+  static forState(state: CharacterState): MouthOfState {
+    if (state.isSpeaking() && state.viseme() !== 'X') return { speaking: true, shape: MouthGeometry.for(state.viseme(), state.opening()) };
+    return { speaking: false, shape: MouthGeometry.silent(FaceGeometry.for(state.expression()).mouth) };
   }
 }

@@ -1,40 +1,40 @@
-import { Personagem, type ValorDeParametro } from '../../dominio/elenco/Personagem.ts';
-import { type ConteudoDoProjeto, Projeto } from '../../dominio/projeto/Projeto.ts';
-import { Capitulo } from '../../dominio/roteiro/Capitulo.ts';
-import { Fala } from '../../dominio/roteiro/Fala.ts';
-import { Falas } from '../../dominio/roteiro/Falas.ts';
-import { Roteiro } from '../../dominio/roteiro/Roteiro.ts';
-import { IdPersonagem } from '../../dominio/valores/IdPersonagem.ts';
-import { Idioma } from '../../dominio/valores/Idioma.ts';
-import { Proporcao } from '../../dominio/valores/Proporcao.ts';
-import type { PersonagemJson } from './esquemaDoPersonagem.ts';
-import type { ProjetoJson } from './esquemaDoProjeto.ts';
-import type { FalaJson, RoteiroJson } from './esquemaDoRoteiro.ts';
+import { Character, type ParameterValue } from '../../domain/cast/Character.ts';
+import { type ProjectContent, Project } from '../../domain/project/Project.ts';
+import { Chapter } from '../../domain/script/Chapter.ts';
+import { Line } from '../../domain/script/Line.ts';
+import { Lines } from '../../domain/script/Lines.ts';
+import { Script } from '../../domain/script/Script.ts';
+import { CharacterId } from '../../domain/values/CharacterId.ts';
+import { Language } from '../../domain/values/Language.ts';
+import { AspectRatio } from '../../domain/values/AspectRatio.ts';
+import type { CharacterJson } from './characterSchema.ts';
+import type { ProjectJson } from './projectSchema.ts';
+import type { LineJson, ScriptJson } from './scriptSchema.ts';
 
-/** Conversões de JSON já validado para o domínio: uma função por entidade. */
-export function personagemParaDominio(json: PersonagemJson, parametros: Record<string, ValorDeParametro>): Personagem {
-  const { id, ...ficha } = json;
-  return Personagem.de(IdPersonagem.de(id), { ...ficha, parametros });
+/** Conversions from already validated JSON to the domain: one function per entity. */
+export function characterToDomain(json: CharacterJson, parameters: Record<string, ParameterValue>): Character {
+  const { id, ...profile } = json;
+  return Character.of(CharacterId.of(id), { ...profile, parameters });
 }
 
-export function falaParaDominio(json: FalaJson): Fala {
-  const { quem, capitulo, ...dados } = json;
-  return Fala.de(IdPersonagem.de(quem), { ...dados, capitulo: Capitulo.de(capitulo) });
+export function lineToDomain(json: LineJson): Line {
+  const { speaker, chapter, ...data } = json;
+  return Line.of(CharacterId.of(speaker), { ...data, chapter: Chapter.of(chapter) });
 }
 
-export function roteiroParaDominio(json: RoteiroJson): Roteiro {
-  return Roteiro.de(json.capitulos, Falas.de(json.falas.map(falaParaDominio)));
+export function scriptToDomain(json: ScriptJson): Script {
+  return Script.of(json.chapters, Lines.of(json.lines.map(lineToDomain)));
 }
 
-export function projetoParaDominio(json: ProjetoJson, conteudo: ConteudoDoProjeto): Projeto {
-  const ficha = {
-    titulo: json.titulo,
-    formato: json.formato,
-    idioma: Idioma.de(json.idioma),
-    proporcao: Proporcao.de(json.proporcao),
-    marca: json.marca,
-    estiloDeLegenda: json.estiloDeLegenda,
-    voz: json.voz,
+export function projectToDomain(json: ProjectJson, content: ProjectContent): Project {
+  const profile = {
+    title: json.title,
+    format: json.format,
+    language: Language.of(json.language),
+    aspect: AspectRatio.of(json.aspect),
+    brand: json.brand,
+    captionStyle: json.captionStyle,
+    voice: json.voice,
   };
-  return Projeto.de(ficha, conteudo);
+  return Project.of(profile, content);
 }

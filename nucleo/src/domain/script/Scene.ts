@@ -1,26 +1,26 @@
-import type { CenaDeAula } from './CenasDeAula.ts';
-import type { Efeito, Hud, MovimentoDeCameraJson, Ponto, TextoGrande } from './ElementosDeCena.ts';
+import type { LessonScene } from './LessonScenes.ts';
+import type { Effect, Hud, CameraMoveJson, Point, BigText } from './SceneElements.ts';
 
-export const POSICOES_NOMEADAS = ['esquerda', 'centro', 'direita'] as const;
-export const DIRECOES = ['frente', 'esquerda', 'direita'] as const;
+export const NAMED_POSITIONS = ['left', 'center', 'right'] as const;
+export const DIRECTIONS = ['front', 'left', 'right'] as const;
 
-export type PersonagemEmCena = Readonly<{
-  quem: string;
-  posicao: (typeof POSICOES_NOMEADAS)[number] | Ponto;
-  escala?: number;
-  direcao?: (typeof DIRECOES)[number];
+export type CharacterInScene = Readonly<{
+  character: string;
+  position: (typeof NAMED_POSITIONS)[number] | Point;
+  scale?: number;
+  direction?: (typeof DIRECTIONS)[number];
 }>;
 
-export type Fundo = Readonly<{ imagem?: string; vetorial?: string; cores?: Readonly<Record<string, string>> }>;
+export type Background = Readonly<{ image?: string; vector?: string; colors?: Readonly<Record<string, string>> }>;
 
-export type CenaDeCenario = Readonly<{
-  tipo: 'cenario';
-  fundo: Fundo;
-  personagens: readonly PersonagemEmCena[];
-  camera?: MovimentoDeCameraJson;
-  efeitos?: readonly Efeito[];
+export type ScenarioScene = Readonly<{
+  type: 'scenario';
+  background: Background;
+  characters: readonly CharacterInScene[];
+  camera?: CameraMoveJson;
+  effects?: readonly Effect[];
   hud?: Hud;
-  destaque?: TextoGrande;
+  highlight?: BigText;
 }>;
 
-export type Cena = CenaDeCenario | CenaDeAula;
+export type Scene = ScenarioScene | LessonScene;

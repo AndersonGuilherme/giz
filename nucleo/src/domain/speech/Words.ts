@@ -1,78 +1,78 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import { Segundos } from '../valores/Tempo.ts';
-import type { PalavraJson } from './PalavraJson.ts';
+import { DomainError } from '../DomainError.ts';
+import { Seconds } from '../values/Time.ts';
+import type { WordJson } from './WordJson.ts';
 
-export type { PalavraJson };
+export type { WordJson };
 
-type Trecho = Readonly<{ inicio: Segundos; fim: Segundos }>;
+type Span = Readonly<{ start: Seconds; end: Seconds }>;
 
-const SEM_TEMPO: Trecho = { inicio: Segundos.de(0), fim: Segundos.de(0) };
+const NO_TIME: Span = { start: Seconds.of(0), end: Seconds.of(0) };
 
-/** Uma palavra do roteiro (com a pontuação junto) e o trecho da fala em que é dita. */
-export class Palavra {
-  readonly #texto: string;
-  readonly #trecho: Trecho;
+/** A script word (with its punctuation attached) and the span of the line in which it is said. */
+export class Word {
+  readonly #text: string;
+  readonly #span: Span;
 
-  private constructor(texto: string, trecho: Trecho) {
-    this.#texto = texto;
-    this.#trecho = trecho;
+  private constructor(text: string, span: Span) {
+    this.#text = text;
+    this.#span = span;
   }
 
-  static de(texto: string, trecho: Trecho = SEM_TEMPO): Palavra {
-    if (trecho.fim.valor() < trecho.inicio.valor()) {
-      throw new ErroDeDominio(`palavra "${texto}" termina (${trecho.fim.valor()} s) antes de começar (${trecho.inicio.valor()} s)`);
+  static of(text: string, span: Span = NO_TIME): Word {
+    if (span.end.value() < span.start.value()) {
+      throw new DomainError(`palavra "${text}" termina (${span.end.value()} s) antes de começar (${span.start.value()} s)`);
     }
-    return new Palavra(texto, trecho);
+    return new Word(text, span);
   }
 
-  texto(): string {
-    return this.#texto;
+  text(): string {
+    return this.#text;
   }
 
-  comecouAte(instante: Segundos): boolean {
-    return this.#trecho.inicio.valor() <= instante.valor();
+  startedBy(instant: Seconds): boolean {
+    return this.#span.start.value() <= instant.value();
   }
 
-  paraJson(): PalavraJson {
-    return { texto: this.#texto, inicio: this.#trecho.inicio.valor(), fim: this.#trecho.fim.valor() };
+  toJson(): WordJson {
+    return { text: this.#text, start: this.#span.start.value(), end: this.#span.end.value() };
   }
 }
 
-/** As palavras de uma fala, na ordem do roteiro. A legenda mostra sempre estes textos, nunca o que foi ouvido. */
-export class Palavras {
-  readonly #palavras: readonly Palavra[];
+/** The words of a line, in script order. The caption always shows these texts, never what was heard. */
+export class Words {
+  readonly #words: readonly Word[];
 
-  private constructor(palavras: readonly Palavra[]) {
-    this.#palavras = palavras;
+  private constructor(words: readonly Word[]) {
+    this.#words = words;
   }
 
-  /** Os colchetes das marcas `[trecho]` não fazem parte das palavras. */
-  static doTexto(texto: string): Palavras {
-    const textos = texto.replace(/[[\]]/g, '').split(/\s+/).filter(Boolean);
-    return new Palavras(textos.map((palavra) => Palavra.de(palavra)));
+  /** The brackets of the `[span]` beats are not part of the words. */
+  static fromText(text: string): Words {
+    const texts = text.replace(/[[\]]/g, '').split(/\s+/).filter(Boolean);
+    return new Words(texts.map((word) => Word.of(word)));
   }
 
-  comTempos(inicios: readonly Segundos[], fins: readonly Segundos[]): Palavras {
-    const total = this.#palavras.length;
-    if (inicios.length !== total || fins.length !== total) {
-      throw new ErroDeDominio(`${total} palavra(s), mas ${inicios.length} início(s) e ${fins.length} fim(ns)`);
+  withTimes(starts: readonly Seconds[], ends: readonly Seconds[]): Words {
+    const total = this.#words.length;
+    if (starts.length !== total || ends.length !== total) {
+      throw new DomainError(`${total} palavra(s), mas ${starts.length} início(s) e ${ends.length} fim(ns)`);
     }
-    const comTempo = this.#palavras.map(
-      (palavra, indice) => Palavra.de(palavra.texto(), { inicio: inicios[indice] ?? SEM_TEMPO.inicio, fim: fins[indice] ?? SEM_TEMPO.fim }),
+    const timed = this.#words.map(
+      (word, index) => Word.of(word.text(), { start: starts[index] ?? NO_TIME.start, end: ends[index] ?? NO_TIME.end }),
     );
-    return new Palavras(comTempo);
+    return new Words(timed);
   }
 
-  /** Índice da última palavra que já começou no instante `instante`; -1 antes da primeira. */
-  ativaEm(instante: Segundos): number {
-    return this.#palavras.reduce((ativa, palavra, indice) => (palavra.comecouAte(instante) ? indice : ativa), -1);
+  /** Index of the last word already started at `instant`; -1 before the first. */
+  activeAt(instant: Seconds): number {
+    return this.#words.reduce((active, word, index) => (word.startedBy(instant) ? index : active), -1);
   }
 
-  textos(): string[] {
-    return this.#palavras.map((palavra) => palavra.texto());
+  texts(): string[] {
+    return this.#words.map((word) => word.text());
   }
 
-  paraJson(): PalavraJson[] {
-    return this.#palavras.map((palavra) => palavra.paraJson());
+  toJson(): WordJson[] {
+    return this.#words.map((word) => word.toJson());
   }
 }

@@ -1,11 +1,11 @@
 import tseslint from 'typescript-eslint';
 
-const regrasDeCalisthenics = {
+const calisthenicsRules = {
   'max-depth': ['error', 1],
   'no-else-return': 'error',
   'no-restricted-syntax': [
     'error',
-    { selector: 'IfStatement[alternate]', message: 'Sem else: use retorno antecipado ou polimorfismo.' },
+    { selector: 'IfStatement[alternate]', message: 'No else: use an early return or polymorphism.' },
   ],
   'max-lines': ['error', { max: 150, skipBlankLines: false, skipComments: false }],
   'max-lines-per-function': ['error', { max: 20, skipBlankLines: false, skipComments: false }],
@@ -20,7 +20,7 @@ export default tseslint.config(
     files: ['**/*.ts', '**/*.tsx'],
     extends: [tseslint.configs.recommended],
     linterOptions: { reportUnusedDisableDirectives: 'error' },
-    rules: regrasDeCalisthenics,
+    rules: calisthenicsRules,
   },
   {
     files: ['test/**/*.ts', 'test/**/*.tsx'],

@@ -1,21 +1,21 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { PedidoDeVoz, ProvedorVoz } from '../../aplicacao/portas/ProvedorVoz.ts';
-import type { Audio } from '../../dominio/fala/Audio.ts';
-import { deWav } from './wav.ts';
+import type { VoiceRequest, VoiceProvider } from '../../application/ports/VoiceProvider.ts';
+import type { Audio } from '../../domain/speech/Audio.ts';
+import { fromWav } from './wav.ts';
 
-/** "Gravei minha voz": cada fala vem de `gravacoes/<idFala>.wav`, na pasta do projeto. */
-export class VozDeArquivo implements ProvedorVoz {
-  readonly #pasta: string;
+/** "I recorded my voice": each line comes from `recordings/<lineId>.wav`, in the project folder. */
+export class RecordingVoice implements VoiceProvider {
+  readonly #folder: string;
 
-  constructor(pasta: string) {
-    this.#pasta = pasta;
+  constructor(folder: string) {
+    this.#folder = folder;
   }
 
-  async gerar(pedido: PedidoDeVoz): Promise<Audio> {
-    const caminho = join(this.#pasta, 'gravacoes', `${pedido.idFala}.wav`);
-    if (!existsSync(caminho)) throw new Error(`fala ${pedido.idFala}: gravação não encontrada; grave "${pedido.texto}" em ${caminho}`);
-    return deWav(await readFile(caminho));
+  async generate(request: VoiceRequest): Promise<Audio> {
+    const path = join(this.#folder, 'recordings', `${request.lineId}.wav`);
+    if (!existsSync(path)) throw new Error(`fala ${request.lineId}: gravação não encontrada; grave "${request.text}" em ${path}`);
+    return fromWav(await readFile(path));
   }
 }

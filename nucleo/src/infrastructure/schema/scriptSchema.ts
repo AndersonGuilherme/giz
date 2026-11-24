@@ -1,66 +1,66 @@
 import { z } from 'zod';
-import { EXPRESSOES, POSES } from '../../dominio/elenco/PoseEExpressao.ts';
-import { EFEITOS_SONOROS, OLHARES } from '../../dominio/roteiro/Fala.ts';
-import { esquemaDaCena } from './esquemaDaCena.ts';
-import { esquemaDeIdDePersonagem, textoPreenchido } from './refinamentos.ts';
+import { EXPRESSIONS, POSES } from '../../domain/cast/PoseAndExpression.ts';
+import { SOUND_EFFECTS, GAZES } from '../../domain/script/Line.ts';
+import { sceneSchema } from './sceneSchema.ts';
+import { characterIdSchema, nonEmptyText } from './refinements.ts';
 
 const pose = z.enum(POSES);
-const expressao = z.enum(EXPRESSOES);
-const olhar = z.enum(OLHARES);
-const efeitoSonoro = z.enum(EFEITOS_SONOROS);
+const expression = z.enum(EXPRESSIONS);
+const look = z.enum(GAZES);
+const sfx = z.enum(SOUND_EFFECTS);
 
-const esquemaDaReacao = z
-  .object({ expressao: expressao.optional(), pose: pose.optional(), olhar: olhar.optional() })
+const reactionSchema = z
+  .object({ expression: expression.optional(), pose: pose.optional(), look: look.optional() })
   .strict();
 
-const esquemaDaMarca = z
-  .object({ expressao: expressao.optional(), pose: pose.optional(), efeitoSonoro: efeitoSonoro.optional() })
+const beatSchema = z
+  .object({ expression: expression.optional(), pose: pose.optional(), sfx: sfx.optional() })
   .passthrough();
 
-const esquemaDaPausa = z.object({ segundos: z.number().positive(), rotulo: z.string() }).strict();
+const holdSchema = z.object({ seconds: z.number().positive(), label: z.string() }).strict();
 
-export const esquemaDaFala = z
+export const lineSchema = z
   .object({
-    id: textoPreenchido,
-    capitulo: z.number().int().min(1),
-    quem: esquemaDeIdDePersonagem,
-    texto: textoPreenchido,
-    pronuncia: textoPreenchido.optional(),
+    id: nonEmptyText,
+    chapter: z.number().int().min(1),
+    speaker: characterIdSchema,
+    text: nonEmptyText,
+    pronunciation: nonEmptyText.optional(),
     pose: pose.optional(),
-    expressao: expressao.optional(),
-    olhar: olhar.optional(),
-    reacao: esquemaDaReacao.optional(),
-    cena: esquemaDaCena.optional(),
-    marcas: z.array(esquemaDaMarca).optional(),
-    pausaDepois: esquemaDaPausa.optional(),
-    efeitoSonoro: efeitoSonoro.optional(),
+    expression: expression.optional(),
+    look: look.optional(),
+    reaction: reactionSchema.optional(),
+    scene: sceneSchema.optional(),
+    beats: z.array(beatSchema).optional(),
+    holdAfter: holdSchema.optional(),
+    sfx: sfx.optional(),
   })
   .strict();
 
-export type FalaJson = z.infer<typeof esquemaDaFala>;
+export type LineJson = z.infer<typeof lineSchema>;
 
-type RoteiroBruto = { capitulos: string[]; falas: FalaJson[] };
+type RawScript = { chapters: string[]; lines: LineJson[] };
 
-function capitulosExistentes(roteiro: RoteiroBruto, contexto: z.RefinementCtx): void {
-  const total = roteiro.capitulos.length;
-  roteiro.falas.forEach((fala, indice) => {
-    if (fala.capitulo <= total) return;
-    const message = `capítulo ${fala.capitulo} não existe (há ${total})`;
-    contexto.addIssue({ code: z.ZodIssueCode.custom, path: ['falas', indice, 'capitulo'], message });
+function existingChapters(script: RawScript, context: z.RefinementCtx): void {
+  const total = script.chapters.length;
+  script.lines.forEach((line, index) => {
+    if (line.chapter <= total) return;
+    const message = `capítulo ${line.chapter} não existe (há ${total})`;
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['lines', index, 'chapter'], message });
   });
 }
 
-function idsUnicos(roteiro: RoteiroBruto, contexto: z.RefinementCtx): void {
-  roteiro.falas.forEach((fala, indice) => {
-    if (roteiro.falas.findIndex((outra) => outra.id === fala.id) === indice) return;
-    contexto.addIssue({ code: z.ZodIssueCode.custom, path: ['falas', indice, 'id'], message: `id "${fala.id}" repetido` });
+function uniqueIds(script: RawScript, context: z.RefinementCtx): void {
+  script.lines.forEach((line, index) => {
+    if (script.lines.findIndex((other) => other.id === line.id) === index) return;
+    context.addIssue({ code: z.ZodIssueCode.custom, path: ['lines', index, 'id'], message: `id "${line.id}" repetido` });
   });
 }
 
-export const esquemaDoRoteiro = z
-  .object({ capitulos: z.array(textoPreenchido).min(1), falas: z.array(esquemaDaFala).min(1) })
+export const scriptSchema = z
+  .object({ chapters: z.array(nonEmptyText).min(1), lines: z.array(lineSchema).min(1) })
   .strict()
-  .superRefine(capitulosExistentes)
-  .superRefine(idsUnicos);
+  .superRefine(existingChapters)
+  .superRefine(uniqueIds);
 
-export type RoteiroJson = z.infer<typeof esquemaDoRoteiro>;
+export type ScriptJson = z.infer<typeof scriptSchema>;

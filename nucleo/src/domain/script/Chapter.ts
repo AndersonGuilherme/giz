@@ -1,25 +1,25 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
+import { DomainError } from '../DomainError.ts';
 
-/** Posição (a partir de 1) da fala na lista de capítulos do roteiro. */
-export class Capitulo {
-  readonly #numero: number;
+/** Position (from 1) of the line in the script chapter list. */
+export class Chapter {
+  readonly #number: number;
 
-  private constructor(numero: number) {
-    this.#numero = numero;
+  private constructor(number: number) {
+    this.#number = number;
   }
 
-  static de(numero: number): Capitulo {
-    if (!Number.isInteger(numero) || numero < 1) {
-      throw new ErroDeDominio(`capítulo ${numero} inválido (use um inteiro a partir de 1)`);
+  static of(number: number): Chapter {
+    if (!Number.isInteger(number) || number < 1) {
+      throw new DomainError(`capítulo ${number} inválido (use um inteiro a partir de 1)`);
     }
-    return new Capitulo(numero);
+    return new Chapter(number);
   }
 
-  existeEm(total: number): boolean {
-    return this.#numero <= total;
+  existsIn(total: number): boolean {
+    return this.#number <= total;
   }
 
-  numero(): number {
-    return this.#numero;
+  number(): number {
+    return this.#number;
   }
 }

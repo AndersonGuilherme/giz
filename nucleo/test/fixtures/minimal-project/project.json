@@ -1,10 +1,10 @@
 {
-  "versao": 2,
-  "titulo": "Projeto mínimo",
-  "formato": "historia",
-  "idioma": "pt-BR",
-  "proporcao": "9:16",
-  "estiloDeLegenda": "palavras",
-  "elenco": ["ana"],
-  "voz": { "provedor": "qwen", "modelo": "0.6b" }
+  "version": 2,
+  "title": "Projeto mínimo",
+  "format": "story",
+  "language": "pt-BR",
+  "aspect": "9:16",
+  "captionStyle": "words",
+  "cast": ["ana"],
+  "voice": { "provider": "qwen", "model": "0.6b" }
 }

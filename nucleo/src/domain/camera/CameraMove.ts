@@ -1,27 +1,27 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import type { MovimentoDeCameraJson } from '../roteiro/ElementosDeCena.ts';
-import type { Quadro } from '../valores/Tempo.ts';
-import type { Enquadramento } from './Enquadramento.ts';
-import { REGISTRO_DE_MOVIMENTOS, type TipoDeMovimento } from './TiposDeMovimento.ts';
+import { DomainError } from '../DomainError.ts';
+import type { CameraMoveJson } from '../script/SceneElements.ts';
+import type { Frame } from '../values/Time.ts';
+import type { Framing } from './Framing.ts';
+import { MOVE_REGISTRY, type MoveType } from './MoveTypes.ts';
 
-export class MovimentoDeCamera {
-  readonly #tipo: TipoDeMovimento;
+export class CameraMove {
+  readonly #type: MoveType;
 
-  private constructor(tipo: TipoDeMovimento) {
-    this.#tipo = tipo;
+  private constructor(type: MoveType) {
+    this.#type = type;
   }
 
-  static de(json: MovimentoDeCameraJson): MovimentoDeCamera {
-    const construtor = REGISTRO_DE_MOVIMENTOS.get(json.tipo);
-    if (!construtor) {
-      const validos = [...REGISTRO_DE_MOVIMENTOS.keys()].join(', ');
-      throw new ErroDeDominio(`tipo de câmera "${json.tipo}" desconhecido (tipos válidos: ${validos})`);
+  static of(json: CameraMoveJson): CameraMove {
+    const moveClass = MOVE_REGISTRY.get(json.type);
+    if (!moveClass) {
+      const valid = [...MOVE_REGISTRY.keys()].join(', ');
+      throw new DomainError(`tipo de câmera "${json.type}" desconhecido (tipos válidos: ${valid})`);
     }
-    return new MovimentoDeCamera(new construtor(json));
+    return new CameraMove(new moveClass(json));
   }
 
-  /** `progresso` de 0 a 1 ao longo da cena. */
-  enquadramentoEm(progresso: number, quadro: Quadro): Enquadramento {
-    return this.#tipo.enquadramentoEm(progresso, quadro);
+  /** `progress` from 0 to 1 along the scene. */
+  framingAt(progress: number, frame: Frame): Framing {
+    return this.#type.framingAt(progress, frame);
   }
 }

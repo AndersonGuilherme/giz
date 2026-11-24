@@ -1,90 +1,90 @@
-// Junta o que o reconhecimento de fala ouviu (com tempos) às palavras do roteiro (o texto que vale).
-import { Segundos } from '../valores/Tempo.ts';
-import { alinharSequencias, type Faixa, type Par } from './AlinhamentoDeSequencia.ts';
-import type { PalavraJson } from './PalavraJson.ts';
-import type { Palavras } from './Palavras.ts';
-import { normalizar } from './Semelhanca.ts';
+// Joins what speech recognition heard (with times) to the script words (the text that counts).
+import { Seconds } from '../values/Time.ts';
+import { alignSequences, type Range, type Pair } from './SequenceAlignment.ts';
+import type { WordJson } from './WordJson.ts';
+import type { Words } from './Words.ts';
+import { normalize } from './Similarity.ts';
 
-type Trecho = Readonly<{ inicio: number; fim: number }>;
+type Span = Readonly<{ start: number; end: number }>;
 
-const MINIMO_EMPARELHADO = 0.6;
-const ZERO: Trecho = { inicio: 0, fim: 0 };
+const MINIMUM_PAIRED = 0.6;
+const ZERO: Span = { start: 0, end: 0 };
 
-// Peso de cada palavra no tempo: o número de letras (pelo menos 1).
-const pesos = (textos: readonly string[]) => textos.map((texto) => Math.max(1, normalizar(texto).length));
+// Weight of each word in time: its number of letters (at least 1).
+const weights = (texts: readonly string[]) => texts.map((text) => Math.max(1, normalize(text).length));
 
-// Divide o trecho entre as palavras, proporcional ao peso; `inicio*(1-f) + fim*f` acerta as pontas exatamente.
-function repartir(trecho: Trecho, pesosDasPalavras: readonly number[]): Trecho[] {
-  const total = pesosDasPalavras.reduce((soma, peso) => soma + peso, 0);
-  const acumulados = pesosDasPalavras.map((_peso, indice) => pesosDasPalavras.slice(0, indice).reduce((soma, peso) => soma + peso, 0));
-  const ponto = (acumulado: number) => trecho.inicio * (1 - acumulado / total) + trecho.fim * (acumulado / total);
-  return acumulados.map((acumulado, indice) => ({ inicio: ponto(acumulado), fim: ponto(acumulado + (pesosDasPalavras[indice] ?? 0)) }));
+// Splits the span among the words, in proportion to the weight; `start*(1-f) + end*f` hits the ends exactly.
+function distribute(span: Span, wordWeights: readonly number[]): Span[] {
+  const total = wordWeights.reduce((sum, weight) => sum + weight, 0);
+  const cumulatives = wordWeights.map((_weight, index) => wordWeights.slice(0, index).reduce((sum, weight) => sum + weight, 0));
+  const point = (cumulative: number) => span.start * (1 - cumulative / total) + span.end * (cumulative / total);
+  return cumulatives.map((cumulative, index) => ({ start: point(cumulative), end: point(cumulative + (wordWeights[index] ?? 0)) }));
 }
 
-function colocar(tempos: (Trecho | undefined)[], faixa: Faixa, trechos: readonly Trecho[]): void {
-  trechos.forEach((trecho, deslocamento) => (tempos[faixa.inicio + deslocamento] = trecho));
+function place(times: (Span | undefined)[], range: Range, spans: readonly Span[]): void {
+  spans.forEach((span, offset) => (times[range.start + offset] = span));
 }
 
-function temposDosPares(pares: readonly Par[], textos: readonly string[], ouvidas: readonly PalavraJson[]): (Trecho | undefined)[] {
-  const tempos: (Trecho | undefined)[] = textos.map(() => undefined);
-  pares.forEach(({ roteiro, ouvidas: faixa }) => {
-    const trecho = { inicio: ouvidas[faixa.inicio]?.inicio ?? 0, fim: ouvidas[faixa.fim - 1]?.fim ?? 0 };
-    colocar(tempos, roteiro, repartir(trecho, pesos(textos.slice(roteiro.inicio, roteiro.fim))));
+function pairTimes(pairs: readonly Pair[], texts: readonly string[], heard: readonly WordJson[]): (Span | undefined)[] {
+  const times: (Span | undefined)[] = texts.map(() => undefined);
+  pairs.forEach(({ script, heard: range }) => {
+    const span = { start: heard[range.start]?.start ?? 0, end: heard[range.end - 1]?.end ?? 0 };
+    place(times, script, distribute(span, weights(texts.slice(script.start, script.end))));
   });
-  return tempos;
+  return times;
 }
 
-// Sequências de palavras do roteiro que ficaram sem par.
-function lacunas(tempos: readonly (Trecho | undefined)[]): Faixa[] {
-  return tempos.reduce<Faixa[]>((faixas, tempo, indice) => {
-    if (tempo) return faixas;
-    const ultima = faixas.at(-1);
-    if (ultima?.fim === indice) return [...faixas.slice(0, -1), { inicio: ultima.inicio, fim: indice + 1 }];
-    return [...faixas, { inicio: indice, fim: indice + 1 }];
+// Runs of script words that were left without a pair.
+function gaps(times: readonly (Span | undefined)[]): Range[] {
+  return times.reduce<Range[]>((ranges, time, index) => {
+    if (time) return ranges;
+    const last = ranges.at(-1);
+    if (last?.end === index) return [...ranges.slice(0, -1), { start: last.start, end: index + 1 }];
+    return [...ranges, { start: index, end: index + 1 }];
   }, []);
 }
 
-// As palavras sem par ganham o tempo entre a vizinha anterior e a seguinte (ou o fim do áudio, se não há seguinte).
-function preencherLacunas(tempos: (Trecho | undefined)[], textos: readonly string[], fimOuvido: number): Trecho[] {
-  lacunas(tempos).forEach((faixa) => {
-    const inicio = tempos[faixa.inicio - 1]?.fim ?? 0;
-    const fim = Math.max(inicio, tempos[faixa.fim]?.inicio ?? fimOuvido);
-    colocar(tempos, faixa, repartir({ inicio, fim }, pesos(textos.slice(faixa.inicio, faixa.fim))));
+// Unpaired words get the time between the previous and the next neighbour (or the end of the audio, if there is no next).
+function fillGaps(times: (Span | undefined)[], texts: readonly string[], heardEnd: number): Span[] {
+  gaps(times).forEach((range) => {
+    const start = times[range.start - 1]?.end ?? 0;
+    const end = Math.max(start, times[range.end]?.start ?? heardEnd);
+    place(times, range, distribute({ start, end }, weights(texts.slice(range.start, range.end))));
   });
-  return tempos.map((tempo) => tempo ?? ZERO);
+  return times.map((time) => time ?? ZERO);
 }
 
-// Nenhuma palavra começa antes do fim da anterior nem termina antes de começar.
-function emOrdem(tempos: readonly Trecho[]): Trecho[] {
-  return tempos.reduce<Trecho[]>((ordenados, { inicio, fim }) => {
-    const comeco = Math.max(inicio, ordenados.at(-1)?.fim ?? 0);
-    return [...ordenados, { inicio: comeco, fim: Math.max(fim, comeco) }];
+// No word starts before the end of the previous one nor ends before it starts.
+function inOrder(times: readonly Span[]): Span[] {
+  return times.reduce<Span[]>((sorted, { start, end }) => {
+    const beginning = Math.max(start, sorted.at(-1)?.end ?? 0);
+    return [...sorted, { start: beginning, end: Math.max(end, beginning) }];
   }, []);
 }
 
-const emparelhadas = (pares: readonly Par[]) => pares.reduce((soma, { roteiro }) => soma + roteiro.fim - roteiro.inicio, 0);
+const paired = (pairs: readonly Pair[]) => pairs.reduce((sum, { script }) => sum + script.end - script.start, 0);
 
-// O que foi ouvido, sem a pontuação solta e sem passar do fim do áudio.
-function audiveisAte(ouvidas: readonly PalavraJson[], fimMaximo: Segundos | undefined): PalavraJson[] {
-  const limite = fimMaximo?.valor() ?? Infinity;
-  const audiveis = ouvidas.filter((ouvida) => normalizar(ouvida.texto) !== '');
-  return audiveis.map(({ texto, inicio, fim }) => ({ texto, inicio: Math.min(inicio, limite), fim: Math.min(fim, limite) }));
+// What was heard, without loose punctuation and without going past the end of the audio.
+function audibleUntil(heard: readonly WordJson[], maximumEnd: Seconds | undefined): WordJson[] {
+  const limit = maximumEnd?.value() ?? Infinity;
+  const audible = heard.filter((heardWord) => normalize(heardWord.text) !== '');
+  return audible.map(({ text, start, end }) => ({ text, start: Math.min(start, limit), end: Math.min(end, limit) }));
 }
 
-// Até onde vão as palavras sem par no fim: a duração do áudio, ou, sem ela, o fim do que foi ouvido.
-const ultimoInstante = (audiveis: readonly PalavraJson[], fimMaximo: Segundos | undefined) =>
-  fimMaximo?.valor() ?? Math.max(0, ...audiveis.map((ouvida) => ouvida.fim));
+// How far the unpaired words at the end go: the audio duration or, without it, the end of what was heard.
+const lastInstant = (audible: readonly WordJson[], maximumEnd: Seconds | undefined) =>
+  maximumEnd?.value() ?? Math.max(0, ...audible.map((heardWord) => heardWord.end));
 
 /**
- * As palavras do roteiro com os tempos do que foi ouvido, em ordem crescente de tempo e sem passar de `fimMaximo`
- * (a duração do áudio); as palavras sem par depois da última ouvida vão até ele.
- * `null` quando menos de 60% das palavras do roteiro acharam par: aí o alinhamento não merece confiança.
+ * The script words with the times of what was heard, in increasing time order and not past `maximumEnd`
+ * (the audio duration); unpaired words after the last heard one go up to it.
+ * `null` when fewer than 60% of the script words found a pair: then the alignment is not trustworthy.
  */
-export function reconciliar(roteiro: Palavras, ouvidas: readonly PalavraJson[], fimMaximo?: Segundos): Palavras | null {
-  const textos = roteiro.textos();
-  const audiveis = audiveisAte(ouvidas, fimMaximo);
-  const pares = alinharSequencias(textos.map(normalizar), audiveis.map((ouvida) => normalizar(ouvida.texto)));
-  if (textos.length === 0 || emparelhadas(pares) < MINIMO_EMPARELHADO * textos.length) return null;
-  const tempos = emOrdem(preencherLacunas(temposDosPares(pares, textos, audiveis), textos, ultimoInstante(audiveis, fimMaximo)));
-  return roteiro.comTempos(tempos.map(({ inicio }) => Segundos.de(inicio)), tempos.map(({ fim }) => Segundos.de(fim)));
+export function reconcile(script: Words, heard: readonly WordJson[], maximumEnd?: Seconds): Words | null {
+  const texts = script.texts();
+  const audible = audibleUntil(heard, maximumEnd);
+  const pairs = alignSequences(texts.map(normalize), audible.map((heardWord) => normalize(heardWord.text)));
+  if (texts.length === 0 || paired(pairs) < MINIMUM_PAIRED * texts.length) return null;
+  const times = inOrder(fillGaps(pairTimes(pairs, texts, audible), texts, lastInstant(audible, maximumEnd)));
+  return script.withTimes(times.map(({ start }) => Seconds.of(start)), times.map(({ end }) => Seconds.of(end)));
 }

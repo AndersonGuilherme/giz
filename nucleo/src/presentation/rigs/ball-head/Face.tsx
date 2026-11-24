@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import type { EstadoDoPersonagem } from '../../../dominio/personagem/EstadoDoPersonagem.ts';
-import { FaceGeometry } from '../../../dominio/personagem/FaceGeometry.ts';
+import type { CharacterState } from '../../../domain/character/CharacterState.ts';
+import { FaceGeometry } from '../../../domain/character/FaceGeometry.ts';
 import { Brows } from './Brows.tsx';
 import { Eyes, Glasses } from './Eyes.tsx';
 import { HEAD } from './measures.ts';
@@ -37,9 +37,9 @@ const Sweat: FC = () => (
 );
 
 /** Eyes, brows and mouth from the domain geometry of the state's expression. */
-export const Face: FC<Readonly<{ state: EstadoDoPersonagem; look: Look }>> = ({ state, look }) => {
-  const face = FaceGeometry.for(state.expressao());
-  const eyes = FaceGeometry.eyes(state.expressao(), state.olhaPara(), state.fechamentoDosOlhos());
+export const Face: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }) => {
+  const face = FaceGeometry.for(state.expression());
+  const eyes = FaceGeometry.eyes(state.expression(), state.gaze(), state.eyeClosure());
   return (
     <g>
       <Eyes eyes={eyes} look={look} />

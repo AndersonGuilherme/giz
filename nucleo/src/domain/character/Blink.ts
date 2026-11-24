@@ -1,51 +1,51 @@
-import type { Fps, Quadro } from '../valores/Tempo.ts';
+import type { Fps, Frame } from '../values/Time.ts';
 
-const MINIMO_EM_SEGUNDOS = 2.5;
-const FAIXA_EM_SEGUNDOS = 3;
-const FECHAMENTO_POR_QUADRO: readonly number[] = [0.7, 1, 1, 0.7];
+const MINIMUM_IN_SECONDS = 2.5;
+const RANGE_IN_SECONDS = 3;
+const CLOSURE_PER_FRAME: readonly number[] = [0.7, 1, 1, 0.7];
 
-function hashDaSemente(semente: string): number {
+function seedHash(seed: string): number {
   let hash = 2166136261;
-  for (const caractere of semente) {
-    hash = Math.imul(hash ^ caractere.charCodeAt(0), 16777619);
+  for (const char of seed) {
+    hash = Math.imul(hash ^ char.charCodeAt(0), 16777619);
   }
   return hash >>> 0;
 }
 
-// mulberry32 de um passo: mistura semente e índice numa fração em [0, 1).
-function fracaoDe(hash: number, indice: number): number {
-  let valor = (hash + Math.imul(indice + 1, 0x6d2b79f5)) >>> 0;
-  valor = Math.imul(valor ^ (valor >>> 15), valor | 1);
-  valor ^= valor + Math.imul(valor ^ (valor >>> 7), valor | 61);
-  return ((valor ^ (valor >>> 14)) >>> 0) / 4294967296;
+// One-step mulberry32: mixes seed and index into a fraction in [0, 1).
+function fractionOf(hash: number, index: number): number {
+  let value = (hash + Math.imul(index + 1, 0x6d2b79f5)) >>> 0;
+  value = Math.imul(value ^ (value >>> 15), value | 1);
+  value ^= value + Math.imul(value ^ (value >>> 7), value | 61);
+  return ((value ^ (value >>> 14)) >>> 0) / 4294967296;
 }
 
-/** Pisca a cada 2,5–5,5 s (intervalo fixo pela semente); cada piscada dura 4 quadros. */
-export class Piscada {
+/** Blinks every 2.5–5.5 s (interval fixed by the seed); each blink lasts 4 frames. */
+export class Blink {
   readonly #hash: number;
 
   private constructor(hash: number) {
     this.#hash = hash;
   }
 
-  static para(semente: string): Piscada {
-    return new Piscada(hashDaSemente(semente));
+  static for(seed: string): Blink {
+    return new Blink(seedHash(seed));
   }
 
-  /** 0 = olhos abertos, 1 = fechados. */
-  fechamentoEm(quadro: Quadro, fps: Fps): number {
-    const atual = quadro.valor();
-    let inicio = 0;
-    let indice = 0;
-    while (inicio + this.#intervalo(indice, fps) <= atual) {
-      inicio += this.#intervalo(indice, fps);
-      indice += 1;
+  /** 0 = eyes open, 1 = closed. */
+  closureAt(frame: Frame, fps: Fps): number {
+    const current = frame.value();
+    let start = 0;
+    let index = 0;
+    while (start + this.#interval(index, fps) <= current) {
+      start += this.#interval(index, fps);
+      index += 1;
     }
-    return indice === 0 ? 0 : (FECHAMENTO_POR_QUADRO[atual - inicio] ?? 0);
+    return index === 0 ? 0 : (CLOSURE_PER_FRAME[current - start] ?? 0);
   }
 
-  #intervalo(indice: number, fps: Fps): number {
-    const segundos = MINIMO_EM_SEGUNDOS + fracaoDe(this.#hash, indice) * FAIXA_EM_SEGUNDOS;
-    return Math.round(segundos * fps.valor());
+  #interval(index: number, fps: Fps): number {
+    const seconds = MINIMUM_IN_SECONDS + fractionOf(this.#hash, index) * RANGE_IN_SECONDS;
+    return Math.round(seconds * fps.value());
   }
 }

@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MouthLayout } from '../../../src/dominio/personagem/MouthLayout.ts';
-import { MouthGeometry, type SpeechShape } from '../../../src/dominio/personagem/MouthGeometry.ts';
-import type { MouthShape } from '../../../src/dominio/personagem/FaceGeometry.ts';
+import { MouthLayout } from '../../../src/domain/character/MouthLayout.ts';
+import { MouthGeometry, type SpeechShape } from '../../../src/domain/character/MouthGeometry.ts';
+import type { MouthShape } from '../../../src/domain/character/FaceGeometry.ts';
 
 const speech = (extra: Partial<SpeechShape>): SpeechShape =>
   ({ width: 28, height: 10, teeth: true, tongue: false, outline: 'oval', lipTuck: false, ...extra });

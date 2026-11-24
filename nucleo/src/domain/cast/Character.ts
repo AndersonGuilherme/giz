@@ -1,71 +1,71 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import type { IdPersonagem } from '../valores/IdPersonagem.ts';
-import type { Expressao } from './PoseEExpressao.ts';
+import { DomainError } from '../DomainError.ts';
+import type { CharacterId } from '../values/CharacterId.ts';
+import type { Expression } from './PoseAndExpression.ts';
 
-export type ValorDeParametro = string | number | boolean;
+export type ParameterValue = string | number | boolean;
 
-export type VozDoPersonagem = Readonly<{ id: string; estilo?: string }>;
+export type CharacterVoice = Readonly<{ id: string; style?: string }>;
 
-/** `parametros` já validados pelo rig, com os padrões aplicados. Sem `rig`, só o narrador (voz sem corpo). */
-export type FichaDoPersonagem = Readonly<{
-  nome: string;
+/** `parameters` already validated by the rig, with defaults applied. Without `rig`, only the narrator (a voice without a body). */
+export type CharacterProfile = Readonly<{
+  name: string;
   rig?: string;
-  parametros: Readonly<Record<string, ValorDeParametro>>;
-  voz: VozDoPersonagem;
-  personalidade?: string;
-  expressaoPadrao: Expressao;
+  parameters: Readonly<Record<string, ParameterValue>>;
+  voice: CharacterVoice;
+  personality?: string;
+  defaultExpression: Expression;
 }>;
 
-export class Personagem {
-  readonly #id: IdPersonagem;
-  readonly #ficha: FichaDoPersonagem;
+export class Character {
+  readonly #id: CharacterId;
+  readonly #profile: CharacterProfile;
 
-  private constructor(id: IdPersonagem, ficha: FichaDoPersonagem) {
+  private constructor(id: CharacterId, profile: CharacterProfile) {
     this.#id = id;
-    this.#ficha = ficha;
+    this.#profile = profile;
   }
 
-  static de(id: IdPersonagem, ficha: FichaDoPersonagem): Personagem {
-    if (ficha.rig === undefined && !id.eNarrador()) {
-      throw new ErroDeDominio(`"${id.texto()}" precisa de um rig (só o narrador pode não ter corpo)`);
+  static of(id: CharacterId, profile: CharacterProfile): Character {
+    if (profile.rig === undefined && !id.isNarrator()) {
+      throw new DomainError(`"${id.text()}" precisa de um rig (só o narrador pode não ter corpo)`);
     }
-    return new Personagem(id, { ...ficha, parametros: Object.freeze({ ...ficha.parametros }) });
+    return new Character(id, { ...profile, parameters: Object.freeze({ ...profile.parameters }) });
   }
 
-  temId(id: IdPersonagem): boolean {
-    return this.#id.igual(id);
+  hasId(id: CharacterId): boolean {
+    return this.#id.equals(id);
   }
 
-  /** O narrador sem rig é só voz. */
-  temCorpo(): boolean {
-    return this.#ficha.rig !== undefined;
+  /** The narrator without a rig is only a voice. */
+  hasBody(): boolean {
+    return this.#profile.rig !== undefined;
   }
 
-  id(): IdPersonagem {
+  id(): CharacterId {
     return this.#id;
   }
 
-  nome(): string {
-    return this.#ficha.nome;
+  name(): string {
+    return this.#profile.name;
   }
 
   rig(): string | undefined {
-    return this.#ficha.rig;
+    return this.#profile.rig;
   }
 
-  parametros(): Readonly<Record<string, ValorDeParametro>> {
-    return this.#ficha.parametros;
+  parameters(): Readonly<Record<string, ParameterValue>> {
+    return this.#profile.parameters;
   }
 
-  voz(): VozDoPersonagem {
-    return this.#ficha.voz;
+  voice(): CharacterVoice {
+    return this.#profile.voice;
   }
 
-  personalidade(): string | undefined {
-    return this.#ficha.personalidade;
+  personality(): string | undefined {
+    return this.#profile.personality;
   }
 
-  expressaoPadrao(): Expressao {
-    return this.#ficha.expressaoPadrao;
+  defaultExpression(): Expression {
+    return this.#profile.defaultExpression;
   }
 }

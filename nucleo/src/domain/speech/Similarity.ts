@@ -1,31 +1,31 @@
-// Comparação de palavras ouvidas com as do roteiro: sem acento, sem pontuação e em minúsculas.
+// Comparing heard words with script words: no accents, no punctuation and lowercase.
 
 /** "Olá," → "ola"; "pull-request" → "pullrequest". */
-export function normalizar(texto: string): string {
-  const semAcento = texto.normalize('NFD').replace(/[̀-ͯ]/g, '');
-  return semAcento.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
+export function normalize(text: string): string {
+  const unaccented = text.normalize('NFD').replace(/[̀-ͯ]/g, '');
+  return unaccented.toLowerCase().replace(/[^\p{L}\p{N}]/gu, '');
 }
 
-const em = (lista: readonly number[], indice: number) => lista[indice] ?? 0;
+const at = (list: readonly number[], index: number) => list[index] ?? 0;
 
-// Uma linha da tabela de Levenshtein, a partir da anterior.
-function proximaLinha(anterior: readonly number[], letra: string, outro: string): number[] {
-  const linha = [em(anterior, 0) + 1];
-  for (let coluna = 1; coluna <= outro.length; coluna++) {
-    const troca = em(anterior, coluna - 1) + (outro[coluna - 1] === letra ? 0 : 1);
-    linha.push(Math.min(em(anterior, coluna) + 1, em(linha, coluna - 1) + 1, troca));
+// One row of the Levenshtein table, from the previous one.
+function nextRow(previous: readonly number[], letter: string, other: string): number[] {
+  const row = [at(previous, 0) + 1];
+  for (let column = 1; column <= other.length; column++) {
+    const substitution = at(previous, column - 1) + (other[column - 1] === letter ? 0 : 1);
+    row.push(Math.min(at(previous, column) + 1, at(row, column - 1) + 1, substitution));
   }
-  return linha;
+  return row;
 }
 
-function distancia(um: string, outro: string): number {
-  const primeira = [...Array(outro.length + 1).keys()];
-  const ultima = [...um].reduce((linha, letra) => proximaLinha(linha, letra, outro), primeira);
-  return ultima[outro.length] ?? 0;
+function distance(one: string, other: string): number {
+  const first = [...Array(other.length + 1).keys()];
+  const last = [...one].reduce((row, letter) => nextRow(row, letter, other), first);
+  return last[other.length] ?? 0;
 }
 
-/** De 0 (nada em comum) a 1 (iguais), pela distância de edição entre as letras. */
-export function semelhanca(um: string, outro: string): number {
-  const maior = Math.max(um.length, outro.length);
-  return maior === 0 ? 1 : 1 - distancia(um, outro) / maior;
+/** From 0 (nothing in common) to 1 (equal), by the edit distance between the letters. */
+export function similarity(one: string, other: string): number {
+  const larger = Math.max(one.length, other.length);
+  return larger === 0 ? 1 : 1 - distance(one, other) / larger;
 }

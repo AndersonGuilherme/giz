@@ -1,60 +1,60 @@
-import type { Expressao, Pose } from '../elenco/PoseEExpressao.ts';
-import type { Visema } from '../fala/Visemas.ts';
-import type { Olhar } from '../roteiro/Fala.ts';
-import type { DeslocamentoDoCorpo } from './Corpo.ts';
+import type { Expression, Pose } from '../cast/PoseAndExpression.ts';
+import type { Viseme } from '../speech/Visemes.ts';
+import type { Gaze } from '../script/Line.ts';
+import type { BodyOffset } from './Body.ts';
 
-export type DadosDoEstado = Readonly<{
+export type StateData = Readonly<{
   pose: Pose;
-  expressao: Expressao;
-  olhar: Olhar;
-  falando: boolean;
-  visema: Visema;
-  abertura: number; // volume da fala, de 0 a 1
-  piscada: number; // fechamento dos olhos, de 0 a 1
-  corpo: DeslocamentoDoCorpo;
+  expression: Expression;
+  look: Gaze;
+  speaking: boolean;
+  viseme: Viseme;
+  opening: number; // speech volume, from 0 to 1
+  blink: number; // eye closure, from 0 to 1
+  body: BodyOffset;
 }>;
 
-/** Tudo o que define como um personagem aparece num quadro; o Task 9 monta com `EstadoDoPersonagem.no(...)`. */
-export class EstadoDoPersonagem {
-  readonly #dados: DadosDoEstado;
+/** Everything that defines how a character looks in a frame; Task 9 builds it with `CharacterState.of(...)`. */
+export class CharacterState {
+  readonly #data: StateData;
 
-  private constructor(dados: DadosDoEstado) {
-    this.#dados = dados;
+  private constructor(data: StateData) {
+    this.#data = data;
   }
 
-  static de(dados: DadosDoEstado): EstadoDoPersonagem {
-    return new EstadoDoPersonagem(dados);
+  static of(data: StateData): CharacterState {
+    return new CharacterState(data);
   }
 
   pose(): Pose {
-    return this.#dados.pose;
+    return this.#data.pose;
   }
 
-  expressao(): Expressao {
-    return this.#dados.expressao;
+  expression(): Expression {
+    return this.#data.expression;
   }
 
-  olhaPara(): Olhar {
-    return this.#dados.olhar;
+  gaze(): Gaze {
+    return this.#data.look;
   }
 
-  estaFalando(): boolean {
-    return this.#dados.falando;
+  isSpeaking(): boolean {
+    return this.#data.speaking;
   }
 
-  visema(): Visema {
-    return this.#dados.visema;
+  viseme(): Viseme {
+    return this.#data.viseme;
   }
 
-  abertura(): number {
-    return this.#dados.abertura;
+  opening(): number {
+    return this.#data.opening;
   }
 
-  fechamentoDosOlhos(): number {
-    return this.#dados.piscada;
+  eyeClosure(): number {
+    return this.#data.blink;
   }
 
-  deslocamentoDoCorpo(): DeslocamentoDoCorpo {
-    return this.#dados.corpo;
+  bodyOffset(): BodyOffset {
+    return this.#data.body;
   }
 }

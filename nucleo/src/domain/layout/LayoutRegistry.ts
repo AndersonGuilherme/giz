@@ -1,35 +1,35 @@
-import type { Cena } from '../roteiro/Cena.ts';
-import type { Idioma } from '../valores/Idioma.ts';
-import type { Proporcao } from '../valores/Proporcao.ts';
-import type { Caixas } from './Caixas.ts';
+import type { Scene } from '../script/Scene.ts';
+import type { Language } from '../values/Language.ts';
+import type { AspectRatio } from '../values/AspectRatio.ts';
+import type { Boxes } from './Boxes.ts';
 
-export type TipoDeCena = Cena['tipo'];
-type CenaDoTipo<T extends TipoDeCena> = Extract<Cena, Readonly<{ tipo: T }>>;
+export type SceneType = Scene['type'];
+type SceneOfType<T extends SceneType> = Extract<Scene, Readonly<{ type: T }>>;
 
-/** Contrato de toda cena: as caixas que ela ocupa numa proporção e num idioma. */
-export type LayoutDeCena<T extends TipoDeCena = TipoDeCena> = (cena: CenaDoTipo<T>, proporcao: Proporcao, idioma: Idioma) => Caixas;
+/** Contract of every scene: the boxes it takes in an aspect ratio and a language. */
+export type SceneLayout<T extends SceneType = SceneType> = (scene: SceneOfType<T>, aspect: AspectRatio, language: Language) => Boxes;
 
-/** Mapa do tipo de cena para o seu layout; cada cena se registra, sem `switch`. */
-export class RegistroDeLayouts {
-  readonly #layouts: Map<TipoDeCena, LayoutDeCena>;
+/** Map from scene type to its layout; each scene registers itself, without a `switch`. */
+export class LayoutRegistry {
+  readonly #layouts: Map<SceneType, SceneLayout>;
 
-  private constructor(layouts: Map<TipoDeCena, LayoutDeCena>) {
+  private constructor(layouts: Map<SceneType, SceneLayout>) {
     this.#layouts = layouts;
   }
 
-  static vazio(): RegistroDeLayouts {
-    return new RegistroDeLayouts(new Map());
+  static empty(): LayoutRegistry {
+    return new LayoutRegistry(new Map());
   }
 
-  registrar<T extends TipoDeCena>(tipo: T, layout: LayoutDeCena<T>): RegistroDeLayouts {
-    // O mapa só entrega a função a cenas do tipo com que ela foi registrada; por isso a conversão é segura.
-    this.#layouts.set(tipo, (cena, proporcao, idioma) => layout(cena as CenaDoTipo<T>, proporcao, idioma));
+  register<T extends SceneType>(type: T, layout: SceneLayout<T>): LayoutRegistry {
+    // The map only hands the function to scenes of the type it was registered with; that is why the cast is safe.
+    this.#layouts.set(type, (scene, aspect, language) => layout(scene as SceneOfType<T>, aspect, language));
     return this;
   }
 
-  /** `undefined` quando o tipo de cena ainda não tem layout registrado. */
-  caixasDe(cena: Cena, proporcao: Proporcao, idioma: Idioma): Caixas | undefined {
-    const layout = this.#layouts.get(cena.tipo);
-    return layout?.(cena, proporcao, idioma);
+  /** `undefined` when the scene type has no registered layout yet. */
+  boxesOf(scene: Scene, aspect: AspectRatio, language: Language): Boxes | undefined {
+    const layout = this.#layouts.get(scene.type);
+    return layout?.(scene, aspect, language);
   }
 }

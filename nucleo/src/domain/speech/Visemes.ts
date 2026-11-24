@@ -1,60 +1,60 @@
-import type { Idioma } from '../valores/Idioma.ts';
+import type { Language } from '../values/Language.ts';
 
-export type Visema = 'X' | 'M' | 'A' | 'E' | 'I' | 'O' | 'U' | 'F' | 'C';
+export type Viseme = 'X' | 'M' | 'A' | 'E' | 'I' | 'O' | 'U' | 'F' | 'C';
 
-type FonemasPorVisema = Readonly<Partial<Record<Visema, string>>>;
+type PhonemesByViseme = Readonly<Partial<Record<Viseme, string>>>;
 
-// Fonema → forma de boca, um objeto por idioma. X = repouso; o que não está na tabela vira C (consoante).
-const TABELAS: Readonly<Record<string, FonemasPorVisema>> = {
+// Phoneme → mouth shape, one object per language. X = rest; whatever is not in the table becomes C (consonant).
+const TABLES: Readonly<Record<string, PhonemesByViseme>> = {
   'pt-BR': { 'A': 'aɐɑ', 'E': 'eɛə', 'I': 'iɪj', 'O': 'oɔ', 'U': 'uʊw', 'M': 'mbp', 'F': 'fv' },
   en: { 'A': 'aɐɑʌæ', 'E': 'eɛəɜɚ', 'I': 'iɪj', 'O': 'oɔ', 'U': 'uʊw', 'M': 'mbp', 'F': 'fv', 'C': 'θð' },
 };
 
-const IGNORADOS = /[̀-ͯˈˌː\s,.;:!?…]/;
+const IGNORED = /[̀-ͯˈˌː\s,.;:!?…]/;
 
-export class SequenciaDeVisemas {
-  readonly #visemas: readonly Visema[];
+export class VisemeSequence {
+  readonly #visemes: readonly Viseme[];
 
-  constructor(visemas: readonly Visema[]) {
-    this.#visemas = visemas;
+  constructor(visemes: readonly Viseme[]) {
+    this.#visemes = visemes;
   }
 
-  texto(): string {
-    return this.#visemas.join('');
+  text(): string {
+    return this.#visemes.join('');
   }
 
-  // Espalha os visemas, em ordem, pelos quadros com voz; os demais ficam em repouso (X).
-  espalharSobre(quadrosComVoz: readonly boolean[]): string {
-    const totalComVoz = quadrosComVoz.filter(Boolean).length;
-    let vistos = 0;
-    return quadrosComVoz
-      .map((comVoz) => (comVoz ? this.#visemaDoQuadro(vistos++, totalComVoz) : 'X'))
+  // Spreads the visemes, in order, over the voiced frames; the others stay at rest (X).
+  spreadOver(voicedFrames: readonly boolean[]): string {
+    const voicedTotal = voicedFrames.filter(Boolean).length;
+    let seen = 0;
+    return voicedFrames
+      .map((voiced) => (voiced ? this.#frameViseme(seen++, voicedTotal) : 'X'))
       .join('');
   }
 
-  #visemaDoQuadro(posicao: number, totalComVoz: number): Visema {
-    const indice = Math.floor((posicao * this.#visemas.length) / totalComVoz);
-    return this.#visemas[indice] ?? 'X';
+  #frameViseme(position: number, voicedTotal: number): Viseme {
+    const index = Math.floor((position * this.#visemes.length) / voicedTotal);
+    return this.#visemes[index] ?? 'X';
   }
 }
 
-export class MapaDeVisemas {
-  readonly #porFonema: ReadonlyMap<string, Visema>;
+export class VisemeMap {
+  readonly #byPhoneme: ReadonlyMap<string, Viseme>;
 
-  private constructor(porFonema: ReadonlyMap<string, Visema>) {
-    this.#porFonema = porFonema;
+  private constructor(byPhoneme: ReadonlyMap<string, Viseme>) {
+    this.#byPhoneme = byPhoneme;
   }
 
-  static para(idioma: Idioma): MapaDeVisemas {
-    const tabela = TABELAS[idioma.codigo()] ?? {};
-    const pares = Object.entries(tabela).flatMap(([visema, fonemas]) =>
-      [...(fonemas ?? '')].map((fonema): [string, Visema] => [fonema, visema as Visema]),
+  static for(language: Language): VisemeMap {
+    const table = TABLES[language.code()] ?? {};
+    const pairs = Object.entries(table).flatMap(([viseme, phonemes]) =>
+      [...(phonemes ?? '')].map((phoneme): [string, Viseme] => [phoneme, viseme as Viseme]),
     );
-    return new MapaDeVisemas(new Map(pares));
+    return new VisemeMap(new Map(pairs));
   }
 
-  converter(ipa: string): SequenciaDeVisemas {
-    const fonemas = [...ipa.normalize('NFD')].filter((caractere) => !IGNORADOS.test(caractere));
-    return new SequenciaDeVisemas(fonemas.map((fonema) => this.#porFonema.get(fonema) ?? 'C'));
+  convert(ipa: string): VisemeSequence {
+    const phonemes = [...ipa.normalize('NFD')].filter((char) => !IGNORED.test(char));
+    return new VisemeSequence(phonemes.map((phoneme) => this.#byPhoneme.get(phoneme) ?? 'C'));
   }
 }

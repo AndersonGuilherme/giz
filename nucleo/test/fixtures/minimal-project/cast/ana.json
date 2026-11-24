@@ -1,8 +1,8 @@
 {
   "id": "ana",
-  "nome": "Ana",
+  "name": "Ana",
   "rig": "ball-head",
-  "parametros": { "outfit": "tunic", "outfitColor": "#b4472e", "hair": "scarf" },
-  "voz": { "id": "vivian" },
-  "expressaoPadrao": "neutra"
+  "parameters": { "outfit": "tunic", "outfitColor": "#b4472e", "hair": "scarf" },
+  "voice": { "id": "vivian" },
+  "defaultExpression": "neutral"
 }

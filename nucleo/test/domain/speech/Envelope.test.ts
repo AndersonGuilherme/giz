@@ -1,42 +1,42 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { Audio } from '../../../src/dominio/fala/Audio.ts';
-import { Envelope } from '../../../src/dominio/fala/Envelope.ts';
-import { Fps, Quadro } from '../../../src/dominio/valores/Tempo.ts';
+import { Audio } from '../../../src/domain/speech/Audio.ts';
+import { Envelope } from '../../../src/domain/speech/Envelope.ts';
+import { Fps, Frame } from '../../../src/domain/values/Time.ts';
 
-const TAXA = 24000;
-const trecho = (segundos: number, amplitude: number) =>
-  Array.from({ length: Math.round(segundos * TAXA) }, (_, i) => amplitude * Math.sin((2 * Math.PI * 220 * i) / TAXA));
-const audio = (...partes: number[][]) => Audio.de(Float32Array.from(partes.flat()), TAXA);
+const RATE = 24000;
+const segment = (seconds: number, amplitude: number) =>
+  Array.from({ length: Math.round(seconds * RATE) }, (_, i) => amplitude * Math.sin((2 * Math.PI * 220 * i) / RATE));
+const audio = (...parts: number[][]) => Audio.of(Float32Array.from(parts.flat()), RATE);
 
-test('um valor por quadro, arredondando a duração para cima', () => {
-  const envelope = Envelope.medir(audio(trecho(1.01, 0.5)), Fps.PADRAO);
-  assert.equal(envelope.paraJson().length, 31);
+test('one value per frame, rounding the duration up', () => {
+  const envelope = Envelope.measure(audio(segment(1.01, 0.5)), Fps.DEFAULT);
+  assert.equal(envelope.toJson().length, 31);
 });
 
-test('silêncio é 0 e a voz forte chega perto de 1', () => {
-  const envelope = Envelope.medir(audio(trecho(0.5, 0), trecho(0.5, 0.5), trecho(0.5, 0)), Fps.PADRAO);
-  assert.equal(envelope.abertura(Quadro.de(0)), 0);
-  assert.ok(envelope.abertura(Quadro.de(22)) >= 0.95);
-  assert.equal(envelope.abertura(Quadro.de(44)), 0);
+test('silence is 0 and a loud voice gets close to 1', () => {
+  const envelope = Envelope.measure(audio(segment(0.5, 0), segment(0.5, 0.5), segment(0.5, 0)), Fps.DEFAULT);
+  assert.equal(envelope.opening(Frame.of(0)), 0);
+  assert.ok(envelope.opening(Frame.of(22)) >= 0.95);
+  assert.equal(envelope.opening(Frame.of(44)), 0);
 });
 
-test('a abertura fica entre 0 e 1 e é 0 fora do áudio', () => {
-  const envelope = Envelope.medir(audio(trecho(0.3, 0.2), trecho(0.3, 0.6)), Fps.PADRAO);
-  envelope.paraJson().forEach((valor) => assert.ok(valor >= 0 && valor <= 1));
-  assert.equal(envelope.abertura(Quadro.de(1000)), 0);
+test('the opening stays between 0 and 1 and is 0 outside the audio', () => {
+  const envelope = Envelope.measure(audio(segment(0.3, 0.2), segment(0.3, 0.6)), Fps.DEFAULT);
+  envelope.toJson().forEach((value) => assert.ok(value >= 0 && value <= 1));
+  assert.equal(envelope.opening(Frame.of(1000)), 0);
 });
 
-test('quadros com voz são os de abertura maior que 0; voz bem baixa conta como silêncio', () => {
-  const envelope = Envelope.medir(audio(trecho(0.2, 0.01), trecho(0.2, 0.5)), Fps.PADRAO);
-  const comVoz = envelope.quadrosComVoz();
-  assert.equal(comVoz.length, 12);
-  assert.deepEqual(comVoz.slice(0, 4), [false, false, false, false]);
-  assert.deepEqual(comVoz.slice(8), [true, true, true, true]);
+test('voiced frames are those with an opening above 0; a very quiet voice counts as silence', () => {
+  const envelope = Envelope.measure(audio(segment(0.2, 0.01), segment(0.2, 0.5)), Fps.DEFAULT);
+  const voiced = envelope.voicedFrames();
+  assert.equal(voiced.length, 12);
+  assert.deepEqual(voiced.slice(0, 4), [false, false, false, false]);
+  assert.deepEqual(voiced.slice(8), [true, true, true, true]);
 });
 
-test('paraJson devolve uma cópia', () => {
-  const envelope = Envelope.medir(audio(trecho(0.2, 0.5)), Fps.PADRAO);
-  envelope.paraJson().fill(9);
-  assert.ok(envelope.paraJson().every((valor) => valor <= 1));
+test('toJson returns a copy', () => {
+  const envelope = Envelope.measure(audio(segment(0.2, 0.5)), Fps.DEFAULT);
+  envelope.toJson().fill(9);
+  assert.ok(envelope.toJson().every((value) => value <= 1));
 });

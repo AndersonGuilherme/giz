@@ -1,18 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { EstadoDoPersonagem } from '../../../src/dominio/personagem/EstadoDoPersonagem.ts';
+import { CharacterState } from '../../../src/domain/character/CharacterState.ts';
 
-test('guarda o que define o personagem no quadro', () => {
-  const estado = EstadoDoPersonagem.de({
-    pose: 'acenar', expressao: 'feliz', olhar: 'camera', falando: true, visema: 'A', abertura: 0.8, piscada: 0,
-    corpo: { y: -1, rotacao: 0.2, escala: 1.004 },
+test('keeps what defines the character in the frame', () => {
+  const state = CharacterState.of({
+    pose: 'wave', expression: 'happy', look: 'camera', speaking: true, viseme: 'A', opening: 0.8, blink: 0,
+    body: { y: -1, rotation: 0.2, scale: 1.004 },
   });
-  assert.equal(estado.pose(), 'acenar');
-  assert.equal(estado.expressao(), 'feliz');
-  assert.equal(estado.olhaPara(), 'camera');
-  assert.ok(estado.estaFalando());
-  assert.equal(estado.visema(), 'A');
-  assert.equal(estado.abertura(), 0.8);
-  assert.equal(estado.fechamentoDosOlhos(), 0);
-  assert.equal(estado.deslocamentoDoCorpo().y, -1);
+  assert.equal(state.pose(), 'wave');
+  assert.equal(state.expression(), 'happy');
+  assert.equal(state.gaze(), 'camera');
+  assert.ok(state.isSpeaking());
+  assert.equal(state.viseme(), 'A');
+  assert.equal(state.opening(), 0.8);
+  assert.equal(state.eyeClosure(), 0);
+  assert.equal(state.bodyOffset().y, -1);
 });

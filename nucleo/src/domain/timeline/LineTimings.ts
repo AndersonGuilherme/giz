@@ -1,69 +1,69 @@
-import type { PalavraJson } from '../fala/PalavraJson.ts';
-import { Fps, Segundos } from '../valores/Tempo.ts';
-import type { PalavraEmQuadros } from './PropsDoVideo.ts';
+import type { WordJson } from '../speech/WordJson.ts';
+import { Fps, Seconds } from '../values/Time.ts';
+import type { WordInFrames } from './VideoProps.ts';
 
-/** O que a linha do tempo usa da voz gravada de uma fala. */
-export type VozDaFala = Readonly<{
-  arquivo: string;
+/** What the timeline uses from the recorded voice of a line. */
+export type LineVoice = Readonly<{
+  file: string;
   envelope: readonly number[];
-  visemas: string;
-  palavras?: readonly PalavraJson[];
+  visemes: string;
+  words?: readonly WordJson[];
 }>;
 
-// Os quadros com voz; sem nenhum, todos os quadros da fala.
-function quadrosFalados(envelope: readonly number[]): number[] {
-  const falados = envelope.flatMap((abertura, quadro) => (abertura > 0 ? [quadro] : []));
-  return falados.length > 0 ? falados : [...envelope.keys()];
+// The voiced frames; with none, every frame of the line.
+function spokenFrames(envelope: readonly number[]): number[] {
+  const spoken = envelope.flatMap((opening, frame) => (opening > 0 ? [frame] : []));
+  return spoken.length > 0 ? spoken : [...envelope.keys()];
 }
 
-// Fração (de 0 a 1) do texto em que cada palavra começa, pelas letras.
-function fracoesDeInicio(textos: readonly string[]): number[] {
-  const tamanho = Math.max(1, textos.join(' ').length);
-  return textos.map((_texto, indice) => textos.slice(0, indice).reduce((soma, anterior) => soma + anterior.length + 1, 0) / tamanho);
+// Fraction (from 0 to 1) of the text where each word starts, by letters.
+function startFractions(texts: readonly string[]): number[] {
+  const size = Math.max(1, texts.join(' ').length);
+  return texts.map((_text, index) => texts.slice(0, index).reduce((sum, previous) => sum + previous.length + 1, 0) / size);
 }
 
-/** Converte os tempos da fala em quadros relativos; sem as palavras gravadas, interpola pelos quadros com voz. */
-export class TemposDaFala {
+/** Converts the line times into relative frames; without the recorded words, it interpolates over the voiced frames. */
+export class LineTimings {
   readonly #envelope: readonly number[];
-  readonly #palavras: readonly PalavraJson[] | undefined;
+  readonly #words: readonly WordJson[] | undefined;
 
-  private constructor(envelope: readonly number[], palavras: readonly PalavraJson[] | undefined) {
+  private constructor(envelope: readonly number[], words: readonly WordJson[] | undefined) {
     this.#envelope = envelope;
-    this.#palavras = palavras;
+    this.#words = words;
   }
 
-  /** As palavras gravadas só valem se forem tantas quanto as do roteiro (`textos`). */
-  static de(voz: VozDaFala, textos: readonly string[]): TemposDaFala {
-    const palavras = voz.palavras?.length === textos.length ? voz.palavras : undefined;
-    return new TemposDaFala(voz.envelope, palavras);
+  /** The recorded words only count if there are as many as the script words (`texts`). */
+  static of(voice: LineVoice, texts: readonly string[]): LineTimings {
+    const words = voice.words?.length === texts.length ? voice.words : undefined;
+    return new LineTimings(voice.envelope, words);
   }
 
-  /** A duração da fala em quadros: o tamanho do envelope (igual ao dos visemas). */
-  quadros(): number {
+  /** The line duration in frames: the envelope length (the same as the visemes). */
+  frames(): number {
     return this.#envelope.length;
   }
 
-  /** O quadro em que a palavra começa; sem palavras gravadas, `undefined`. */
-  inicioDaPalavra(indice: number): number | undefined {
-    const palavra = this.#palavras?.[indice];
-    return palavra && this.#emQuadros(palavra.inicio);
+  /** The frame where the word starts; without recorded words, `undefined`. */
+  wordStart(index: number): number | undefined {
+    const word = this.#words?.[index];
+    return word && this.#toFrames(word.start);
   }
 
-  /** O quadro com voz em que cai a fração `fracao` (de 0 a 1) da fala. */
-  quadroNaFracao(fracao: number): number {
-    const quadros = quadrosFalados(this.#envelope);
-    if (fracao >= 1) return this.quadros();
-    return quadros[Math.floor(fracao * quadros.length)] ?? 0;
+  /** The voiced frame where the fraction `fraction` (from 0 to 1) of the line falls. */
+  frameAtFraction(fraction: number): number {
+    const frames = spokenFrames(this.#envelope);
+    if (fraction >= 1) return this.frames();
+    return frames[Math.floor(fraction * frames.length)] ?? 0;
   }
 
-  emQuadros(textos: readonly string[]): PalavraEmQuadros[] {
-    const inicios = this.#palavras?.map((palavra) => this.#emQuadros(palavra.inicio)) ?? fracoesDeInicio(textos).map((fracao) => this.quadroNaFracao(fracao));
-    const fins = this.#palavras?.map((palavra) => this.#emQuadros(palavra.fim)) ?? [...inicios.slice(1), this.quadros()];
-    return textos.map((texto, indice) => ({ texto, inicio: inicios[indice] ?? 0, fim: fins[indice] ?? this.quadros() }));
+  toFrames(texts: readonly string[]): WordInFrames[] {
+    const starts = this.#words?.map((word) => this.#toFrames(word.start)) ?? startFractions(texts).map((fraction) => this.frameAtFraction(fraction));
+    const ends = this.#words?.map((word) => this.#toFrames(word.end)) ?? [...starts.slice(1), this.frames()];
+    return texts.map((text, index) => ({ text, start: starts[index] ?? 0, end: ends[index] ?? this.frames() }));
   }
 
-  #emQuadros(segundos: number): number {
-    const quadro = Segundos.de(segundos).emQuadros(Fps.PADRAO);
-    return Math.min(this.quadros(), quadro.valor());
+  #toFrames(seconds: number): number {
+    const frame = Seconds.of(seconds).toFrames(Fps.DEFAULT);
+    return Math.min(this.frames(), frame.value());
   }
 }

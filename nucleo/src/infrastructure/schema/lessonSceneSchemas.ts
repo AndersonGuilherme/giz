@@ -1,81 +1,81 @@
 import { z } from 'zod';
 import {
-  CURVAS_DE_GRAFICO,
-  TONS_DE_NO,
-  TONS_DE_TERMINAL,
-  VARIANTES_DE_CARTAO,
-} from '../../dominio/roteiro/CenasDeAula.ts';
-import { textoPreenchido } from './refinamentos.ts';
+  CHART_CURVES,
+  NODE_TONES,
+  TERMINAL_TONES,
+  CARD_VARIANTS,
+} from '../../domain/script/LessonScenes.ts';
+import { nonEmptyText } from './refinements.ts';
 
-const indice = z.number().int().min(0);
-const lado = z.object({ titulo: z.string(), texto: z.string() }).strict();
+const index = z.number().int().min(0);
+const side = z.object({ title: z.string(), text: z.string() }).strict();
 
-const titulo = z
-  .object({ tipo: z.literal('titulo'), sobretitulo: z.string(), titulo: textoPreenchido, subtitulo: z.string().optional() })
+const title = z
+  .object({ type: z.literal('title'), overline: z.string(), title: nonEmptyText, subtitle: z.string().optional() })
   .strict();
-const cartao = z
+const card = z
   .object({
-    tipo: z.literal('cartao'),
-    variante: z.enum(VARIANTES_DE_CARTAO),
-    titulo: z.string(),
-    itens: z.array(z.string()),
-    mostrados: indice.optional(),
+    type: z.literal('card'),
+    variant: z.enum(CARD_VARIANTS),
+    title: z.string(),
+    items: z.array(z.string()),
+    shown: index.optional(),
   })
   .strict();
-const citacao = z.object({ tipo: z.literal('citacao'), texto: textoPreenchido }).strict();
-const grafico = z
+const quote = z.object({ type: z.literal('quote'), text: nonEmptyText }).strict();
+const chart = z
   .object({
-    tipo: z.literal('grafico'),
-    rotuloDoEixoX: z.string(),
-    rotuloDoEixoY: z.string(),
-    curvas: z.array(z.enum(CURVAS_DE_GRAFICO)),
+    type: z.literal('chart'),
+    xAxisLabel: z.string(),
+    yAxisLabel: z.string(),
+    curves: z.array(z.enum(CHART_CURVES)),
   })
   .strict();
-const sintomas = z
+const symptoms = z
   .object({
-    tipo: z.literal('sintomas'),
-    itens: z.array(z.object({ nome: z.string(), descricao: z.string() }).strict()),
-    mostrados: indice,
-    foco: indice.optional(),
+    type: z.literal('symptoms'),
+    items: z.array(z.object({ name: z.string(), description: z.string() }).strict()),
+    shown: index,
+    focus: index.optional(),
   })
   .strict();
-const codigo = z
+const code = z
   .object({
-    tipo: z.literal('codigo'),
-    titulo: z.string(),
-    linhas: z.array(z.string()),
-    adicionadas: z.array(indice).optional(),
-    destaque: z.array(textoPreenchido).optional(),
+    type: z.literal('code'),
+    title: z.string(),
+    lines: z.array(z.string()),
+    added: z.array(index).optional(),
+    highlight: z.array(nonEmptyText).optional(),
   })
   .strict();
 const terminal = z
   .object({
-    tipo: z.literal('terminal'),
-    comando: z.string(),
-    linhas: z.array(z.object({ texto: z.string(), tom: z.enum(TONS_DE_TERMINAL).optional() }).strict()),
+    type: z.literal('terminal'),
+    command: z.string(),
+    lines: z.array(z.object({ text: z.string(), tone: z.enum(TERMINAL_TONES).optional() }).strict()),
   })
   .strict();
-const no = z
-  .object({ id: textoPreenchido, rotulo: z.string(), x: z.number(), y: z.number(), tom: z.enum(TONS_DE_NO).optional() })
+const node = z
+  .object({ id: nonEmptyText, label: z.string(), x: z.number(), y: z.number(), tone: z.enum(NODE_TONES).optional() })
   .strict();
-const aresta = z.object({ de: textoPreenchido, para: textoPreenchido, ruim: z.boolean().optional() }).strict();
-const grafo = z
-  .object({ tipo: z.literal('grafo'), nos: z.array(no), arestas: z.array(aresta), focoNasRuins: z.boolean().optional() })
+const edge = z.object({ from: nonEmptyText, to: nonEmptyText, bad: z.boolean().optional() }).strict();
+const graph = z
+  .object({ type: z.literal('graph'), nodes: z.array(node), edges: z.array(edge), focusOnBad: z.boolean().optional() })
   .strict();
-const versus = z.object({ tipo: z.literal('versus'), errado: lado, certo: lado }).strict();
-const tabela = z
+const versus = z.object({ type: z.literal('versus'), wrong: side, right: side }).strict();
+const table = z
   .object({
-    tipo: z.literal('tabela'),
-    titulo: z.string().optional(),
-    colunas: z.array(z.string()),
-    linhas: z.array(z.object({ rotulo: z.string(), celulas: z.array(z.string()) }).strict()),
-    linhasMostradas: indice.optional(),
-    colunaDestacada: indice.optional(),
-    linhaDestacada: indice.optional(),
+    type: z.literal('table'),
+    title: z.string().optional(),
+    columns: z.array(z.string()),
+    rows: z.array(z.object({ label: z.string(), cells: z.array(z.string()) }).strict()),
+    shownRows: index.optional(),
+    highlightedColumn: index.optional(),
+    highlightedRow: index.optional(),
   })
   .strict();
-const conversa = z.object({ tipo: z.literal('conversa') }).strict();
+const talk = z.object({ type: z.literal('talk') }).strict();
 
-export const esquemasDasCenasDeAula = [
-  titulo, cartao, citacao, grafico, sintomas, codigo, terminal, grafo, versus, tabela, conversa,
+export const lessonSceneSchemas = [
+  title, card, quote, chart, symptoms, code, terminal, graph, versus, table, talk,
 ] as const;

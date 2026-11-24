@@ -1,42 +1,42 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
+import { DomainError } from '../DomainError.ts';
 
-const FORMATO_CURTO = /^#[0-9a-f]{3}$/i;
-const FORMATO_LONGO = /^#[0-9a-f]{6}$/i;
+const SHORT_FORMAT = /^#[0-9a-f]{3}$/i;
+const LONG_FORMAT = /^#[0-9a-f]{6}$/i;
 
-function expandida(texto: string): string {
-  if (!FORMATO_CURTO.test(texto)) return texto.toLowerCase();
-  const [, vermelho, verde, azul] = texto.toLowerCase();
-  return `#${vermelho}${vermelho}${verde}${verde}${azul}${azul}`;
+function expanded(text: string): string {
+  if (!SHORT_FORMAT.test(text)) return text.toLowerCase();
+  const [, red, green, blue] = text.toLowerCase();
+  return `#${red}${red}${green}${green}${blue}${blue}`;
 }
 
-function canalEscurecido(canal: string, fator: number): string {
-  const escurecido = Math.round(Number.parseInt(canal, 16) * (1 - fator));
-  return escurecido.toString(16).padStart(2, '0');
+function darkenedChannel(channel: string, factor: number): string {
+  const darkened = Math.round(Number.parseInt(channel, 16) * (1 - factor));
+  return darkened.toString(16).padStart(2, '0');
 }
 
-export class CorHex {
-  readonly #texto: string;
+export class HexColor {
+  readonly #text: string;
 
-  private constructor(texto: string) {
-    this.#texto = texto;
+  private constructor(text: string) {
+    this.#text = text;
   }
 
-  static de(texto: string): CorHex {
-    if (!FORMATO_CURTO.test(texto) && !FORMATO_LONGO.test(texto)) {
-      throw new ErroDeDominio(`cor "${texto}" inválida (use #RGB ou #RRGGBB)`);
+  static of(text: string): HexColor {
+    if (!SHORT_FORMAT.test(text) && !LONG_FORMAT.test(text)) {
+      throw new DomainError(`cor "${text}" inválida (use #RGB ou #RRGGBB)`);
     }
-    return new CorHex(expandida(texto));
+    return new HexColor(expanded(text));
   }
 
   css(): string {
-    return this.#texto;
+    return this.#text;
   }
 
-  escurecida(fator: number): CorHex {
-    if (!(fator >= 0 && fator <= 1)) {
-      throw new ErroDeDominio(`fator ${fator} inválido (use um número entre 0 e 1)`);
+  darkened(factor: number): HexColor {
+    if (!(factor >= 0 && factor <= 1)) {
+      throw new DomainError(`fator ${factor} inválido (use um número entre 0 e 1)`);
     }
-    const canais = this.#texto.slice(1).match(/../g) ?? [];
-    return new CorHex(`#${canais.map((canal) => canalEscurecido(canal, fator)).join('')}`);
+    const channels = this.#text.slice(1).match(/../g) ?? [];
+    return new HexColor(`#${channels.map((channel) => darkenedChannel(channel, factor)).join('')}`);
   }
 }

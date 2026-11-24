@@ -1,76 +1,76 @@
-// Alinhamento de sequência (Needleman-Wunsch) entre as palavras do roteiro e as ouvidas, já normalizadas.
-// Além do par 1:1, aceita duas do roteiro numa ouvida ("pull request" → "pullrequest") e uma do roteiro
-// em duas ouvidas ("deploy" → "the ploy"). A ordem das duas sequências é sempre mantida.
-import { semelhanca } from './Semelhanca.ts';
+// Sequence alignment (Needleman-Wunsch) between the script words and the heard ones, already normalized.
+// Besides the 1:1 pair, it accepts two script words in one heard word ("pull request" → "pullrequest") and one script word
+// in two heard words ("deploy" → "the ploy"). The order of both sequences is always kept.
+import { similarity } from './Similarity.ts';
 
-/** Fatia [inicio, fim) de uma sequência. */
-export type Faixa = Readonly<{ inicio: number; fim: number }>;
-export type Par = Readonly<{ roteiro: Faixa; ouvidas: Faixa }>;
-type Sequencias = Readonly<{ roteiro: readonly string[]; ouvidas: readonly string[] }>;
-type Passo = Readonly<{ roteiro: number; ouvidas: number }>;
-type Celula = Readonly<{ pontos: number; passo: Passo | undefined }>;
+/** Slice [start, end) of a sequence. */
+export type Range = Readonly<{ start: number; end: number }>;
+export type Pair = Readonly<{ script: Range; heard: Range }>;
+type Sequences = Readonly<{ script: readonly string[]; heard: readonly string[] }>;
+type Step = Readonly<{ script: number; heard: number }>;
+type Cell = Readonly<{ points: number; step: Step | undefined }>;
 
-const PASSOS: readonly Passo[] = [
-  { roteiro: 1, ouvidas: 1 },
-  { roteiro: 2, ouvidas: 1 },
-  { roteiro: 1, ouvidas: 2 },
-  { roteiro: 1, ouvidas: 0 },
-  { roteiro: 0, ouvidas: 1 },
+const STEPS: readonly Step[] = [
+  { script: 1, heard: 1 },
+  { script: 2, heard: 1 },
+  { script: 1, heard: 2 },
+  { script: 1, heard: 0 },
+  { script: 0, heard: 1 },
 ];
-const SEMELHANCA_MINIMA = 0.5;
-// Juntar duas palavras do roteiro vale o dobro; sem esta exigência, "eu sou" engoliria um "sou" sozinho.
-const SEMELHANCA_MINIMA_AO_JUNTAR = 0.8;
-const ORIGEM: Celula = { pontos: 0, passo: undefined };
-const IMPOSSIVEL: Celula = { pontos: -Infinity, passo: undefined };
+const MINIMUM_SIMILARITY = 0.5;
+// Joining two script words is worth double; without this requirement, "eu sou" would swallow a lone "sou".
+const MINIMUM_SIMILARITY_WHEN_JOINING = 0.8;
+const ORIGIN: Cell = { points: 0, step: undefined };
+const IMPOSSIBLE: Cell = { points: -Infinity, step: undefined };
 
-// Pontos de um passo que termina em (linha, coluna): pulos valem 0; pares valem a semelhança por palavra do roteiro.
-function pontosDoPasso(passo: Passo, fim: Readonly<{ linha: number; coluna: number }>, sequencias: Sequencias): number {
-  if (passo.roteiro === 0 || passo.ouvidas === 0) return 0;
-  const doRoteiro = sequencias.roteiro.slice(fim.linha - passo.roteiro, fim.linha).join('');
-  const ouvido = sequencias.ouvidas.slice(fim.coluna - passo.ouvidas, fim.coluna).join('');
-  const nota = semelhanca(doRoteiro, ouvido);
-  const minima = passo.roteiro > 1 ? SEMELHANCA_MINIMA_AO_JUNTAR : SEMELHANCA_MINIMA;
-  return nota < minima ? -Infinity : nota * passo.roteiro;
+// Points of a step that ends at (row, column): skips are worth 0; pairs are worth the similarity per script word.
+function stepPoints(step: Step, end: Readonly<{ row: number; column: number }>, sequences: Sequences): number {
+  if (step.script === 0 || step.heard === 0) return 0;
+  const fromScript = sequences.script.slice(end.row - step.script, end.row).join('');
+  const heardText = sequences.heard.slice(end.column - step.heard, end.column).join('');
+  const score = similarity(fromScript, heardText);
+  const minimum = step.script > 1 ? MINIMUM_SIMILARITY_WHEN_JOINING : MINIMUM_SIMILARITY;
+  return score < minimum ? -Infinity : score * step.script;
 }
 
-function melhorCelula(tabela: readonly Celula[][], fim: Readonly<{ linha: number; coluna: number }>, sequencias: Sequencias): Celula {
-  if (fim.linha === 0 && fim.coluna === 0) return ORIGEM;
-  const possiveis = PASSOS.filter((passo) => passo.roteiro <= fim.linha && passo.ouvidas <= fim.coluna);
-  return possiveis.reduce((melhor, passo) => {
-    const anterior = tabela[fim.linha - passo.roteiro]?.[fim.coluna - passo.ouvidas] ?? IMPOSSIVEL;
-    const pontos = anterior.pontos + pontosDoPasso(passo, fim, sequencias);
-    return pontos > melhor.pontos ? { pontos, passo } : melhor;
-  }, IMPOSSIVEL);
+function bestCell(table: readonly Cell[][], end: Readonly<{ row: number; column: number }>, sequences: Sequences): Cell {
+  if (end.row === 0 && end.column === 0) return ORIGIN;
+  const possible = STEPS.filter((step) => step.script <= end.row && step.heard <= end.column);
+  return possible.reduce((best, step) => {
+    const previous = table[end.row - step.script]?.[end.column - step.heard] ?? IMPOSSIBLE;
+    const points = previous.points + stepPoints(step, end, sequences);
+    return points > best.points ? { points, step } : best;
+  }, IMPOSSIBLE);
 }
 
-function preencherLinha(tabela: Celula[][], linha: number, sequencias: Sequencias): void {
-  const celulas: Celula[] = [];
-  tabela.push(celulas);
-  for (let coluna = 0; coluna <= sequencias.ouvidas.length; coluna++) celulas.push(melhorCelula(tabela, { linha, coluna }, sequencias));
+function fillRow(table: Cell[][], row: number, sequences: Sequences): void {
+  const cells: Cell[] = [];
+  table.push(cells);
+  for (let column = 0; column <= sequences.heard.length; column++) cells.push(bestCell(table, { row, column }, sequences));
 }
 
-function parDoPasso(passo: Passo, linha: number, coluna: number): Par[] {
-  if (passo.roteiro === 0 || passo.ouvidas === 0) return [];
-  return [{ roteiro: { inicio: linha - passo.roteiro, fim: linha }, ouvidas: { inicio: coluna - passo.ouvidas, fim: coluna } }];
+function stepPair(step: Step, row: number, column: number): Pair[] {
+  if (step.script === 0 || step.heard === 0) return [];
+  return [{ script: { start: row - step.script, end: row }, heard: { start: column - step.heard, end: column } }];
 }
 
-// Volta do fim ao começo da tabela pelo melhor caminho, guardando só os pares.
-function caminho(tabela: readonly Celula[][], sequencias: Sequencias): Par[] {
-  const pares: Par[] = [];
-  let linha = sequencias.roteiro.length;
-  let coluna = sequencias.ouvidas.length;
-  for (let passo = tabela[linha]?.[coluna]?.passo; passo; passo = tabela[linha]?.[coluna]?.passo) {
-    pares.unshift(...parDoPasso(passo, linha, coluna));
-    linha -= passo.roteiro;
-    coluna -= passo.ouvidas;
+// Walks back from the end to the start of the table along the best path, keeping only the pairs.
+function path(table: readonly Cell[][], sequences: Sequences): Pair[] {
+  const pairs: Pair[] = [];
+  let row = sequences.script.length;
+  let column = sequences.heard.length;
+  for (let step = table[row]?.[column]?.step; step; step = table[row]?.[column]?.step) {
+    pairs.unshift(...stepPair(step, row, column));
+    row -= step.script;
+    column -= step.heard;
   }
-  return pares;
+  return pairs;
 }
 
-/** Os pares (em ordem) do melhor alinhamento entre as palavras do roteiro e as ouvidas. */
-export function alinharSequencias(roteiro: readonly string[], ouvidas: readonly string[]): Par[] {
-  const sequencias = { roteiro, ouvidas };
-  const tabela: Celula[][] = [];
-  for (let linha = 0; linha <= roteiro.length; linha++) preencherLinha(tabela, linha, sequencias);
-  return caminho(tabela, sequencias);
+/** The pairs (in order) of the best alignment between the script words and the heard ones. */
+export function alignSequences(script: readonly string[], heard: readonly string[]): Pair[] {
+  const sequences = { script, heard };
+  const table: Cell[][] = [];
+  for (let row = 0; row <= script.length; row++) fillRow(table, row, sequences);
+  return path(table, sequences);
 }

@@ -1,40 +1,40 @@
-import type { Alinhador } from '../../aplicacao/portas/Alinhador.ts';
-import type { Audio } from '../../dominio/fala/Audio.ts';
-import { Envelope } from '../../dominio/fala/Envelope.ts';
-import { Palavras } from '../../dominio/fala/Palavras.ts';
-import { Fps, Segundos } from '../../dominio/valores/Tempo.ts';
+import type { Aligner } from '../../application/ports/Aligner.ts';
+import type { Audio } from '../../domain/speech/Audio.ts';
+import { Envelope } from '../../domain/speech/Envelope.ts';
+import { Words } from '../../domain/speech/Words.ts';
+import { Fps, Seconds } from '../../domain/values/Time.ts';
 
-// Pesos de charToFrame do motor (scripts/tts.ts): espaço 0, pontuação 3 (vira pausa), demais letras 1.
-const PONTUACAO = /[,;:.!?…]/;
-const pesoDaLetra = (letra: string) => (/\s/.test(letra) ? 0 : PONTUACAO.test(letra) ? 3 : 1);
-const pesoDaPalavra = (palavra: string) => [...palavra].reduce((soma, letra) => soma + pesoDaLetra(letra), 0);
+// charToFrame weights from the motor (scripts/tts.ts): space 0, punctuation 3 (becomes a pause), other letters 1.
+const PUNCTUATION = /[,;:.!?…]/;
+const letterWeight = (letter: string) => (/\s/.test(letter) ? 0 : PUNCTUATION.test(letter) ? 3 : 1);
+const wordWeight = (word: string) => [...word].reduce((sum, letter) => sum + letterWeight(letter), 0);
 
-// Os quadros com voz; sem nenhum, todos os quadros da fala (a contagem é a do envelope).
-function quadrosDeFala(envelope: Envelope): number[] {
-  const comVoz = envelope.quadrosComVoz();
-  const falados = comVoz.flatMap((temVoz, quadro) => (temVoz ? [quadro] : []));
-  return falados.length > 0 ? falados : [...comVoz.keys()];
+// The voiced frames; with none, every frame of the line (the count is the envelope one).
+function speechFrames(envelope: Envelope): number[] {
+  const voiced = envelope.voicedFrames();
+  const spoken = voiced.flatMap((hasVoice, frame) => (hasVoice ? [frame] : []));
+  return spoken.length > 0 ? spoken : [...voiced.keys()];
 }
 
-// Quadro onde cai o peso acumulado: o começo de um quadro com voz, ou o fim do último.
-function fronteira(acumulado: number, total: number, quadros: readonly number[]): number {
-  const ultimo = quadros.at(-1) ?? 0;
-  if (acumulado >= total) return ultimo + 1;
-  return quadros[Math.floor((acumulado / total) * quadros.length)] ?? ultimo;
+// Frame where the cumulative weight falls: the start of a voiced frame, or the end of the last one.
+function boundary(cumulative: number, total: number, frames: readonly number[]): number {
+  const last = frames.at(-1) ?? 0;
+  if (cumulative >= total) return last + 1;
+  return frames[Math.floor((cumulative / total) * frames.length)] ?? last;
 }
 
-/** Sem reconhecimento de fala: espalha as palavras pelos quadros com voz, proporcional às letras. */
-export class AlinhadorPorEnvelope implements Alinhador {
-  async alinhar(audio: Audio, texto: string): Promise<Palavras> {
-    const palavras = Palavras.doTexto(texto);
-    const envelope = Envelope.medir(audio, Fps.PADRAO);
-    const quadros = quadrosDeFala(envelope);
-    const pesos = palavras.textos().map(pesoDaPalavra);
-    const total = Math.max(1, pesos.reduce((soma, peso) => soma + peso, 0));
-    const acumulados = pesos.map((_peso, indice) => pesos.slice(0, indice + 1).reduce((soma, peso) => soma + peso, 0));
-    const emSegundos = (acumulado: number) =>
-      Segundos.de(Math.min(audio.duracao().valor(), fronteira(acumulado, total, quadros) / Fps.PADRAO.valor()));
-    const inicios = acumulados.map((acumulado, indice) => emSegundos(acumulado - (pesos[indice] ?? 0)));
-    return palavras.comTempos(inicios, acumulados.map(emSegundos));
+/** Without speech recognition: spreads the words over the voiced frames, in proportion to the letters. */
+export class EnvelopeAligner implements Aligner {
+  async align(audio: Audio, text: string): Promise<Words> {
+    const words = Words.fromText(text);
+    const envelope = Envelope.measure(audio, Fps.DEFAULT);
+    const frames = speechFrames(envelope);
+    const weights = words.texts().map(wordWeight);
+    const total = Math.max(1, weights.reduce((sum, weight) => sum + weight, 0));
+    const cumulatives = weights.map((_weight, index) => weights.slice(0, index + 1).reduce((sum, weight) => sum + weight, 0));
+    const toSeconds = (cumulative: number) =>
+      Seconds.of(Math.min(audio.duration().value(), boundary(cumulative, total, frames) / Fps.DEFAULT.value()));
+    const starts = cumulatives.map((cumulative, index) => toSeconds(cumulative - (weights[index] ?? 0)));
+    return words.withTimes(starts, cumulatives.map(toSeconds));
   }
 }

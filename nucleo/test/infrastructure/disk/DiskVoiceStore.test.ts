@@ -3,30 +3,30 @@ import assert from 'node:assert/strict';
 import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { VozGravada } from '../../../src/aplicacao/portas/ArmazemDeVozes.ts';
-import { Audio } from '../../../src/dominio/fala/Audio.ts';
-import { ArmazemDeVozesEmDisco } from '../../../src/infraestrutura/disco/ArmazemDeVozesEmDisco.ts';
-import { deWav } from '../../../src/infraestrutura/voz/wav.ts';
+import type { RecordedVoice } from '../../../src/application/ports/VoiceStore.ts';
+import { Audio } from '../../../src/domain/speech/Audio.ts';
+import { DiskVoiceStore } from '../../../src/infrastructure/disk/DiskVoiceStore.ts';
+import { fromWav } from '../../../src/infrastructure/voice/wav.ts';
 
-const pasta = await mkdtemp(join(tmpdir(), 'giz-vozes-'));
-after(() => rm(pasta, { recursive: true, force: true }));
-const registro: VozGravada = { arquivo: 'voz/1.wav', hash: 'abc', duracaoSegundos: 0.5, envelope: [0, 1], visemas: 'XA' };
+const folder = await mkdtemp(join(tmpdir(), 'giz-voices-'));
+after(() => rm(folder, { recursive: true, force: true }));
+const record: RecordedVoice = { file: 'voice/1.wav', hash: 'abc', durationSeconds: 0.5, envelope: [0, 1], visemes: 'XA' };
 
-test('sem gravação, não há hash', () => {
-  assert.equal(new ArmazemDeVozesEmDisco(pasta).hashGravado('1'), undefined);
+test('without a recording there is no hash', () => {
+  assert.equal(new DiskVoiceStore(folder).savedHash('1'), undefined);
 });
 
-test('grava voz/<id>.wav e voz/<id>.json e lê de volta', async () => {
-  const armazem = new ArmazemDeVozesEmDisco(pasta);
-  await armazem.gravar('1', registro, Audio.de(new Float32Array(12000), 24000));
-  assert.deepEqual(await armazem.ler('1'), registro);
-  assert.equal(armazem.hashGravado('1'), 'abc');
-  assert.equal(deWav(await readFile(join(pasta, 'voz', '1.wav'))).duracao().valor(), 0.5);
+test('saves voice/<id>.wav and voice/<id>.json and reads them back', async () => {
+  const store = new DiskVoiceStore(folder);
+  await store.save('1', record, Audio.of(new Float32Array(12000), 24000));
+  assert.deepEqual(await store.read('1'), record);
+  assert.equal(store.savedHash('1'), 'abc');
+  assert.equal(fromWav(await readFile(join(folder, 'voice', '1.wav'))).duration().value(), 0.5);
 });
 
-test('sem o wav, o registro não vale', async () => {
-  const armazem = new ArmazemDeVozesEmDisco(pasta);
-  await armazem.gravar('2', registro, Audio.de(new Float32Array(10), 24000));
-  await rm(join(pasta, 'voz', '2.wav'));
-  assert.equal(armazem.hashGravado('2'), undefined);
+test('without the wav, the record does not count', async () => {
+  const store = new DiskVoiceStore(folder);
+  await store.save('2', record, Audio.of(new Float32Array(10), 24000));
+  await rm(join(folder, 'voice', '2.wav'));
+  assert.equal(store.savedHash('2'), undefined);
 });

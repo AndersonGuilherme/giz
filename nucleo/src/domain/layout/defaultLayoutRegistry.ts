@@ -1,7 +1,7 @@
-import { registrarLayoutsDeAula } from './layoutsDeAula.ts';
-import { RegistroDeLayouts } from './RegistroDeLayouts.ts';
+import { registerLessonLayouts } from './lessonLayouts.ts';
+import { LayoutRegistry } from './LayoutRegistry.ts';
 
-/** Registro com os layouts de todas as cenas conhecidas; cada chamada cria um registro novo. */
-export function criarRegistroDeLayouts(): RegistroDeLayouts {
-  return registrarLayoutsDeAula(RegistroDeLayouts.vazio());
+/** Registry with the layouts of every known scene; each call creates a new registry. */
+export function createLayoutRegistry(): LayoutRegistry {
+  return registerLessonLayouts(LayoutRegistry.empty());
 }

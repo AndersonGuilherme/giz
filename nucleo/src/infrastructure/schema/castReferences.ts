@@ -1,39 +1,39 @@
-import type { Elenco } from '../../dominio/elenco/Elenco.ts';
-import type { Roteiro } from '../../dominio/roteiro/Roteiro.ts';
-import { IdPersonagem } from '../../dominio/valores/IdPersonagem.ts';
-import type { RoteiroJson } from './esquemaDoRoteiro.ts';
-import type { ColetorDeProblemas } from './mensagensDeErro.ts';
+import type { Cast } from '../../domain/cast/Cast.ts';
+import type { Script } from '../../domain/script/Script.ts';
+import { CharacterId } from '../../domain/values/CharacterId.ts';
+import type { ScriptJson } from './scriptSchema.ts';
+import type { ProblemCollector } from './errorMessages.ts';
 
-const ARQUIVO = 'roteiro.json';
+const FILE = 'script.json';
 
-function foraDoElenco(quem: string, elenco: Elenco): string {
-  return `"${quem}" não está no elenco (${elenco.ids().join(', ')})`;
+function notInCast(name: string, cast: Cast): string {
+  return `"${name}" não está no elenco (${cast.ids().join(', ')})`;
 }
 
-function problemaDeQuemEstaEmCena(quem: string, elenco: Elenco): string | undefined {
-  const id = IdPersonagem.de(quem);
-  if (!elenco.contem(id)) return foraDoElenco(quem, elenco);
-  return elenco.personagem(id).temCorpo() ? undefined : `${quem} não tem corpo e não pode aparecer em cena`;
+function onStageProblem(name: string, cast: Cast): string | undefined {
+  const id = CharacterId.of(name);
+  if (!cast.contains(id)) return notInCast(name, cast);
+  return cast.character(id).hasBody() ? undefined : `${name} não tem corpo e não pode aparecer em cena`;
 }
 
-/** Cada fala precisa ser de alguém do elenco. */
-export function verificarQuemFala(roteiro: Roteiro, elenco: Elenco, coletor: ColetorDeProblemas): void {
-  const desconhecidos = roteiro.falas().idsDesconhecidos(elenco);
-  roteiro.falas().cadaUma().forEach((fala, indice) => {
-    const quem = fala.quem().texto();
-    if (!desconhecidos.includes(quem)) return;
-    coletor.adicionar({ arquivo: ARQUIVO, caminho: `falas[${indice}].quem`, mensagem: foraDoElenco(quem, elenco) });
+/** Every line must belong to someone in the cast. */
+export function checkSpeakers(script: Script, cast: Cast, collector: ProblemCollector): void {
+  const unknownIds = script.lines().unknownIds(cast);
+  script.lines().each().forEach((line, index) => {
+    const speaker = line.speaker().text();
+    if (!unknownIds.includes(speaker)) return;
+    collector.add({ file: FILE, path: `lines[${index}].speaker`, message: notInCast(speaker, cast) });
   });
 }
 
-/** Cada personagem posto num cenário precisa ser do elenco e ter corpo. */
-export function verificarPersonagensEmCena(json: RoteiroJson, elenco: Elenco, coletor: ColetorDeProblemas): void {
-  json.falas.forEach((fala, indiceDaFala) => {
-    if (fala.cena?.tipo !== 'cenario') return;
-    fala.cena.personagens.forEach(({ quem }, indice) => {
-      const mensagem = problemaDeQuemEstaEmCena(quem, elenco);
-      const caminho = `falas[${indiceDaFala}].cena.personagens[${indice}].quem`;
-      if (mensagem) coletor.adicionar({ arquivo: ARQUIVO, caminho, mensagem });
+/** Every character placed in a scenario must be in the cast and have a body. */
+export function checkCharactersOnStage(json: ScriptJson, cast: Cast, collector: ProblemCollector): void {
+  json.lines.forEach((line, lineIndex) => {
+    if (line.scene?.type !== 'scenario') return;
+    line.scene.characters.forEach(({ character }, index) => {
+      const message = onStageProblem(character, cast);
+      const path = `lines[${lineIndex}].scene.characters[${index}].character`;
+      if (message) collector.add({ file: FILE, path, message });
     });
   });
 }

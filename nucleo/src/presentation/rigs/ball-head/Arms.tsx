@@ -1,5 +1,5 @@
 import type { FC } from 'react';
-import type { Arm as ArmShape, Hand as HandShape } from '../../../dominio/personagem/ArmGeometry.ts';
+import type { Arm as ArmShape, Hand as HandShape } from '../../../domain/character/ArmGeometry.ts';
 import { ARM, SHOULDERS } from './measures.ts';
 import type { Look } from './parameters.ts';
 import { shade } from './svg.ts';

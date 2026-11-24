@@ -3,101 +3,101 @@ import assert from 'node:assert/strict';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { env } from '@huggingface/transformers';
-import type { Alinhador } from '../../../src/aplicacao/portas/Alinhador.ts';
-import { Audio } from '../../../src/dominio/fala/Audio.ts';
-import type { PalavraJson } from '../../../src/dominio/fala/PalavraJson.ts';
-import type { Palavras } from '../../../src/dominio/fala/Palavras.ts';
-import { Idioma } from '../../../src/dominio/valores/Idioma.ts';
-import { AlinhadorPorEnvelope } from '../../../src/infraestrutura/alinhamento/AlinhadorPorEnvelope.ts';
-import { AlinhadorWhisper, type Ouvido } from '../../../src/infraestrutura/alinhamento/AlinhadorWhisper.ts';
-import { MODELO_DO_WHISPER, OuvidoWhisper } from '../../../src/infraestrutura/alinhamento/OuvidoWhisper.ts';
-import { deWav } from '../../../src/infraestrutura/voz/wav.ts';
+import type { Aligner } from '../../../src/application/ports/Aligner.ts';
+import { Audio } from '../../../src/domain/speech/Audio.ts';
+import type { WordJson } from '../../../src/domain/speech/WordJson.ts';
+import type { Words } from '../../../src/domain/speech/Words.ts';
+import { Language } from '../../../src/domain/values/Language.ts';
+import { EnvelopeAligner } from '../../../src/infrastructure/alignment/EnvelopeAligner.ts';
+import { WhisperAligner, type Listener } from '../../../src/infrastructure/alignment/WhisperAligner.ts';
+import { WHISPER_MODEL, WhisperListener } from '../../../src/infrastructure/alignment/WhisperListener.ts';
+import { fromWav } from '../../../src/infrastructure/voice/wav.ts';
 
-const som = Audio.de(new Float32Array(24000), 24000);
+const sound = Audio.of(new Float32Array(24000), 24000);
 
-class OuvidoFalso implements Ouvido {
-  readonly idiomas: Idioma[] = [];
-  readonly #ouvidas: PalavraJson[];
+class FakeListener implements Listener {
+  readonly languages: Language[] = [];
+  readonly #heard: WordJson[];
 
-  constructor(ouvidas: PalavraJson[]) {
-    this.#ouvidas = ouvidas;
+  constructor(heard: WordJson[]) {
+    this.#heard = heard;
   }
 
-  async ouvir(_audio: Audio, idioma: Idioma): Promise<PalavraJson[]> {
-    this.idiomas.push(idioma);
-    return this.#ouvidas;
-  }
-}
-
-class ReservaFalsa implements Alinhador {
-  chamadas = 0;
-
-  async alinhar(_audio: Audio, texto: string): Promise<Palavras> {
-    this.chamadas++;
-    return new AlinhadorPorEnvelope().alinhar(som, texto);
+  async listen(_audio: Audio, language: Language): Promise<WordJson[]> {
+    this.languages.push(language);
+    return this.#heard;
   }
 }
 
-test('AlinhadorWhisper reconcilia o que ouviu com o texto do roteiro', async () => {
-  const reserva = new ReservaFalsa();
-  const ouvido = new OuvidoFalso([{ texto: ' ola', inicio: 0, fim: 0.3 }, { texto: ' teu', inicio: 0.3, fim: 0.6 }]);
-  const palavras = await new AlinhadorWhisper(reserva, ouvido).alinhar(som, 'Olá, Téo!', Idioma.INGLES);
-  assert.deepEqual(palavras.paraJson(), [{ texto: 'Olá,', inicio: 0, fim: 0.3 }, { texto: 'Téo!', inicio: 0.3, fim: 0.6 }]);
-  assert.equal(reserva.chamadas, 0);
-  assert.deepEqual(ouvido.idiomas, [Idioma.INGLES]);
+class FakeFallback implements Aligner {
+  calls = 0;
+
+  async align(_audio: Audio, text: string): Promise<Words> {
+    this.calls++;
+    return new EnvelopeAligner().align(sound, text);
+  }
+}
+
+test('WhisperAligner reconciles what it heard with the script text', async () => {
+  const fallback = new FakeFallback();
+  const listener = new FakeListener([{ text: ' ola', start: 0, end: 0.3 }, { text: ' teu', start: 0.3, end: 0.6 }]);
+  const words = await new WhisperAligner(fallback, listener).align(sound, 'Olá, Téo!', Language.ENGLISH);
+  assert.deepEqual(words.toJson(), [{ text: 'Olá,', start: 0, end: 0.3 }, { text: 'Téo!', start: 0.3, end: 0.6 }]);
+  assert.equal(fallback.calls, 0);
+  assert.deepEqual(listener.languages, [Language.ENGLISH]);
 });
 
-test('AlinhadorWhisper cai para a reserva quando o alinhamento é ruim demais', async () => {
-  const reserva = new ReservaFalsa();
-  const ouvido = new OuvidoFalso([{ texto: 'banana', inicio: 0, fim: 1 }]);
-  const palavras = await new AlinhadorWhisper(reserva, ouvido).alinhar(som, 'um dois três quatro', Idioma.PORTUGUES);
-  assert.equal(reserva.chamadas, 1);
-  assert.deepEqual(palavras.textos(), ['um', 'dois', 'três', 'quatro']);
+test('WhisperAligner falls back when the alignment is too poor', async () => {
+  const fallback = new FakeFallback();
+  const listener = new FakeListener([{ text: 'banana', start: 0, end: 1 }]);
+  const words = await new WhisperAligner(fallback, listener).align(sound, 'um dois três quatro', Language.PORTUGUESE);
+  assert.equal(fallback.calls, 1);
+  assert.deepEqual(words.texts(), ['um', 'dois', 'três', 'quatro']);
 });
 
-class OuvidoQueFalha implements Ouvido {
-  async ouvir(): Promise<PalavraJson[]> {
+class FailingListener implements Listener {
+  async listen(): Promise<WordJson[]> {
     throw new Error('sem rede para baixar o modelo');
   }
 }
 
-test('AlinhadorWhisper avisa e usa a reserva quando o Whisper falha', async () => {
-  const reserva = new ReservaFalsa();
-  const avisos: string[] = [];
-  const alinhador = new AlinhadorWhisper(reserva, new OuvidoQueFalha(), (mensagem) => avisos.push(mensagem));
-  const palavras = await alinhador.alinhar(som, 'um dois', Idioma.PORTUGUES);
-  assert.equal(reserva.chamadas, 1);
-  assert.deepEqual(palavras.textos(), ['um', 'dois']);
-  assert.deepEqual(avisos, ['alinhamento por Whisper falhou (sem rede para baixar o modelo); usando o envelope da voz']);
+test('WhisperAligner warns and uses the fallback when Whisper fails', async () => {
+  const fallback = new FakeFallback();
+  const warnings: string[] = [];
+  const aligner = new WhisperAligner(fallback, new FailingListener(), (message) => warnings.push(message));
+  const words = await aligner.align(sound, 'um dois', Language.PORTUGUESE);
+  assert.equal(fallback.calls, 1);
+  assert.deepEqual(words.texts(), ['um', 'dois']);
+  assert.deepEqual(warnings, ['alinhamento por Whisper falhou (sem rede para baixar o modelo); usando o envelope da voz']);
 });
 
-test('AlinhadorWhisper sem quem avise também usa a reserva quando o Whisper falha', async () => {
-  const reserva = new ReservaFalsa();
-  await new AlinhadorWhisper(reserva, new OuvidoQueFalha()).alinhar(som, 'um', Idioma.PORTUGUES);
-  assert.equal(reserva.chamadas, 1);
+test('WhisperAligner without a warning sink also uses the fallback when Whisper fails', async () => {
+  const fallback = new FakeFallback();
+  await new WhisperAligner(fallback, new FailingListener()).align(sound, 'um', Language.PORTUGUESE);
+  assert.equal(fallback.calls, 1);
 });
 
-test('AlinhadorWhisper limita os tempos à duração do áudio', async () => {
-  const ouvido = new OuvidoFalso([{ texto: 'um', inicio: 0, fim: 5 }]);
-  const palavras = await new AlinhadorWhisper(new ReservaFalsa(), ouvido).alinhar(som, 'um', Idioma.PORTUGUES);
-  assert.deepEqual(palavras.paraJson(), [{ texto: 'um', inicio: 0, fim: 1 }]);
+test('WhisperAligner limits the times to the audio duration', async () => {
+  const listener = new FakeListener([{ text: 'um', start: 0, end: 5 }]);
+  const words = await new WhisperAligner(new FakeFallback(), listener).align(sound, 'um', Language.PORTUGUESE);
+  assert.deepEqual(words.toJson(), [{ text: 'um', start: 0, end: 1 }]);
 });
 
-// Integração com o modelo de verdade: só roda se ele já estiver no cache e a fixture já tiver voz.
-const modeloBaixado = existsSync(join(env.cacheDir ?? '', MODELO_DO_WHISPER, 'config.json'));
-const wavDaFixture = new URL('../../fixtures/projeto-minimo/voz/1.wav', import.meta.url);
-const semModelo = `modelo ${MODELO_DO_WHISPER} não está em ${env.cacheDir} (baixa sozinho na primeira voz gerada)`;
-const semVoz = 'a fixture não tem voz/1.wav (gere com: node src/apresentacao/cli/giz.ts voz test/fixtures/projeto-minimo)';
-const pulo = !modeloBaixado ? semModelo : !existsSync(wavDaFixture) && semVoz;
+// Integration with the real model: runs only if it is already in the cache and the fixture already has a voice.
+const downloadedModel = existsSync(join(env.cacheDir ?? '', WHISPER_MODEL, 'config.json'));
+const fixtureWav = new URL('../../fixtures/minimal-project/voice/1.wav', import.meta.url);
+const withoutModel = `modelo ${WHISPER_MODEL} não está em ${env.cacheDir} (baixa sozinho na primeira voz gerada)`;
+const voiceless = 'the fixture has no voice/1.wav (generate it with: node src/presentation/cli/giz.ts voice test/fixtures/minimal-project)';
+const skipReason = !downloadedModel ? withoutModel : !existsSync(fixtureWav) && voiceless;
 
-test('OuvidoWhisper ouve a fala da fixture com o tempo de cada palavra', { skip: pulo || false, timeout: 120_000 }, async () => {
-  const audio = deWav(readFileSync(wavDaFixture));
-  const ouvido = new OuvidoWhisper();
-  const ouvidas = await ouvido.ouvir(audio, Idioma.PORTUGUES);
-  const reserva = new ReservaFalsa();
-  const palavras = await new AlinhadorWhisper(reserva, ouvido).alinhar(audio, 'Oi, eu sou a Ana.', Idioma.PORTUGUES);
-  assert.equal(reserva.chamadas, 0);
-  assert.ok(ouvidas.length >= 4, JSON.stringify(ouvidas));
-  assert.deepEqual(palavras.textos(), ['Oi,', 'eu', 'sou', 'a', 'Ana.']);
-  assert.ok((palavras.paraJson().at(-1)?.fim ?? 0) <= audio.duracao().valor() + 0.05);
+test('WhisperListener hears the fixture line with the time of each word', { skip: skipReason || false, timeout: 120_000 }, async () => {
+  const audio = fromWav(readFileSync(fixtureWav));
+  const listener = new WhisperListener();
+  const heard = await listener.listen(audio, Language.PORTUGUESE);
+  const fallback = new FakeFallback();
+  const words = await new WhisperAligner(fallback, listener).align(audio, 'Oi, eu sou a Ana.', Language.PORTUGUESE);
+  assert.equal(fallback.calls, 0);
+  assert.ok(heard.length >= 4, JSON.stringify(heard));
+  assert.deepEqual(words.texts(), ['Oi,', 'eu', 'sou', 'a', 'Ana.']);
+  assert.ok((words.toJson().at(-1)?.end ?? 0) <= audio.duration().value() + 0.05);
 });

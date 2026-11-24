@@ -1,213 +1,213 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { VozGravada } from '../../src/aplicacao/portas/ArmazemDeVozes.ts';
-import { MontarLinhaDoTempo } from '../../src/aplicacao/casos-de-uso/MontarLinhaDoTempo.ts';
-import { Elenco } from '../../src/dominio/elenco/Elenco.ts';
-import { Personagem } from '../../src/dominio/elenco/Personagem.ts';
-import type { PalavraJson } from '../../src/dominio/fala/PalavraJson.ts';
-import { Projeto } from '../../src/dominio/projeto/Projeto.ts';
-import { Capitulo } from '../../src/dominio/roteiro/Capitulo.ts';
-import type { Cena } from '../../src/dominio/roteiro/Cena.ts';
-import { Fala, type DadosDaFala } from '../../src/dominio/roteiro/Fala.ts';
-import { Falas } from '../../src/dominio/roteiro/Falas.ts';
-import { Roteiro } from '../../src/dominio/roteiro/Roteiro.ts';
-import { IdPersonagem } from '../../src/dominio/valores/IdPersonagem.ts';
-import { Idioma } from '../../src/dominio/valores/Idioma.ts';
-import { Proporcao } from '../../src/dominio/valores/Proporcao.ts';
-import { ArmazemEmMemoria } from '../dublês/ArmazemEmMemoria.ts';
+import type { RecordedVoice } from '../../src/application/ports/VoiceStore.ts';
+import { BuildTimeline } from '../../src/application/use-cases/BuildTimeline.ts';
+import { Cast } from '../../src/domain/cast/Cast.ts';
+import { Character } from '../../src/domain/cast/Character.ts';
+import type { WordJson } from '../../src/domain/speech/WordJson.ts';
+import { Project } from '../../src/domain/project/Project.ts';
+import { Chapter } from '../../src/domain/script/Chapter.ts';
+import type { Scene } from '../../src/domain/script/Scene.ts';
+import { Line, type LineData } from '../../src/domain/script/Line.ts';
+import { Lines } from '../../src/domain/script/Lines.ts';
+import { Script } from '../../src/domain/script/Script.ts';
+import { CharacterId } from '../../src/domain/values/CharacterId.ts';
+import { Language } from '../../src/domain/values/Language.ts';
+import { AspectRatio } from '../../src/domain/values/AspectRatio.ts';
+import { InMemoryVoiceStore } from '../doubles/InMemoryVoiceStore.ts';
 
-type FalaDeTeste = Omit<DadosDaFala, 'capitulo'> & { quem?: string };
+type TestLine = Omit<LineData, 'chapter'> & { speaker?: string };
 
-const RESPIRO = 11; // 0,35 s a 30 fps
-const titulo: Cena = { tipo: 'titulo', sobretitulo: 'Aula 1', titulo: 'Cupons' };
+const BREATHER = 11; // 0.35 s at 30 fps
+const title: Scene = { type: 'title', overline: 'Aula 1', title: 'Cupons' };
 
-function projeto(falas: FalaDeTeste[]): Projeto {
-  const ana = Personagem.de(IdPersonagem.de('ana'), { nome: 'Ana', rig: 'teste', parametros: { pele: '#aa8866' }, voz: { id: 'vivian' }, expressaoPadrao: 'feliz' });
-  const teo = Personagem.de(IdPersonagem.de('teo'), { nome: 'Téo', rig: 'teste', parametros: {}, voz: { id: 'ryan' }, expressaoPadrao: 'neutra' });
-  const narrador = Personagem.de(IdPersonagem.NARRADOR, { nome: 'Narrador', parametros: {}, voz: { id: 'eric' }, expressaoPadrao: 'neutra' });
-  const lista = falas.map(({ quem = 'ana', ...dados }) => Fala.de(IdPersonagem.de(quem), { ...dados, capitulo: Capitulo.de(1) }));
-  return Projeto.de(
-    { titulo: 'Cupons', formato: 'aula', idioma: Idioma.PORTUGUES, proporcao: Proporcao.VERTICAL, estiloDeLegenda: 'palavras', voz: { provedor: 'qwen' } },
-    { elenco: Elenco.de([ana, teo, narrador]), roteiro: Roteiro.de(['Abertura'], Falas.de(lista)), avisos: [] },
+function project(lines: TestLine[]): Project {
+  const ana = Character.of(CharacterId.of('ana'), { name: 'Ana', rig: 'test', parameters: { skin: '#aa8866' }, voice: { id: 'vivian' }, defaultExpression: 'happy' });
+  const teo = Character.of(CharacterId.of('teo'), { name: 'Téo', rig: 'test', parameters: {}, voice: { id: 'ryan' }, defaultExpression: 'neutral' });
+  const narrator = Character.of(CharacterId.NARRATOR, { name: 'Narrador', parameters: {}, voice: { id: 'eric' }, defaultExpression: 'neutral' });
+  const list = lines.map(({ speaker = 'ana', ...data }) => Line.of(CharacterId.of(speaker), { ...data, chapter: Chapter.of(1) }));
+  return Project.of(
+    { title: 'Cupons', format: 'lesson', language: Language.PORTUGUESE, aspect: AspectRatio.VERTICAL, captionStyle: 'words', voice: { provider: 'qwen' } },
+    { cast: Cast.of([ana, teo, narrator]), script: Script.of(['Abertura'], Lines.of(list)), warnings: [] },
   );
 }
 
-function voz(idFala: string, quadros: number, { palavras, envelope }: { palavras?: PalavraJson[]; envelope?: number[] } = {}): VozGravada {
+function voice(lineId: string, frames: number, { words, envelope }: { words?: WordJson[]; envelope?: number[] } = {}): RecordedVoice {
   return {
-    arquivo: `voz/${idFala}.wav`, hash: 'h', duracaoSegundos: quadros / 30 + 0.01,
-    envelope: envelope ?? Array(quadros).fill(0.5), visemas: 'A'.repeat(quadros), ...(palavras ? { palavras } : {}),
+    file: `voice/${lineId}.wav`, hash: 'h', durationSeconds: frames / 30 + 0.01,
+    envelope: envelope ?? Array(frames).fill(0.5), visemes: 'A'.repeat(frames), ...(words ? { words } : {}),
   };
 }
 
-function montar(vozes: VozGravada[]) {
-  const armazem = new ArmazemEmMemoria();
-  vozes.forEach((registro, indice) => armazem.registros.set(String(indice + 1), registro));
-  return new MontarLinhaDoTempo({ armazem });
+function build(voices: RecordedVoice[]) {
+  const store = new InMemoryVoiceStore();
+  voices.forEach((record, index) => store.records.set(String(index + 1), record));
+  return new BuildTimeline({ store });
 }
 
-const comCena = (id: string, texto: string, extra: Partial<FalaDeTeste> = {}): FalaDeTeste => ({ id, texto, cena: titulo, ...extra });
+const withScene = (id: string, text: string, extra: Partial<TestLine> = {}): TestLine => ({ id, text, scene: title, ...extra });
 
-test('fala sem cena herda a cena anterior', async () => {
-  const cartao: Cena = { tipo: 'cartao', variante: 'resumo', titulo: 'Resumo', itens: ['a'] };
-  const caso = montar([voz('1', 30), voz('2', 30), voz('3', 30)]);
-  const props = await caso.executar(projeto([comCena('1', 'Oi.'), { id: '2', texto: 'Tudo bem?' }, { id: '3', texto: 'Fim.', cena: cartao }]));
-  const [primeiro, segundo, terceiro] = props.trechos;
-  assert.deepEqual(segundo!.cena, primeiro!.cena);
-  assert.equal(segundo!.chaveDaCena, primeiro!.chaveDaCena);
-  assert.deepEqual(terceiro!.cena, cartao);
-  assert.notEqual(terceiro!.chaveDaCena, segundo!.chaveDaCena);
+test('a line without a scene inherits the previous scene', async () => {
+  const card: Scene = { type: 'card', variant: 'summary', title: 'Resumo', items: ['a'] };
+  const useCase = build([voice('1', 30), voice('2', 30), voice('3', 30)]);
+  const props = await useCase.run(project([withScene('1', 'Oi.'), { id: '2', text: 'Tudo bem?' }, { id: '3', text: 'Fim.', scene: card }]));
+  const [first, second, third] = props.segments;
+  assert.deepEqual(second!.scene, first!.scene);
+  assert.equal(second!.sceneKey, first!.sceneKey);
+  assert.deepEqual(third!.scene, card);
+  assert.notEqual(third!.sceneKey, second!.sceneKey);
 });
 
-test('primeira fala sem cena é recusada', async () => {
-  const caso = montar([voz('1', 30)]);
-  await assert.rejects(caso.executar(projeto([{ id: '1', texto: 'Oi.' }])), /fala 1: a primeira fala precisa de cena/);
+test('a first line without a scene is rejected', async () => {
+  const useCase = build([voice('1', 30)]);
+  await assert.rejects(useCase.run(project([{ id: '1', text: 'Oi.' }])), /fala 1: a primeira fala precisa de cena/);
 });
 
-const CUPOM = 'Um cliente [usou um cupom] e [pagou mais].';
-const PALAVRAS_DO_CUPOM: PalavraJson[] = [
-  { texto: 'Um', inicio: 0, fim: 0.2 }, { texto: 'cliente', inicio: 0.2, fim: 0.6 }, { texto: '[usou', inicio: 0.6, fim: 0.9 },
-  { texto: 'um', inicio: 0.9, fim: 1 }, { texto: 'cupom]', inicio: 1, fim: 1.4 }, { texto: 'e', inicio: 1.4, fim: 1.5 },
-  { texto: '[pagou', inicio: 1.5, fim: 1.9 }, { texto: 'mais].', inicio: 2, fim: 2.3 },
+const COUPON = 'Um cliente [usou um cupom] e [pagou mais].';
+const COUPON_WORDS: WordJson[] = [
+  { text: 'Um', start: 0, end: 0.2 }, { text: 'cliente', start: 0.2, end: 0.6 }, { text: '[usou', start: 0.6, end: 0.9 },
+  { text: 'um', start: 0.9, end: 1 }, { text: 'cupom]', start: 1, end: 1.4 }, { text: 'e', start: 1.4, end: 1.5 },
+  { text: '[pagou', start: 1.5, end: 1.9 }, { text: 'mais].', start: 2, end: 2.3 },
 ];
 
-test('marca do segundo [trecho] cai no quadro da palavra que o abre', async () => {
-  const caso = montar([voz('1', 75, { palavras: PALAVRAS_DO_CUPOM })]);
-  const props = await caso.executar(projeto([comCena('1', CUPOM, { marcas: [{ expressao: 'surpresa' }, { expressao: 'brava' }] })]));
-  const [trecho] = props.trechos;
-  assert.deepEqual(trecho!.marcas.map((marca) => marca.quadro), [18, 45]);
-  assert.deepEqual(trecho!.marcas[1]!.mudancas, { expressao: 'brava' });
+test('the beat of the second [span] falls on the frame of the word that opens it', async () => {
+  const useCase = build([voice('1', 75, { words: COUPON_WORDS })]);
+  const props = await useCase.run(project([withScene('1', COUPON, { beats: [{ expression: 'surprised' }, { expression: 'angry' }] })]));
+  const [segment] = props.segments;
+  assert.deepEqual(segment!.beats.map((beat) => beat.frame), [18, 45]);
+  assert.deepEqual(segment!.beats[1]!.changes, { expression: 'angry' });
 });
 
-test('as palavras do trecho vêm em quadros relativos e sem os colchetes', async () => {
-  const caso = montar([voz('1', 75, { palavras: PALAVRAS_DO_CUPOM })]);
-  const props = await caso.executar(projeto([comCena('1', CUPOM, { marcas: [{}, {}] })]));
-  const palavras = props.trechos[0]!.palavras;
-  assert.deepEqual(palavras.map((palavra) => palavra.texto), ['Um', 'cliente', 'usou', 'um', 'cupom', 'e', 'pagou', 'mais.']);
-  assert.deepEqual(palavras[6], { texto: 'pagou', inicio: 45, fim: 57 });
+test('the segment words come in relative frames and without the brackets', async () => {
+  const useCase = build([voice('1', 75, { words: COUPON_WORDS })]);
+  const props = await useCase.run(project([withScene('1', COUPON, { beats: [{}, {}] })]));
+  const words = props.segments[0]!.words;
+  assert.deepEqual(words.map((word) => word.text), ['Um', 'cliente', 'usou', 'um', 'cupom', 'e', 'pagou', 'mais.']);
+  assert.deepEqual(words[6], { text: 'pagou', start: 45, end: 57 });
 });
 
-test('sem palavras gravadas, a marca é interpolada pelos quadros com voz', async () => {
+test('without recorded words, the beat is interpolated over the voiced frames', async () => {
   const envelope = [...Array(10).fill(0), ...Array(30).fill(0.5)];
-  const caso = montar([voz('1', 40, { envelope })]);
-  const props = await caso.executar(projeto([comCena('1', 'aaaa [bbbb]', { marcas: [{}] })]));
-  // "aaaa bbbb": a marca está no caractere 5 de 9 → quadro com voz nº floor(5/9 × 30) = 16 → quadro 10 + 16
-  assert.equal(props.trechos[0]!.marcas[0]!.quadro, 26);
-  assert.deepEqual(props.trechos[0]!.palavras.map((palavra) => palavra.texto), ['aaaa', 'bbbb']);
+  const useCase = build([voice('1', 40, { envelope })]);
+  const props = await useCase.run(project([withScene('1', 'aaaa [bbbb]', { beats: [{}] })]));
+  // "aaaa bbbb": the beat is at character 5 of 9 → voiced frame no. floor(5/9 × 30) = 16 → frame 10 + 16
+  assert.equal(props.segments[0]!.beats[0]!.frame, 26);
+  assert.deepEqual(props.segments[0]!.words.map((word) => word.text), ['aaaa', 'bbbb']);
 });
 
-test('número de marcas diferente do de [trechos] é recusado', async () => {
-  const caso = montar([voz('1', 75, { palavras: PALAVRAS_DO_CUPOM })]);
-  await assert.rejects(caso.executar(projeto([comCena('1', CUPOM, { marcas: [{}] })])), /fala 1: 2 \[trechos\] no texto, mas 1 marca/);
+test('a beat count different from the [spans] count is rejected', async () => {
+  const useCase = build([voice('1', 75, { words: COUPON_WORDS })]);
+  await assert.rejects(useCase.run(project([withScene('1', COUPON, { beats: [{}] })])), /fala 1: 2 \[trechos\] no texto, mas 1 marca/);
 });
 
-test('as mudanças de cena das marcas passam para a fala seguinte', async () => {
-  const cartao: Cena = { tipo: 'cartao', variante: 'resumo', titulo: 'Resumo', itens: ['a', 'b'], mostrados: 1 };
-  const caso = montar([voz('1', 30), voz('2', 30)]);
-  const props = await caso.executar(projeto([
-    { id: '1', texto: 'Primeiro [segundo].', cena: cartao, marcas: [{ mostrados: 2, pose: 'apontar' }] }, { id: '2', texto: 'Viu?' },
+test('scene changes from beats carry over to the next line', async () => {
+  const card: Scene = { type: 'card', variant: 'summary', title: 'Resumo', items: ['a', 'b'], shown: 1 };
+  const useCase = build([voice('1', 30), voice('2', 30)]);
+  const props = await useCase.run(project([
+    { id: '1', text: 'Primeiro [segundo].', scene: card, beats: [{ shown: 2, pose: 'point' }] }, { id: '2', text: 'Viu?' },
   ]));
-  assert.deepEqual(props.trechos[0]!.marcas[0]!.mudancas, { mostrados: 2, pose: 'apontar' });
-  assert.deepEqual(props.trechos[1]!.cena, { ...cartao, mostrados: 2 });
-  assert.equal(props.trechos[1]!.chaveDaCena, props.trechos[0]!.chaveDaCena);
+  assert.deepEqual(props.segments[0]!.beats[0]!.changes, { shown: 2, pose: 'point' });
+  assert.deepEqual(props.segments[1]!.scene, { ...card, shown: 2 });
+  assert.equal(props.segments[1]!.sceneKey, props.segments[0]!.sceneKey);
 });
 
-test('total de quadros = soma das durações', async () => {
-  const caso = montar([voz('1', 30), voz('2', 45)]);
-  const props = await caso.executar(projeto([comCena('1', 'Oi.'), { id: '2', texto: 'Tudo bem?' }]));
-  const [primeiro, segundo] = props.trechos;
-  assert.equal(primeiro!.duracaoDaFala, 30);
-  assert.equal(primeiro!.duracaoTotal, 30 + RESPIRO);
-  assert.equal(segundo!.inicio, 30 + RESPIRO);
-  assert.equal(props.totalDeQuadros, primeiro!.duracaoTotal + segundo!.duracaoTotal);
+test('total frames = sum of the durations', async () => {
+  const useCase = build([voice('1', 30), voice('2', 45)]);
+  const props = await useCase.run(project([withScene('1', 'Oi.'), { id: '2', text: 'Tudo bem?' }]));
+  const [first, second] = props.segments;
+  assert.equal(first!.lineDuration, 30);
+  assert.equal(first!.totalDuration, 30 + BREATHER);
+  assert.equal(second!.start, 30 + BREATHER);
+  assert.equal(props.totalFrames, first!.totalDuration + second!.totalDuration);
 });
 
-test('a duração da fala é o tamanho do envelope, não a duração arredondada para cima', async () => {
-  const caso = montar([voz('1', 30)]);
-  const props = await caso.executar(projeto([comCena('1', 'Oi.')]));
-  assert.equal(props.trechos[0]!.duracaoDaFala, 30);
+test('the line duration is the envelope length, not the duration rounded up', async () => {
+  const useCase = build([voice('1', 30)]);
+  const props = await useCase.run(project([withScene('1', 'Oi.')]));
+  assert.equal(props.segments[0]!.lineDuration, 30);
 });
 
-test('código novo na tela ganha pausa de leitura; a fala que herda o código não', async () => {
-  const linhas = [...Array(10).keys()].map((numero) => `linha ${numero}`);
-  const codigo: Cena = { tipo: 'codigo', titulo: 'cupom.ts', linhas: [...linhas, '', '  '], adicionadas: [2] };
-  const caso = montar([voz('1', 30), voz('2', 30)]);
-  const props = await caso.executar(projeto([{ id: '1', texto: 'Veja.', cena: codigo }, { id: '2', texto: 'Viu?' }]));
-  // 10 linhas com texto × 0,35 s = 3,5 → 4 s (mínimo 4, máximo 9) + 1 s por haver linhas adicionadas
-  assert.deepEqual(props.trechos[0]!.pausaDepois, { segundos: 5, rotulo: 'Leia o código' });
-  assert.equal(props.trechos[0]!.duracaoTotal, 30 + 150 + RESPIRO);
-  assert.equal(props.trechos[1]!.pausaDepois, undefined);
-  assert.equal(props.trechos[1]!.duracaoTotal, 30 + RESPIRO);
+test('new code on screen gets a reading hold; the line that inherits the code does not', async () => {
+  const lines = [...Array(10).keys()].map((number) => `linha ${number}`);
+  const code: Scene = { type: 'code', title: 'cupom.ts', lines: [...lines, '', '  '], added: [2] };
+  const useCase = build([voice('1', 30), voice('2', 30)]);
+  const props = await useCase.run(project([{ id: '1', text: 'Veja.', scene: code }, { id: '2', text: 'Viu?' }]));
+  // 10 lines with text × 0.35 s = 3.5 → 4 s (minimum 4, maximum 9) + 1 s for having added lines
+  assert.deepEqual(props.segments[0]!.holdAfter, { seconds: 5, label: 'Leia o código' });
+  assert.equal(props.segments[0]!.totalDuration, 30 + 150 + BREATHER);
+  assert.equal(props.segments[1]!.holdAfter, undefined);
+  assert.equal(props.segments[1]!.totalDuration, 30 + BREATHER);
 });
 
-test('pausaDepois explícita soma quadros, mantém o rótulo e toca o tique a cada segundo', async () => {
-  const caso = montar([voz('1', 30)]);
-  const props = await caso.executar(projeto([comCena('1', 'Pense.', { pausaDepois: { segundos: 2, rotulo: 'Pense' } })]));
-  assert.deepEqual(props.trechos[0]!.pausaDepois, { segundos: 2, rotulo: 'Pense' });
-  assert.equal(props.trechos[0]!.duracaoTotal, 30 + 60 + RESPIRO);
-  assert.deepEqual(props.efeitosSonoros, [{ quadro: 30, som: 'tique' }, { quadro: 60, som: 'tique' }]);
+test('an explicit holdAfter adds frames, keeps the label and ticks every second', async () => {
+  const useCase = build([voice('1', 30)]);
+  const props = await useCase.run(project([withScene('1', 'Pense.', { holdAfter: { seconds: 2, label: 'Pense' } })]));
+  assert.deepEqual(props.segments[0]!.holdAfter, { seconds: 2, label: 'Pense' });
+  assert.equal(props.segments[0]!.totalDuration, 30 + 60 + BREATHER);
+  assert.deepEqual(props.soundEffects, [{ frame: 30, sound: 'tick' }, { frame: 60, sound: 'tick' }]);
 });
 
-test('efeitos sonoros da fala, das marcas e da troca de cena vão em quadros absolutos', async () => {
-  const caso = montar([voz('1', 30), voz('2', 75, { palavras: PALAVRAS_DO_CUPOM })]);
-  const cartao: Cena = { tipo: 'cartao', variante: 'resumo', titulo: 'Resumo', itens: ['a'] };
-  const props = await caso.executar(projeto([
-    comCena('1', 'Oi.', { efeitoSonoro: 'pop' }),
-    { id: '2', texto: CUPOM, cena: cartao, marcas: [{ efeitoSonoro: 'ding' }, {}] },
+test('sound effects of the line, the beats and the scene change go in absolute frames', async () => {
+  const useCase = build([voice('1', 30), voice('2', 75, { words: COUPON_WORDS })]);
+  const card: Scene = { type: 'card', variant: 'summary', title: 'Resumo', items: ['a'] };
+  const props = await useCase.run(project([
+    withScene('1', 'Oi.', { sfx: 'pop' }),
+    { id: '2', text: COUPON, scene: card, beats: [{ sfx: 'ding' }, {}] },
   ]));
-  const inicio = 30 + RESPIRO;
-  assert.deepEqual(props.efeitosSonoros, [
-    { quadro: 0, som: 'pop' }, { quadro: inicio, som: 'whoosh' }, { quadro: inicio + 18, som: 'ding' },
+  const start = 30 + BREATHER;
+  assert.deepEqual(props.soundEffects, [
+    { frame: 0, sound: 'pop' }, { frame: start, sound: 'whoosh' }, { frame: start + 18, sound: 'ding' },
   ]);
 });
 
-test('narrador fala sem estado de corpo', async () => {
-  const caso = montar([voz('1', 30)]);
-  const props = await caso.executar(projeto([comCena('1', 'Era uma vez.', { quem: 'narrador', reacao: { expressao: 'surpresa' } })]));
-  const estados = props.trechos[0]!.estados;
-  assert.ok(!('narrador' in estados));
-  assert.deepEqual(estados.ana, { pose: 'neutra', expressao: 'surpresa', olhar: 'outro' });
-  assert.deepEqual(estados.teo, { pose: 'neutra', expressao: 'surpresa', olhar: 'outro' });
+test('the narrator speaks without a body state', async () => {
+  const useCase = build([voice('1', 30)]);
+  const props = await useCase.run(project([withScene('1', 'Era uma vez.', { speaker: 'narrator', reaction: { expression: 'surprised' } })]));
+  const states = props.segments[0]!.states;
+  assert.ok(!('narrator' in states));
+  assert.deepEqual(states.ana, { pose: 'neutral', expression: 'surprised', look: 'other' });
+  assert.deepEqual(states.teo, { pose: 'neutral', expression: 'surprised', look: 'other' });
 });
 
-test('quem fala usa pose, expressão e olhar da fala; quem escuta usa a reação ou o padrão', async () => {
-  const caso = montar([voz('1', 30), voz('2', 30)]);
-  const props = await caso.executar(projeto([
-    comCena('1', 'Oi.', { pose: 'acenar', reacao: { pose: 'pensar' } }), { id: '2', texto: 'Olá.', quem: 'teo', olhar: 'camera' },
+test('the speaker uses the line pose, expression and look; listeners use the reaction or the default', async () => {
+  const useCase = build([voice('1', 30), voice('2', 30)]);
+  const props = await useCase.run(project([
+    withScene('1', 'Oi.', { pose: 'wave', reaction: { pose: 'think' } }), { id: '2', text: 'Olá.', speaker: 'teo', look: 'camera' },
   ]));
-  assert.deepEqual(props.trechos[0]!.estados, {
-    ana: { pose: 'acenar', expressao: 'feliz', olhar: 'conteudo' }, teo: { pose: 'pensar', expressao: 'neutra', olhar: 'outro' },
+  assert.deepEqual(props.segments[0]!.states, {
+    ana: { pose: 'wave', expression: 'happy', look: 'content' }, teo: { pose: 'think', expression: 'neutral', look: 'other' },
   });
-  assert.deepEqual(props.trechos[1]!.estados.teo, { pose: 'neutra', expressao: 'neutra', olhar: 'camera' });
+  assert.deepEqual(props.segments[1]!.states.teo, { pose: 'neutral', expression: 'neutral', look: 'camera' });
 });
 
-test('falta de áudio lista as falas pendentes', async () => {
-  const caso = montar([voz('1', 30)]);
-  const semAudio = projeto([comCena('1', 'Oi.'), { id: '2', texto: 'Dois.' }, { id: '3', texto: 'Três.' }]);
-  await assert.rejects(caso.executar(semAudio), /falas sem áudio: 2, 3/);
+test('missing audio lists the pending lines', async () => {
+  const useCase = build([voice('1', 30)]);
+  const withoutAudio = project([withScene('1', 'Oi.'), { id: '2', text: 'Dois.' }, { id: '3', text: 'Três.' }]);
+  await assert.rejects(useCase.run(withoutAudio), /falas sem áudio: 2, 3/);
 });
 
-test('as props são JSON puro: ida e volta por JSON dá o mesmo objeto', async () => {
-  const caso = montar([voz('1', 75, { palavras: PALAVRAS_DO_CUPOM }), voz('2', 30)]);
-  const props = await caso.executar(projeto([
-    comCena('1', CUPOM, { marcas: [{ mostrados: 1 }, { efeitoSonoro: 'pop' }], pausaDepois: { segundos: 1, rotulo: 'Pense' } }),
-    { id: '2', texto: 'Fim.', quem: 'narrador' },
+test('the props are plain JSON: a JSON round trip gives the same object', async () => {
+  const useCase = build([voice('1', 75, { words: COUPON_WORDS }), voice('2', 30)]);
+  const props = await useCase.run(project([
+    withScene('1', COUPON, { beats: [{ shown: 1 }, { sfx: 'pop' }], holdAfter: { seconds: 1, label: 'Pense' } }),
+    { id: '2', text: 'Fim.', speaker: 'narrator' },
   ]));
   assert.deepEqual(JSON.parse(JSON.stringify(props)), props);
 });
 
-test('a ficha do projeto e o elenco vão nas props', async () => {
-  const caso = montar([voz('1', 30)]);
-  const props = await caso.executar(projeto([comCena('1', 'Oi.')]));
-  const { fps, largura, altura, idioma, formato, estiloDeLegenda, titulo: tituloDoVideo, capitulos, elenco } = props;
-  assert.equal('marca' in props, false);
-  assert.deepEqual({ fps, largura, altura, idioma, formato, estiloDeLegenda, titulo: tituloDoVideo, capitulos, elenco }, {
-    fps: 30, largura: 1080, altura: 1920, idioma: 'pt-BR', formato: 'aula', estiloDeLegenda: 'palavras', titulo: 'Cupons', capitulos: ['Abertura'],
-    elenco: [
-      { id: 'ana', nome: 'Ana', rig: 'teste', parametros: { pele: '#aa8866' }, expressaoPadrao: 'feliz' },
-      { id: 'teo', nome: 'Téo', rig: 'teste', parametros: {}, expressaoPadrao: 'neutra' },
-      { id: 'narrador', nome: 'Narrador', parametros: {}, expressaoPadrao: 'neutra' },
+test('the project profile and the cast go in the props', async () => {
+  const useCase = build([voice('1', 30)]);
+  const props = await useCase.run(project([withScene('1', 'Oi.')]));
+  const { fps, width, height, language, format, captionStyle, title: videoTitle, chapters, cast } = props;
+  assert.equal('brand' in props, false);
+  assert.deepEqual({ fps, width, height, language, format, captionStyle, title: videoTitle, chapters, cast }, {
+    fps: 30, width: 1080, height: 1920, language: 'pt-BR', format: 'lesson', captionStyle: 'words', title: 'Cupons', chapters: ['Abertura'],
+    cast: [
+      { id: 'ana', name: 'Ana', rig: 'test', parameters: { skin: '#aa8866' }, defaultExpression: 'happy' },
+      { id: 'teo', name: 'Téo', rig: 'test', parameters: {}, defaultExpression: 'neutral' },
+      { id: 'narrator', name: 'Narrador', parameters: {}, defaultExpression: 'neutral' },
     ],
   });
-  assert.equal(props.trechos[0]!.audio, 'voz/1.wav');
-  assert.equal(props.trechos[0]!.visemas, 'A'.repeat(30));
+  assert.equal(props.segments[0]!.audio, 'voice/1.wav');
+  assert.equal(props.segments[0]!.visemes, 'A'.repeat(30));
 });

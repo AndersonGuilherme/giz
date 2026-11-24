@@ -1,77 +1,77 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import type { EfeitoSonoro, Fala } from '../roteiro/Fala.ts';
-import type { CenaResolvida, EfeitoSonoroJson, MarcaJson } from './PropsDoVideo.ts';
-import type { TemposDaFala } from './TemposDaFala.ts';
-import { TextoComMarcas } from './TextoComMarcas.ts';
+import { DomainError } from '../DomainError.ts';
+import type { SoundEffect, Line } from '../script/Line.ts';
+import type { ResolvedScene, SoundEffectJson, BeatJson } from './VideoProps.ts';
+import type { LineTimings } from './LineTimings.ts';
+import { BeatText } from './BeatText.ts';
 
-type Fonte = Readonly<{ texto: TextoComMarcas; pelaPalavra: boolean }>;
+type BeatSource = Readonly<{ text: BeatText; byWord: boolean }>;
 
-// As marcas ficam na pronúncia (se ela tiver colchetes) ou no texto, como no motor. As palavras gravadas
-// são as do texto: na pronúncia, a marca cai pela fração do texto falado.
-function fonteDasMarcas(fala: Fala): Fonte {
-  const pronuncia = fala.pronuncia();
-  const naPronuncia = pronuncia !== fala.texto() && TextoComMarcas.temMarcas(pronuncia);
-  return { texto: TextoComMarcas.de(naPronuncia ? pronuncia : fala.texto()), pelaPalavra: !naPronuncia };
+// The beats live in the pronunciation (if it has brackets) or in the text, as in the motor. The recorded words
+// are the text words: in the pronunciation, the beat falls by the fraction of the spoken text.
+function beatSource(line: Line): BeatSource {
+  const pronunciation = line.pronunciation();
+  const inPronunciation = pronunciation !== line.text() && BeatText.hasBeats(pronunciation);
+  return { text: BeatText.of(inPronunciation ? pronunciation : line.text()), byWord: !inPronunciation };
 }
 
-function recusarContagemDiferente(fala: Fala, texto: TextoComMarcas): void {
-  const marcas = fala.marcas();
-  if (marcas.length === texto.quantidade()) return;
-  throw new ErroDeDominio(`fala ${fala.id()}: ${texto.quantidade()} [trechos] no texto, mas ${marcas.length} marca(s)`);
+function rejectCountMismatch(line: Line, text: BeatText): void {
+  const beats = line.beats();
+  if (beats.length === text.count()) return;
+  throw new DomainError(`fala ${line.id()}: ${text.count()} [trechos] no texto, mas ${beats.length} marca(s)`);
 }
 
-function quadrosDasMarcas(fonte: Fonte, tempos: TemposDaFala): number[] {
-  const { texto, pelaPalavra } = fonte;
-  const palavras = texto.palavrasQueAbrem();
-  return texto.fracoes().map((fracao, ordem) => {
-    const pelaPalavraGravada = pelaPalavra ? tempos.inicioDaPalavra(palavras[ordem] ?? 0) : undefined;
-    return pelaPalavraGravada ?? tempos.quadroNaFracao(fracao);
+function beatFrames(source: BeatSource, times: LineTimings): number[] {
+  const { text, byWord } = source;
+  const words = text.openingWords();
+  return text.fractions().map((fraction, order) => {
+    const byRecordedWord = byWord ? times.wordStart(words[order] ?? 0) : undefined;
+    return byRecordedWord ?? times.frameAtFraction(fraction);
   });
 }
 
-const CAMPOS_DE_PERSONAGEM = new Set(['expressao', 'pose', 'efeitoSonoro']);
+const CHARACTER_FIELDS = new Set(['expression', 'pose', 'sfx']);
 
-/** As marcas de uma fala: o k-ésimo `[trecho]` do texto dispara a k-ésima marca. */
-export class Marcas {
-  readonly #lista: readonly MarcaJson[];
+/** The beats of a line: the k-th `[span]` of the text fires the k-th beat. */
+export class Beats {
+  readonly #list: readonly BeatJson[];
 
-  private constructor(lista: readonly MarcaJson[]) {
-    this.#lista = lista;
+  private constructor(list: readonly BeatJson[]) {
+    this.#list = list;
   }
 
-  static daFala(fala: Fala, tempos: TemposDaFala): Marcas {
-    const fonte = fonteDasMarcas(fala);
-    recusarContagemDiferente(fala, fonte.texto);
-    const quadros = quadrosDasMarcas(fonte, tempos);
-    return new Marcas(fala.marcas().map((marca, ordem) => ({ quadro: quadros[ordem] ?? 0, mudancas: { ...marca } })));
+  static fromLine(line: Line, times: LineTimings): Beats {
+    const source = beatSource(line);
+    rejectCountMismatch(line, source.text);
+    const frames = beatFrames(source, times);
+    return new Beats(line.beats().map((beat, order) => ({ frame: frames[order] ?? 0, changes: { ...beat } })));
   }
 
-  static deJson(lista: readonly MarcaJson[]): Marcas {
-    return new Marcas(lista);
+  static fromJson(list: readonly BeatJson[]): Beats {
+    return new Beats(list);
   }
 
-  /** A cena depois de todas as marcas: só os campos de cena (sem expressão, pose e som). */
-  aplicadasA(cena: CenaResolvida): CenaResolvida {
-    const mudancas = this.#lista.map((marca) => Object.entries(marca.mudancas).filter(([campo]) => !CAMPOS_DE_PERSONAGEM.has(campo)));
-    // A marca aceita qualquer campo de cena (como o beat do motor); a validação de cada campo é do esquema.
-    return { ...cena, ...Object.fromEntries(mudancas.flat()) } as CenaResolvida;
+  /** The scene after all the beats: only the scene fields (no expression, pose or sound). */
+  appliedTo(scene: ResolvedScene): ResolvedScene {
+    const changes = this.#list.map((beat) => Object.entries(beat.changes).filter(([field]) => !CHARACTER_FIELDS.has(field)));
+    // A beat accepts any scene field (like the motor beat); validating each field is the schema's job.
+    return { ...scene, ...Object.fromEntries(changes.flat()) } as ResolvedScene;
   }
 
-  /** Os sons das marcas, em quadros absolutos a partir de `inicio`. */
-  efeitosSonoros(inicio: number): EfeitoSonoroJson[] {
-    return this.#lista.flatMap(({ quadro, mudancas }) => {
-      const som = mudancas.efeitoSonoro as EfeitoSonoro | undefined;
-      return som ? [{ quadro: inicio + quadro, som }] : [];
+  /** The sounds of the beats, in absolute frames from `start`. */
+  soundEffects(start: number): SoundEffectJson[] {
+    return this.#list.flatMap(({ frame, changes }) => {
+      const sound = changes.sfx as SoundEffect | undefined;
+      return sound ? [{ frame: start + frame, sound }] : [];
     });
   }
 
-  /** O último valor de `campo` dado por uma marca até o quadro relativo `quadro`, e onde ele foi dado. */
-  ultimaAte(campo: 'expressao' | 'pose', quadro: number): MarcaJson | undefined {
-    const dadas = this.#lista.filter((marca) => marca.quadro <= quadro && marca.mudancas[campo] !== undefined);
-    return dadas.at(-1);
+  /** The last value of `field` set by a beat up to the relative frame `frame`, and where it was set. */
+  lastUntil(field: 'expression' | 'pose', frame: number): BeatJson | undefined {
+    const given = this.#list.filter((beat) => beat.frame <= frame && beat.changes[field] !== undefined);
+    return given.at(-1);
   }
 
-  paraJson(): MarcaJson[] {
-    return this.#lista.map((marca) => ({ quadro: marca.quadro, mudancas: { ...marca.mudancas } }));
+  toJson(): BeatJson[] {
+    return this.#list.map((beat) => ({ frame: beat.frame, changes: { ...beat.changes } }));
   }
 }

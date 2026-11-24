@@ -1,43 +1,43 @@
 import { z } from 'zod';
 import {
-  ENTRADAS_DE_TEXTO,
-  SUAVIDADES,
-  TIPOS_DE_EFEITO,
-  TIPOS_DE_MOVIMENTO,
-} from '../../dominio/roteiro/ElementosDeCena.ts';
-import { esquemaDeCor, textoPreenchido } from './refinamentos.ts';
+  TEXT_ENTRANCES,
+  EASINGS,
+  EFFECT_TYPES,
+  MOVE_TYPES,
+} from '../../domain/script/SceneElements.ts';
+import { colorSchema, nonEmptyText } from './refinements.ts';
 
-export const esquemaDePonto = z.object({ x: z.number(), y: z.number() }).strict();
+export const pointSchema = z.object({ x: z.number(), y: z.number() }).strict();
 
-const esquemaDeEnquadramento = z.object({ x: z.number(), y: z.number(), zoom: z.number().positive() }).strict();
+const framingSchema = z.object({ x: z.number(), y: z.number(), zoom: z.number().positive() }).strict();
 
-export const esquemaDeCamera = z
+export const cameraSchema = z
   .object({
-    tipo: z.enum(TIPOS_DE_MOVIMENTO),
-    de: esquemaDeEnquadramento.optional(),
-    para: esquemaDeEnquadramento.optional(),
-    alvo: textoPreenchido.optional(),
-    intensidade: z.number().min(0).optional(),
-    suavidade: z.enum(SUAVIDADES).optional(),
+    type: z.enum(MOVE_TYPES),
+    from: framingSchema.optional(),
+    to: framingSchema.optional(),
+    target: nonEmptyText.optional(),
+    intensity: z.number().min(0).optional(),
+    easing: z.enum(EASINGS).optional(),
   })
   .strict();
 
-export const esquemaDeEfeito = z
+export const effectSchema = z
   .object({
-    tipo: z.enum(TIPOS_DE_EFEITO),
-    intensidade: z.number().min(0).optional(),
-    cor: esquemaDeCor.optional(),
-    posicao: esquemaDePonto.optional(),
+    type: z.enum(EFFECT_TYPES),
+    intensity: z.number().min(0).optional(),
+    color: colorSchema.optional(),
+    position: pointSchema.optional(),
   })
   .strict();
 
-export const esquemaDoHud = z
+export const hudSchema = z
   .object({
-    campos: z.array(z.object({ rotulo: z.string(), valor: z.string() }).strict()),
-    barra: z.object({ rotulo: z.string(), valor: z.number().min(0).max(100) }).strict().optional(),
+    fields: z.array(z.object({ label: z.string(), value: z.string() }).strict()),
+    bar: z.object({ label: z.string(), value: z.number().min(0).max(100) }).strict().optional(),
   })
   .strict();
 
-export const esquemaDeTextoGrande = z
-  .object({ texto: textoPreenchido, cor: esquemaDeCor.optional(), entrada: z.enum(ENTRADAS_DE_TEXTO).optional() })
+export const bigTextSchema = z
+  .object({ text: nonEmptyText, color: colorSchema.optional(), entrance: z.enum(TEXT_ENTRANCES).optional() })
   .strict();

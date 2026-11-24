@@ -1,71 +1,71 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import { Segundos } from '../valores/Tempo.ts';
+import { DomainError } from '../DomainError.ts';
+import { Seconds } from '../values/Time.ts';
 
-// Valores de trimSilence e normalizeLoudness do motor (scripts/tts.ts).
-const LIMIAR_DE_SILENCIO = 0.012;
-const MARGEM_EM_SEGUNDOS = 0.04;
-const LIMIAR_DE_VOZ_NA_NORMALIZACAO = 0.01;
-const VOLUME_ALVO = 0.085;
-const PICO_MAXIMO = 0.95;
+// Values of trimSilence and normalizeLoudness from the motor (scripts/tts.ts).
+const SILENCE_THRESHOLD = 0.012;
+const MARGIN_IN_SECONDS = 0.04;
+const NORMALIZATION_VOICE_THRESHOLD = 0.01;
+const TARGET_VOLUME = 0.085;
+const MAXIMUM_PEAK = 0.95;
 
-const audivel = (amostra: number) => Math.abs(amostra) >= LIMIAR_DE_SILENCIO;
+const isAudible = (sample: number) => Math.abs(sample) >= SILENCE_THRESHOLD;
 
-// findLastIndex dos arrays tipados é ES2023; o alvo do pacote é ES2022.
-function ultimaAudivel(amostras: Float32Array): number {
-  let posicao = amostras.length - 1;
-  while (posicao >= 0 && !audivel(amostras[posicao] ?? 0)) posicao--;
-  return posicao;
+// findLastIndex on typed arrays is ES2023; the package target is ES2022.
+function lastAudible(samples: Float32Array): number {
+  let position = samples.length - 1;
+  while (position >= 0 && !isAudible(samples[position] ?? 0)) position--;
+  return position;
 }
 
-function ganhoDeNormalizacao(amostras: Float32Array): number {
-  const comVoz = amostras.filter((amostra) => Math.abs(amostra) > LIMIAR_DE_VOZ_NA_NORMALIZACAO);
-  const energia = comVoz.reduce((soma, amostra) => soma + amostra * amostra, 0);
-  const volume = Math.sqrt(energia / Math.max(1, comVoz.length));
-  const pico = amostras.reduce((maior, amostra) => Math.max(maior, Math.abs(amostra)), 0);
-  return Math.min(VOLUME_ALVO / volume, PICO_MAXIMO / Math.max(pico, 1e-6));
+function normalizationGain(samples: Float32Array): number {
+  const voiced = samples.filter((sample) => Math.abs(sample) > NORMALIZATION_VOICE_THRESHOLD);
+  const energy = voiced.reduce((sum, sample) => sum + sample * sample, 0);
+  const volume = Math.sqrt(energy / Math.max(1, voiced.length));
+  const peak = samples.reduce((larger, sample) => Math.max(larger, Math.abs(sample)), 0);
+  return Math.min(TARGET_VOLUME / volume, MAXIMUM_PEAK / Math.max(peak, 1e-6));
 }
 
-/** Som mono: amostras de -1 a 1 e a taxa (amostras por segundo). */
+/** Mono sound: samples from -1 to 1 and the rate (samples per second). */
 export class Audio {
-  readonly #amostras: Float32Array;
-  readonly #taxa: number;
+  readonly #samples: Float32Array;
+  readonly #rate: number;
 
-  private constructor(amostras: Float32Array, taxa: number) {
-    this.#amostras = amostras;
-    this.#taxa = taxa;
+  private constructor(samples: Float32Array, rate: number) {
+    this.#samples = samples;
+    this.#rate = rate;
   }
 
-  static de(amostras: Float32Array, taxa: number): Audio {
-    if (!Number.isInteger(taxa) || taxa <= 0) throw new ErroDeDominio(`taxa ${taxa} inválida (use um inteiro maior que 0)`);
-    return new Audio(amostras, taxa);
+  static of(samples: Float32Array, rate: number): Audio {
+    if (!Number.isInteger(rate) || rate <= 0) throw new DomainError(`taxa ${rate} inválida (use um inteiro maior que 0)`);
+    return new Audio(samples, rate);
   }
 
-  duracao(): Segundos {
-    return Segundos.de(this.#amostras.length / this.#taxa);
+  duration(): Seconds {
+    return Seconds.of(this.#samples.length / this.#rate);
   }
 
-  /** Corta o silêncio das pontas, deixando uma margem curta de cada lado. */
-  aparado(): Audio {
-    const ultimaPosicao = Math.max(0, this.#amostras.length - 1);
-    const encontradaNoInicio = this.#amostras.findIndex(audivel);
-    const inicio = encontradaNoInicio === -1 ? ultimaPosicao : encontradaNoInicio;
-    const fim = Math.max(inicio, ultimaAudivel(this.#amostras));
-    const margem = Math.round(MARGEM_EM_SEGUNDOS * this.#taxa);
-    const recorte = this.#amostras.subarray(Math.max(0, inicio - margem), Math.min(this.#amostras.length, fim + margem + 1));
-    return new Audio(recorte, this.#taxa);
+  /** Cuts the silence at the ends, leaving a short margin on each side. */
+  trimmed(): Audio {
+    const lastPosition = Math.max(0, this.#samples.length - 1);
+    const foundAtStart = this.#samples.findIndex(isAudible);
+    const start = foundAtStart === -1 ? lastPosition : foundAtStart;
+    const end = Math.max(start, lastAudible(this.#samples));
+    const margin = Math.round(MARGIN_IN_SECONDS * this.#rate);
+    const cut = this.#samples.subarray(Math.max(0, start - margin), Math.min(this.#samples.length, end + margin + 1));
+    return new Audio(cut, this.#rate);
   }
 
-  /** Leva o volume das partes com voz ao alvo, sem deixar o pico estourar. */
-  normalizado(): Audio {
-    const ganho = ganhoDeNormalizacao(this.#amostras);
-    return new Audio(this.#amostras.map((amostra) => amostra * ganho), this.#taxa);
+  /** Brings the volume of the voiced parts to the target, without letting the peak clip. */
+  normalized(): Audio {
+    const gain = normalizationGain(this.#samples);
+    return new Audio(this.#samples.map((sample) => sample * gain), this.#rate);
   }
 
-  amostras(): Float32Array {
-    return this.#amostras;
+  samples(): Float32Array {
+    return this.#samples;
   }
 
-  taxa(): number {
-    return this.#taxa;
+  rate(): number {
+    return this.#rate;
   }
 }

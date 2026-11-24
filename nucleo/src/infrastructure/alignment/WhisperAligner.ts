@@ -1,44 +1,44 @@
-import type { Alinhador } from '../../aplicacao/portas/Alinhador.ts';
-import type { Audio } from '../../dominio/fala/Audio.ts';
-import type { PalavraJson } from '../../dominio/fala/PalavraJson.ts';
-import { Palavras } from '../../dominio/fala/Palavras.ts';
-import { reconciliar } from '../../dominio/fala/Reconciliacao.ts';
-import type { Idioma } from '../../dominio/valores/Idioma.ts';
+import type { Aligner } from '../../application/ports/Aligner.ts';
+import type { Audio } from '../../domain/speech/Audio.ts';
+import type { WordJson } from '../../domain/speech/WordJson.ts';
+import { Words } from '../../domain/speech/Words.ts';
+import { reconcile } from '../../domain/speech/Reconciliation.ts';
+import type { Language } from '../../domain/values/Language.ts';
 
-/** Reconhecimento de fala: as palavras ouvidas, com o tempo de cada uma. */
-export interface Ouvido {
-  ouvir(audio: Audio, idioma: Idioma): Promise<PalavraJson[]>;
+/** Speech recognition: the heard words, with the time of each one. */
+export interface Listener {
+  listen(audio: Audio, language: Language): Promise<WordJson[]>;
 }
 
-const nadaAAvisar = () => undefined;
-const motivoDe = (erro: unknown) => (erro instanceof Error ? erro.message : String(erro));
+const nothingToWarn = () => undefined;
+const reasonOf = (error: unknown) => (error instanceof Error ? error.message : String(error));
 
 /**
- * Tempos do que o Whisper ouviu, presos às palavras do roteiro. Se o alinhamento for ruim demais, ou se o Whisper
- * falhar (sem rede para baixar o modelo, erro do onnx), usa a reserva: a voz da fala nunca se perde por isso.
+ * Times of what Whisper heard, pinned to the script words. If the alignment is too poor, or if Whisper
+ * fails (no network to download the model, an onnx error), it uses the fallback: the line voice is never lost because of it.
  */
-export class AlinhadorWhisper implements Alinhador {
-  readonly #reserva: Alinhador;
-  readonly #ouvido: Ouvido;
-  readonly #aoAvisar: (mensagem: string) => void;
+export class WhisperAligner implements Aligner {
+  readonly #fallback: Aligner;
+  readonly #listener: Listener;
+  readonly #onWarning: (message: string) => void;
 
-  constructor(reserva: Alinhador, ouvido: Ouvido, aoAvisar: (mensagem: string) => void = nadaAAvisar) {
-    this.#reserva = reserva;
-    this.#ouvido = ouvido;
-    this.#aoAvisar = aoAvisar;
+  constructor(fallback: Aligner, listener: Listener, onWarning: (message: string) => void = nothingToWarn) {
+    this.#fallback = fallback;
+    this.#listener = listener;
+    this.#onWarning = onWarning;
   }
 
-  async alinhar(audio: Audio, texto: string, idioma: Idioma): Promise<Palavras> {
-    const ouvidas = await this.#ouvir(audio, idioma);
-    const reconciliadas = ouvidas && reconciliar(Palavras.doTexto(texto), ouvidas, audio.duracao());
-    return reconciliadas ?? this.#reserva.alinhar(audio, texto, idioma);
+  async align(audio: Audio, text: string, language: Language): Promise<Words> {
+    const heard = await this.#listen(audio, language);
+    const reconciled = heard && reconcile(Words.fromText(text), heard, audio.duration());
+    return reconciled ?? this.#fallback.align(audio, text, language);
   }
 
-  async #ouvir(audio: Audio, idioma: Idioma): Promise<PalavraJson[] | null> {
+  async #listen(audio: Audio, language: Language): Promise<WordJson[] | null> {
     try {
-      return await this.#ouvido.ouvir(audio, idioma);
-    } catch (erro) {
-      this.#aoAvisar(`alinhamento por Whisper falhou (${motivoDe(erro)}); usando o envelope da voz`);
+      return await this.#listener.listen(audio, language);
+    } catch (error) {
+      this.#onWarning(`alinhamento por Whisper falhou (${reasonOf(error)}); usando o envelope da voz`);
       return null;
     }
   }

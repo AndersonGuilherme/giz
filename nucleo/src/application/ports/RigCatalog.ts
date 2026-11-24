@@ -1,17 +1,17 @@
-export type TipoDeParametro = 'cor' | 'numero' | 'opcao' | 'booleano';
+export type ParameterType = 'color' | 'number' | 'option' | 'boolean';
 
-export type DefinicaoDeParametro = {
-  tipo: TipoDeParametro;
-  padrao: string | number | boolean;
+export type ParameterDefinition = {
+  type: ParameterType;
+  defaultValue: string | number | boolean;
   min?: number;
   max?: number;
-  opcoes?: string[];
+  options?: string[];
 };
 
-export type DefinicaoDeParametros = Record<string, DefinicaoDeParametro>;
+export type ParameterDefinitions = Record<string, ParameterDefinition>;
 
-/** Os rigs disponíveis e os parâmetros que cada um aceita. */
-export interface CatalogoDeRigs {
-  definicao(idRig: string): DefinicaoDeParametros | undefined;
+/** The available rigs and the parameters each one accepts. */
+export interface RigCatalog {
+  definition(rigId: string): ParameterDefinitions | undefined;
   ids(): string[];
 }

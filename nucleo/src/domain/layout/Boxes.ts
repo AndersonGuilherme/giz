@@ -1,38 +1,38 @@
-import type { Caixa } from './Caixa.ts';
+import type { Box } from './Box.ts';
 
-function paresDe(lista: readonly Caixa[]): Array<[Caixa, Caixa]> {
-  return lista.flatMap((primeira, indice) => lista.slice(indice + 1).map((segunda): [Caixa, Caixa] => [primeira, segunda]));
+function pairsOf(list: readonly Box[]): Array<[Box, Box]> {
+  return list.flatMap((first, index) => list.slice(index + 1).map((second): [Box, Box] => [first, second]));
 }
 
-/** As caixas que uma cena ocupa num quadro. */
-export class Caixas {
-  readonly #lista: readonly Caixa[];
+/** The boxes a scene takes in a frame. */
+export class Boxes {
+  readonly #list: readonly Box[];
 
-  private constructor(lista: readonly Caixa[]) {
-    this.#lista = lista;
+  private constructor(list: readonly Box[]) {
+    this.#list = list;
   }
 
-  static de(lista: readonly Caixa[]): Caixas {
-    return new Caixas([...lista]);
+  static of(list: readonly Box[]): Boxes {
+    return new Boxes([...list]);
   }
 
-  static vazias(): Caixas {
-    return new Caixas([]);
+  static empty(): Boxes {
+    return new Boxes([]);
   }
 
-  com(caixa: Caixa): Caixas {
-    return new Caixas([...this.#lista, caixa]);
+  with(box: Box): Boxes {
+    return new Boxes([...this.#list, box]);
   }
 
-  sobreposicoes(): Array<[Caixa, Caixa]> {
-    return paresDe(this.#lista).filter(([primeira, segunda]) => primeira.sobrepoe(segunda));
+  overlappingPairs(): Array<[Box, Box]> {
+    return pairsOf(this.#list).filter(([first, second]) => first.overlaps(second));
   }
 
-  foraDe(area: Caixa): Caixa[] {
-    return this.#lista.filter((caixa) => !caixa.dentroDe(area));
+  outsideOf(area: Box): Box[] {
+    return this.#list.filter((box) => !box.isInside(area));
   }
 
-  textosQueNaoCabem(): Caixa[] {
-    return this.#lista.filter((caixa) => !caixa.textoCabe());
+  overflowingTexts(): Box[] {
+    return this.#list.filter((box) => !box.textFits());
   }
 }

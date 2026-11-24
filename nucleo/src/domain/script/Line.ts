@@ -1,105 +1,105 @@
-import type { Expressao, Pose } from '../elenco/PoseEExpressao.ts';
-import type { IdPersonagem } from '../valores/IdPersonagem.ts';
-import type { Capitulo } from './Capitulo.ts';
-import type { Cena } from './Cena.ts';
+import type { Expression, Pose } from '../cast/PoseAndExpression.ts';
+import type { CharacterId } from '../values/CharacterId.ts';
+import type { Chapter } from './Chapter.ts';
+import type { Scene } from './Scene.ts';
 
-export const OLHARES = ['camera', 'outro', 'conteudo'] as const;
-export type Olhar = (typeof OLHARES)[number];
+export const GAZES = ['camera', 'other', 'content'] as const;
+export type Gaze = (typeof GAZES)[number];
 
-export const EFEITOS_SONOROS = ['pop', 'whoosh', 'ding', 'dings', 'erro', 'sucesso', 'tique'] as const;
-export type EfeitoSonoro = (typeof EFEITOS_SONOROS)[number];
+export const SOUND_EFFECTS = ['pop', 'whoosh', 'ding', 'dings', 'error', 'success', 'tick'] as const;
+export type SoundEffect = (typeof SOUND_EFFECTS)[number];
 
-/** Como reage quem escuta, durante a fala. */
-export type Reacao = Readonly<{ expressao?: Expressao; pose?: Pose; olhar?: Olhar }>;
+/** How listeners react, during the line. */
+export type Reaction = Readonly<{ expression?: Expression; pose?: Pose; look?: Gaze }>;
 
-/** Marca (o antigo beat): aplicada quando a narração chega ao k-ésimo `[trecho]`; aceita campos de cena. */
-export type Marca = Readonly<Record<string, unknown>> &
-  Readonly<{ expressao?: Expressao; pose?: Pose; efeitoSonoro?: EfeitoSonoro }>;
+/** Beat (the old motor beat): applied when the narration reaches the k-th `[span]`; accepts scene fields. */
+export type Beat = Readonly<Record<string, unknown>> &
+  Readonly<{ expression?: Expression; pose?: Pose; sfx?: SoundEffect }>;
 
-export type PausaDepois = Readonly<{ segundos: number; rotulo: string }>;
+export type HoldAfter = Readonly<{ seconds: number; label: string }>;
 
-/** `pronuncia` é o texto para a voz (o antigo `say`). */
-export type DadosDaFala = Readonly<{
+/** `pronunciation` is the text for the voice (the old `say`). */
+export type LineData = Readonly<{
   id: string;
-  capitulo: Capitulo;
-  texto: string;
-  pronuncia?: string;
+  chapter: Chapter;
+  text: string;
+  pronunciation?: string;
   pose?: Pose;
-  expressao?: Expressao;
-  olhar?: Olhar;
-  reacao?: Reacao;
-  cena?: Cena;
-  marcas?: readonly Marca[];
-  pausaDepois?: PausaDepois;
-  efeitoSonoro?: EfeitoSonoro;
+  expression?: Expression;
+  look?: Gaze;
+  reaction?: Reaction;
+  scene?: Scene;
+  beats?: readonly Beat[];
+  holdAfter?: HoldAfter;
+  sfx?: SoundEffect;
 }>;
 
-const SEM_MARCAS: readonly Marca[] = [];
+const NO_BEATS: readonly Beat[] = [];
 
-export class Fala {
-  readonly #quem: IdPersonagem;
-  readonly #dados: DadosDaFala;
+export class Line {
+  readonly #speaker: CharacterId;
+  readonly #data: LineData;
 
-  private constructor(quem: IdPersonagem, dados: DadosDaFala) {
-    this.#quem = quem;
-    this.#dados = dados;
+  private constructor(speaker: CharacterId, data: LineData) {
+    this.#speaker = speaker;
+    this.#data = data;
   }
 
-  static de(quem: IdPersonagem, dados: DadosDaFala): Fala {
-    return new Fala(quem, dados);
+  static of(speaker: CharacterId, data: LineData): Line {
+    return new Line(speaker, data);
   }
 
-  quem(): IdPersonagem {
-    return this.#quem;
+  speaker(): CharacterId {
+    return this.#speaker;
   }
 
   id(): string {
-    return this.#dados.id;
+    return this.#data.id;
   }
 
-  capitulo(): Capitulo {
-    return this.#dados.capitulo;
+  chapter(): Chapter {
+    return this.#data.chapter;
   }
 
-  texto(): string {
-    return this.#dados.texto;
+  text(): string {
+    return this.#data.text;
   }
 
-  /** O texto para a voz; sem pronúncia própria, é o texto da legenda. */
-  pronuncia(): string {
-    return this.#dados.pronuncia ?? this.#dados.texto;
+  /** The text for the voice; without its own pronunciation, it is the caption text. */
+  pronunciation(): string {
+    return this.#data.pronunciation ?? this.#data.text;
   }
 
   pose(): Pose | undefined {
-    return this.#dados.pose;
+    return this.#data.pose;
   }
 
-  expressao(): Expressao | undefined {
-    return this.#dados.expressao;
+  expression(): Expression | undefined {
+    return this.#data.expression;
   }
 
-  olhar(): Olhar | undefined {
-    return this.#dados.olhar;
+  look(): Gaze | undefined {
+    return this.#data.look;
   }
 
-  reacao(): Reacao | undefined {
-    return this.#dados.reacao;
+  reaction(): Reaction | undefined {
+    return this.#data.reaction;
   }
 
-  /** Ausente: a fala herda a cena anterior. */
-  cena(): Cena | undefined {
-    return this.#dados.cena;
+  /** Absent: the line inherits the previous scene. */
+  scene(): Scene | undefined {
+    return this.#data.scene;
   }
 
-  marcas(): readonly Marca[] {
-    return this.#dados.marcas ?? SEM_MARCAS;
+  beats(): readonly Beat[] {
+    return this.#data.beats ?? NO_BEATS;
   }
 
-  pausaDepois(): PausaDepois | undefined {
-    return this.#dados.pausaDepois;
+  holdAfter(): HoldAfter | undefined {
+    return this.#data.holdAfter;
   }
 
-  efeitoSonoro(): EfeitoSonoro | undefined {
-    return this.#dados.efeitoSonoro;
+  sfx(): SoundEffect | undefined {
+    return this.#data.sfx;
   }
 }

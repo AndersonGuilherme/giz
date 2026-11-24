@@ -1,38 +1,38 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import type { IdPersonagem } from '../valores/IdPersonagem.ts';
-import type { Personagem } from './Personagem.ts';
+import { DomainError } from '../DomainError.ts';
+import type { CharacterId } from '../values/CharacterId.ts';
+import type { Character } from './Character.ts';
 
-function idEmTexto(personagem: Personagem): string {
-  const id = personagem.id();
-  return id.texto();
+function idText(character: Character): string {
+  const id = character.id();
+  return id.text();
 }
 
-export class Elenco {
-  readonly #personagens: readonly Personagem[];
+export class Cast {
+  readonly #characters: readonly Character[];
 
-  private constructor(personagens: readonly Personagem[]) {
-    this.#personagens = personagens;
+  private constructor(characters: readonly Character[]) {
+    this.#characters = characters;
   }
 
-  static de(personagens: readonly Personagem[]): Elenco {
-    return new Elenco([...personagens]);
+  static of(characters: readonly Character[]): Cast {
+    return new Cast([...characters]);
   }
 
-  contem(id: IdPersonagem): boolean {
-    return this.#personagens.some((personagem) => personagem.temId(id));
+  contains(id: CharacterId): boolean {
+    return this.#characters.some((character) => character.hasId(id));
   }
 
-  personagem(id: IdPersonagem): Personagem {
-    const encontrado = this.#personagens.find((personagem) => personagem.temId(id));
-    if (!encontrado) throw new ErroDeDominio(`"${id.texto()}" não está no elenco (${this.ids().join(', ')})`);
-    return encontrado;
+  character(id: CharacterId): Character {
+    const found = this.#characters.find((character) => character.hasId(id));
+    if (!found) throw new DomainError(`"${id.text()}" não está no elenco (${this.ids().join(', ')})`);
+    return found;
   }
 
-  cadaUm(): readonly Personagem[] {
-    return this.#personagens;
+  each(): readonly Character[] {
+    return this.#characters;
   }
 
   ids(): string[] {
-    return this.#personagens.map(idEmTexto);
+    return this.#characters.map(idText);
   }
 }

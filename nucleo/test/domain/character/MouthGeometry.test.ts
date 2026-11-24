@@ -1,11 +1,11 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { MouthGeometry } from '../../../src/dominio/personagem/MouthGeometry.ts';
-import type { Visema } from '../../../src/dominio/fala/Visemas.ts';
-import { EstadoDoPersonagem } from '../../../src/dominio/personagem/EstadoDoPersonagem.ts';
-import { FaceGeometry } from '../../../src/dominio/personagem/FaceGeometry.ts';
+import { MouthGeometry } from '../../../src/domain/character/MouthGeometry.ts';
+import type { Viseme } from '../../../src/domain/speech/Visemes.ts';
+import { CharacterState } from '../../../src/domain/character/CharacterState.ts';
+import { FaceGeometry } from '../../../src/domain/character/FaceGeometry.ts';
 
-const VISEMES: readonly Visema[] = ['X', 'M', 'A', 'E', 'I', 'O', 'U', 'F', 'C'];
+const VISEMES: readonly Viseme[] = ['X', 'M', 'A', 'E', 'I', 'O', 'U', 'F', 'C'];
 
 test('viseme M closes the mouth; A opens in proportion to the opening', () => {
   assert.equal(MouthGeometry.for('M', 1).height, 0);
@@ -85,8 +85,8 @@ test('silent mouth: teeth from width 24, tongue from opening 14', () => {
   assert.equal(MouthGeometry.silent({ width: 30, curve: 0, opening: 13, tilt: 0, wave: 0 }).tongue, false);
 });
 
-const state = (falando: boolean, visema: Visema) => EstadoDoPersonagem.de({
-  pose: 'neutra', expressao: 'feliz', olhar: 'camera', falando, visema, abertura: 1, piscada: 0, corpo: { y: 0, rotacao: 0, escala: 1 },
+const state = (speaking: boolean, viseme: Viseme) => CharacterState.of({
+  pose: 'neutral', expression: 'happy', look: 'camera', speaking, viseme, opening: 1, blink: 0, body: { y: 0, rotation: 0, scale: 1 },
 });
 
 test('the viseme replaces the expression mouth only while speaking and not at rest', () => {
@@ -94,5 +94,5 @@ test('the viseme replaces the expression mouth only while speaking and not at re
   assert.equal(MouthGeometry.forState(state(true, 'X')).speaking, false);
   assert.equal(MouthGeometry.forState(state(false, 'A')).speaking, false);
   const silent = MouthGeometry.forState(state(false, 'A'));
-  assert.deepEqual(silent.speaking ? undefined : silent.shape, MouthGeometry.silent(FaceGeometry.for('feliz').mouth));
+  assert.deepEqual(silent.speaking ? undefined : silent.shape, MouthGeometry.silent(FaceGeometry.for('happy').mouth));
 });

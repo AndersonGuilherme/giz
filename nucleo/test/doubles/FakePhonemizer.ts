@@ -1,7 +1,7 @@
-import type { Fonetizador } from '../../src/aplicacao/portas/Fonetizador.ts';
+import type { Phonemizer } from '../../src/application/ports/Phonemizer.ts';
 
-/** Devolve sempre a mesma fonética: "mama" (visemas M A M A). */
-export class FonetizadorFalso implements Fonetizador {
+/** Always returns the same phonetics: "mama" (visemes M A M A). */
+export class FakePhonemizer implements Phonemizer {
   async ipa(): Promise<string> {
     return 'mama';
   }

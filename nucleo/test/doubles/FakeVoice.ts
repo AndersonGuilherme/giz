@@ -1,30 +1,30 @@
-import type { PedidoDeVoz, ProvedorVoz } from '../../src/aplicacao/portas/ProvedorVoz.ts';
-import { Audio } from '../../src/dominio/fala/Audio.ts';
+import type { VoiceRequest, VoiceProvider } from '../../src/application/ports/VoiceProvider.ts';
+import { Audio } from '../../src/domain/speech/Audio.ts';
 
-const TAXA = 24000;
+const RATE = 24000;
 
-/** Silêncio, um começo baixinho (abaixo do limiar de voz do envelope), um tom, um fim baixinho e silêncio. */
-function fala(segundosDeTom: number): Float32Array {
-  const trechos = [
-    { segundos: 0.3, amplitude: 0 },
-    { segundos: 0.2, amplitude: 0.015 },
-    { segundos: segundosDeTom, amplitude: 0.5 },
-    { segundos: 0.2, amplitude: 0.015 },
-    { segundos: 0.3, amplitude: 0 },
+/** Silence, a quiet start (below the envelope voice threshold), a tone, a quiet end and silence. */
+function line(toneSeconds: number): Float32Array {
+  const spans = [
+    { seconds: 0.3, amplitude: 0 },
+    { seconds: 0.2, amplitude: 0.015 },
+    { seconds: toneSeconds, amplitude: 0.5 },
+    { seconds: 0.2, amplitude: 0.015 },
+    { seconds: 0.3, amplitude: 0 },
   ];
-  const amostras = trechos.flatMap(({ segundos, amplitude }) =>
-    Array.from({ length: Math.round(segundos * TAXA) }, (_, i) => amplitude * Math.sin((2 * Math.PI * 220 * i) / TAXA)),
+  const samples = spans.flatMap(({ seconds, amplitude }) =>
+    Array.from({ length: Math.round(seconds * RATE) }, (_, i) => amplitude * Math.sin((2 * Math.PI * 220 * i) / RATE)),
   );
-  return Float32Array.from(amostras);
+  return Float32Array.from(samples);
 }
 
-export class VozFalsa implements ProvedorVoz {
-  chamadas = 0;
-  readonly pedidos: PedidoDeVoz[] = [];
+export class FakeVoice implements VoiceProvider {
+  calls = 0;
+  readonly requests: VoiceRequest[] = [];
 
-  async gerar(pedido: PedidoDeVoz): Promise<Audio> {
-    this.chamadas++;
-    this.pedidos.push(pedido);
-    return Audio.de(fala(0.05 * pedido.texto.length), TAXA);
+  async generate(request: VoiceRequest): Promise<Audio> {
+    this.calls++;
+    this.requests.push(request);
+    return Audio.of(line(0.05 * request.text.length), RATE);
   }
 }

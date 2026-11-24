@@ -1,14 +1,14 @@
 {
-  "capitulos": ["Abertura"],
-  "falas": [
+  "chapters": ["Abertura"],
+  "lines": [
     {
       "id": "1",
-      "capitulo": 1,
-      "quem": "ana",
-      "texto": "Oi, eu sou a Ana.",
-      "pose": "acenar",
-      "cena": { "tipo": "cenario", "fundo": { "vetorial": "quarto" }, "personagens": [{ "quem": "ana", "posicao": "centro" }] }
+      "chapter": 1,
+      "speaker": "ana",
+      "text": "Oi, eu sou a Ana.",
+      "pose": "wave",
+      "scene": { "type": "scenario", "background": { "vector": "quarto" }, "characters": [{ "character": "ana", "position": "center" }] }
     },
-    { "id": "2", "capitulo": 1, "quem": "ana", "texto": "Hoje vamos aprender juntos.", "expressao": "feliz" }
+    { "id": "2", "chapter": 1, "speaker": "ana", "text": "Hoje vamos aprender juntos.", "expression": "happy" }
   ]
 }

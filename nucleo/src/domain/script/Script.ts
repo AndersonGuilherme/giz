@@ -1,33 +1,33 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import type { Fala } from './Fala.ts';
-import type { Falas } from './Falas.ts';
+import { DomainError } from '../DomainError.ts';
+import type { Line } from './Line.ts';
+import type { Lines } from './Lines.ts';
 
-function recusarCapituloInexistente(fala: Fala, total: number): void {
-  const capitulo = fala.capitulo();
-  if (capitulo.existeEm(total)) return;
-  throw new ErroDeDominio(`fala ${fala.id()}: capítulo ${capitulo.numero()} não existe (há ${total})`);
+function rejectMissingChapter(line: Line, total: number): void {
+  const chapter = line.chapter();
+  if (chapter.existsIn(total)) return;
+  throw new DomainError(`fala ${line.id()}: capítulo ${chapter.number()} não existe (há ${total})`);
 }
 
-export class Roteiro {
-  readonly #capitulos: readonly string[];
-  readonly #falas: Falas;
+export class Script {
+  readonly #chapters: readonly string[];
+  readonly #lines: Lines;
 
-  private constructor(capitulos: readonly string[], falas: Falas) {
-    this.#capitulos = capitulos;
-    this.#falas = falas;
+  private constructor(chapters: readonly string[], lines: Lines) {
+    this.#chapters = chapters;
+    this.#lines = lines;
   }
 
-  static de(capitulos: readonly string[], falas: Falas): Roteiro {
-    if (capitulos.length === 0) throw new ErroDeDominio('o roteiro precisa de pelo menos um capítulo');
-    falas.cadaUma().forEach((fala) => recusarCapituloInexistente(fala, capitulos.length));
-    return new Roteiro([...capitulos], falas);
+  static of(chapters: readonly string[], lines: Lines): Script {
+    if (chapters.length === 0) throw new DomainError('o roteiro precisa de pelo menos um capítulo');
+    lines.each().forEach((line) => rejectMissingChapter(line, chapters.length));
+    return new Script([...chapters], lines);
   }
 
-  capitulos(): readonly string[] {
-    return this.#capitulos;
+  chapters(): readonly string[] {
+    return this.#chapters;
   }
 
-  falas(): Falas {
-    return this.#falas;
+  lines(): Lines {
+    return this.#lines;
   }
 }

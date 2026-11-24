@@ -1,51 +1,51 @@
-// Uso: node src/apresentacao/cli/giz.ts <subcomando> [argumentos]
+// Usage: node src/presentation/cli/giz.ts <subcommand> [arguments]
 import { resolve } from 'node:path';
-import type { Progresso } from '../../aplicacao/casos-de-uso/GerarVozes.ts';
-import type { Problema } from '../../aplicacao/casos-de-uso/VerificarProjeto.ts';
-import { gerarVozes, repositorioDeProjeto, verificarProjeto } from './composicao.ts';
+import type { Progress } from '../../application/use-cases/GenerateVoices.ts';
+import type { Problem } from '../../application/use-cases/CheckProject.ts';
+import { generateVoices, projectRepository, checkProject } from './composition.ts';
 
-type Subcomando = (argumentos: readonly string[]) => Promise<void>;
+type Subcommand = (args: readonly string[]) => Promise<void>;
 
-class ErroDeUso extends Error {}
+class UsageError extends Error {}
 
-function mostrarProgresso({ feitas, total, idFala, gerada }: Progresso): void {
-  console.log(`fala ${idFala} (${feitas}/${total}): ${gerada ? 'voz gerada' : 'já em dia'}`);
+function showProgress({ done, total, lineId, generated }: Progress): void {
+  console.log(`fala ${lineId} (${done}/${total}): ${generated ? 'voz gerada' : 'já em dia'}`);
 }
 
-async function voz([pasta]: readonly string[]): Promise<void> {
-  if (!pasta) throw new ErroDeUso('uso: giz voz <pasta-do-projeto>');
-  const caminho = resolve(pasta);
-  const projeto = await repositorioDeProjeto().carregar(caminho);
-  const relatorio = await gerarVozes(caminho, projeto).executar(projeto, mostrarProgresso);
-  console.log(`${relatorio.geradas.length} gerada(s), ${relatorio.puladas.length} já em dia`);
+async function voice([folder]: readonly string[]): Promise<void> {
+  if (!folder) throw new UsageError('uso: giz voice <pasta-do-projeto>');
+  const path = resolve(folder);
+  const project = await projectRepository().load(path);
+  const report = await generateVoices(path, project).run(project, showProgress);
+  console.log(`${report.generated.length} gerada(s), ${report.skipped.length} já em dia`);
 }
 
-function linhaDoProblema(nivel: 'ERRO' | 'AVISO', { fala, mensagem }: Problema): string {
-  return fala ? `${nivel} fala ${fala}: ${mensagem}` : `${nivel}: ${mensagem}`;
+function problemLine(level: 'ERRO' | 'AVISO', { line, message }: Problem): string {
+  return line ? `${level} fala ${line}: ${message}` : `${level}: ${message}`;
 }
 
-async function check([pasta]: readonly string[]): Promise<void> {
-  if (!pasta) throw new ErroDeUso('uso: giz check <pasta-do-projeto>');
-  const projeto = await repositorioDeProjeto().carregar(resolve(pasta));
-  const { erros, avisos } = verificarProjeto().executar(projeto);
-  erros.forEach((erro) => console.log(linhaDoProblema('ERRO', erro)));
-  avisos.forEach((aviso) => console.log(linhaDoProblema('AVISO', aviso)));
-  console.log(`${erros.length} erro(s), ${avisos.length} aviso(s)`);
-  if (erros.length > 0) process.exitCode = 1;
+async function check([folder]: readonly string[]): Promise<void> {
+  if (!folder) throw new UsageError('uso: giz check <pasta-do-projeto>');
+  const project = await projectRepository().load(resolve(folder));
+  const { errors, warnings } = checkProject().run(project);
+  errors.forEach((error) => console.log(problemLine('ERRO', error)));
+  warnings.forEach((warning) => console.log(problemLine('AVISO', warning)));
+  console.log(`${errors.length} erro(s), ${warnings.length} aviso(s)`);
+  if (errors.length > 0) process.exitCode = 1;
 }
 
-const SUBCOMANDOS: Readonly<Record<string, Subcomando>> = { voz, check };
+const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = { voice, check };
 
-async function principal([nome = '', ...argumentos]: readonly string[]): Promise<void> {
-  const subcomando = SUBCOMANDOS[nome];
-  if (!subcomando) throw new ErroDeUso(`uso: giz <${Object.keys(SUBCOMANDOS).join(' | ')}> [argumentos]`);
-  await subcomando(argumentos);
+async function main([name = '', ...args]: readonly string[]): Promise<void> {
+  const subcommand = SUBCOMMANDS[name];
+  if (!subcommand) throw new UsageError(`uso: giz <${Object.keys(SUBCOMMANDS).join(' | ')}> [argumentos]`);
+  await subcommand(args);
 }
 
-// Erros viram mensagem legível, sem stack trace; erro de uso sai com 2, os demais com 1.
+// Errors become a readable message, without a stack trace; a usage error exits with 2, the others with 1.
 try {
-  await principal(process.argv.slice(2));
-} catch (erro) {
-  console.error(erro instanceof Error ? erro.message : String(erro));
-  process.exitCode = erro instanceof ErroDeUso ? 2 : 1;
+  await main(process.argv.slice(2));
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = error instanceof UsageError ? 2 : 1;
 }

@@ -1,57 +1,57 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
-import { Corpo } from '../personagem/Corpo.ts';
-import { EstadoDoPersonagem } from '../personagem/EstadoDoPersonagem.ts';
-import { Piscada } from '../personagem/Piscada.ts';
-import type { IdPersonagem } from '../valores/IdPersonagem.ts';
-import { Fps, Quadro } from '../valores/Tempo.ts';
-import { bocaNoTrecho, estadoNoTrecho, inicioDaPose, type NoTrecho } from './EstadoNoTrecho.ts';
-import type { PropsDoVideo, TrechoJson } from './PropsDoVideo.ts';
+import { DomainError } from '../DomainError.ts';
+import { Body } from '../character/Body.ts';
+import { CharacterState } from '../character/CharacterState.ts';
+import { Blink } from '../character/Blink.ts';
+import type { CharacterId } from '../values/CharacterId.ts';
+import { Fps, Frame } from '../values/Time.ts';
+import { mouthInSegment, stateInSegment, poseStart, type InSegment } from './StateInSegment.ts';
+import type { VideoProps, SegmentJson } from './VideoProps.ts';
 
-// Desloca a respiração de cada personagem (pela posição no elenco) para não respirarem juntos.
-const FASE_POR_PERSONAGEM = 1.7;
-const corpo = new Corpo();
+// Shifts the breathing of each character (by its position in the cast) so they do not breathe together.
+const PHASE_PER_CHARACTER = 1.7;
+const body = new Body();
 
-/** A linha do tempo montada (as props do vídeo): o estado de cada personagem em cada quadro. */
-export class LinhaDoTempo {
-  readonly #props: PropsDoVideo;
+/** The built timeline (the video props): the state of each character in each frame. */
+export class Timeline {
+  readonly #props: VideoProps;
 
-  private constructor(props: PropsDoVideo) {
+  private constructor(props: VideoProps) {
     this.#props = props;
   }
 
-  static de(props: PropsDoVideo): LinhaDoTempo {
-    return new LinhaDoTempo(structuredClone(props));
+  static of(props: VideoProps): Timeline {
+    return new Timeline(structuredClone(props));
   }
 
-  estadoDe(idPersonagem: IdPersonagem, quadro: Quadro): EstadoDoPersonagem {
-    const indice = this.#indiceDoTrecho(quadro);
-    const local = this.#local(idPersonagem, indice, quadro);
-    const estado = estadoNoTrecho(local);
-    if (!estado) throw new ErroDeDominio(`"${local.id}" está sem estado no quadro ${quadro.valor()} (só personagens com corpo têm estado)`);
-    const boca = bocaNoTrecho(local);
-    const inicio = inicioDaPose(this.#props.trechos, indice, local);
-    const contexto = { pose: estado.pose, inicioDaPose: Quadro.de(inicio), falando: boca.falando, abertura: boca.abertura, fase: this.#fase(local.id), fps: Fps.PADRAO };
-    const piscada = Piscada.para(local.id);
-    return EstadoDoPersonagem.de({
-      ...estado, ...boca, piscada: piscada.fechamentoEm(quadro, Fps.PADRAO), corpo: corpo.deslocamentoEm(quadro, contexto),
+  stateOf(characterId: CharacterId, frame: Frame): CharacterState {
+    const index = this.#segmentIndex(frame);
+    const local = this.#local(characterId, index, frame);
+    const state = stateInSegment(local);
+    if (!state) throw new DomainError(`"${local.id}" está sem estado no quadro ${frame.value()} (só personagens com corpo têm estado)`);
+    const mouth = mouthInSegment(local);
+    const start = poseStart(this.#props.segments, index, local);
+    const context = { pose: state.pose, poseStart: Frame.of(start), speaking: mouth.speaking, opening: mouth.opening, phase: this.#phase(local.id), fps: Fps.DEFAULT };
+    const blink = Blink.for(local.id);
+    return CharacterState.of({
+      ...state, ...mouth, blink: blink.closureAt(frame, Fps.DEFAULT), body: body.offsetAt(frame, context),
     });
   }
 
-  // O trecho que contém o quadro; depois do fim, o último.
-  #indiceDoTrecho(quadro: Quadro): number {
-    const trechos = this.#props.trechos;
-    const indice = trechos.findIndex((trecho) => quadro.antesDe(Quadro.de(trecho.inicio + trecho.duracaoTotal)));
-    return indice >= 0 ? indice : trechos.length - 1;
+  // The segment that contains the frame; after the end, the last one.
+  #segmentIndex(frame: Frame): number {
+    const segments = this.#props.segments;
+    const index = segments.findIndex((segment) => frame.isBefore(Frame.of(segment.start + segment.totalDuration)));
+    return index >= 0 ? index : segments.length - 1;
   }
 
-  #local(idPersonagem: IdPersonagem, indice: number, quadro: Quadro): NoTrecho {
-    const trecho: TrechoJson | undefined = this.#props.trechos[indice];
-    if (!trecho) throw new ErroDeDominio('a linha do tempo não tem nenhum trecho');
-    return { trecho, id: idPersonagem.texto(), relativo: quadro.valor() - trecho.inicio };
+  #local(characterId: CharacterId, index: number, frame: Frame): InSegment {
+    const segment: SegmentJson | undefined = this.#props.segments[index];
+    if (!segment) throw new DomainError('a linha do tempo não tem nenhum trecho');
+    return { segment, id: characterId.text(), relative: frame.value() - segment.start };
   }
 
-  #fase(id: string): number {
-    const posicao = this.#props.elenco.findIndex((personagem) => personagem.id === id);
-    return Math.max(0, posicao) * FASE_POR_PERSONAGEM;
+  #phase(id: string): number {
+    const position = this.#props.cast.findIndex((character) => character.id === id);
+    return Math.max(0, position) * PHASE_PER_CHARACTER;
   }
 }

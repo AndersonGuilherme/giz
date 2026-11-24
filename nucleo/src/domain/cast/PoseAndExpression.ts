@@ -1,9 +1,9 @@
 export const POSES = [
-  'neutra', 'explicar', 'apontar', 'acenar', 'levantar', 'pensar', 'ombros', 'comemorar', 'mao-na-cabeca', 'maos-na-boca',
+  'neutral', 'explain', 'point', 'wave', 'raise', 'think', 'shrug', 'celebrate', 'hand-on-head', 'hands-on-mouth',
 ] as const;
 export type Pose = (typeof POSES)[number];
 
-export const EXPRESSOES = [
-  'neutra', 'feliz', 'animada', 'surpresa', 'confusa', 'pensativa', 'cetica', 'preocupada', 'brava', 'assustada',
+export const EXPRESSIONS = [
+  'neutral', 'happy', 'excited', 'surprised', 'confused', 'thinking', 'skeptical', 'worried', 'angry', 'scared',
 ] as const;
-export type Expressao = (typeof EXPRESSOES)[number];
+export type Expression = (typeof EXPRESSIONS)[number];

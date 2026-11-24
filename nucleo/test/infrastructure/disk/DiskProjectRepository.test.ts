@@ -4,189 +4,189 @@ import { cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { ErroDeProjeto } from '../../../src/aplicacao/portas/ErroDeProjeto.ts';
-import { RepositorioDeProjetoEmDisco } from '../../../src/infraestrutura/disco/RepositorioDeProjetoEmDisco.ts';
-import { IdPersonagem } from '../../../src/dominio/valores/IdPersonagem.ts';
-import { CatalogoDeRigsFalso } from '../../dublês/CatalogoDeRigsFalso.ts';
+import { ProjectError } from '../../../src/application/ports/ProjectError.ts';
+import { DiskProjectRepository } from '../../../src/infrastructure/disk/DiskProjectRepository.ts';
+import { CharacterId } from '../../../src/domain/values/CharacterId.ts';
+import { FakeRigCatalog } from '../../doubles/FakeRigCatalog.ts';
 
 type Json = Record<string, unknown>;
 
 const FIXTURES = fileURLToPath(new URL('../../fixtures/', import.meta.url));
-const fixture = (nome: string) => join(FIXTURES, nome);
-const repositorio = () => new RepositorioDeProjetoEmDisco({ catalogo: new CatalogoDeRigsFalso() });
-const pastasTemporarias: string[] = [];
+const fixture = (name: string) => join(FIXTURES, name);
+const repository = () => new DiskProjectRepository({ catalog: new FakeRigCatalog() });
+const tempFolders: string[] = [];
 
-after(() => Promise.all(pastasTemporarias.map((pasta) => rm(pasta, { recursive: true, force: true }))));
+after(() => Promise.all(tempFolders.map((folder) => rm(folder, { recursive: true, force: true }))));
 
-async function alterarArquivo(pasta: string, arquivo: string, alterar: (json: Json) => Json): Promise<void> {
-  const caminho = join(pasta, arquivo);
-  const json = JSON.parse(await readFile(caminho, 'utf8')) as Json;
-  await writeFile(caminho, JSON.stringify(alterar(json)));
+async function changeFile(folder: string, file: string, change: (json: Json) => Json): Promise<void> {
+  const path = join(folder, file);
+  const json = JSON.parse(await readFile(path, 'utf8')) as Json;
+  await writeFile(path, JSON.stringify(change(json)));
 }
 
-// A fixture usa o rig de produção (ball-head); estes testes usam o catálogo falso, então a cópia troca a Ana para o rig "teste".
-const ANA_NO_RIG_DE_TESTE: Json = { rig: 'teste', parametros: { pele: '#f0c8a0' } };
+// The fixture uses the production rig (ball-head); these tests use the fake catalog, so the copy switches Ana to the "test" rig.
+const ANA_ON_TEST_RIG: Json = { rig: 'test', parameters: { skin: '#f0c8a0' } };
 
-async function copiaAlterada(arquivo: string, alterar: (json: Json) => Json): Promise<string> {
-  const pasta = await mkdtemp(join(tmpdir(), 'giz-projeto-'));
-  pastasTemporarias.push(pasta);
-  await cp(fixture('projeto-minimo'), pasta, { recursive: true });
-  await alterarArquivo(pasta, 'elenco/ana.json', (json) => ({ ...json, ...ANA_NO_RIG_DE_TESTE }));
-  await alterarArquivo(pasta, arquivo, alterar);
-  return pasta;
+async function changedCopy(file: string, change: (json: Json) => Json): Promise<string> {
+  const folder = await mkdtemp(join(tmpdir(), 'giz-project-'));
+  tempFolders.push(folder);
+  await cp(fixture('minimal-project'), folder, { recursive: true });
+  await changeFile(folder, 'cast/ana.json', (json) => ({ ...json, ...ANA_ON_TEST_RIG }));
+  await changeFile(folder, file, change);
+  return folder;
 }
 
-const carregarCom = async (arquivo: string, alterar: (json: Json) => Json) =>
-  repositorio().carregar(await copiaAlterada(arquivo, alterar));
-const carregarComProjeto = (parcial: Json) => carregarCom('projeto.json', (json) => ({ ...json, ...parcial }));
-const carregarComRoteiro = (parcial: Json) => carregarCom('roteiro.json', (json) => ({ ...json, ...parcial }));
-const carregarComPersonagem = (parcial: Json) => carregarCom('elenco/ana.json', (json) => ({ ...json, ...parcial }));
-const carregarComCena = (cena: Json) =>
-  carregarCom('roteiro.json', (json) => {
-    const [primeira, ...resto] = json.falas as Json[];
-    return { ...json, falas: [{ ...primeira, cena }, ...resto] };
+const loadWith = async (file: string, change: (json: Json) => Json) =>
+  repository().load(await changedCopy(file, change));
+const loadWithProject = (partial: Json) => loadWith('project.json', (json) => ({ ...json, ...partial }));
+const loadWithScript = (partial: Json) => loadWith('script.json', (json) => ({ ...json, ...partial }));
+const loadWithCharacter = (partial: Json) => loadWith('cast/ana.json', (json) => ({ ...json, ...partial }));
+const loadWithScene = (scene: Json) =>
+  loadWith('script.json', (json) => {
+    const [first, ...rest] = json.lines as Json[];
+    return { ...json, lines: [{ ...first, scene }, ...rest] };
   });
 
-async function capturar(promessa: Promise<unknown>): Promise<ErroDeProjeto> {
+async function capture(promise: Promise<unknown>): Promise<ProjectError> {
   try {
-    await promessa;
-  } catch (erro) {
-    assert.ok(erro instanceof ErroDeProjeto, `esperava ErroDeProjeto, veio ${String(erro)}`);
-    return erro;
+    await promise;
+  } catch (error) {
+    assert.ok(error instanceof ProjectError, `expected ProjectError, got ${String(error)}`);
+    return error;
   }
-  assert.fail('esperava ErroDeProjeto');
+  assert.fail('expected ProjectError');
 }
 
-test('carrega o projeto mínimo', async () => {
-  const p = await carregarComPersonagem({});
-  assert.equal(p.idioma().codigo(), 'pt-BR');
-  assert.equal(p.roteiro().falas().quantidade(), 2);
-  assert.ok(p.elenco().contem(IdPersonagem.de('ana')));
-  assert.equal(p.titulo(), 'Projeto mínimo');
-  assert.equal(p.formato(), 'historia');
-  assert.equal(p.proporcao().texto(), '9:16');
-  assert.deepEqual(p.avisos(), []);
+test('loads the minimal project', async () => {
+  const p = await loadWithCharacter({});
+  assert.equal(p.language().code(), 'pt-BR');
+  assert.equal(p.script().lines().count(), 2);
+  assert.ok(p.cast().contains(CharacterId.of('ana')));
+  assert.equal(p.title(), 'Projeto mínimo');
+  assert.equal(p.format(), 'story');
+  assert.equal(p.aspect().text(), '9:16');
+  assert.deepEqual(p.warnings(), []);
 });
-test('fala de personagem fora do elenco vira erro legível', async () => {
-  await assert.rejects(carregarComRoteiro({ falas: [{ id: '1', capitulo: 1, quem: 'bia', texto: 'oi' }] }),
-    { name: 'ErroDeProjeto', message: /roteiro\.json › falas\[0\]\.quem: "bia" não está no elenco \(ana\)/ });
+test('a line by a character outside the cast is a readable error', async () => {
+  await assert.rejects(loadWithScript({ lines: [{ id: '1', chapter: 1, speaker: 'bia', text: 'oi' }] }),
+    { name: 'ProjectError', message: /script\.json › lines\[0\]\.speaker: "bia" não está no elenco \(ana\)/ });
 });
-test('cor inválida no personagem aponta arquivo e campo', async () => {
-  await assert.rejects(carregarComPersonagem({ parametros: { pele: 'roxo' } }), /elenco\/ana\.json › parametros\.pele: cor "roxo"/);
+test('an invalid color in the character points at the file and field', async () => {
+  await assert.rejects(loadWithCharacter({ parameters: { skin: 'roxo' } }), /cast\/ana\.json › parameters\.skin: cor "roxo"/);
 });
-test('vários erros saem juntos, não só o primeiro', async () => {
-  const erro = await capturar(carregarComRoteiro({ falas: [{ id: '1' }, { id: '2' }] }));
-  assert.ok(erro.problemas.length >= 4);
+test('several errors come out together, not only the first', async () => {
+  const error = await capture(loadWithScript({ lines: [{ id: '1' }, { id: '2' }] }));
+  assert.ok(error.problems.length >= 4);
 });
-test('imagem de cenário ausente é aviso, não falha de carga', async () => {
-  const p = await carregarComCena({ tipo: 'cenario', fundo: { imagem: 'cenarios/nao-existe.png' }, personagens: [] });
-  assert.match(p.avisos().join('\n'), /cenarios\/nao-existe\.png não encontrada.*fala 1/);
+test('a missing scenario image is a warning, not a load failure', async () => {
+  const p = await loadWithScene({ type: 'scenario', background: { image: 'cenarios/nao-existe.png' }, characters: [] });
+  assert.match(p.warnings().join('\n'), /cenarios\/nao-existe\.png não encontrada.*fala 1/);
 });
 
-test('campo obrigatório ausente diz o caminho', async () => {
-  const erro = await capturar(carregarComRoteiro({ falas: [{ id: '1', capitulo: 1, quem: 'ana' }] }));
-  assert.match(erro.message, /roteiro\.json › falas\[0\]\.texto: obrigatório/);
+test('a missing required field gives the path', async () => {
+  const error = await capture(loadWithScript({ lines: [{ id: '1', chapter: 1, speaker: 'ana' }] }));
+  assert.match(error.message, /script\.json › lines\[0\]\.text: obrigatório/);
 });
-test('capítulo inexistente é erro', async () => {
-  await assert.rejects(carregarComRoteiro({ falas: [{ id: '1', capitulo: 3, quem: 'ana', texto: 'oi' }] }),
-    /falas\[0\]\.capitulo: capítulo 3 não existe \(há 1\)/);
+test('a missing chapter is an error', async () => {
+  await assert.rejects(loadWithScript({ lines: [{ id: '1', chapter: 3, speaker: 'ana', text: 'oi' }] }),
+    /lines\[0\]\.chapter: capítulo 3 não existe \(há 1\)/);
 });
-test('ids de fala repetidos são erro', async () => {
-  const falas = [{ id: '1', capitulo: 1, quem: 'ana', texto: 'oi' }, { id: '1', capitulo: 1, quem: 'ana', texto: 'de novo' }];
-  await assert.rejects(carregarComRoteiro({ falas }), /falas\[1\]\.id: id "1" repetido/);
+test('repeated line ids are an error', async () => {
+  const lines = [{ id: '1', chapter: 1, speaker: 'ana', text: 'oi' }, { id: '1', chapter: 1, speaker: 'ana', text: 'de novo' }];
+  await assert.rejects(loadWithScript({ lines }), /lines\[1\]\.id: id "1" repetido/);
 });
-test('campo desconhecido é erro', async () => {
-  await assert.rejects(carregarComProjeto({ cor: 'azul' }), /projeto\.json › cor: campo desconhecido/);
+test('an unknown field is an error', async () => {
+  await assert.rejects(loadWithProject({ color: 'azul' }), /project\.json › color: campo desconhecido/);
 });
-test('idioma inválido usa a mensagem do domínio', async () => {
-  await assert.rejects(carregarComProjeto({ idioma: 'es' }), /projeto\.json › idioma: idioma "es" não suportado/);
+test('an invalid language uses the domain message', async () => {
+  await assert.rejects(loadWithProject({ language: 'es' }), /project\.json › language: idioma "es" não suportado/);
 });
-test('arquivo de personagem ausente é erro', async () => {
-  await assert.rejects(carregarComProjeto({ elenco: ['ana', 'bia'] }), /elenco\/bia\.json: arquivo não encontrado/);
+test('a missing character file is an error', async () => {
+  await assert.rejects(loadWithProject({ cast: ['ana', 'bia'] }), /cast\/bia\.json: arquivo não encontrado/);
 });
-test('id do personagem diferente do arquivo é erro', async () => {
-  await assert.rejects(carregarComPersonagem({ id: 'bia' }), /elenco\/ana\.json › id: "bia" difere do nome do arquivo \(ana\)/);
+test('a character id different from the file is an error', async () => {
+  await assert.rejects(loadWithCharacter({ id: 'bia' }), /cast\/ana\.json › id: "bia" difere do nome do arquivo \(ana\)/);
 });
-test('rig desconhecido lista os rigs válidos', async () => {
-  await assert.rejects(carregarComPersonagem({ rig: 'robo' }), /elenco\/ana\.json › rig: rig "robo" desconhecido \(use teste\)/);
+test('an unknown rig lists the valid rigs', async () => {
+  await assert.rejects(loadWithCharacter({ rig: 'robo' }), /cast\/ana\.json › rig: rig "robo" desconhecido \(use test\)/);
 });
-test('parâmetro desconhecido do rig é erro', async () => {
-  await assert.rejects(carregarComPersonagem({ parametros: { asas: true } }),
-    /parametros\.asas: parâmetro desconhecido no rig "teste" \(use pele, altura, cabelo, oculos\)/);
+test('an unknown rig parameter is an error', async () => {
+  await assert.rejects(loadWithCharacter({ parameters: { wings: true } }),
+    /parameters\.wings: parâmetro desconhecido no rig "test" \(use skin, height, hair, glasses\)/);
 });
-test('número fora do intervalo e opção inválida saem juntos', async () => {
-  const erro = await capturar(carregarComPersonagem({ parametros: { altura: 3, cabelo: 'roxo', oculos: 'sim' } }));
-  assert.match(erro.message, /parametros\.altura: número 3 fora de 0\.5 a 1\.5/);
-  assert.match(erro.message, /parametros\.cabelo: opção "roxo" inválida \(use curto, longo\)/);
-  assert.match(erro.message, /parametros\.oculos: esperava verdadeiro ou falso, veio "sim"/);
+test('an out-of-range number and an invalid option come out together', async () => {
+  const error = await capture(loadWithCharacter({ parameters: { height: 3, hair: 'roxo', glasses: 'sim' } }));
+  assert.match(error.message, /parameters\.height: número 3 fora de 0\.5 a 1\.5/);
+  assert.match(error.message, /parameters\.hair: opção "roxo" inválida \(use short, long\)/);
+  assert.match(error.message, /parameters\.glasses: esperava verdadeiro ou falso, veio "sim"/);
 });
-test('parâmetros ausentes recebem o padrão do rig', async () => {
-  const p = await carregarComPersonagem({ parametros: { altura: 1.2 } });
-  const ana = p.elenco().personagem(IdPersonagem.de('ana'));
-  assert.deepEqual(ana.parametros(), { pele: '#f0c8a0', altura: 1.2, cabelo: 'curto', oculos: false });
+test('missing parameters get the rig default', async () => {
+  const p = await loadWithCharacter({ parameters: { height: 1.2 } });
+  const ana = p.cast().character(CharacterId.of('ana'));
+  assert.deepEqual(ana.parameters(), { skin: '#f0c8a0', height: 1.2, hair: 'short', glasses: false });
 });
-test('tipo de cena desconhecido lista os tipos', async () => {
-  await assert.rejects(carregarComCena({ tipo: 'casa' }), /falas\[0\]\.cena\.tipo: tipo inválido \(use cenario, titulo,/);
+test('an unknown scene type lists the types', async () => {
+  await assert.rejects(loadWithScene({ type: 'casa' }), /lines\[0\]\.scene\.type: tipo inválido \(use scenario, title,/);
 });
-test('personagem em cena fora do elenco é erro', async () => {
-  const cena = { tipo: 'cenario', fundo: {}, personagens: [{ quem: 'bia', posicao: { x: 0.5, y: 0.8 } }] };
-  await assert.rejects(carregarComCena(cena), /falas\[0\]\.cena\.personagens\[0\]\.quem: "bia" não está no elenco \(ana\)/);
+test('a character on stage outside the cast is an error', async () => {
+  const scene = { type: 'scenario', background: {}, characters: [{ character: 'bia', position: { x: 0.5, y: 0.8 } }] };
+  await assert.rejects(loadWithScene(scene), /lines\[0\]\.scene\.characters\[0\]\.character: "bia" não está no elenco \(ana\)/);
 });
-test('cena de código embutido e cenário completo carregam', async () => {
-  const codigo = { tipo: 'codigo', titulo: 'soma.ts', linhas: ['const a = 1;', 'const b = 2;'], adicionadas: [1], destaque: ['b'] };
-  const p = await carregarComCena(codigo);
-  assert.deepEqual(p.roteiro().falas().cadaUma()[0].cena(), codigo);
-  const cenario = {
-    tipo: 'cenario', fundo: { vetorial: 'sala', cores: { parede: '#ffeedd' } },
-    personagens: [{ quem: 'ana', posicao: 'esquerda', escala: 1.1, direcao: 'direita' }],
-    camera: { tipo: 'aproximar', de: { x: 0, y: 0, zoom: 1 }, para: { x: 0.2, y: 0.1, zoom: 1.4 }, suavidade: 'suave' },
-    efeitos: [{ tipo: 'vinheta', intensidade: 0.4 }, { tipo: 'brilho', cor: '#ffffff', posicao: { x: 0.5, y: 0.2 } }],
-    hud: { campos: [{ rotulo: 'Vida', valor: '3' }], barra: { rotulo: 'Energia', valor: 80 } },
-    destaque: { texto: 'UAU', cor: '#ff0000', entrada: 'pop' },
+test('an embedded code scene and a full scenario load', async () => {
+  const code = { type: 'code', title: 'soma.ts', lines: ['const a = 1;', 'const b = 2;'], added: [1], highlight: ['b'] };
+  const p = await loadWithScene(code);
+  assert.deepEqual(p.script().lines().each()[0].scene(), code);
+  const scenario = {
+    type: 'scenario', background: { vector: 'sala', colors: { wall: '#ffeedd' } },
+    characters: [{ character: 'ana', position: 'left', scale: 1.1, direction: 'right' }],
+    camera: { type: 'zoom-in', from: { x: 0, y: 0, zoom: 1 }, to: { x: 0.2, y: 0.1, zoom: 1.4 }, easing: 'smooth' },
+    effects: [{ type: 'vignette', intensity: 0.4 }, { type: 'glow', color: '#ffffff', position: { x: 0.5, y: 0.2 } }],
+    hud: { fields: [{ label: 'Vida', value: '3' }], bar: { label: 'Energia', value: 80 } },
+    highlight: { text: 'UAU', color: '#ff0000', entrance: 'pop' },
   };
-  await carregarComCena(cenario);
+  await loadWithScene(scenario);
 });
-test('cor inválida dentro da cena aponta o caminho', async () => {
-  const cena = { tipo: 'cenario', fundo: { cores: { parede: 'bege' } }, personagens: [] };
-  await assert.rejects(carregarComCena(cena), /falas\[0\]\.cena\.fundo\.cores\.parede: cor "bege" inválida/);
+test('an invalid color inside the scene points at the path', async () => {
+  const scene = { type: 'scenario', background: { colors: { wall: 'bege' } }, characters: [] };
+  await assert.rejects(loadWithScene(scene), /lines\[0\]\.scene\.background\.colors\.wall: cor "bege" inválida/);
 });
-test('barra do HUD acima de 100 é erro', async () => {
-  const cena = { tipo: 'cenario', fundo: {}, personagens: [], hud: { campos: [], barra: { rotulo: 'x', valor: 120 } } };
-  await assert.rejects(carregarComCena(cena), /cena\.hud\.barra\.valor: deve ser no máximo 100/);
+test('a HUD bar above 100 is an error', async () => {
+  const scene = { type: 'scenario', background: {}, characters: [], hud: { fields: [], bar: { label: 'x', value: 120 } } };
+  await assert.rejects(loadWithScene(scene), /scene\.hud\.bar\.value: deve ser no máximo 100/);
 });
 
-const NARRADOR = { id: 'narrador', nome: 'Narrador', voz: { id: 'narrador' }, expressaoPadrao: 'neutra' };
-async function pastaComNarrador(alterarRoteiro: (json: Json) => Json = (json) => json): Promise<string> {
-  const pasta = await copiaAlterada('projeto.json', (json) => ({ ...json, elenco: ['ana', 'narrador'] }));
-  await writeFile(join(pasta, 'elenco/narrador.json'), JSON.stringify(NARRADOR));
-  const caminho = join(pasta, 'roteiro.json');
-  await writeFile(caminho, JSON.stringify(alterarRoteiro(JSON.parse(await readFile(caminho, 'utf8')) as Json)));
-  return pasta;
+const NARRATOR = { id: 'narrator', name: 'Narrador', voice: { id: 'narrator' }, defaultExpression: 'neutral' };
+async function folderWithNarrator(changeScript: (json: Json) => Json = (json) => json): Promise<string> {
+  const folder = await changedCopy('project.json', (json) => ({ ...json, cast: ['ana', 'narrator'] }));
+  await writeFile(join(folder, 'cast/narrator.json'), JSON.stringify(NARRATOR));
+  const path = join(folder, 'script.json');
+  await writeFile(path, JSON.stringify(changeScript(JSON.parse(await readFile(path, 'utf8')) as Json)));
+  return folder;
 }
-test('narrador sem rig carrega como voz sem corpo', async () => {
-  const pasta = await pastaComNarrador((json) => ({
-    ...json, falas: [...(json.falas as Json[]), { id: '3', capitulo: 1, quem: 'narrador', texto: 'Era uma vez.' }],
+test('a narrator without a rig loads as a voice without a body', async () => {
+  const folder = await folderWithNarrator((json) => ({
+    ...json, lines: [...(json.lines as Json[]), { id: '3', chapter: 1, speaker: 'narrator', text: 'Era uma vez.' }],
   }));
-  const p = await repositorio().carregar(pasta);
-  const narrador = p.elenco().personagem(IdPersonagem.NARRADOR);
-  assert.equal(narrador.temCorpo(), false);
-  assert.ok(p.elenco().personagem(IdPersonagem.de('ana')).temCorpo());
+  const p = await repository().load(folder);
+  const narrator = p.cast().character(CharacterId.NARRATOR);
+  assert.equal(narrator.hasBody(), false);
+  assert.ok(p.cast().character(CharacterId.of('ana')).hasBody());
 });
-test('narrador em cena é erro legível', async () => {
-  const pasta = await pastaComNarrador((json) => {
-    const [primeira, ...resto] = json.falas as Json[];
-    const cena = { tipo: 'cenario', fundo: {}, personagens: [{ quem: 'narrador', posicao: 'centro' }] };
-    return { ...json, falas: [{ ...primeira, cena }, ...resto] };
+test('a narrator on stage is a readable error', async () => {
+  const folder = await folderWithNarrator((json) => {
+    const [first, ...rest] = json.lines as Json[];
+    const scene = { type: 'scenario', background: {}, characters: [{ character: 'narrator', position: 'center' }] };
+    return { ...json, lines: [{ ...first, scene }, ...rest] };
   });
-  await assert.rejects(repositorio().carregar(pasta),
-    /falas\[0\]\.cena\.personagens\[0\]\.quem: narrador não tem corpo e não pode aparecer em cena/);
+  await assert.rejects(repository().load(folder),
+    /lines\[0\]\.scene\.characters\[0\]\.character: narrator não tem corpo e não pode aparecer em cena/);
 });
-test('personagem sem rig que não é o narrador é erro', async () => {
-  await assert.rejects(carregarComPersonagem({ rig: undefined }),
-    /elenco\/ana\.json › rig: obrigatório \(só o narrador pode não ter rig\)/);
+test('a character without a rig that is not the narrator is an error', async () => {
+  await assert.rejects(loadWithCharacter({ rig: undefined }),
+    /cast\/ana\.json › rig: obrigatório \(só o narrador pode não ter rig\)/);
 });
-test('narrador sem rig com parâmetros é erro', async () => {
-  const pasta = await pastaComNarrador();
-  await writeFile(join(pasta, 'elenco/narrador.json'), JSON.stringify({ ...NARRADOR, parametros: { pele: '#000' } }));
-  await assert.rejects(repositorio().carregar(pasta), /elenco\/narrador\.json › parametros: o narrador sem rig não tem parâmetros/);
+test('a narrator without a rig but with parameters is an error', async () => {
+  const folder = await folderWithNarrator();
+  await writeFile(join(folder, 'cast/narrator.json'), JSON.stringify({ ...NARRATOR, parameters: { skin: '#000' } }));
+  await assert.rejects(repository().load(folder), /cast\/narrator\.json › parameters: o narrador sem rig não tem parâmetros/);
 });

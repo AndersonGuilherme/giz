@@ -1,8 +1,8 @@
-import type { Audio } from '../../dominio/fala/Audio.ts';
-import type { Palavras } from '../../dominio/fala/Palavras.ts';
-import type { Idioma } from '../../dominio/valores/Idioma.ts';
+import type { Audio } from '../../domain/speech/Audio.ts';
+import type { Words } from '../../domain/speech/Words.ts';
+import type { Language } from '../../domain/values/Language.ts';
 
-/** Descobre quando cada palavra de `texto` (o texto do roteiro) é dita no áudio. */
-export interface Alinhador {
-  alinhar(audio: Audio, texto: string, idioma: Idioma): Promise<Palavras>;
+/** Finds when each word of `text` (the script text) is said in the audio. */
+export interface Aligner {
+  align(audio: Audio, text: string, language: Language): Promise<Words>;
 }

@@ -1,45 +1,45 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { ErroDeDominio } from '../../../src/dominio/ErroDeDominio.ts';
-import { Palavras } from '../../../src/dominio/fala/Palavras.ts';
-import { Segundos } from '../../../src/dominio/valores/Tempo.ts';
+import { DomainError } from '../../../src/domain/DomainError.ts';
+import { Words } from '../../../src/domain/speech/Words.ts';
+import { Seconds } from '../../../src/domain/values/Time.ts';
 
-const s = (...valores: number[]) => valores.map((valor) => Segundos.de(valor));
+const s = (...values: number[]) => values.map((value) => Seconds.of(value));
 
-test('doTexto tira os colchetes das marcas [trecho]', () => {
-  assert.deepEqual(Palavras.doTexto('Um [usou um cupom] e [ pagou ].').textos(), ['Um', 'usou', 'um', 'cupom', 'e', 'pagou', '.']);
+test('fromText removes the brackets of the [span] beats', () => {
+  assert.deepEqual(Words.fromText('Um [usou um cupom] e [ pagou ].').texts(), ['Um', 'usou', 'um', 'cupom', 'e', 'pagou', '.']);
 });
 
-test('doTexto separa por espaço e mantém a pontuação junto da palavra', () => {
-  const palavras = Palavras.doTexto('  Olá,   Téo!  Tudo bem? ');
-  assert.deepEqual(palavras.textos(), ['Olá,', 'Téo!', 'Tudo', 'bem?']);
+test('fromText splits on spaces and keeps punctuation attached to the word', () => {
+  const words = Words.fromText('  Olá,   Téo!  Tudo bem? ');
+  assert.deepEqual(words.texts(), ['Olá,', 'Téo!', 'Tudo', 'bem?']);
 });
 
-test('comTempos grava início e fim de cada palavra', () => {
-  const palavras = Palavras.doTexto('um dois').comTempos(s(0, 0.4), s(0.3, 0.9));
-  assert.deepEqual(palavras.paraJson(), [
-    { texto: 'um', inicio: 0, fim: 0.3 },
-    { texto: 'dois', inicio: 0.4, fim: 0.9 },
+test('withTimes stores the start and end of each word', () => {
+  const words = Words.fromText('um dois').withTimes(s(0, 0.4), s(0.3, 0.9));
+  assert.deepEqual(words.toJson(), [
+    { text: 'um', start: 0, end: 0.3 },
+    { text: 'dois', start: 0.4, end: 0.9 },
   ]);
 });
 
-test('comTempos recusa quantidade diferente de tempos e fim antes do início', () => {
-  const palavras = Palavras.doTexto('um dois');
-  assert.throws(() => palavras.comTempos(s(0), s(0.3)), ErroDeDominio);
-  assert.throws(() => palavras.comTempos(s(0, 0.5), s(0.3, 0.4)), ErroDeDominio);
+test('withTimes rejects a different number of times and an end before the start', () => {
+  const words = Words.fromText('um dois');
+  assert.throws(() => words.withTimes(s(0), s(0.3)), DomainError);
+  assert.throws(() => words.withTimes(s(0, 0.5), s(0.3, 0.4)), DomainError);
 });
 
-test('ativaEm devolve a última palavra já começada (-1 antes da primeira)', () => {
-  const palavras = Palavras.doTexto('um dois três').comTempos(s(0.1, 0.4, 0.8), s(0.3, 0.7, 1));
-  assert.equal(palavras.ativaEm(Segundos.de(0)), -1);
-  assert.equal(palavras.ativaEm(Segundos.de(0.1)), 0);
-  assert.equal(palavras.ativaEm(Segundos.de(0.35)), 0);
-  assert.equal(palavras.ativaEm(Segundos.de(0.5)), 1);
-  assert.equal(palavras.ativaEm(Segundos.de(5)), 2);
+test('activeAt returns the last word already started (-1 before the first)', () => {
+  const words = Words.fromText('um dois três').withTimes(s(0.1, 0.4, 0.8), s(0.3, 0.7, 1));
+  assert.equal(words.activeAt(Seconds.of(0)), -1);
+  assert.equal(words.activeAt(Seconds.of(0.1)), 0);
+  assert.equal(words.activeAt(Seconds.of(0.35)), 0);
+  assert.equal(words.activeAt(Seconds.of(0.5)), 1);
+  assert.equal(words.activeAt(Seconds.of(5)), 2);
 });
 
-test('paraJson devolve uma cópia', () => {
-  const palavras = Palavras.doTexto('um');
-  palavras.paraJson()[0]!.texto = 'mudou';
-  assert.deepEqual(palavras.textos(), ['um']);
+test('toJson returns a copy', () => {
+  const words = Words.fromText('um');
+  words.toJson()[0]!.text = 'mudou';
+  assert.deepEqual(words.texts(), ['um']);
 });

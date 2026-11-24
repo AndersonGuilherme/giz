@@ -1,74 +1,74 @@
-/** Cenas de aula: os campos das cenas do motor, em português. */
-export const VARIANTES_DE_CARTAO = ['objetivo', 'resumo', 'desafio', 'proximo', 'chamado', 'regra'] as const;
-export const CURVAS_DE_GRAFICO = ['saudavel', 'podre'] as const;
-export const TONS_DE_TERMINAL = ['falha', 'ok', 'apagado'] as const;
-export const TONS_DE_NO = ['nucleo', 'infraestrutura', 'interface', 'suave'] as const;
+/** Lesson scenes: the fields of the motor scenes, in English. */
+export const CARD_VARIANTS = ['objective', 'summary', 'challenge', 'next', 'ticket', 'rule'] as const;
+export const CHART_CURVES = ['healthy', 'rotten'] as const;
+export const TERMINAL_TONES = ['fail', 'ok', 'dim'] as const;
+export const NODE_TONES = ['core', 'infrastructure', 'interface', 'soft'] as const;
 
-type Lado = Readonly<{ titulo: string; texto: string }>;
+type Side = Readonly<{ title: string; text: string }>;
 
-export type CenaDeTitulo = Readonly<{ tipo: 'titulo'; sobretitulo: string; titulo: string; subtitulo?: string }>;
-export type CenaDeCartao = Readonly<{
-  tipo: 'cartao';
-  variante: (typeof VARIANTES_DE_CARTAO)[number];
-  titulo: string;
-  itens: readonly string[];
-  mostrados?: number;
+export type TitleScene = Readonly<{ type: 'title'; overline: string; title: string; subtitle?: string }>;
+export type CardScene = Readonly<{
+  type: 'card';
+  variant: (typeof CARD_VARIANTS)[number];
+  title: string;
+  items: readonly string[];
+  shown?: number;
 }>;
-export type CenaDeCitacao = Readonly<{ tipo: 'citacao'; texto: string }>;
-export type CenaDeGrafico = Readonly<{
-  tipo: 'grafico';
-  rotuloDoEixoX: string;
-  rotuloDoEixoY: string;
-  curvas: readonly (typeof CURVAS_DE_GRAFICO)[number][];
+export type QuoteScene = Readonly<{ type: 'quote'; text: string }>;
+export type ChartScene = Readonly<{
+  type: 'chart';
+  xAxisLabel: string;
+  yAxisLabel: string;
+  curves: readonly (typeof CHART_CURVES)[number][];
 }>;
-export type CenaDeSintomas = Readonly<{
-  tipo: 'sintomas';
-  itens: readonly Readonly<{ nome: string; descricao: string }>[];
-  mostrados: number;
-  foco?: number;
+export type SymptomsScene = Readonly<{
+  type: 'symptoms';
+  items: readonly Readonly<{ name: string; description: string }>[];
+  shown: number;
+  focus?: number;
 }>;
-/** Código embutido; `adicionadas` são os índices (base 0) das linhas novas. */
-export type CenaDeCodigo = Readonly<{
-  tipo: 'codigo';
-  titulo: string;
-  linhas: readonly string[];
-  adicionadas?: readonly number[];
-  destaque?: readonly string[];
+/** Embedded code; `added` are the indexes (0-based) of the new lines. */
+export type CodeScene = Readonly<{
+  type: 'code';
+  title: string;
+  lines: readonly string[];
+  added?: readonly number[];
+  highlight?: readonly string[];
 }>;
-export type CenaDeTerminal = Readonly<{
-  tipo: 'terminal';
-  comando: string;
-  linhas: readonly Readonly<{ texto: string; tom?: (typeof TONS_DE_TERMINAL)[number] }>[];
+export type TerminalScene = Readonly<{
+  type: 'terminal';
+  command: string;
+  lines: readonly Readonly<{ text: string; tone?: (typeof TERMINAL_TONES)[number] }>[];
 }>;
-export type NoDoGrafo = Readonly<{ id: string; rotulo: string; x: number; y: number; tom?: (typeof TONS_DE_NO)[number] }>;
-export type ArestaDoGrafo = Readonly<{ de: string; para: string; ruim?: boolean }>;
-export type CenaDeGrafo = Readonly<{
-  tipo: 'grafo';
-  nos: readonly NoDoGrafo[];
-  arestas: readonly ArestaDoGrafo[];
-  focoNasRuins?: boolean;
+export type GraphNode = Readonly<{ id: string; label: string; x: number; y: number; tone?: (typeof NODE_TONES)[number] }>;
+export type GraphEdge = Readonly<{ from: string; to: string; bad?: boolean }>;
+export type GraphScene = Readonly<{
+  type: 'graph';
+  nodes: readonly GraphNode[];
+  edges: readonly GraphEdge[];
+  focusOnBad?: boolean;
 }>;
-export type CenaDeVersus = Readonly<{ tipo: 'versus'; errado: Lado; certo: Lado }>;
-export type CenaDeTabela = Readonly<{
-  tipo: 'tabela';
-  titulo?: string;
-  colunas: readonly string[];
-  linhas: readonly Readonly<{ rotulo: string; celulas: readonly string[] }>[];
-  linhasMostradas?: number;
-  colunaDestacada?: number;
-  linhaDestacada?: number;
+export type VersusScene = Readonly<{ type: 'versus'; wrong: Side; right: Side }>;
+export type TableScene = Readonly<{
+  type: 'table';
+  title?: string;
+  columns: readonly string[];
+  rows: readonly Readonly<{ label: string; cells: readonly string[] }>[];
+  shownRows?: number;
+  highlightedColumn?: number;
+  highlightedRow?: number;
 }>;
-export type CenaDeConversa = Readonly<{ tipo: 'conversa' }>;
+export type TalkScene = Readonly<{ type: 'talk' }>;
 
-export type CenaDeAula =
-  | CenaDeTitulo
-  | CenaDeCartao
-  | CenaDeCitacao
-  | CenaDeGrafico
-  | CenaDeSintomas
-  | CenaDeCodigo
-  | CenaDeTerminal
-  | CenaDeGrafo
-  | CenaDeVersus
-  | CenaDeTabela
-  | CenaDeConversa;
+export type LessonScene =
+  | TitleScene
+  | CardScene
+  | QuoteScene
+  | ChartScene
+  | SymptomsScene
+  | CodeScene
+  | TerminalScene
+  | GraphScene
+  | VersusScene
+  | TableScene
+  | TalkScene;

@@ -1,8 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { CorHex } from '../../../src/dominio/valores/CorHex.ts';
+import { HexColor } from '../../../src/domain/values/HexColor.ts';
 
-test('CorHex recusa nome de cor com mensagem', () => assert.throws(() => CorHex.de('roxo'), /cor "roxo".*#RRGGBB/));
-test('CorHex escurece #ffffff em 50% para #808080', () => assert.equal(CorHex.de('#ffffff').escurecida(0.5).css(), '#808080'));
-test('CorHex expande #RGB e normaliza para minúsculas', () => assert.equal(CorHex.de('#FA0').css(), '#ffaa00'));
-test('CorHex recusa fator fora de 0 a 1', () => assert.throws(() => CorHex.de('#ffffff').escurecida(1.5), /fator/));
+test('HexColor rejects a color name with a message', () => assert.throws(() => HexColor.of('roxo'), /cor "roxo".*#RRGGBB/));
+test('HexColor darkens #ffffff by 50% to #808080', () => assert.equal(HexColor.of('#ffffff').darkened(0.5).css(), '#808080'));
+test('HexColor expands #RGB and normalizes to lowercase', () => assert.equal(HexColor.of('#FA0').css(), '#ffaa00'));
+test('HexColor rejects a factor outside 0 to 1', () => assert.throws(() => HexColor.of('#ffffff').darkened(1.5), /fator/));

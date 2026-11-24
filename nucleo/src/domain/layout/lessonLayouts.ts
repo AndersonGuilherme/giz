@@ -1,51 +1,51 @@
-import type { CenaDeTitulo } from '../roteiro/CenasDeAula.ts';
-import type { Proporcao } from '../valores/Proporcao.ts';
-import { Caixa } from './Caixa.ts';
-import { Caixas } from './Caixas.ts';
-import { Fonte } from './Fonte.ts';
-import type { RegistroDeLayouts } from './RegistroDeLayouts.ts';
+import type { TitleScene } from '../script/LessonScenes.ts';
+import type { AspectRatio } from '../values/AspectRatio.ts';
+import { Box } from './Box.ts';
+import { Boxes } from './Boxes.ts';
+import { Font } from './Font.ts';
+import type { LayoutRegistry } from './LayoutRegistry.ts';
 
-// Constantes de layout das cenas de aula, em pixels do vídeo. Todas ficam dentro da área segura:
-// 9:16 → x 86–994, y 250–1498; 16:9 → x 96–1824, y 54–1026. A altura de cada caixa vem da fonte.
-type Coluna = Readonly<{ x: number; largura: number }>;
-type Posicoes = Readonly<{ coluna: Coluna; sobretitulo: number; titulo: number; subtitulo: number; legenda: Coluna & { base: number } }>;
+// Layout constants of the lesson scenes, in video pixels. All of them stay inside the safe area:
+// 9:16 → x 86–994, y 250–1498; 16:9 → x 96–1824, y 54–1026. The height of each box comes from the font.
+type Column = Readonly<{ x: number; width: number }>;
+type Positions = Readonly<{ column: Column; overline: number; title: number; subtitle: number; caption: Column & { base: number } }>;
 
-export const FONTE_LEGENDA = Fonte.de({ familia: 'texto', tamanho: 48, alturaDaLinha: 1.25, maximoDeLinhas: 6 });
-export const FONTE_SOBRETITULO = Fonte.de({ familia: 'texto', tamanho: 40, alturaDaLinha: 1.2, maximoDeLinhas: 1 });
-export const FONTE_TITULO = Fonte.de({ familia: 'texto', tamanho: 96, alturaDaLinha: 1.1, maximoDeLinhas: 2 });
-export const FONTE_SUBTITULO = Fonte.de({ familia: 'texto', tamanho: 48, alturaDaLinha: 1.25, maximoDeLinhas: 2 });
+export const CAPTION_FONT = Font.of({ family: 'text', size: 48, lineHeight: 1.25, maximumLines: 6 });
+export const OVERLINE_FONT = Font.of({ family: 'text', size: 40, lineHeight: 1.2, maximumLines: 1 });
+export const TITLE_FONT = Font.of({ family: 'text', size: 96, lineHeight: 1.1, maximumLines: 2 });
+export const SUBTITLE_FONT = Font.of({ family: 'text', size: 48, lineHeight: 1.25, maximumLines: 2 });
 
-const POSICOES_VERTICAL: Posicoes = {
-  coluna: { x: 86, largura: 908 }, sobretitulo: 420, titulo: 492, subtitulo: 727,
-  legenda: { x: 86, largura: 908, base: 1498 },
+const VERTICAL_POSITIONS: Positions = {
+  column: { x: 86, width: 908 }, overline: 420, title: 492, subtitle: 727,
+  caption: { x: 86, width: 908, base: 1498 },
 };
-const POSICOES_HORIZONTAL: Posicoes = {
-  coluna: { x: 96, largura: 1728 }, sobretitulo: 150, titulo: 214, subtitulo: 449,
-  legenda: { x: 260, largura: 1400, base: 1026 },
+const HORIZONTAL_POSITIONS: Positions = {
+  column: { x: 96, width: 1728 }, overline: 150, title: 214, subtitle: 449,
+  caption: { x: 260, width: 1400, base: 1026 },
 };
 
-const posicoesPara = (proporcao: Proporcao): Posicoes => (proporcao.vertical() ? POSICOES_VERTICAL : POSICOES_HORIZONTAL);
+const positionsFor = (aspect: AspectRatio): Positions => (aspect.vertical() ? VERTICAL_POSITIONS : HORIZONTAL_POSITIONS);
 
-function caixaDeTexto(rotulo: string, local: Coluna & { y: number }, conteudo: { texto: string; fonte: Fonte }): Caixa {
-  return Caixa.comTexto(rotulo, { ...local, altura: conteudo.fonte.alturaMaxima() }, conteudo);
+function textBox(label: string, local: Column & { y: number }, content: { text: string; font: Font }): Box {
+  return Box.withText(label, { ...local, height: content.font.maximumHeight() }, content);
 }
 
-/** A legenda fica encostada na base da área segura. */
-export function caixaDaLegenda(texto: string, proporcao: Proporcao): Caixa {
-  const { legenda } = posicoesPara(proporcao);
-  const y = legenda.base - FONTE_LEGENDA.alturaMaxima();
-  return caixaDeTexto('legenda', { x: legenda.x, largura: legenda.largura, y }, { texto, fonte: FONTE_LEGENDA });
+/** The caption sits against the bottom of the safe area. */
+export function captionBox(text: string, aspect: AspectRatio): Box {
+  const { caption } = positionsFor(aspect);
+  const y = caption.base - CAPTION_FONT.maximumHeight();
+  return textBox('legenda', { x: caption.x, width: caption.width, y }, { text, font: CAPTION_FONT });
 }
 
-function caixasDoTitulo(cena: CenaDeTitulo, proporcao: Proporcao): Caixas {
-  const { coluna, ...y } = posicoesPara(proporcao);
-  const sobretitulo = caixaDeTexto('sobretítulo', { ...coluna, y: y.sobretitulo }, { texto: cena.sobretitulo, fonte: FONTE_SOBRETITULO });
-  const caixas = Caixas.de([sobretitulo, caixaDeTexto('título', { ...coluna, y: y.titulo }, { texto: cena.titulo, fonte: FONTE_TITULO })]);
-  if (cena.subtitulo === undefined) return caixas;
-  return caixas.com(caixaDeTexto('subtítulo', { ...coluna, y: y.subtitulo }, { texto: cena.subtitulo, fonte: FONTE_SUBTITULO }));
+function titleBoxes(scene: TitleScene, aspect: AspectRatio): Boxes {
+  const { column, ...y } = positionsFor(aspect);
+  const overline = textBox('sobretítulo', { ...column, y: y.overline }, { text: scene.overline, font: OVERLINE_FONT });
+  const boxes = Boxes.of([overline, textBox('título', { ...column, y: y.title }, { text: scene.title, font: TITLE_FONT })]);
+  if (scene.subtitle === undefined) return boxes;
+  return boxes.with(textBox('subtítulo', { ...column, y: y.subtitle }, { text: scene.subtitle, font: SUBTITLE_FONT }));
 }
 
-/** Por ora só a cena `titulo`; o Task 13 registra as demais cenas de aula. */
-export function registrarLayoutsDeAula(registro: RegistroDeLayouts): RegistroDeLayouts {
-  return registro.registrar('titulo', caixasDoTitulo);
+/** Only the `title` scene for now; Task 13 registers the other lesson scenes. */
+export function registerLessonLayouts(registry: LayoutRegistry): LayoutRegistry {
+  return registry.register('title', titleBoxes);
 }

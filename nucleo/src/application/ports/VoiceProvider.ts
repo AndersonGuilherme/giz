@@ -1,9 +1,9 @@
-import type { Audio } from '../../dominio/fala/Audio.ts';
-import type { Idioma } from '../../dominio/valores/Idioma.ts';
+import type { Audio } from '../../domain/speech/Audio.ts';
+import type { Language } from '../../domain/values/Language.ts';
 
-/** `texto` é o que a voz diz (a pronúncia da fala); `idFala` identifica a fala (gravação própria, semente). */
-export type PedidoDeVoz = Readonly<{ idFala: string; texto: string; voz: string; idioma: Idioma; estilo?: string }>;
+/** `text` is what the voice says (the line pronunciation); `lineId` identifies the line (own recording, seed). */
+export type VoiceRequest = Readonly<{ lineId: string; text: string; voice: string; language: Language; style?: string }>;
 
-export interface ProvedorVoz {
-  gerar(pedido: PedidoDeVoz): Promise<Audio>;
+export interface VoiceProvider {
+  generate(request: VoiceRequest): Promise<Audio>;
 }

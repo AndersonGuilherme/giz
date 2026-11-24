@@ -1,52 +1,52 @@
-const MARCA = /\[[^\]]+\]/g;
-const COLCHETES = /[[\]]/g;
-const COLCHETES_POR_MARCA = 2;
+const BEAT = /\[[^\]]+\]/g;
+const BRACKETS = /[[\]]/g;
+const BRACKETS_PER_BEAT = 2;
 
-const palavrasEm = (texto: string): number => texto.split(/\s+/).filter(Boolean).length;
+const wordsIn = (text: string): number => text.split(/\s+/).filter(Boolean).length;
 
-/** Um texto com marcas `[trecho]`: onde cada marca abre, no texto sem os colchetes. */
-export class TextoComMarcas {
-  readonly #bruto: string;
+/** A text with `[span]` beats: where each beat opens, in the text without the brackets. */
+export class BeatText {
+  readonly #raw: string;
 
-  private constructor(bruto: string) {
-    this.#bruto = bruto;
+  private constructor(raw: string) {
+    this.#raw = raw;
   }
 
-  static de(texto: string): TextoComMarcas {
-    return new TextoComMarcas(texto);
+  static of(text: string): BeatText {
+    return new BeatText(text);
   }
 
-  static temMarcas(texto: string): boolean {
-    return new RegExp(MARCA.source).test(texto);
+  static hasBeats(text: string): boolean {
+    return new RegExp(BEAT.source).test(text);
   }
 
-  limpo(): string {
-    return this.#bruto.replace(COLCHETES, '');
+  clean(): string {
+    return this.#raw.replace(BRACKETS, '');
   }
 
-  quantidade(): number {
-    return this.#posicoes().length;
+  count(): number {
+    return this.#positions().length;
   }
 
-  /** Índice (nas palavras do texto limpo) da palavra que abre cada marca. */
-  palavrasQueAbrem(): number[] {
-    const limpo = this.limpo();
-    return this.#posicoes().map((posicao) => {
-      const antes = limpo.slice(0, posicao);
-      const noMeioDaPalavra = posicao > 0 && !/\s$/.test(antes);
-      return palavrasEm(antes) - (noMeioDaPalavra ? 1 : 0);
+  /** Index (in the words of the clean text) of the word that opens each beat. */
+  openingWords(): number[] {
+    const clean = this.clean();
+    return this.#positions().map((position) => {
+      const before = clean.slice(0, position);
+      const midWord = position > 0 && !/\s$/.test(before);
+      return wordsIn(before) - (midWord ? 1 : 0);
     });
   }
 
-  /** Onde cada marca abre, como fração (de 0 a 1) do texto limpo. */
-  fracoes(): number[] {
-    const tamanho = Math.max(1, this.limpo().length);
-    return this.#posicoes().map((posicao) => posicao / tamanho);
+  /** Where each beat opens, as a fraction (from 0 to 1) of the clean text. */
+  fractions(): number[] {
+    const size = Math.max(1, this.clean().length);
+    return this.#positions().map((position) => position / size);
   }
 
-  // Posição de cada marca no texto limpo: cada marca anterior tirou dois colchetes.
-  #posicoes(): number[] {
-    const encontradas = [...this.#bruto.matchAll(MARCA)];
-    return encontradas.map((marca, ordem) => (marca.index ?? 0) - ordem * COLCHETES_POR_MARCA);
+  // Position of each beat in the clean text: each earlier beat removed two brackets.
+  #positions(): number[] {
+    const found = [...this.#raw.matchAll(BEAT)];
+    return found.map((beat, order) => (beat.index ?? 0) - order * BRACKETS_PER_BEAT);
   }
 }

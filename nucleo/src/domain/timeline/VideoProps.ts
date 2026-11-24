@@ -1,64 +1,64 @@
-import type { Expressao, Pose } from '../elenco/PoseEExpressao.ts';
-import type { ValorDeParametro } from '../elenco/Personagem.ts';
-import type { PalavraJson } from '../fala/PalavraJson.ts';
-import type { EstiloDeLegenda, Formato } from '../projeto/Projeto.ts';
-import type { Cena } from '../roteiro/Cena.ts';
-import type { EfeitoSonoro, Olhar, PausaDepois } from '../roteiro/Fala.ts';
+import type { Expression, Pose } from '../cast/PoseAndExpression.ts';
+import type { ParameterValue } from '../cast/Character.ts';
+import type { WordJson } from '../speech/WordJson.ts';
+import type { CaptionStyle, Format } from '../project/Project.ts';
+import type { Scene } from '../script/Scene.ts';
+import type { SoundEffect, Gaze, HoldAfter } from '../script/Line.ts';
 
-/** O que o Remotion recebe: só JSON (sem instâncias de classe nem Float32Array). Quadros a 30 fps. */
+/** What Remotion receives: JSON only (no class instances nor Float32Array). Frames at 30 fps. */
 
-/** A cena do trecho com as mudanças das marcas das falas anteriores já aplicadas. */
-export type CenaResolvida = Cena;
+/** The segment scene with the beat changes of the previous lines already applied. */
+export type ResolvedScene = Scene;
 
-export type EstadoJson = { pose: Pose; expressao: Expressao; olhar: Olhar };
+export type StateJson = { pose: Pose; expression: Expression; look: Gaze };
 
-/** `quadro` é relativo ao início do trecho; `mudancas` traz os campos de cena e a expressão, a pose e o som. */
-export type MarcaJson = { quadro: number; mudancas: Record<string, unknown> };
+/** `frame` is relative to the start of the segment; `changes` holds the scene fields plus the expression, pose and sound. */
+export type BeatJson = { frame: number; changes: Record<string, unknown> };
 
-/** `quadro` é absoluto (desde o começo do vídeo). */
-export type EfeitoSonoroJson = { quadro: number; som: EfeitoSonoro };
+/** `frame` is absolute (from the start of the video). */
+export type SoundEffectJson = { frame: number; sound: SoundEffect };
 
-/** Uma palavra da legenda, com início e fim em quadros relativos ao início do trecho. */
-export type PalavraEmQuadros = PalavraJson;
+/** A caption word, with start and end in frames relative to the start of the segment. */
+export type WordInFrames = WordJson;
 
-export type TrechoJson = {
-  idFala: string;
-  quem: string;
-  inicio: number;
-  duracaoDaFala: number;
-  duracaoTotal: number;
-  cena: CenaResolvida;
-  chaveDaCena: number;
-  palavras: PalavraEmQuadros[];
-  marcas: MarcaJson[];
-  /** Só personagens com corpo: o narrador não entra. */
-  estados: Record<string, EstadoJson>;
+export type SegmentJson = {
+  lineId: string;
+  speaker: string;
+  start: number;
+  lineDuration: number;
+  totalDuration: number;
+  scene: ResolvedScene;
+  sceneKey: number;
+  words: WordInFrames[];
+  beats: BeatJson[];
+  /** Only characters with a body: the narrator is left out. */
+  states: Record<string, StateJson>;
   audio?: string;
   envelope?: number[];
-  visemas?: string;
-  pausaDepois?: PausaDepois;
+  visemes?: string;
+  holdAfter?: HoldAfter;
 };
 
-export type PersonagemJson = {
+export type CharacterJson = {
   id: string;
-  nome: string;
+  name: string;
   rig?: string;
-  parametros: Record<string, ValorDeParametro>;
-  expressaoPadrao: Expressao;
+  parameters: Record<string, ParameterValue>;
+  defaultExpression: Expression;
 };
 
-export type PropsDoVideo = {
+export type VideoProps = {
   fps: number;
-  largura: number;
-  altura: number;
-  idioma: string;
-  formato: Formato;
-  estiloDeLegenda: EstiloDeLegenda;
-  marca?: string;
-  titulo: string;
-  capitulos: string[];
-  totalDeQuadros: number;
-  trechos: TrechoJson[];
-  elenco: PersonagemJson[];
-  efeitosSonoros: EfeitoSonoroJson[];
+  width: number;
+  height: number;
+  language: string;
+  format: Format;
+  captionStyle: CaptionStyle;
+  brand?: string;
+  title: string;
+  chapters: string[];
+  totalFrames: number;
+  segments: SegmentJson[];
+  cast: CharacterJson[];
+  soundEffects: SoundEffectJson[];
 };

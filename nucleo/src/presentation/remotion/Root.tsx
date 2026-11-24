@@ -6,7 +6,7 @@ import { CharacterSheet, type CharacterSheetProps } from './CharacterSheet.tsx';
 const readCharacter: CalculateMetadataFunction<CharacterSheetProps> = async ({ props }) => {
   if (!props.character) return {};
   const json = await (await fetch(staticFile(props.character))).json();
-  return { props: { ...props, rig: json.rig ?? props.rig, parameters: json.parametros ?? {} } };
+  return { props: { ...props, rig: json.rig ?? props.rig, parameters: json.parameters ?? {} } };
 };
 
 export const Root: FC = () => (

@@ -3,23 +3,23 @@ import assert from 'node:assert/strict';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import type { PedidoDeVoz } from '../../../src/aplicacao/portas/ProvedorVoz.ts';
-import { Audio } from '../../../src/dominio/fala/Audio.ts';
-import { Idioma } from '../../../src/dominio/valores/Idioma.ts';
-import { VozDeArquivo } from '../../../src/infraestrutura/voz/VozDeArquivo.ts';
-import { paraWav } from '../../../src/infraestrutura/voz/wav.ts';
+import type { VoiceRequest } from '../../../src/application/ports/VoiceProvider.ts';
+import { Audio } from '../../../src/domain/speech/Audio.ts';
+import { Language } from '../../../src/domain/values/Language.ts';
+import { RecordingVoice } from '../../../src/infrastructure/voice/RecordingVoice.ts';
+import { toWav } from '../../../src/infrastructure/voice/wav.ts';
 
-const pasta = await mkdtemp(join(tmpdir(), 'giz-gravacoes-'));
-after(() => rm(pasta, { recursive: true, force: true }));
-const pedido = (idFala: string): PedidoDeVoz => ({ idFala, texto: 'Oi', voz: 'eu', idioma: Idioma.PORTUGUES });
+const folder = await mkdtemp(join(tmpdir(), 'giz-recordings-'));
+after(() => rm(folder, { recursive: true, force: true }));
+const request = (lineId: string): VoiceRequest => ({ lineId, text: 'Oi', voice: 'eu', language: Language.PORTUGUESE });
 
-test('VozDeArquivo sem a gravação diz onde ela deveria estar', async () => {
-  await assert.rejects(new VozDeArquivo(pasta).gerar(pedido('7')), /gravacoes\/7\.wav/);
+test('RecordingVoice without the recording says where it should be', async () => {
+  await assert.rejects(new RecordingVoice(folder).generate(request('7')), /recordings\/7\.wav/);
 });
 
-test('VozDeArquivo lê a gravação da fala', async () => {
-  await mkdir(join(pasta, 'gravacoes'), { recursive: true });
-  await writeFile(join(pasta, 'gravacoes', '3.wav'), paraWav(Audio.de(new Float32Array(12000), 24000)));
-  const audio = await new VozDeArquivo(pasta).gerar(pedido('3'));
-  assert.equal(audio.duracao().valor(), 0.5);
+test('RecordingVoice reads the line recording', async () => {
+  await mkdir(join(folder, 'recordings'), { recursive: true });
+  await writeFile(join(folder, 'recordings', '3.wav'), toWav(Audio.of(new Float32Array(12000), 24000)));
+  const audio = await new RecordingVoice(folder).generate(request('3'));
+  assert.equal(audio.duration().value(), 0.5);
 });

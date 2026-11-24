@@ -1,28 +1,28 @@
-import type { Cena } from '../roteiro/Cena.ts';
-import type { Fala, PausaDepois } from '../roteiro/Fala.ts';
+import type { Scene } from '../script/Scene.ts';
+import type { Line, HoldAfter } from '../script/Line.ts';
 
-// readingSeconds do motor: ~0,35 s por linha com texto, entre 4 e 9 s, +1 s se houver linhas adicionadas.
-const SEGUNDOS_POR_LINHA = 0.35;
-const MINIMO_EM_SEGUNDOS = 4;
-const MAXIMO_EM_SEGUNDOS = 9;
-const ROTULO_DA_LEITURA = 'Leia o código';
+// readingSeconds from the motor: ~0.35 s per line with text, between 4 and 9 s, +1 s if there are added lines.
+const SECONDS_PER_LINE = 0.35;
+const MINIMUM_IN_SECONDS = 4;
+const MAXIMUM_IN_SECONDS = 9;
+const READING_LABEL = 'Leia o código';
 
-function segundosDeLeitura(cena: Cena): number {
-  if (cena.tipo !== 'codigo') return 0;
-  const comTexto = cena.linhas.filter((linha) => linha.trim()).length;
-  const porLinhas = Math.round(comTexto * SEGUNDOS_POR_LINHA);
-  const temAdicionadas = (cena.adicionadas?.length ?? 0) > 0;
-  return Math.min(MAXIMO_EM_SEGUNDOS, Math.max(MINIMO_EM_SEGUNDOS, porLinhas)) + (temAdicionadas ? 1 : 0);
+function readingSeconds(scene: Scene): number {
+  if (scene.type !== 'code') return 0;
+  const withText = scene.lines.filter((line) => line.trim()).length;
+  const byLines = Math.round(withText * SECONDS_PER_LINE);
+  const hasAdded = (scene.added?.length ?? 0) > 0;
+  return Math.min(MAXIMUM_IN_SECONDS, Math.max(MINIMUM_IN_SECONDS, byLines)) + (hasAdded ? 1 : 0);
 }
 
 /**
- * A pausa depois da fala: a explícita (`pausaDepois`) e/ou a de leitura de um código que a fala abre na tela;
- * vale a maior. `cenaAberta` é a cena que a fala abre (ausente quando ela herda a anterior).
+ * The hold after the line: the explicit one (`holdAfter`) and/or the reading hold of code the line opens on screen;
+ * the larger one wins. `openedScene` is the scene the line opens (absent when it inherits the previous one).
  */
-export function pausaDaFala(fala: Fala, cenaAberta: Cena | undefined): PausaDepois | undefined {
-  const leitura = cenaAberta ? segundosDeLeitura(cenaAberta) : 0;
-  const explicita = fala.pausaDepois();
-  if (explicita) return { ...explicita, segundos: Math.max(explicita.segundos, leitura) };
-  if (leitura > 0) return { segundos: leitura, rotulo: ROTULO_DA_LEITURA };
+export function lineHold(line: Line, openedScene: Scene | undefined): HoldAfter | undefined {
+  const reading = openedScene ? readingSeconds(openedScene) : 0;
+  const explicit = line.holdAfter();
+  if (explicit) return { ...explicit, seconds: Math.max(explicit.seconds, reading) };
+  if (reading > 0) return { seconds: reading, label: READING_LABEL };
   return undefined;
 }

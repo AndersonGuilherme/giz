@@ -1,64 +1,64 @@
-import type { Fps, Quadro } from '../valores/Tempo.ts';
+import type { Fps, Frame } from '../values/Time.ts';
 import type { Audio } from './Audio.ts';
 
-// Valores de rmsFrames/envelope do motor (scripts/tts.ts).
-const PERCENTIL_DE_REFERENCIA = 0.92;
-const ABERTURA_MINIMA = 0.12;
-const CURVA = 0.8;
+// Values of rmsFrames/envelope from the motor (scripts/tts.ts).
+const REFERENCE_PERCENTILE = 0.92;
+const MINIMUM_OPENING = 0.12;
+const CURVE = 0.8;
 
-function energiaDoTrecho(amostras: Float32Array): number {
-  const soma = amostras.reduce((total, amostra) => total + amostra * amostra, 0);
-  return Math.sqrt(soma / Math.max(1, amostras.length));
+function chunkEnergy(samples: Float32Array): number {
+  const sum = samples.reduce((total, sample) => total + sample * sample, 0);
+  return Math.sqrt(sum / Math.max(1, samples.length));
 }
 
-// Volume (RMS) de cada quadro.
-function volumesPorQuadro(audio: Audio, fps: Fps): number[] {
-  const amostras = audio.amostras();
-  const passo = audio.taxa() / fps.valor();
-  const quadros = Math.ceil(amostras.length / passo);
-  return [...Array(quadros).keys()].map((quadro) =>
-    energiaDoTrecho(amostras.subarray(Math.floor(quadro * passo), Math.floor((quadro + 1) * passo))),
+// Volume (RMS) of each frame.
+function volumesPerFrame(audio: Audio, fps: Fps): number[] {
+  const samples = audio.samples();
+  const step = audio.rate() / fps.value();
+  const frames = Math.ceil(samples.length / step);
+  return [...Array(frames).keys()].map((frame) =>
+    chunkEnergy(samples.subarray(Math.floor(frame * step), Math.floor((frame + 1) * step))),
   );
 }
 
-// O volume de referência é o percentil 92: os picos raros não achatam o resto da fala.
-function referencia(volumes: readonly number[]): number {
-  const ordenados = [...volumes].sort((menor, maior) => menor - maior);
-  return ordenados[Math.floor(ordenados.length * PERCENTIL_DE_REFERENCIA)] || 1;
+// The reference volume is the 92nd percentile: rare peaks do not flatten the rest of the line.
+function reference(volumes: readonly number[]): number {
+  const sorted = [...volumes].sort((smaller, larger) => smaller - larger);
+  return sorted[Math.floor(sorted.length * REFERENCE_PERCENTILE)] || 1;
 }
 
-// Suaviza com os vizinhos, normaliza pela referência e zera o que é baixo demais para mexer a boca.
-function aberturas(volumes: readonly number[]): number[] {
-  const volumeDeReferencia = referencia(volumes);
-  return volumes.map((volume, quadro) => {
-    const suavizado = ((volumes[quadro - 1] ?? volume) + 2 * volume + (volumes[quadro + 1] ?? volume)) / 4;
-    const relativo = Math.min(1, suavizado / volumeDeReferencia);
-    const abertura = relativo < ABERTURA_MINIMA ? 0 : Math.pow(relativo, CURVA);
-    return Math.round(abertura * 100) / 100;
+// Smooths with the neighbours, normalizes by the reference and zeroes what is too low to move the mouth.
+function openings(volumes: readonly number[]): number[] {
+  const referenceVolume = reference(volumes);
+  return volumes.map((volume, frame) => {
+    const smoothed = ((volumes[frame - 1] ?? volume) + 2 * volume + (volumes[frame + 1] ?? volume)) / 4;
+    const relative = Math.min(1, smoothed / referenceVolume);
+    const opening = relative < MINIMUM_OPENING ? 0 : Math.pow(relative, CURVE);
+    return Math.round(opening * 100) / 100;
   });
 }
 
-/** Quanto a boca abre (de 0 a 1) em cada quadro da fala. */
+/** How much the mouth opens (from 0 to 1) in each frame of the line. */
 export class Envelope {
-  readonly #aberturas: readonly number[];
+  readonly #openings: readonly number[];
 
-  private constructor(valores: readonly number[]) {
-    this.#aberturas = valores;
+  private constructor(values: readonly number[]) {
+    this.#openings = values;
   }
 
-  static medir(audio: Audio, fps: Fps): Envelope {
-    return new Envelope(aberturas(volumesPorQuadro(audio, fps)));
+  static measure(audio: Audio, fps: Fps): Envelope {
+    return new Envelope(openings(volumesPerFrame(audio, fps)));
   }
 
-  quadrosComVoz(): boolean[] {
-    return this.#aberturas.map((abertura) => abertura > 0);
+  voicedFrames(): boolean[] {
+    return this.#openings.map((opening) => opening > 0);
   }
 
-  abertura(quadro: Quadro): number {
-    return this.#aberturas[quadro.valor()] ?? 0;
+  opening(frame: Frame): number {
+    return this.#openings[frame.value()] ?? 0;
   }
 
-  paraJson(): number[] {
-    return [...this.#aberturas];
+  toJson(): number[] {
+    return [...this.#openings];
   }
 }

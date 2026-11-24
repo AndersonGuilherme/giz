@@ -1,41 +1,41 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
-import { arquivoDaVoz, type ArmazemDeVozes, type VozGravada } from '../../aplicacao/portas/ArmazemDeVozes.ts';
-import type { Audio } from '../../dominio/fala/Audio.ts';
-import { paraWav } from '../voz/wav.ts';
+import { voiceFile, type VoiceStore, type RecordedVoice } from '../../application/ports/VoiceStore.ts';
+import type { Audio } from '../../domain/speech/Audio.ts';
+import { toWav } from '../voice/wav.ts';
 
-const registroDaVoz = (idFala: string) => `voz/${idFala}.json`;
+const voiceRecordFile = (lineId: string) => `voice/${lineId}.json`;
 
-function hashDoArquivo(caminho: string): string | undefined {
+function fileHash(path: string): string | undefined {
   try {
-    return (JSON.parse(readFileSync(caminho, 'utf8')) as Partial<VozGravada>).hash;
+    return (JSON.parse(readFileSync(path, 'utf8')) as Partial<RecordedVoice>).hash;
   } catch {
     return undefined;
   }
 }
 
-/** Grava `voz/<id>.wav` e `voz/<id>.json` dentro da pasta do projeto. */
-export class ArmazemDeVozesEmDisco implements ArmazemDeVozes {
-  readonly #pasta: string;
+/** Saves `voice/<id>.wav` and `voice/<id>.json` inside the project folder. */
+export class DiskVoiceStore implements VoiceStore {
+  readonly #folder: string;
 
-  constructor(pasta: string) {
-    this.#pasta = pasta;
+  constructor(folder: string) {
+    this.#folder = folder;
   }
 
-  // Sem o wav, o registro não vale: a fala é gerada de novo.
-  hashGravado(idFala: string): string | undefined {
-    if (!existsSync(join(this.#pasta, arquivoDaVoz(idFala)))) return undefined;
-    return hashDoArquivo(join(this.#pasta, registroDaVoz(idFala)));
+  // Without the wav, the record does not count: the line is generated again.
+  savedHash(lineId: string): string | undefined {
+    if (!existsSync(join(this.#folder, voiceFile(lineId)))) return undefined;
+    return fileHash(join(this.#folder, voiceRecordFile(lineId)));
   }
 
-  async gravar(idFala: string, registro: VozGravada, audio: Audio): Promise<void> {
-    await mkdir(join(this.#pasta, 'voz'), { recursive: true });
-    await writeFile(join(this.#pasta, arquivoDaVoz(idFala)), paraWav(audio));
-    await writeFile(join(this.#pasta, registroDaVoz(idFala)), JSON.stringify(registro));
+  async save(lineId: string, record: RecordedVoice, audio: Audio): Promise<void> {
+    await mkdir(join(this.#folder, 'voice'), { recursive: true });
+    await writeFile(join(this.#folder, voiceFile(lineId)), toWav(audio));
+    await writeFile(join(this.#folder, voiceRecordFile(lineId)), JSON.stringify(record));
   }
 
-  async ler(idFala: string): Promise<VozGravada> {
-    return JSON.parse(await readFile(join(this.#pasta, registroDaVoz(idFala)), 'utf8')) as VozGravada;
+  async read(lineId: string): Promise<RecordedVoice> {
+    return JSON.parse(await readFile(join(this.#folder, voiceRecordFile(lineId)), 'utf8')) as RecordedVoice;
   }
 }

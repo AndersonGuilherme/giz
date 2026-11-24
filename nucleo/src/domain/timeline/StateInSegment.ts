@@ -1,76 +1,76 @@
-import type { Expressao, Pose } from '../elenco/PoseEExpressao.ts';
-import type { Visema } from '../fala/Visemas.ts';
-import { Marcas } from './Marcas.ts';
-import type { EstadoJson, TrechoJson } from './PropsDoVideo.ts';
+import type { Expression, Pose } from '../cast/PoseAndExpression.ts';
+import type { Viseme } from '../speech/Visemes.ts';
+import { Beats } from './Beats.ts';
+import type { StateJson, SegmentJson } from './VideoProps.ts';
 
-/** Um personagem num quadro de um trecho; `relativo` é o quadro desde o início do trecho. */
-export type NoTrecho = Readonly<{ trecho: TrechoJson; id: string; relativo: number }>;
+/** A character in a frame of a segment; `relative` is the frame since the start of the segment. */
+export type InSegment = Readonly<{ segment: SegmentJson; id: string; relative: number }>;
 
-export type Boca = Readonly<{ falando: boolean; visema: Visema; abertura: number }>;
+export type MouthState = Readonly<{ speaking: boolean; viseme: Viseme; opening: number }>;
 
-const BOCA_FECHADA: Boca = { falando: false, visema: 'X', abertura: 0 };
-const DEPOIS_DE_TUDO = Number.POSITIVE_INFINITY;
+const CLOSED_MOUTH: MouthState = { speaking: false, viseme: 'X', opening: 0 };
+const AFTER_EVERYTHING = Number.POSITIVE_INFINITY;
 
-function fala(local: NoTrecho): boolean {
-  return local.trecho.quem === local.id;
+function line(local: InSegment): boolean {
+  return local.segment.speaker === local.id;
 }
 
-function mudancaAte<Valor>(local: NoTrecho, campo: 'pose' | 'expressao'): Valor | undefined {
-  const marcas = Marcas.deJson(local.trecho.marcas);
-  const marca = marcas.ultimaAte(campo, local.relativo);
-  return marca?.mudancas[campo] as Valor | undefined;
+function changeUntil<Value>(local: InSegment, field: 'pose' | 'expression'): Value | undefined {
+  const beats = Beats.fromJson(local.segment.beats);
+  const beat = beats.lastUntil(field, local.relative);
+  return beat?.changes[field] as Value | undefined;
 }
 
-/** Pose, expressão e olhar no quadro: as marcas mudam a pose e a expressão de quem fala a partir do seu quadro. */
-export function estadoNoTrecho(local: NoTrecho): EstadoJson | undefined {
-  const base = local.trecho.estados[local.id];
-  if (!base || !fala(local)) return base;
-  const pose = mudancaAte<Pose>(local, 'pose') ?? base.pose;
-  const expressao = mudancaAte<Expressao>(local, 'expressao') ?? base.expressao;
-  return { ...base, pose, expressao };
+/** Pose, expression and look in the frame: beats change the speaker pose and expression from their frame on. */
+export function stateInSegment(local: InSegment): StateJson | undefined {
+  const base = local.segment.states[local.id];
+  if (!base || !line(local)) return base;
+  const pose = changeUntil<Pose>(local, 'pose') ?? base.pose;
+  const expression = changeUntil<Expression>(local, 'expression') ?? base.expression;
+  return { ...base, pose, expression };
 }
 
-function visemaNo(trecho: TrechoJson, relativo: number): Visema {
-  const visemas = trecho.visemas ?? '';
-  return (visemas[relativo] ?? 'X') as Visema;
+function visemeAt(segment: SegmentJson, relative: number): Viseme {
+  const visemes = segment.visemes ?? '';
+  return (visemes[relative] ?? 'X') as Viseme;
 }
 
-function aberturaNo(trecho: TrechoJson, relativo: number): number {
-  const envelope = trecho.envelope ?? [];
-  return envelope[relativo] ?? 0;
+function openingAt(segment: SegmentJson, relative: number): number {
+  const envelope = segment.envelope ?? [];
+  return envelope[relative] ?? 0;
 }
 
-/** A boca só mexe em quem fala, durante a fala (não na pausa nem no respiro). */
-export function bocaNoTrecho(local: NoTrecho): Boca {
-  const { trecho, relativo } = local;
-  if (!fala(local) || relativo >= trecho.duracaoDaFala) return BOCA_FECHADA;
-  return { falando: true, visema: visemaNo(trecho, relativo), abertura: aberturaNo(trecho, relativo) };
+/** Only the speaker moves the mouth, during the line (not in the hold nor in the breather). */
+export function mouthInSegment(local: InSegment): MouthState {
+  const { segment, relative } = local;
+  if (!line(local) || relative >= segment.lineDuration) return CLOSED_MOUTH;
+  return { speaking: true, viseme: visemeAt(segment, relative), opening: openingAt(segment, relative) };
 }
 
-// Onde (quadro absoluto) uma marca deste trecho deu a pose atual; `undefined` se a pose veio do começo do trecho.
-function inicioPelaMarca(local: NoTrecho): number | undefined {
-  if (!fala(local)) return undefined;
-  const marcas = Marcas.deJson(local.trecho.marcas);
-  const marca = marcas.ultimaAte('pose', local.relativo);
-  return marca && local.trecho.inicio + marca.quadro;
+// Where (absolute frame) a beat of this segment set the current pose; `undefined` if the pose came from the start of the segment.
+function startFromBeat(local: InSegment): number | undefined {
+  if (!line(local)) return undefined;
+  const beats = Beats.fromJson(local.segment.beats);
+  const beat = beats.lastUntil('pose', local.relative);
+  return beat && local.segment.start + beat.frame;
 }
 
-// O mesmo personagem no fim do trecho anterior, se ele terminou na mesma pose.
-function naMesmaPoseAntes(anterior: TrechoJson | undefined, local: NoTrecho): NoTrecho | undefined {
-  if (!anterior) return undefined;
-  const noAnterior = { trecho: anterior, id: local.id, relativo: DEPOIS_DE_TUDO };
-  const mesmaPose = estadoNoTrecho(noAnterior)?.pose === estadoNoTrecho(local)?.pose;
-  return mesmaPose ? noAnterior : undefined;
+// The same character at the end of the previous segment, if it ended in the same pose.
+function inSamePoseBefore(previous: SegmentJson | undefined, local: InSegment): InSegment | undefined {
+  if (!previous) return undefined;
+  const inPrevious = { segment: previous, id: local.id, relative: AFTER_EVERYTHING };
+  const samePose = stateInSegment(inPrevious)?.pose === stateInSegment(local)?.pose;
+  return samePose ? inPrevious : undefined;
 }
 
 /**
- * O quadro (absoluto) em que a pose atual começou: na marca que a deu ou no começo do trecho. Se o trecho
- * anterior terminou na mesma pose, ela continua e o gesto não recomeça.
+ * The (absolute) frame where the current pose started: at the beat that set it or at the start of the segment. If the
+ * previous segment ended in the same pose, it continues and the gesture does not restart.
  */
-export function inicioDaPose(trechos: readonly TrechoJson[], indice: number, local: NoTrecho): number {
-  const pelaMarca = inicioPelaMarca(local);
-  if (pelaMarca !== undefined) return pelaMarca;
-  const noAnterior = naMesmaPoseAntes(trechos[indice - 1], local);
-  if (!noAnterior) return local.trecho.inicio;
-  return inicioDaPose(trechos, indice - 1, noAnterior);
+export function poseStart(segments: readonly SegmentJson[], index: number, local: InSegment): number {
+  const fromBeat = startFromBeat(local);
+  if (fromBeat !== undefined) return fromBeat;
+  const inPrevious = inSamePoseBefore(segments[index - 1], local);
+  if (!inPrevious) return local.segment.start;
+  return poseStart(segments, index - 1, inPrevious);
 }

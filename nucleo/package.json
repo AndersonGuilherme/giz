@@ -6,7 +6,7 @@
     "test": "node --test \"test/**/*.test.ts\"",
     "typecheck": "tsc --noEmit",
     "lint": "eslint . && depcruise src",
-    "verificar": "npm run typecheck && npm run lint && npm test"
+    "verify": "npm run typecheck && npm run lint && npm test"
   },
   "dependencies": {
     "@echogarden/espeak-ng-emscripten": "^0.3.5",

@@ -1,94 +1,94 @@
-import { Audio } from '../../dominio/fala/Audio.ts';
-import { Envelope } from '../../dominio/fala/Envelope.ts';
-import { MapaDeVisemas } from '../../dominio/fala/Visemas.ts';
-import type { Projeto } from '../../dominio/projeto/Projeto.ts';
-import type { Fala } from '../../dominio/roteiro/Fala.ts';
-import { Fps } from '../../dominio/valores/Tempo.ts';
-import { arquivoDaVoz, type ArmazemDeVozes } from '../portas/ArmazemDeVozes.ts';
-import type { Alinhador } from '../portas/Alinhador.ts';
-import type { Fonetizador } from '../portas/Fonetizador.ts';
-import type { PedidoDeVoz, ProvedorVoz } from '../portas/ProvedorVoz.ts';
+import { Audio } from '../../domain/speech/Audio.ts';
+import { Envelope } from '../../domain/speech/Envelope.ts';
+import { VisemeMap } from '../../domain/speech/Visemes.ts';
+import type { Project } from '../../domain/project/Project.ts';
+import type { Line } from '../../domain/script/Line.ts';
+import { Fps } from '../../domain/values/Time.ts';
+import { voiceFile, type VoiceStore } from '../ports/VoiceStore.ts';
+import type { Aligner } from '../ports/Aligner.ts';
+import type { Phonemizer } from '../ports/Phonemizer.ts';
+import type { VoiceRequest, VoiceProvider } from '../ports/VoiceProvider.ts';
 
-export type Progresso = Readonly<{ feitas: number; total: number; idFala: string; gerada: boolean }>;
-export type RelatorioDeVozes = { geradas: string[]; puladas: string[] };
-type Dependencias = Readonly<{ voz: ProvedorVoz; fonetizador: Fonetizador; armazem: ArmazemDeVozes; alinhador: Alinhador }>;
+export type Progress = Readonly<{ done: number; total: number; lineId: string; generated: boolean }>;
+export type VoiceReport = { generated: string[]; skipped: string[] };
+type Dependencies = Readonly<{ voice: VoiceProvider; phonemizer: Phonemizer; store: VoiceStore; aligner: Aligner }>;
 
-const nadaAFazer = () => undefined;
+const nothingToDo = () => undefined;
 
-// Web Crypto (global do Node e dos navegadores): a aplicação não importa node:crypto.
-async function sha1(texto: string): Promise<string> {
-  const resumo = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(texto));
-  return [...new Uint8Array(resumo)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
+// Web Crypto (a Node and browser global): the application does not import node:crypto.
+async function sha1(text: string): Promise<string> {
+  const digest = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
+  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
 }
 
-function pedidoDaFala(projeto: Projeto, fala: Fala): PedidoDeVoz {
-  const elenco = projeto.elenco();
-  const personagem = elenco.personagem(fala.quem());
-  const { id, estilo } = personagem.voz();
-  return { idFala: fala.id(), texto: fala.pronuncia(), voz: id, estilo, idioma: projeto.idioma() };
+function lineRequest(project: Project, line: Line): VoiceRequest {
+  const cast = project.cast();
+  const character = cast.character(line.speaker());
+  const { id, style } = character.voice();
+  return { lineId: line.id(), text: line.pronunciation(), voice: id, style, language: project.language() };
 }
 
-// Mudar qualquer um destes campos regrava a fala; o resto (pose, cena...) não mexe na voz.
-function hashDaFala(projeto: Projeto, fala: Fala, pedido: PedidoDeVoz): Promise<string> {
-  const { provedor } = projeto.voz();
-  const idioma = pedido.idioma;
-  return sha1([fala.texto(), pedido.texto, pedido.voz, pedido.estilo ?? '', idioma.codigo(), provedor].join('|'));
+// Changing any of these fields re-records the line; the rest (pose, scene...) does not touch the voice.
+function lineHash(project: Project, line: Line, request: VoiceRequest): Promise<string> {
+  const { provider } = project.voice();
+  const language = request.language;
+  return sha1([line.text(), request.text, request.voice, request.style ?? '', language.code(), provider].join('|'));
 }
 
-/** Gera a voz, o envelope e os visemas de cada fala; falas com o mesmo hash já gravado são puladas. */
-export class GerarVozes {
-  readonly #dependencias: Dependencias;
+/** Generates the voice, envelope and visemes of each line; lines whose hash is already saved are skipped. */
+export class GenerateVoices {
+  readonly #dependencies: Dependencies;
 
-  constructor(dependencias: Dependencias) {
-    this.#dependencias = dependencias;
+  constructor(dependencies: Dependencies) {
+    this.#dependencies = dependencies;
   }
 
-  async executar(projeto: Projeto, aoProgredir: (progresso: Progresso) => void = nadaAFazer): Promise<RelatorioDeVozes> {
-    const roteiro = projeto.roteiro();
-    const todas = roteiro.falas();
-    const falas = todas.cadaUma();
-    const relatorio: RelatorioDeVozes = { geradas: [], puladas: [] };
-    for (const [indice, fala] of falas.entries()) {
-      const gerada = await this.#processar(projeto, fala);
-      (gerada ? relatorio.geradas : relatorio.puladas).push(fala.id());
-      aoProgredir({ feitas: indice + 1, total: falas.length, idFala: fala.id(), gerada });
+  async run(project: Project, onProgress: (progress: Progress) => void = nothingToDo): Promise<VoiceReport> {
+    const script = project.script();
+    const all = script.lines();
+    const lines = all.each();
+    const report: VoiceReport = { generated: [], skipped: [] };
+    for (const [index, line] of lines.entries()) {
+      const generated = await this.#process(project, line);
+      (generated ? report.generated : report.skipped).push(line.id());
+      onProgress({ done: index + 1, total: lines.length, lineId: line.id(), generated });
     }
-    return relatorio;
+    return report;
   }
 
-  async #processar(projeto: Projeto, fala: Fala): Promise<boolean> {
-    const pedido = pedidoDaFala(projeto, fala);
-    const hash = await hashDaFala(projeto, fala, pedido);
-    const { armazem } = this.#dependencias;
-    if (armazem.hashGravado(fala.id()) === hash) return false;
-    await this.#gravar(fala, pedido, hash);
+  async #process(project: Project, line: Line): Promise<boolean> {
+    const request = lineRequest(project, line);
+    const hash = await lineHash(project, line, request);
+    const { store } = this.#dependencies;
+    if (store.savedHash(line.id()) === hash) return false;
+    await this.#save(line, request, hash);
     return true;
   }
 
-  // As palavras vêm do texto do roteiro (o que a legenda mostra), não da pronúncia.
-  async #gravar(fala: Fala, pedido: PedidoDeVoz, hash: string): Promise<void> {
-    const { voz, armazem, alinhador } = this.#dependencias;
-    const audio = tratado(await voz.gerar(pedido));
-    const envelope = Envelope.medir(audio, Fps.PADRAO);
-    const visemas = await this.#visemas(pedido, envelope);
-    const palavras = await alinhador.alinhar(audio, fala.texto(), pedido.idioma);
-    const duracao = audio.duracao();
-    const registro = {
-      arquivo: arquivoDaVoz(pedido.idFala), hash, duracaoSegundos: duracao.valor(), envelope: envelope.paraJson(), visemas, palavras: palavras.paraJson(),
+  // The words come from the script text (what the caption shows), not from the pronunciation.
+  async #save(line: Line, request: VoiceRequest, hash: string): Promise<void> {
+    const { voice, store, aligner } = this.#dependencies;
+    const audio = processed(await voice.generate(request));
+    const envelope = Envelope.measure(audio, Fps.DEFAULT);
+    const visemes = await this.#visemes(request, envelope);
+    const words = await aligner.align(audio, line.text(), request.language);
+    const duration = audio.duration();
+    const record = {
+      file: voiceFile(request.lineId), hash, durationSeconds: duration.value(), envelope: envelope.toJson(), visemes, words: words.toJson(),
     };
-    await armazem.gravar(pedido.idFala, registro, audio);
+    await store.save(request.lineId, record, audio);
   }
 
-  async #visemas(pedido: PedidoDeVoz, envelope: Envelope): Promise<string> {
-    const { fonetizador } = this.#dependencias;
-    const ipa = await fonetizador.ipa(pedido.texto, pedido.idioma);
-    const mapa = MapaDeVisemas.para(pedido.idioma);
-    const sequencia = mapa.converter(ipa);
-    return sequencia.espalharSobre(envelope.quadrosComVoz());
+  async #visemes(request: VoiceRequest, envelope: Envelope): Promise<string> {
+    const { phonemizer } = this.#dependencies;
+    const ipa = await phonemizer.ipa(request.text, request.language);
+    const map = VisemeMap.for(request.language);
+    const sequence = map.convert(ipa);
+    return sequence.spreadOver(envelope.voicedFrames());
   }
 }
 
-function tratado(bruto: Audio): Audio {
-  const aparado = bruto.aparado();
-  return aparado.normalizado();
+function processed(raw: Audio): Audio {
+  const trimmed = raw.trimmed();
+  return trimmed.normalized();
 }

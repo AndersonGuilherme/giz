@@ -1,39 +1,39 @@
 import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { z } from 'zod';
-import type { ColetorDeProblemas } from '../esquema/mensagensDeErro.ts';
+import type { ProblemCollector } from '../schema/errorMessages.ts';
 
-type Origem = Readonly<{ pasta: string; arquivo: string; coletor: ColetorDeProblemas }>;
+type Source = Readonly<{ folder: string; file: string; collector: ProblemCollector }>;
 
-function motivoDaFalha(erro: unknown): string {
-  const codigo = (erro as NodeJS.ErrnoException).code;
-  return codigo === 'ENOENT' ? 'arquivo não encontrado' : `não foi possível ler (${String(erro)})`;
+function failureReason(error: unknown): string {
+  const code = (error as NodeJS.ErrnoException).code;
+  return code === 'ENOENT' ? 'arquivo não encontrado' : `não foi possível ler (${String(error)})`;
 }
 
-function interpretado(texto: string, origem: Origem): unknown {
+function parsed(text: string, source: Source): unknown {
   try {
-    return JSON.parse(texto);
-  } catch (erro) {
-    origem.coletor.adicionar({ arquivo: origem.arquivo, caminho: '', mensagem: `JSON inválido (${String(erro)})` });
+    return JSON.parse(text);
+  } catch (error) {
+    source.collector.add({ file: source.file, path: '', message: `JSON inválido (${String(error)})` });
     return undefined;
   }
 }
 
-async function lerJson(origem: Origem): Promise<unknown> {
+async function readJson(source: Source): Promise<unknown> {
   try {
-    return interpretado(await readFile(join(origem.pasta, origem.arquivo), 'utf8'), origem);
-  } catch (erro) {
-    origem.coletor.adicionar({ arquivo: origem.arquivo, caminho: '', mensagem: motivoDaFalha(erro) });
+    return parsed(await readFile(join(source.folder, source.file), 'utf8'), source);
+  } catch (error) {
+    source.collector.add({ file: source.file, path: '', message: failureReason(error) });
     return undefined;
   }
 }
 
-/** Lê e valida um JSON da pasta do projeto; os problemas vão para o coletor e o retorno fica `undefined`. */
-export async function lerValidado<T>(origem: Origem, esquema: z.ZodType<T, z.ZodTypeDef, unknown>): Promise<T | undefined> {
-  const conteudo = await lerJson(origem);
-  if (conteudo === undefined) return undefined;
-  const resultado = esquema.safeParse(conteudo);
-  if (resultado.success) return resultado.data;
-  origem.coletor.adicionarDoZod(origem.arquivo, resultado.error.issues);
+/** Reads and validates a JSON file from the project folder; problems go to the collector and the result is `undefined`. */
+export async function readValidated<T>(source: Source, schema: z.ZodType<T, z.ZodTypeDef, unknown>): Promise<T | undefined> {
+  const content = await readJson(source);
+  if (content === undefined) return undefined;
+  const result = schema.safeParse(content);
+  if (result.success) return result.data;
+  source.collector.addFromZod(source.file, result.error.issues);
   return undefined;
 }

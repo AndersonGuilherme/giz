@@ -1,18 +1,18 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { IdPersonagem } from '../../../src/dominio/valores/IdPersonagem.ts';
+import { CharacterId } from '../../../src/domain/values/CharacterId.ts';
 
-test('IdPersonagem aceita "ana-2" e recusa "Ana Maria"', () => {
-  IdPersonagem.de('ana-2');
-  assert.throws(() => IdPersonagem.de('Ana Maria'), /id de personagem/);
+test('CharacterId accepts "ana-2" and rejects "Ana Maria"', () => {
+  CharacterId.of('ana-2');
+  assert.throws(() => CharacterId.of('Ana Maria'), /id de personagem/);
 });
-test('narrador é um id reservado', () => assert.ok(IdPersonagem.de('narrador').eNarrador()));
-test('IdPersonagem recusa mais de 32 caracteres e vazio', () => {
-  assert.throws(() => IdPersonagem.de('a'.repeat(33)), /id de personagem/);
-  assert.throws(() => IdPersonagem.de(''), /id de personagem/);
+test('narrator is a reserved id', () => assert.ok(CharacterId.of('narrator').isNarrator()));
+test('CharacterId rejects more than 32 characters and empty', () => {
+  assert.throws(() => CharacterId.of('a'.repeat(33)), /id de personagem/);
+  assert.throws(() => CharacterId.of(''), /id de personagem/);
 });
-test('igual compara pelo texto', () => {
-  assert.ok(IdPersonagem.de('ana').igual(IdPersonagem.de('ana')));
-  assert.ok(!IdPersonagem.de('ana').igual(IdPersonagem.NARRADOR));
-  assert.equal(IdPersonagem.de('ana').texto(), 'ana');
+test('equals compares by text', () => {
+  assert.ok(CharacterId.of('ana').equals(CharacterId.of('ana')));
+  assert.ok(!CharacterId.of('ana').equals(CharacterId.NARRATOR));
+  assert.equal(CharacterId.of('ana').text(), 'ana');
 });

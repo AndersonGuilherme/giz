@@ -1,6 +1,6 @@
 import type { FC, ReactNode } from 'react';
-import type { EstadoDoPersonagem } from '../../../dominio/personagem/EstadoDoPersonagem.ts';
-import { MouthLayout, type MouthOutline, type MouthParts, type Oval, type Rect } from '../../../dominio/personagem/MouthLayout.ts';
+import type { CharacterState } from '../../../domain/character/CharacterState.ts';
+import { MouthLayout, type MouthOutline, type MouthParts, type Oval, type Rect } from '../../../domain/character/MouthLayout.ts';
 import { HEAD, MOUTH } from './measures.ts';
 import type { Look } from './parameters.ts';
 import { contrast, useSvgId } from './svg.ts';
@@ -65,7 +65,7 @@ const OpenMouth: FC<Readonly<{ parts: MouthParts }>> = ({ parts }) => {
 const CLOSED: ReadonlySet<MouthOutline['kind']> = new Set(['pressed', 'line', 'wave']);
 
 /** Draws the mouth the domain laid out for this state: a stroked line when closed, an open mouth otherwise. */
-export const Mouth: FC<Readonly<{ state: EstadoDoPersonagem; look: Look }>> = ({ state, look }): ReactNode => {
+export const Mouth: FC<Readonly<{ state: CharacterState; look: Look }>> = ({ state, look }): ReactNode => {
   const parts = MouthLayout.for(state);
   if (!CLOSED.has(parts.outline.kind)) return <OpenMouth parts={parts} />;
   return <path d={pathOf(parts.outline)} fill="none" stroke={contrast(look.headColor)} strokeWidth={7} strokeLinecap="round" />;

@@ -1,31 +1,31 @@
 import { z } from 'zod';
-import { ErroDeDominio } from '../../dominio/ErroDeDominio.ts';
-import { CorHex } from '../../dominio/valores/CorHex.ts';
-import { IdPersonagem } from '../../dominio/valores/IdPersonagem.ts';
+import { DomainError } from '../../domain/DomainError.ts';
+import { HexColor } from '../../domain/values/HexColor.ts';
+import { CharacterId } from '../../domain/values/CharacterId.ts';
 
-function mensagemDoErro(erro: unknown): string {
-  if (!(erro instanceof ErroDeDominio)) throw erro;
-  return erro.message;
+function errorMessage(error: unknown): string {
+  if (!(error instanceof DomainError)) throw error;
+  return error.message;
 }
 
-/** Roda a fábrica do domínio e devolve a mensagem do `ErroDeDominio`, se houver. */
-export function mensagemDoDominio(fabrica: () => unknown): string | undefined {
+/** Runs the domain factory and returns the `DomainError` message, if any. */
+export function domainMessage(factory: () => unknown): string | undefined {
   try {
-    fabrica();
+    factory();
     return undefined;
-  } catch (erro) {
-    return mensagemDoErro(erro);
+  } catch (error) {
+    return errorMessage(error);
   }
 }
 
-/** Um texto que a fábrica do domínio aceita; a mensagem de recusa é a do próprio domínio. */
-export function validadoPeloDominio(fabrica: (texto: string) => unknown) {
-  return z.string().superRefine((texto, contexto) => {
-    const mensagem = mensagemDoDominio(() => fabrica(texto));
-    if (mensagem) contexto.addIssue({ code: z.ZodIssueCode.custom, message: mensagem });
+/** A text the domain factory accepts; the rejection message is the domain's own. */
+export function validatedByDomain(factory: (text: string) => unknown) {
+  return z.string().superRefine((text, context) => {
+    const message = domainMessage(() => factory(text));
+    if (message) context.addIssue({ code: z.ZodIssueCode.custom, message: message });
   });
 }
 
-export const esquemaDeCor = validadoPeloDominio((texto) => CorHex.de(texto));
-export const esquemaDeIdDePersonagem = validadoPeloDominio((texto) => IdPersonagem.de(texto));
-export const textoPreenchido = z.string().min(1);
+export const colorSchema = validatedByDomain((text) => HexColor.of(text));
+export const characterIdSchema = validatedByDomain((text) => CharacterId.of(text));
+export const nonEmptyText = z.string().min(1);

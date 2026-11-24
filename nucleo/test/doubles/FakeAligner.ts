@@ -1,18 +1,18 @@
-import type { Alinhador } from '../../src/aplicacao/portas/Alinhador.ts';
-import type { Audio } from '../../src/dominio/fala/Audio.ts';
-import { Palavras } from '../../src/dominio/fala/Palavras.ts';
-import { Segundos } from '../../src/dominio/valores/Tempo.ts';
+import type { Aligner } from '../../src/application/ports/Aligner.ts';
+import type { Audio } from '../../src/domain/speech/Audio.ts';
+import { Words } from '../../src/domain/speech/Words.ts';
+import { Seconds } from '../../src/domain/values/Time.ts';
 
-/** Divide a duração do áudio em partes iguais, uma por palavra do texto. */
-export class AlinhadorFalso implements Alinhador {
-  readonly textos: string[] = [];
+/** Splits the audio duration into equal parts, one per word of the text. */
+export class FakeAligner implements Aligner {
+  readonly texts: string[] = [];
 
-  async alinhar(audio: Audio, texto: string): Promise<Palavras> {
-    this.textos.push(texto);
-    const palavras = Palavras.doTexto(texto);
-    const parte = audio.duracao().valor() / palavras.textos().length;
-    const inicios = palavras.textos().map((_, i) => Segundos.de(i * parte));
-    const fins = palavras.textos().map((_, i) => Segundos.de((i + 1) * parte));
-    return palavras.comTempos(inicios, fins);
+  async align(audio: Audio, text: string): Promise<Words> {
+    this.texts.push(text);
+    const words = Words.fromText(text);
+    const part = audio.duration().value() / words.texts().length;
+    const starts = words.texts().map((_, i) => Seconds.of(i * part));
+    const ends = words.texts().map((_, i) => Seconds.of((i + 1) * part));
+    return words.withTimes(starts, ends);
   }
 }

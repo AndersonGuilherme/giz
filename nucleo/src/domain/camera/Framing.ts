@@ -1,53 +1,53 @@
-import type { Enquadramento as EnquadramentoJson } from '../roteiro/ElementosDeCena.ts';
+import type { Framing as FramingJson } from '../script/SceneElements.ts';
 
-export type DadosDoEnquadramento = Readonly<{ zoom: number; x: number; y: number; rotacao: number }>;
+export type FramingData = Readonly<{ zoom: number; x: number; y: number; rotation: number }>;
 
-const CENTESIMO = 100;
+const HUNDRED = 100;
 
-function limitar(valor: number, folga: number): number {
-  return Math.max(-folga, Math.min(folga, valor));
+function clamp(value: number, slack: number): number {
+  return Math.max(-slack, Math.min(slack, value));
 }
 
-/** Zoom nunca abaixo de 1 (a borda do fundo não aparece); x e y ficam dentro da folga que o zoom dá. */
-export class Enquadramento {
+/** Zoom never below 1 (the background edge never shows); x and y stay within the slack the zoom gives. */
+export class Framing {
   readonly zoom: number;
   readonly x: number;
   readonly y: number;
-  readonly rotacao: number;
+  readonly rotation: number;
 
-  private constructor(dados: DadosDoEnquadramento) {
-    this.zoom = Math.max(1, dados.zoom);
-    const folga = (this.zoom - 1) / 2;
-    this.x = limitar(dados.x, folga);
-    this.y = limitar(dados.y, folga);
-    this.rotacao = dados.rotacao;
+  private constructor(data: FramingData) {
+    this.zoom = Math.max(1, data.zoom);
+    const slack = (this.zoom - 1) / 2;
+    this.x = clamp(data.x, slack);
+    this.y = clamp(data.y, slack);
+    this.rotation = data.rotation;
   }
 
-  static de(dados: DadosDoEnquadramento): Enquadramento {
-    return new Enquadramento(dados);
+  static of(data: FramingData): Framing {
+    return new Framing(data);
   }
 
-  static doJson(json: EnquadramentoJson): Enquadramento {
-    return new Enquadramento({ ...json, rotacao: 0 });
+  static fromJson(json: FramingJson): Framing {
+    return new Framing({ ...json, rotation: 0 });
   }
 
-  static neutro(): Enquadramento {
-    return new Enquadramento({ zoom: 1, x: 0, y: 0, rotacao: 0 });
+  static neutral(): Framing {
+    return new Framing({ zoom: 1, x: 0, y: 0, rotation: 0 });
   }
 
-  /** `fracao` de 0 (este enquadramento) a 1 (o outro). */
-  ate(outro: Enquadramento, fracao: number): Enquadramento {
-    const mistura = (inicio: number, fim: number): number => inicio + (fim - inicio) * fracao;
-    return new Enquadramento({
-      zoom: mistura(this.zoom, outro.zoom),
-      x: mistura(this.x, outro.x),
-      y: mistura(this.y, outro.y),
-      rotacao: mistura(this.rotacao, outro.rotacao),
+  /** `fraction` from 0 (this framing) to 1 (the other). */
+  towards(other: Framing, fraction: number): Framing {
+    const mix = (start: number, end: number): number => start + (end - start) * fraction;
+    return new Framing({
+      zoom: mix(this.zoom, other.zoom),
+      x: mix(this.x, other.x),
+      y: mix(this.y, other.y),
+      rotation: mix(this.rotation, other.rotation),
     });
   }
 
-  transformacaoCss(): string {
-    const deslocamento = `translate(${this.x * CENTESIMO}%, ${this.y * CENTESIMO}%)`;
-    return `${deslocamento} scale(${this.zoom}) rotate(${this.rotacao}deg)`;
+  cssTransform(): string {
+    const offset = `translate(${this.x * HUNDRED}%, ${this.y * HUNDRED}%)`;
+    return `${offset} scale(${this.zoom}) rotate(${this.rotation}deg)`;
   }
 }

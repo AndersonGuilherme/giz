@@ -1,78 +1,78 @@
-import { ErroDeDominio } from '../../dominio/ErroDeDominio.ts';
-import type { Elenco } from '../../dominio/elenco/Elenco.ts';
-import type { Personagem } from '../../dominio/elenco/Personagem.ts';
-import type { EfeitoSonoroJson, PersonagemJson, PropsDoVideo, TrechoJson } from '../../dominio/linha-do-tempo/PropsDoVideo.ts';
-import { SequenciaDeCenas } from '../../dominio/linha-do-tempo/SequenciaDeCenas.ts';
-import type { VozDaFala } from '../../dominio/linha-do-tempo/TemposDaFala.ts';
-import { TrechoDeFala } from '../../dominio/linha-do-tempo/TrechoDeFala.ts';
-import type { Projeto } from '../../dominio/projeto/Projeto.ts';
-import type { Fala } from '../../dominio/roteiro/Fala.ts';
-import { Fps } from '../../dominio/valores/Tempo.ts';
-import type { ArmazemDeVozes } from '../portas/ArmazemDeVozes.ts';
+import { DomainError } from '../../domain/DomainError.ts';
+import type { Cast } from '../../domain/cast/Cast.ts';
+import type { Character } from '../../domain/cast/Character.ts';
+import type { SoundEffectJson, CharacterJson, VideoProps, SegmentJson } from '../../domain/timeline/VideoProps.ts';
+import { SceneSequence } from '../../domain/timeline/SceneSequence.ts';
+import type { LineVoice } from '../../domain/timeline/LineTimings.ts';
+import { LineSegment } from '../../domain/timeline/LineSegment.ts';
+import type { Project } from '../../domain/project/Project.ts';
+import type { Line } from '../../domain/script/Line.ts';
+import { Fps } from '../../domain/values/Time.ts';
+import type { VoiceStore } from '../ports/VoiceStore.ts';
 
-type Dependencias = Readonly<{ armazem: ArmazemDeVozes }>;
-type Montagem = { trechos: TrechoJson[]; efeitosSonoros: EfeitoSonoroJson[]; totalDeQuadros: number };
+type Dependencies = Readonly<{ store: VoiceStore }>;
+type Assembly = { segments: SegmentJson[]; soundEffects: SoundEffectJson[]; totalFrames: number };
 
-function falasDo(projeto: Projeto): readonly Fala[] {
-  const roteiro = projeto.roteiro();
-  const falas = roteiro.falas();
-  return falas.cadaUma();
+function linesOf(project: Project): readonly Line[] {
+  const script = project.script();
+  const lines = script.lines();
+  return lines.each();
 }
 
-function personagemEmJson(personagem: Personagem): PersonagemJson {
-  const id = personagem.id();
-  const rig = personagem.rig();
-  const comum = { id: id.texto(), nome: personagem.nome(), parametros: { ...personagem.parametros() }, expressaoPadrao: personagem.expressaoPadrao() };
-  return rig === undefined ? comum : { ...comum, rig };
+function characterToJson(character: Character): CharacterJson {
+  const id = character.id();
+  const rig = character.rig();
+  const common = { id: id.text(), name: character.name(), parameters: { ...character.parameters() }, defaultExpression: character.defaultExpression() };
+  return rig === undefined ? common : { ...common, rig };
 }
 
-function fichaEmJson(projeto: Projeto) {
-  const proporcao = projeto.proporcao();
-  const idioma = projeto.idioma();
-  const roteiro = projeto.roteiro();
-  const marca = projeto.marca();
+function profileToJson(project: Project) {
+  const aspect = project.aspect();
+  const language = project.language();
+  const script = project.script();
+  const brand = project.brand();
   return {
-    fps: Fps.PADRAO.valor(), largura: proporcao.largura(), altura: proporcao.altura(), idioma: idioma.codigo(), formato: projeto.formato(),
-    estiloDeLegenda: projeto.estiloDeLegenda(), ...(marca === undefined ? {} : { marca }), titulo: projeto.titulo(), capitulos: [...roteiro.capitulos()],
+    fps: Fps.DEFAULT.value(), width: aspect.width(), height: aspect.height(), language: language.code(), format: project.format(),
+    captionStyle: project.captionStyle(), ...(brand === undefined ? {} : { brand }), title: project.title(), chapters: [...script.chapters()],
   };
 }
 
-/** Monta as props do vídeo: cada fala vira um trecho, um depois do outro, com a voz já gravada. */
-export class MontarLinhaDoTempo {
-  readonly #dependencias: Dependencias;
+/** Builds the video props: each line becomes a segment, one after the other, with the voice already saved. */
+export class BuildTimeline {
+  readonly #dependencies: Dependencies;
 
-  constructor(dependencias: Dependencias) {
-    this.#dependencias = dependencias;
+  constructor(dependencies: Dependencies) {
+    this.#dependencies = dependencies;
   }
 
-  async executar(projeto: Projeto): Promise<PropsDoVideo> {
-    const falas = falasDo(projeto);
-    this.#recusarFalasSemAudio(falas);
-    const vozes = await Promise.all(falas.map((fala) => this.#dependencias.armazem.ler(fala.id())));
-    const elenco = projeto.elenco();
-    const montagem = montarTrechos(falas, vozes, elenco);
-    return { ...fichaEmJson(projeto), ...montagem, elenco: elenco.cadaUm().map(personagemEmJson) };
+  async run(project: Project): Promise<VideoProps> {
+    const lines = linesOf(project);
+    this.#rejectLinesWithoutAudio(lines);
+    const voices = await Promise.all(lines.map((line) => this.#dependencies.store.read(line.id())));
+    const cast = project.cast();
+    const assembly = buildSegments(lines, voices, cast);
+    return { ...profileToJson(project), ...assembly, cast: cast.each().map(characterToJson) };
   }
 
-  #recusarFalasSemAudio(falas: readonly Fala[]): void {
-    const { armazem } = this.#dependencias;
-    const semAudio = falas.filter((fala) => armazem.hashGravado(fala.id()) === undefined);
-    if (semAudio.length === 0) return;
-    throw new ErroDeDominio(`falas sem áudio: ${semAudio.map((fala) => fala.id()).join(', ')} (gere as vozes antes de montar o vídeo)`);
+  #rejectLinesWithoutAudio(lines: readonly Line[]): void {
+    const { store } = this.#dependencies;
+    const withoutAudio = lines.filter((line) => store.savedHash(line.id()) === undefined);
+    if (withoutAudio.length === 0) return;
+    throw new DomainError(`falas sem áudio: ${withoutAudio.map((line) => line.id()).join(', ')} (gere as vozes antes de montar o vídeo)`);
   }
 }
 
-// As falas em sequência: a cena passa de uma para a outra e cada trecho começa onde o anterior acaba.
-function montarTrechos(falas: readonly Fala[], vozes: readonly VozDaFala[], elenco: Elenco): Montagem {
-  const cenas = new SequenciaDeCenas();
-  const montagem: Montagem = { trechos: [], efeitosSonoros: [], totalDeQuadros: 0 };
-  falas.forEach((fala, indice) => {
-    const voz = vozes[indice] as VozDaFala;
-    const trecho = TrechoDeFala.montar(fala, voz, { inicio: montagem.totalDeQuadros, cena: cenas.cenaDe(fala), elenco });
-    cenas.continuarCom(trecho.cenaDepois());
-    montagem.trechos.push(trecho.paraJson());
-    montagem.efeitosSonoros.push(...trecho.efeitosSonoros());
-    montagem.totalDeQuadros = trecho.fim();
+// The lines in sequence: the scene carries from one to the next and each segment starts where the previous one ends.
+function buildSegments(lines: readonly Line[], voices: readonly LineVoice[], cast: Cast): Assembly {
+  const scenes = new SceneSequence();
+  const assembly: Assembly = { segments: [], soundEffects: [], totalFrames: 0 };
+  lines.forEach((line, index) => {
+    const voice = voices[index] as LineVoice;
+    const segment = LineSegment.build(line, voice, { start: assembly.totalFrames, scene: scenes.sceneOf(line), cast });
+    scenes.continueWith(segment.sceneAfter());
+    assembly.segments.push(segment.toJson());
+    assembly.soundEffects.push(...segment.soundEffects());
+    assembly.totalFrames = segment.end();
   });
-  return montagem;
+  return assembly;
 }

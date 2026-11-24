@@ -1,6 +1,6 @@
-import type { Projeto } from '../../dominio/projeto/Projeto.ts';
+import type { Project } from '../../domain/project/Project.ts';
 
-/** Carrega um projeto de uma pasta; falha com `ErroDeProjeto` listando todos os problemas encontrados. */
-export interface RepositorioDeProjeto {
-  carregar(pasta: string): Promise<Projeto>;
+/** Loads a project from a folder; fails with `ProjectError` listing every problem found. */
+export interface ProjectRepository {
+  load(folder: string): Promise<Project>;
 }

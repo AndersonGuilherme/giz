@@ -1,75 +1,75 @@
-import { ErroDeDominio } from '../ErroDeDominio.ts';
+import { DomainError } from '../DomainError.ts';
 
-const TOLERANCIA_DE_PONTO_FLUTUANTE = 1e-9;
+const FLOATING_POINT_TOLERANCE = 1e-9;
 
 export class Fps {
-  static readonly PADRAO = new Fps(30);
+  static readonly DEFAULT = new Fps(30);
 
-  readonly #valor: number;
+  readonly #value: number;
 
-  private constructor(valor: number) {
-    this.#valor = valor;
+  private constructor(value: number) {
+    this.#value = value;
   }
 
-  valor(): number {
-    return this.#valor;
-  }
-}
-
-export class Quadro {
-  readonly #valor: number;
-
-  private constructor(valor: number) {
-    this.#valor = valor;
-  }
-
-  static de(numero: number): Quadro {
-    if (!Number.isInteger(numero) || numero < 0) {
-      throw new ErroDeDominio(`quadro ${numero} inválido (use um inteiro maior ou igual a 0)`);
-    }
-    return new Quadro(numero);
-  }
-
-  mais(outro: Quadro): Quadro {
-    return new Quadro(this.#valor + outro.#valor);
-  }
-
-  menos(outro: Quadro): Quadro {
-    return new Quadro(Math.max(0, this.#valor - outro.#valor));
-  }
-
-  antesDe(outro: Quadro): boolean {
-    return this.#valor < outro.#valor;
-  }
-
-  valor(): number {
-    return this.#valor;
+  value(): number {
+    return this.#value;
   }
 }
 
-export class Segundos {
-  readonly #valor: number;
+export class Frame {
+  readonly #value: number;
 
-  private constructor(valor: number) {
-    this.#valor = valor;
+  private constructor(value: number) {
+    this.#value = value;
   }
 
-  static de(numero: number): Segundos {
-    if (!Number.isFinite(numero) || numero < 0) {
-      throw new ErroDeDominio(`segundos ${numero} inválido (use um número maior ou igual a 0)`);
+  static of(number: number): Frame {
+    if (!Number.isInteger(number) || number < 0) {
+      throw new DomainError(`quadro ${number} inválido (use um inteiro maior ou igual a 0)`);
     }
-    return new Segundos(numero);
+    return new Frame(number);
   }
 
-  emQuadros(fps: Fps): Quadro {
-    return Quadro.de(Math.max(0, Math.ceil(this.#valor * fps.valor() - TOLERANCIA_DE_PONTO_FLUTUANTE)));
+  plus(other: Frame): Frame {
+    return new Frame(this.#value + other.#value);
   }
 
-  mais(outro: Segundos): Segundos {
-    return new Segundos(this.#valor + outro.#valor);
+  minus(other: Frame): Frame {
+    return new Frame(Math.max(0, this.#value - other.#value));
   }
 
-  valor(): number {
-    return this.#valor;
+  isBefore(other: Frame): boolean {
+    return this.#value < other.#value;
+  }
+
+  value(): number {
+    return this.#value;
+  }
+}
+
+export class Seconds {
+  readonly #value: number;
+
+  private constructor(value: number) {
+    this.#value = value;
+  }
+
+  static of(number: number): Seconds {
+    if (!Number.isFinite(number) || number < 0) {
+      throw new DomainError(`segundos ${number} inválido (use um número maior ou igual a 0)`);
+    }
+    return new Seconds(number);
+  }
+
+  toFrames(fps: Fps): Frame {
+    return Frame.of(Math.max(0, Math.ceil(this.#value * fps.value() - FLOATING_POINT_TOLERANCE)));
+  }
+
+  plus(other: Seconds): Seconds {
+    return new Seconds(this.#value + other.#value);
+  }
+
+  value(): number {
+    return this.#value;
   }
 }

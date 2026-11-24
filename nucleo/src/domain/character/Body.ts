@@ -1,60 +1,60 @@
-import type { Pose } from '../elenco/PoseEExpressao.ts';
-import type { Fps, Quadro } from '../valores/Tempo.ts';
+import type { Pose } from '../cast/PoseAndExpression.ts';
+import type { Fps, Frame } from '../values/Time.ts';
 
-export type ContextoDoCorpo = Readonly<{
+export type BodyContext = Readonly<{
   pose: Pose;
-  inicioDaPose: Quadro;
-  falando: boolean;
-  abertura: number; // volume da fala neste quadro, de 0 a 1
-  fase: number; // desloca a respiração para dois personagens não respirarem juntos
+  poseStart: Frame;
+  speaking: boolean;
+  opening: number; // speech volume in this frame, from 0 to 1
+  phase: number; // shifts the breathing so two characters do not breathe together
   fps: Fps;
 }>;
 
-export type DeslocamentoDoCorpo = Readonly<{ y: number; rotacao: number; escala: number }>;
+export type BodyOffset = Readonly<{ y: number; rotation: number; scale: number }>;
 
-type Gesto = (desdeAPose: number, instante: number) => Readonly<{ y?: number; rotacao?: number }>;
+type Gesture = (sincePose: number, instant: number) => Readonly<{ y?: number; rotation?: number }>;
 
-// Gesto único: 0 → 1 → 0 em `duracao` segundos, depois zero.
-function umaVez(desdeAPose: number, duracao: number): number {
-  return desdeAPose < duracao ? Math.sin((desdeAPose / duracao) * Math.PI) : 0;
+// One-off gesture: 0 → 1 → 0 in `duration` seconds, then zero.
+function once(sincePose: number, duration: number): number {
+  return sincePose < duration ? Math.sin((sincePose / duration) * Math.PI) : 0;
 }
 
-const GESTOS: Readonly<Record<Pose, Gesto>> = {
-  neutra: () => ({}),
-  comemorar: (desde) => ({ y: -umaVez(desde, 0.5) * 18 }),
-  pensar: (_desde, instante) => ({ rotacao: 2 + Math.sin(instante * 0.9) * 0.6 }),
-  levantar: (desde) => ({ rotacao: umaVez(desde, 0.6) * 2 }),
-  acenar: (desde) => ({ rotacao: desde < 1.6 ? Math.sin(desde * 7) * 2 * (1 - desde / 1.6) : 0 }),
-  explicar: (desde) => ({ rotacao: umaVez(desde, 0.6) * 1 }),
-  apontar: (desde) => ({ rotacao: umaVez(desde, 0.5) * 1.5 }),
-  ombros: (desde) => ({ y: -umaVez(desde, 0.4) * 3 }),
-  'mao-na-cabeca': (desde) => ({ rotacao: umaVez(desde, 0.5) * 1.5 }),
-  'maos-na-boca': (desde) => ({ y: -umaVez(desde, 0.3) * 2 }),
+const GESTURES: Readonly<Record<Pose, Gesture>> = {
+  neutral: () => ({}),
+  celebrate: (since) => ({ y: -once(since, 0.5) * 18 }),
+  think: (_since, instant) => ({ rotation: 2 + Math.sin(instant * 0.9) * 0.6 }),
+  raise: (since) => ({ rotation: once(since, 0.6) * 2 }),
+  wave: (since) => ({ rotation: since < 1.6 ? Math.sin(since * 7) * 2 * (1 - since / 1.6) : 0 }),
+  explain: (since) => ({ rotation: once(since, 0.6) * 1 }),
+  point: (since) => ({ rotation: once(since, 0.5) * 1.5 }),
+  shrug: (since) => ({ y: -once(since, 0.4) * 3 }),
+  'hand-on-head': (since) => ({ rotation: once(since, 0.5) * 1.5 }),
+  'hands-on-mouth': (since) => ({ y: -once(since, 0.3) * 2 }),
 };
 
-const RESPIRACAO_EM_PIXELS = 2;
-const PUXAO_DO_VOLUME_EM_PIXELS = 5;
+const BREATH_IN_PIXELS = 2;
+const VOLUME_PULL_IN_PIXELS = 5;
 
-/** Movimento contido: respiração leve, o corpo acompanha o volume de leve e o gesto da pose acontece uma vez. */
-export class Corpo {
-  deslocamentoEm(quadro: Quadro, contexto: ContextoDoCorpo): DeslocamentoDoCorpo {
-    const instante = quadro.valor() / contexto.fps.valor();
-    const desdeAPose = quadro.menos(contexto.inicioDaPose).valor() / contexto.fps.valor();
-    const gesto = GESTOS[contexto.pose](desdeAPose, instante);
-    const fala = this.#efeitoDaFala(instante, contexto);
+/** Restrained motion: light breathing, the body follows the volume slightly and the pose gesture happens once. */
+export class Body {
+  offsetAt(frame: Frame, context: BodyContext): BodyOffset {
+    const instant = frame.value() / context.fps.value();
+    const sincePose = frame.minus(context.poseStart).value() / context.fps.value();
+    const gesture = GESTURES[context.pose](sincePose, instant);
+    const line = this.#speechEffect(instant, context);
     return {
-      y: Math.sin(instante * 1.5 + contexto.fase) * RESPIRACAO_EM_PIXELS + fala.y + (gesto.y ?? 0),
-      rotacao: fala.rotacao + (gesto.rotacao ?? 0),
-      escala: 1 + fala.escala,
+      y: Math.sin(instant * 1.5 + context.phase) * BREATH_IN_PIXELS + line.y + (gesture.y ?? 0),
+      rotation: line.rotation + (gesture.rotation ?? 0),
+      scale: 1 + line.scale,
     };
   }
 
-  #efeitoDaFala(instante: number, contexto: ContextoDoCorpo): DeslocamentoDoCorpo {
-    if (!contexto.falando) return { y: 0, rotacao: 0, escala: 0 };
+  #speechEffect(instant: number, context: BodyContext): BodyOffset {
+    if (!context.speaking) return { y: 0, rotation: 0, scale: 0 };
     return {
-      y: -contexto.abertura * PUXAO_DO_VOLUME_EM_PIXELS,
-      rotacao: Math.sin(instante * 1.3 + contexto.fase) * 0.6 * contexto.abertura,
-      escala: contexto.abertura * 0.006,
+      y: -context.opening * VOLUME_PULL_IN_PIXELS,
+      rotation: Math.sin(instant * 1.3 + context.phase) * 0.6 * context.opening,
+      scale: context.opening * 0.006,
     };
   }
 }

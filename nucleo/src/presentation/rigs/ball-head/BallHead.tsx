@@ -1,6 +1,6 @@
 import type { FC } from 'react';
-import { ArmGeometry } from '../../../dominio/personagem/ArmGeometry.ts';
-import type { EstadoDoPersonagem } from '../../../dominio/personagem/EstadoDoPersonagem.ts';
+import { ArmGeometry } from '../../../domain/character/ArmGeometry.ts';
+import type { CharacterState } from '../../../domain/character/CharacterState.ts';
 import type { RigProps } from '../RigModel.ts';
 import { Arm } from './Arms.tsx';
 import { Ball, Face } from './Face.tsx';
@@ -9,7 +9,7 @@ import { FEET, NECK, VIEW_BOX } from './measures.ts';
 import { lookOf, type Look } from './parameters.ts';
 import { Outfit } from './Outfit.tsx';
 
-type BodyProps = Readonly<{ state: EstadoDoPersonagem; look: Look }>;
+type BodyProps = Readonly<{ state: CharacterState; look: Look }>;
 
 // Back to front: shadow, arms behind the head, legs and torso, head with hair and face, arms in front of the head.
 const Body: FC<BodyProps> = ({ state, look }) => {
@@ -33,10 +33,10 @@ const Body: FC<BodyProps> = ({ state, look }) => {
 
 /** The ball-head rig: a faceless-style dark ball head with big eyes, brows that carry the emotion and a clothed body. */
 export const BallHead: FC<RigProps> = ({ state, parameters, height, side }) => {
-  const { y, rotacao, escala } = state.deslocamentoDoCorpo();
+  const { y, rotation, scale } = state.bodyOffset();
   const look = lookOf(parameters);
   const width = (height * VIEW_BOX.width) / VIEW_BOX.height;
-  const body = `translate(0 ${y}) translate(200 ${FEET.y}) rotate(${rotacao}) scale(${escala}) translate(-200 -${FEET.y})`;
+  const body = `translate(0 ${y}) translate(200 ${FEET.y}) rotate(${rotation}) scale(${scale}) translate(-200 -${FEET.y})`;
   return (
     <svg viewBox={`${VIEW_BOX.x} ${VIEW_BOX.y} ${VIEW_BOX.width} ${VIEW_BOX.height}`} width={width} height={height} style={{ overflow: 'visible' }}>
       <ellipse cx={200} cy={FEET.y} rx={92} ry={10} fill="#000000" opacity={0.16} />

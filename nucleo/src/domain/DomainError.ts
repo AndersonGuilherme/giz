@@ -1,6 +1,6 @@
-export class ErroDeDominio extends Error {
-  constructor(mensagem: string) {
-    super(mensagem);
-    this.name = 'ErroDeDominio';
+export class DomainError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'DomainError';
   }
 }
