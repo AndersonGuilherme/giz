@@ -11,9 +11,10 @@ import { OuvidoWhisper } from '../../infraestrutura/alinhamento/OuvidoWhisper.ts
 import { ArmazemDeVozesEmDisco } from '../../infraestrutura/disco/ArmazemDeVozesEmDisco.ts';
 import { RepositorioDeProjetoEmDisco } from '../../infraestrutura/disco/RepositorioDeProjetoEmDisco.ts';
 import { FonetizadorEspeak } from '../../infraestrutura/fonetica/FonetizadorEspeak.ts';
-import { CatalogoDeRigsProvisorio } from '../../infraestrutura/rigs/CatalogoDeRigsProvisorio.ts';
 import { VozDeArquivo } from '../../infraestrutura/voz/VozDeArquivo.ts';
 import { VozQwen } from '../../infraestrutura/voz/VozQwen.ts';
+import { RigCatalogFromRegistry } from '../rigs/RigCatalogFromRegistry.ts';
+import { rigRegistry } from '../rigs/rigRegistry.ts';
 
 type Provedor = ReturnType<Projeto['voz']>['provedor'];
 
@@ -23,7 +24,7 @@ const PROVEDORES: Readonly<Record<Provedor, (pasta: string, projeto: Projeto) =>
 };
 
 export function repositorioDeProjeto(): RepositorioDeProjeto {
-  return new RepositorioDeProjetoEmDisco({ catalogo: new CatalogoDeRigsProvisorio() });
+  return new RepositorioDeProjetoEmDisco({ catalogo: new RigCatalogFromRegistry(rigRegistry) });
 }
 
 const avisar = (mensagem: string) => console.log(`AVISO: ${mensagem}`);
