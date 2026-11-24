@@ -1,0 +1,249 @@
+{
+  "chapters": [
+    "O desastre",
+    "O suspeito",
+    "A pista",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Reclamação #4521",
+        "items": [
+          "Usei o cupom BEMVINDO",
+          "Paguei R$ 10 a mais"
+        ],
+        "shown": 0
+      },
+      "text": "Um cliente [usou um cupom de desconto]... e [pagou mais caro].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "error"
+        }
+      ],
+      "pronunciation": "Um cliente usou um cúpom de desconto, e pagou mais caro."
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Mais caro com desconto? Isso não deveria ser possível."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Lia e Téo explicam · Aula 01",
+        "title": "O cupom que deixava mais caro",
+        "subtitle": "Um caso para investigar"
+      },
+      "text": "Vamos descobrir o que aconteceu."
+    },
+    {
+      "id": "004",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "exemplo.ts",
+        "lines": [
+          "export function precoFinal(subtotal: number, cupom?: string): number {",
+          "  if (cupom === 'BEMVINDO') return subtotal - 10;",
+          "  return subtotal;",
+          "}"
+        ]
+      },
+      "text": "Esse é o cálculo do preço. Se o cupom for [BEMVINDO], tira dez reais.",
+      "pronunciation": "Esse é o cálculo do preço. Se o cúpom for bem-vindo, tira dez reais.",
+      "beats": [
+        {
+          "highlight": [
+            "cupom === 'BEMVINDO'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test",
+        "lines": []
+      },
+      "text": "E os testes [passam]. Os dois, verdinhos.",
+      "beats": [
+        {
+          "sfx": "success",
+          "lines": [
+            {
+              "text": "✔ sem cupom, o preço não muda",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ cupom BEMVINDO dá R$ 10 de desconto",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 2   ℹ pass 2   ℹ fail 0",
+              "tone": "dim"
+            }
+          ]
+        }
+      ],
+      "pronunciation": "E os testes passam. Os dois, verdinhos."
+    },
+    {
+      "id": "006",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "exemplo.ts",
+        "lines": [
+          "export function precoFinal(subtotal: number, cupom?: string): number {",
+          "  if (cupom === 'BEMVINDO') return subtotal - 10;",
+          "  return subtotal;",
+          "}"
+        ]
+      },
+      "text": "Pausa: o que acontece com um pedido de cinco reais?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Ache o bug"
+      }
+    },
+    {
+      "id": "007",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[Cinco menos dez] dá menos cinco. Um preço negativo!",
+      "beats": [
+        {
+          "highlight": [
+            "subtotal - 10"
+          ],
+          "sfx": "error"
+        }
+      ],
+      "pronunciation": "Cinco menos dez dá menos cinco. Um preço negativo!"
+    },
+    {
+      "id": "008",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Teste passando prova o que você testou.\nNão o que você esqueceu."
+      },
+      "text": "Teste passando prova o que você testou. Não o que você esqueceu."
+    },
+    {
+      "id": "009",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "items": [
+          "Escreva o teste do pedido de R$ 5",
+          "Corrija o preço para nunca ficar negativo"
+        ],
+        "shown": 0
+      },
+      "text": "Desafio: [escreva o teste] e [corrija o código].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ],
+      "pronunciation": "Desafio: escreva o teste e corrija o código."
+    },
+    {
+      "id": "010",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Até a próxima!"
+    }
+  ]
+}

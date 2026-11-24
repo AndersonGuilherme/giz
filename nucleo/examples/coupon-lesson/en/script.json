@@ -1,0 +1,249 @@
+{
+  "chapters": [
+    "The disaster",
+    "The suspect",
+    "The clue",
+    "The lesson",
+    "Challenge"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Complaint #4521",
+        "items": [
+          "I used the WELCOME coupon",
+          "I paid $10 more"
+        ],
+        "shown": 0
+      },
+      "text": "A customer [used a discount coupon]... and [paid more].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "error"
+        }
+      ],
+      "pronunciation": "A customer used a discount coupon, and paid more."
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Pricier with a discount? That shouldn't even be possible."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Lia and Téo explain · Lesson 01",
+        "title": "The coupon that made it pricier",
+        "subtitle": "A case to investigate"
+      },
+      "text": "Let's find out what happened."
+    },
+    {
+      "id": "004",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "example.ts",
+        "lines": [
+          "export function finalPrice(subtotal: number, coupon?: string): number {",
+          "  if (coupon === 'WELCOME') return subtotal - 10;",
+          "  return subtotal;",
+          "}"
+        ]
+      },
+      "text": "Here's the price calculation. If the coupon is [WELCOME], it takes ten dollars off.",
+      "pronunciation": "Here's the price calculation. If the coupon is welcome, it takes ten dollars off.",
+      "beats": [
+        {
+          "highlight": [
+            "coupon === 'WELCOME'"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test",
+        "lines": []
+      },
+      "text": "And the tests [pass]. Both of them, all green.",
+      "beats": [
+        {
+          "sfx": "success",
+          "lines": [
+            {
+              "text": "✔ without a coupon, the price stays the same",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ WELCOME coupon takes $10 off",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 2   ℹ pass 2   ℹ fail 0",
+              "tone": "dim"
+            }
+          ]
+        }
+      ],
+      "pronunciation": "And the tests pass. Both of them, all green."
+    },
+    {
+      "id": "006",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "example.ts",
+        "lines": [
+          "export function finalPrice(subtotal: number, coupon?: string): number {",
+          "  if (coupon === 'WELCOME') return subtotal - 10;",
+          "  return subtotal;",
+          "}"
+        ]
+      },
+      "text": "Pause here: what happens to a five-dollar order?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Find the bug"
+      }
+    },
+    {
+      "id": "007",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[Five minus ten] is minus five. A negative price!",
+      "beats": [
+        {
+          "highlight": [
+            "subtotal - 10"
+          ],
+          "sfx": "error"
+        }
+      ],
+      "pronunciation": "Five minus ten is minus five. A negative price!"
+    },
+    {
+      "id": "008",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "A passing test proves what you tested.\nNot what you forgot."
+      },
+      "text": "A passing test proves what you tested. Not what you forgot."
+    },
+    {
+      "id": "009",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Challenge",
+        "items": [
+          "Write the test for the $5 order",
+          "Fix the price so it never goes negative"
+        ],
+        "shown": 0
+      },
+      "text": "Your challenge: [write the test] and [fix the code].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ],
+      "pronunciation": "Your challenge: write the test and fix the code."
+    },
+    {
+      "id": "010",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "See you next time!"
+    }
+  ]
+}

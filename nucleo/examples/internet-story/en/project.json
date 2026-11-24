@@ -1,0 +1,17 @@
+{
+  "version": 2,
+  "title": "What if the internet stopped for 24 hours?",
+  "format": "story",
+  "language": "en",
+  "aspect": "9:16",
+  "captionStyle": "words",
+  "cast": [
+    "narrator",
+    "nina",
+    "davi"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
+}

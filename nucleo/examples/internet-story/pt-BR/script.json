@@ -1,0 +1,438 @@
+{
+  "chapters": [
+    "Hora 0",
+    "Hora 3",
+    "Hora 6",
+    "Hora 12",
+    "Hora 23",
+    "Hora 24"
+  ],
+  "lines": [
+    {
+      "id": "01",
+      "chapter": 1,
+      "speaker": "narrator",
+      "text": "E se a internet do mundo inteiro parasse por um dia?",
+      "sfx": "whoosh",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "room"
+        },
+        "characters": [],
+        "camera": {
+          "type": "zoom-in"
+        },
+        "effects": [
+          {
+            "type": "vignette"
+          }
+        ],
+        "highlight": {
+          "text": "E SE A INTERNET PARASSE?",
+          "entrance": "pop"
+        }
+      }
+    },
+    {
+      "id": "02",
+      "chapter": 1,
+      "speaker": "nina",
+      "text": "Sem sinal, sem Wi-Fi. Meu celular virou uma calculadora!",
+      "pronunciation": "Sem sinal, sem uai-fai. Meu celular virou uma calculadora!",
+      "pose": "hand-on-head",
+      "expression": "surprised",
+      "look": "camera",
+      "sfx": "error",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "room"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "center"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "nina"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "HORA",
+              "value": "0"
+            },
+            {
+              "label": "SEM",
+              "value": "SINAL"
+            }
+          ],
+          "bar": {
+            "label": "pânico",
+            "value": 10
+          }
+        }
+      }
+    },
+    {
+      "id": "03",
+      "chapter": 2,
+      "speaker": "narrator",
+      "text": "Hora três. Sem mapa no celular, ninguém chega a lugar nenhum.",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "street"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "davi",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "shake",
+          "intensity": 1.2
+        },
+        "effects": [
+          {
+            "type": "rain"
+          },
+          {
+            "type": "vignette"
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "HORA",
+              "value": "3"
+            },
+            {
+              "label": "SEM",
+              "value": "SINAL"
+            }
+          ],
+          "bar": {
+            "label": "pânico",
+            "value": 40
+          }
+        }
+      }
+    },
+    {
+      "id": "04",
+      "chapter": 2,
+      "speaker": "davi",
+      "text": "Como eu pago o ônibus? Meu cartão mora no celular!",
+      "pose": "hand-on-head",
+      "expression": "scared",
+      "reaction": {
+        "expression": "skeptical"
+      }
+    },
+    {
+      "id": "05",
+      "chapter": 2,
+      "speaker": "nina",
+      "text": "Calma. Dinheiro de papel ainda existe.",
+      "pose": "explain",
+      "expression": "skeptical",
+      "reaction": {
+        "expression": "confused"
+      }
+    },
+    {
+      "id": "06",
+      "chapter": 3,
+      "speaker": "narrator",
+      "text": "Hora seis. As maquininhas param e as filas dobram o quarteirão.",
+      "reaction": {
+        "expression": "worried",
+        "pose": "shrug"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "village"
+        },
+        "characters": [
+          {
+            "character": "davi",
+            "position": "center"
+          }
+        ],
+        "camera": {
+          "type": "pan"
+        },
+        "effects": [
+          {
+            "type": "tint",
+            "color": "#b8402f",
+            "intensity": 0.2
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "HORA",
+              "value": "6"
+            },
+            {
+              "label": "SEM",
+              "value": "SINAL"
+            }
+          ],
+          "bar": {
+            "label": "pânico",
+            "value": 70
+          }
+        }
+      }
+    },
+    {
+      "id": "07",
+      "chapter": 4,
+      "speaker": "narrator",
+      "text": "Hora doze. Sem notificações, as pessoas olham pra cima.",
+      "reaction": {
+        "expression": "thinking",
+        "look": "other"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "davi",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out"
+        },
+        "effects": [
+          {
+            "type": "particles"
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "HORA",
+              "value": "12"
+            },
+            {
+              "label": "SEM",
+              "value": "SINAL"
+            }
+          ],
+          "bar": {
+            "label": "pânico",
+            "value": 30
+          }
+        }
+      },
+      "pronunciation": "Hora doze, sem notificações, as pessoas olham pra cima."
+    },
+    {
+      "id": "08",
+      "chapter": 4,
+      "speaker": "davi",
+      "text": "Esse parque sempre foi tão bonito?",
+      "pose": "point",
+      "expression": "surprised"
+    },
+    {
+      "id": "09",
+      "chapter": 4,
+      "speaker": "nina",
+      "text": "Sempre. A gente é que vivia na tela.",
+      "pose": "shrug",
+      "expression": "happy",
+      "reaction": {
+        "expression": "confused"
+      }
+    },
+    {
+      "id": "10",
+      "chapter": 5,
+      "speaker": "narrator",
+      "text": "Curiosidade: a internet não é nuvem. São cabos no fundo do mar.",
+      "sfx": "ding",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "lab"
+        },
+        "characters": [],
+        "camera": {
+          "type": "zoom-in",
+          "to": {
+            "x": 0,
+            "y": 0.05,
+            "zoom": 1.2
+          }
+        },
+        "effects": [
+          {
+            "type": "glow",
+            "color": "#5fc3ff"
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "HORA",
+              "value": "23"
+            },
+            {
+              "label": "SEM",
+              "value": "SINAL"
+            }
+          ],
+          "bar": {
+            "label": "pânico",
+            "value": 20
+          }
+        },
+        "highlight": {
+          "text": "CABOS NO FUNDO DO MAR",
+          "color": "#7ee08a",
+          "entrance": "rise"
+        }
+      },
+      "pronunciation": "Curiosidade: a internet não é nuvem, são cabos no fundo do mar."
+    },
+    {
+      "id": "11",
+      "chapter": 6,
+      "speaker": "narrator",
+      "text": "Hora vinte e quatro. O sinal volta, e tudo chega de uma vez.",
+      "reaction": {
+        "expression": "excited",
+        "look": "camera"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky",
+          "colors": {
+            "moon": "#141d42",
+            "moonGlow": "#141d42"
+          }
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "davi",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "from": {
+            "x": 0,
+            "y": -0.04,
+            "zoom": 1.25
+          }
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "position": {
+              "x": 0.84,
+              "y": 0.86
+            }
+          },
+          {
+            "type": "vignette"
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "HORA",
+              "value": "24"
+            },
+            {
+              "label": "SINAL",
+              "value": "OK"
+            }
+          ],
+          "bar": {
+            "label": "pânico",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "12",
+      "chapter": 6,
+      "speaker": "davi",
+      "text": "[Quatrocentas notificações]! Acho que vou desligar de novo.",
+      "pose": "shrug",
+      "expression": "surprised",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "beats": [
+        {
+          "sfx": "dings"
+        }
+      ],
+      "pronunciation": "Quatrocentas notificações! Acho que vou desligar de novo."
+    },
+    {
+      "id": "13",
+      "chapter": 6,
+      "speaker": "narrator",
+      "text": "E você? Aguentaria um dia offline?",
+      "pronunciation": "E você, aguentaria um dia óflaine?",
+      "sfx": "pop",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [],
+        "camera": {
+          "type": "zoom-in"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "position": {
+              "x": 0.5,
+              "y": 0.84
+            }
+          }
+        ],
+        "highlight": {
+          "text": "E VOCÊ, AGUENTARIA?",
+          "color": "#ffd37a"
+        }
+      }
+    }
+  ]
+}

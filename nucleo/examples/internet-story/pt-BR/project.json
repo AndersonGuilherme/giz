@@ -1,0 +1,10 @@
+{
+  "version": 2,
+  "title": "E se a internet parasse por 24 horas?",
+  "format": "story",
+  "language": "pt-BR",
+  "aspect": "9:16",
+  "captionStyle": "words",
+  "cast": ["narrator", "nina", "davi"],
+  "voice": { "provider": "qwen", "model": "1.7b" }
+}

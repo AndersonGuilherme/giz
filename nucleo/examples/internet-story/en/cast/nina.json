@@ -1,0 +1,17 @@
+{
+  "id": "nina",
+  "name": "Nina",
+  "rig": "ball-head",
+  "parameters": {
+    "outfit": "dress",
+    "outfitColor": "#d0573f",
+    "hair": "bun",
+    "accessoryColor": "#f2d16b"
+  },
+  "voice": {
+    "id": "serena",
+    "style": "Speak in natural American English, expressive and warm, like a smart young woman"
+  },
+  "personality": "practical and curious",
+  "defaultExpression": "neutral"
+}

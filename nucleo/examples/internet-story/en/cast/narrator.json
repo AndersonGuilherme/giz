@@ -1,0 +1,10 @@
+{
+  "id": "narrator",
+  "name": "Narrator",
+  "voice": {
+    "id": "ryan",
+    "style": "Speak in natural American English, like a curious and upbeat documentary narrator, with a brisk pace"
+  },
+  "personality": "curious narrator, without a body",
+  "defaultExpression": "neutral"
+}

@@ -1,0 +1,12 @@
+{
+  "id": "nina",
+  "name": "Nina",
+  "rig": "ball-head",
+  "parameters": { "outfit": "dress", "outfitColor": "#d0573f", "hair": "bun", "accessoryColor": "#f2d16b" },
+  "voice": {
+    "id": "serena",
+    "style": "Fale em português do Brasil, com sotaque brasileiro, de forma expressiva e natural, como uma jovem esperta"
+  },
+  "personality": "prática e curiosa",
+  "defaultExpression": "neutral"
+}
