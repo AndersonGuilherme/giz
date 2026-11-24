@@ -1,7 +1,7 @@
 {
   "id": "davi",
   "name": "Davi",
-  "rig": "ball-head",
+  "rig": "giz",
   "parameters": {
     "outfit": "hoodie",
     "outfitColor": "#2f7f6f",

@@ -31,8 +31,8 @@ const Body: FC<BodyProps> = ({ state, look }) => {
   );
 };
 
-/** The ball-head rig: a faceless-style dark ball head with big eyes, brows that carry the emotion and a clothed body. */
-export const BallHead: FC<RigProps> = ({ state, parameters, height, side }) => {
+/** The giz rig, the house style: colored head, chalk outline, big expressive eyes and a clothed body. */
+export const Giz: FC<RigProps> = ({ state, parameters, height, side }) => {
   const { y, rotation, scale } = state.bodyOffset();
   const look = lookOf(parameters);
   const width = (height * VIEW_BOX.width) / VIEW_BOX.height;

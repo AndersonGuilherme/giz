@@ -23,7 +23,7 @@ const SheetComposition: FC = () => (
     height={1080}
     fps={30}
     durationInFrames={1}
-    defaultProps={{ rig: 'ball-head' }}
+    defaultProps={{ rig: 'giz' }}
     calculateMetadata={readCharacter}
   />
 );

@@ -5,11 +5,11 @@ import { RigRegistry, rigRegistry } from '../../../src/presentation/rigs/rigRegi
 
 const STANCE = { viewBox: { x: 0, y: 0, width: 100, height: 100 }, feet: { x: 50, y: 100 } };
 
-test('the registry refuses an unknown rig listing the valid ones', () => assert.throws(() => rigRegistry.get('robot'), /ball-head/));
+test('the registry refuses an unknown rig listing the valid ones', () => assert.throws(() => rigRegistry.get('robot'), /giz|lia-style/));
 
-test('the ball-head comes registered with the parameters and defaults from the brief', () => {
-  const { parameters, name } = rigRegistry.get('ball-head');
-  assert.equal(name['pt-BR'], 'Cabeça-bola');
+test('the giz rig comes registered with the parameters and defaults from the brief', () => {
+  const { parameters, name } = rigRegistry.get('giz');
+  assert.equal(name['pt-BR'], 'Giz');
   assert.deepEqual(parameters.headColor, { type: 'color', defaultValue: '#151515' });
   assert.deepEqual(parameters.shine, { type: 'boolean', defaultValue: true });
   assert.deepEqual(parameters.outfit, { type: 'option', defaultValue: 'tshirt', options: ['tshirt', 'tunic', 'dress', 'hoodie'] });
@@ -50,12 +50,12 @@ test('the lia-style comes registered with the parameters, ranges and options fro
   ]);
 });
 
-test('every rig declares where its feet touch the ground, inside its view box (ball-head 590, lia-style 570)', () => {
+test('every rig declares where its feet touch the ground, inside its view box (giz 590, lia-style 570)', () => {
   for (const { id, stance } of rigRegistry.all()) {
     const { viewBox, feet } = stance;
     assert.ok(feet.y > viewBox.y && feet.y <= viewBox.y + viewBox.height, id);
     assert.ok(feet.x > viewBox.x && feet.x < viewBox.x + viewBox.width, id);
   }
-  assert.equal(rigRegistry.get('ball-head').stance.feet.y, 590);
+  assert.equal(rigRegistry.get('giz').stance.feet.y, 590);
   assert.equal(rigRegistry.get('lia-style').stance.feet.y, 570);
 });

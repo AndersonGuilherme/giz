@@ -34,8 +34,8 @@ export const PREVIEW_DEFAULTS: ScenePreviewProps = {
     },
   },
   cast: [
-    { id: 'ana', rig: 'ball-head', parameters: { outfit: 'dress', outfitColor: '#a5452f', hair: 'scarf', accessoryColor: '#e9dcc0' } },
-    { id: 'beto', rig: 'ball-head', parameters: { outfit: 'tunic', outfitColor: '#6f7a32' } },
+    { id: 'ana', rig: 'giz', parameters: { outfit: 'dress', outfitColor: '#a5452f', hair: 'scarf', accessoryColor: '#e9dcc0' } },
+    { id: 'beto', rig: 'giz', parameters: { outfit: 'tunic', outfitColor: '#6f7a32' } },
   ],
   states: { ana: { expression: 'surprised', pose: 'hands-on-mouth' }, beto: { expression: 'worried', pose: 'hand-on-head' } },
 };

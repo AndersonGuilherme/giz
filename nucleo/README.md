@@ -9,7 +9,7 @@ Os exemplos completos estão em [`examples/`](examples/):
 
 | Pasta | O que é |
 |---|---|
-| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador, dois personagens cabeça-bola, 6 fundos vetoriais, câmera, chuva, fogo, HUD e texto grande |
+| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador, dois personagens giz, 6 fundos vetoriais, câmera, chuva, fogo, HUD e texto grande |
 | `examples/coupon-lesson/pt-BR` e `en` | Aula 16:9 sobre um bug de cupom de desconto, com Lia e Téo, cartão, título, código, terminal, citação e desafio |
 
 Use qualquer uma dessas pastas como ponto de partida: copie a pasta, troque os textos e rode `produce`.
@@ -74,7 +74,7 @@ Exemplos:
 ```bash
 node src/presentation/cli/giz.ts check examples/coupon-lesson/pt-BR
 node src/presentation/cli/giz.ts produce examples/internet-story/en
-node src/presentation/cli/giz.ts sheet ball-head examples/internet-story/pt-BR/cast/nina.json
+node src/presentation/cli/giz.ts sheet giz examples/internet-story/pt-BR/cast/nina.json
 ```
 
 Para ver um quadro só, sem renderizar o vídeo inteiro, rode `build` e depois:
@@ -119,7 +119,7 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 {
   "id": "nina",
   "name": "Nina",
-  "rig": "ball-head",
+  "rig": "giz",
   "parameters": { "outfit": "dress", "outfitColor": "#d0573f", "hair": "bun", "accessoryColor": "#f2d16b" },
   "voice": {
     "id": "serena",
@@ -157,7 +157,7 @@ Um narrador, só voz:
 O `check` recusa um parâmetro que o rig não tem, um valor fora da lista ou uma cor que não é `#rrggbb`, e diz o
 arquivo, o campo e o valor. Veja um rig desenhado com `giz sheet <rig>`.
 
-### `ball-head` (cabeça-bola)
+### `giz` (giz)
 
 Cabeça redonda escura e corpo simples, no estilo dos vídeos curtos de curiosidade.
 
@@ -173,7 +173,7 @@ Cabeça redonda escura e corpo simples, no estilo dos vídeos curtos de curiosid
 | `eyeScale` | número | `1` | de `0.8` a `1.4` |
 
 ```json
-{ "rig": "ball-head", "parameters": { "outfit": "hoodie", "outfitColor": "#2f7f6f", "hair": "short", "glasses": true } }
+{ "rig": "giz", "parameters": { "outfit": "hoodie", "outfitColor": "#2f7f6f", "hair": "short", "glasses": true } }
 ```
 
 ### `lia-style` (estilo Lia)
@@ -562,6 +562,6 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
   usuária vê ficam em pt-BR.
 - Render: `@remotion/bundler` e `@remotion/renderer` chamados direto (sem `npx`). A pasta pública do render é
   temporária: os sons de `public/sounds/` (copiados de `motor/assets/sfx/`) mais as vozes do projeto.
-- Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-ball-head.png --props='{"rig":"ball-head"}'`.
+- Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-giz.png --props='{"rig":"giz"}'`.
   Acrescente `"character":"cast/<id>.json"` e `--public-dir=<projeto>` para usar os parâmetros de um personagem.
 - `test/examples.test.ts` garante que os quatro exemplos carregam e passam no `check` sem erros.

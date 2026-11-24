@@ -8,8 +8,8 @@ import type { CharacterInScene } from '../../../src/domain/script/Scene.ts';
 
 const VERTICAL = AspectRatio.of('9:16');
 const HORIZONTAL = AspectRatio.of('16:9');
-// The ball-head frame: feet at y = 590 inside a 520 × 630 view box.
-const BALL_HEAD = Stance.of({ viewBox: { x: -60, y: -30, width: 520, height: 630 }, feet: { x: 200, y: 590 } });
+// The giz frame: feet at y = 590 inside a 520 × 630 view box.
+const GIZ = Stance.of({ viewBox: { x: -60, y: -30, width: 520, height: 630 }, feet: { x: 200, y: 590 } });
 const LIA_STYLE = Stance.of({ viewBox: { x: -60, y: -30, width: 520, height: 630 }, feet: { x: 200, y: 570 } });
 
 const at = (character: string, position: CharacterInScene['position'], extra: Partial<CharacterInScene> = {}): CharacterInScene => ({
@@ -22,13 +22,13 @@ test('in 9:16 two characters fit in the safe area', () => {
   const spots = Placement.for([at('ana', 'left'), at('bia', 'right')], VERTICAL);
   const safeArea = SafeArea.for(VERTICAL);
   assert.equal(spots.length, 2);
-  for (const spot of spots) assert.ok(BALL_HEAD.boxFor(spot).isInside(safeArea), `${spot.character} sai da área segura`);
+  for (const spot of spots) assert.ok(GIZ.boxFor(spot).isInside(safeArea), `${spot.character} sai da área segura`);
 });
 
 test('in 16:9 three characters fit in the safe area, side by side and the same size', () => {
   const spots = Placement.for([at('ana', 'left'), at('bia', 'center'), at('caio', 'right')], HORIZONTAL);
   const safeArea = SafeArea.for(HORIZONTAL);
-  for (const spot of spots) assert.ok(BALL_HEAD.boxFor(spot).isInside(safeArea), `${spot.character} sai da área segura`);
+  for (const spot of spots) assert.ok(GIZ.boxFor(spot).isInside(safeArea), `${spot.character} sai da área segura`);
   assert.deepEqual(new Set(spots.map((spot) => spot.height)).size, 1);
   assert.deepEqual(new Set(spots.map((spot) => spot.y)).size, 1);
   assert.ok(spots[0]!.x < spots[1]!.x && spots[1]!.x < spots[2]!.x);
@@ -55,12 +55,12 @@ test('in 9:16 the second character is smaller and behind, and is drawn first', (
 
 test('the feet of every rig rest on the same ground line', () => {
   const [spot] = Placement.for([at('ana', 'center')], HORIZONTAL);
-  const ballHead = BALL_HEAD.rectangleFor(spot!);
+  const giz = GIZ.rectangleFor(spot!);
   const liaStyle = LIA_STYLE.rectangleFor(spot!);
-  const feetOf = (rectangle: typeof ballHead, feetY: number) => rectangle.y + ((feetY + 30) / 630) * rectangle.height;
-  assert.ok(Math.abs(feetOf(ballHead, 590) - spot!.y) < 1e-9);
+  const feetOf = (rectangle: typeof giz, feetY: number) => rectangle.y + ((feetY + 30) / 630) * rectangle.height;
+  assert.ok(Math.abs(feetOf(giz, 590) - spot!.y) < 1e-9);
   assert.ok(Math.abs(feetOf(liaStyle, 570) - spot!.y) < 1e-9);
-  assert.ok(Math.abs(ballHead.x + ((200 + 60) / 520) * ballHead.width - spot!.x) < 1e-9, 'o centro dos pés fica no x do lugar');
+  assert.ok(Math.abs(giz.x + ((200 + 60) / 520) * giz.width - spot!.x) < 1e-9, 'o centro dos pés fica no x do lugar');
 });
 
 test('without a direction, a character faces the center of the frame; with one, it faces where it is told', () => {

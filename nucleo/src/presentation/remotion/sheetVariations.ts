@@ -3,8 +3,8 @@ import type { ValidatedParameters } from '../rigs/RigModel.ts';
 
 type Variation = Readonly<{ label: string; parameters: ValidatedParameters; pose: Pose; expression: Expression; side: -1 | 1 }>;
 
-/** Ball-head variations: outfits, hair and headwear, glasses, eye size. */
-const BALL_HEAD: readonly Variation[] = [
+/** Giz variations: outfits, hair and headwear, glasses, eye size. */
+const GIZ: readonly Variation[] = [
   {
     label: 'túnica + lenço', pose: 'hands-on-mouth', expression: 'scared', side: 1,
     parameters: { outfit: 'tunic', outfitColor: '#b4472e', hair: 'scarf', accessoryColor: '#efe6d2' },
@@ -44,4 +44,4 @@ const LIA_STYLE: readonly Variation[] = [
 ];
 
 /** Parameter variations shown on the sheet, per rig (each rig has its own parameters). */
-export const VARIATIONS: Readonly<Record<string, readonly Variation[]>> = { 'ball-head': BALL_HEAD, 'lia-style': LIA_STYLE };
+export const VARIATIONS: Readonly<Record<string, readonly Variation[]>> = { giz: GIZ, 'lia-style': LIA_STYLE };

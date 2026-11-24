@@ -6,9 +6,9 @@ export const HAIRS = ['none', 'bun', 'short', 'scarf', 'hat'] as const;
 export type Outfit = (typeof OUTFITS)[number];
 export type Hair = (typeof HAIRS)[number];
 
-export const ballHeadDefinition: RigDefinition = {
-  id: 'ball-head',
-  name: { 'pt-BR': 'Cabeça-bola', en: 'Ball-head' },
+export const gizDefinition: RigDefinition = {
+  id: 'giz',
+  name: { 'pt-BR': 'Giz', en: 'Giz' },
   parameters: {
     headColor: { type: 'color', defaultValue: '#151515' },
     shine: { type: 'boolean', defaultValue: true },
@@ -22,7 +22,7 @@ export const ballHeadDefinition: RigDefinition = {
   stance: { viewBox: VIEW_BOX, feet: { x: 200, y: FEET.y } },
 };
 
-/** The ball-head parameters, typed for drawing. */
+/** The giz parameters, typed for drawing. */
 export type Look = Readonly<{
   headColor: string;
   shine: boolean;
@@ -34,7 +34,7 @@ export type Look = Readonly<{
   eyeScale: number;
 }>;
 
-const defaults = Object.fromEntries(Object.entries(ballHeadDefinition.parameters).map(([name, { defaultValue }]) => [name, defaultValue]));
+const defaults = Object.fromEntries(Object.entries(gizDefinition.parameters).map(([name, { defaultValue }]) => [name, defaultValue]));
 
 /** Fills in the defaults: the sheet and the tests may pass only some of the parameters. */
 export function lookOf(parameters: ValidatedParameters): Look {

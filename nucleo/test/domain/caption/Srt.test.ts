@@ -16,7 +16,7 @@ function props(segments: SegmentJson[], format: VideoProps['format'] = 'lesson')
     fps: 30, width: 1920, height: 1080, language: 'pt-BR', format, captionStyle: 'blocks', title: 'T', chapters: ['A'],
     totalFrames: 600, segments, soundEffects: [],
     cast: [
-      { id: 'ana', name: 'Ana', rig: 'ball-head', parameters: {}, defaultExpression: 'neutral' },
+      { id: 'ana', name: 'Ana', rig: 'giz', parameters: {}, defaultExpression: 'neutral' },
       { id: 'narrator', name: 'Narrador', parameters: {}, defaultExpression: 'neutral' },
     ],
   };
