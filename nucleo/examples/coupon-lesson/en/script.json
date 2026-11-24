@@ -37,8 +37,7 @@
           "shown": 2,
           "sfx": "error"
         }
-      ],
-      "pronunciation": "A customer used a discount coupon, and paid more."
+      ]
     },
     {
       "id": "002",
@@ -50,7 +49,44 @@
       "reaction": {
         "expression": "confused"
       },
-      "text": "Pricier with a discount? That shouldn't even be possible."
+      "text": "Pricier with a discount? That shouldn't even be possible.",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "office",
+          "colors": {
+            "glassTop": "#f2a86b",
+            "glassBottom": "#ffe3b8",
+            "city": "#b07a6a"
+          }
+        },
+        "characters": [
+          {
+            "character": "lia",
+            "position": "left"
+          },
+          {
+            "character": "teo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-in",
+          "to": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1.08
+          },
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "tint",
+            "color": "#ff9a4a",
+            "intensity": 0.35
+          }
+        ]
+      }
     },
     {
       "id": "003",
@@ -131,8 +167,7 @@
             }
           ]
         }
-      ],
-      "pronunciation": "And the tests pass. Both of them, all green."
+      ]
     },
     {
       "id": "006",
@@ -177,8 +212,7 @@
           ],
           "sfx": "error"
         }
-      ],
-      "pronunciation": "Five minus ten is minus five. A negative price!"
+      ]
     },
     {
       "id": "008",
@@ -225,8 +259,7 @@
           "shown": 2,
           "sfx": "pop"
         }
-      ],
-      "pronunciation": "Your challenge: write the test and fix the code."
+      ]
     },
     {
       "id": "010",
@@ -241,7 +274,35 @@
         "look": "camera"
       },
       "scene": {
-        "type": "talk"
+        "type": "scenario",
+        "background": {
+          "vector": "classroom"
+        },
+        "characters": [
+          {
+            "character": "lia",
+            "position": "left"
+          },
+          {
+            "character": "teo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "glow",
+            "color": "#fff1c4",
+            "intensity": 0.7
+          },
+          {
+            "type": "particles",
+            "intensity": 0.3
+          }
+        ]
       },
       "text": "See you next time!"
     }

@@ -1,0 +1,21 @@
+{
+  "id": "bia",
+  "name": "Bia",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "hoodie",
+    "outfitColor": "#8b5fbf",
+    "headwear": "headphones",
+    "skin": "deep",
+    "headShape": "round",
+    "hair": "afro",
+    "hairColor": "#1a120e",
+    "eyeColor": "#7a4a26"
+  },
+  "voice": {
+    "id": "vivian",
+    "style": "Speak in natural American English, over the top and funny, like a dramatic young streamer"
+  },
+  "personality": "lively streamer who narrates her own life out loud",
+  "defaultExpression": "excited"
+}

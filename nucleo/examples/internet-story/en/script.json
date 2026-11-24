@@ -3,8 +3,7 @@
     "Hour 0",
     "Hour 3",
     "Hour 6",
-    "Hour 12",
-    "Hour 23",
+    "Hour 18",
     "Hour 24"
   ],
   "lines": [
@@ -12,7 +11,7 @@
       "id": "01",
       "chapter": 1,
       "speaker": "narrator",
-      "text": "What if the whole internet just stopped? For an entire day.",
+      "text": "Picture this: one morning, the whole world loses the internet. For an entire day.",
       "sfx": "whoosh",
       "scene": {
         "type": "scenario",
@@ -29,7 +28,7 @@
           }
         ],
         "highlight": {
-          "text": "WHAT IF THE INTERNET STOPPED?",
+          "text": "24 HOURS OFFLINE",
           "entrance": "pop"
         }
       }
@@ -37,10 +36,10 @@
     {
       "id": "02",
       "chapter": 1,
-      "speaker": "nina",
-      "text": "No bars, no Wi-Fi. My phone is now a very expensive flashlight!",
+      "speaker": "bia",
+      "text": "My stream just died! No bars, no Wi-Fi, and nobody is watching me!",
       "pose": "hand-on-head",
-      "expression": "surprised",
+      "expression": "scared",
       "look": "camera",
       "sfx": "error",
       "scene": {
@@ -50,13 +49,13 @@
         },
         "characters": [
           {
-            "character": "nina",
+            "character": "bia",
             "position": "center"
           }
         ],
         "camera": {
           "type": "follow",
-          "target": "nina"
+          "target": "bia"
         },
         "hud": {
           "fields": [
@@ -80,7 +79,7 @@
       "id": "03",
       "chapter": 2,
       "speaker": "narrator",
-      "text": "Hour three. Nobody remembers how to get anywhere without a map app. Panic sets in.",
+      "text": "Hour three. Without map apps, nobody remembers how to get anywhere.",
       "reaction": {
         "expression": "worried"
       },
@@ -91,11 +90,11 @@
         },
         "characters": [
           {
-            "character": "nina",
+            "character": "caio",
             "position": "left"
           },
           {
-            "character": "davi",
+            "character": "bia",
             "position": "right"
           }
         ],
@@ -132,10 +131,10 @@
     {
       "id": "04",
       "chapter": 2,
-      "speaker": "davi",
-      "text": "How do I even pay for the bus? My card lives on my phone!",
-      "pose": "hand-on-head",
-      "expression": "scared",
+      "speaker": "caio",
+      "text": "Relax! I know the way home by heart. Follow me.",
+      "pose": "point",
+      "expression": "happy",
       "reaction": {
         "expression": "skeptical"
       }
@@ -143,10 +142,11 @@
     {
       "id": "05",
       "chapter": 2,
-      "speaker": "nina",
-      "text": "Relax, Davi. Cash still exists.",
-      "pose": "explain",
+      "speaker": "bia",
+      "text": "Caio, we have passed this exact corner three times.",
+      "pose": "shrug",
       "expression": "skeptical",
+      "look": "other",
       "reaction": {
         "expression": "confused"
       }
@@ -155,20 +155,23 @@
       "id": "06",
       "chapter": 3,
       "speaker": "narrator",
-      "text": "Hour six. Card machines die, and the lines wrap around the block.",
+      "text": "Hour six. Card machines stop working, and the lines wrap around the block.",
       "reaction": {
-        "expression": "worried",
-        "pose": "shrug"
+        "expression": "worried"
       },
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "village"
+          "vector": "fifties-diner"
         },
         "characters": [
           {
-            "character": "davi",
-            "position": "center"
+            "character": "otavio",
+            "position": "left"
+          },
+          {
+            "character": "nono",
+            "position": "right"
           }
         ],
         "camera": {
@@ -176,9 +179,13 @@
         },
         "effects": [
           {
-            "type": "tint",
-            "color": "#b8402f",
-            "intensity": 0.2
+            "type": "glow",
+            "color": "#ff8cc6",
+            "intensity": 0.6
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.4
           }
         ],
         "hud": {
@@ -201,41 +208,67 @@
     },
     {
       "id": "07",
-      "chapter": 4,
-      "speaker": "narrator",
-      "text": "Hour twelve. With no notifications, something strange happens: people start looking up.",
+      "chapter": 3,
+      "speaker": "otavio",
+      "text": "Can I pay you later? I promise I'm good for it.",
+      "pose": "shrug",
+      "expression": "worried",
+      "look": "other",
       "reaction": {
-        "expression": "thinking",
-        "look": "other"
-      },
+        "expression": "skeptical"
+      }
+    },
+    {
+      "id": "08",
+      "chapter": 3,
+      "speaker": "nono",
+      "text": "Here, we only take cash. Otherwise, you're washing dishes.",
+      "pose": "point",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      }
+    },
+    {
+      "id": "09",
+      "chapter": 4,
+      "speaker": "helena",
+      "text": "Fun fact: the internet isn't up in the clouds. It runs through cables on the ocean floor.",
+      "pose": "explain",
+      "expression": "happy",
+      "look": "camera",
+      "sfx": "ding",
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "field"
+          "vector": "classroom"
         },
         "characters": [
           {
-            "character": "nina",
-            "position": "left"
-          },
-          {
-            "character": "davi",
-            "position": "right"
+            "character": "helena",
+            "position": "center"
           }
         ],
         "camera": {
-          "type": "zoom-out"
+          "type": "still"
         },
         "effects": [
           {
-            "type": "particles"
+            "type": "glow",
+            "color": "#fff1c4",
+            "intensity": 0.7
+          },
+          {
+            "type": "particles",
+            "intensity": 0.3
           }
         ],
         "hud": {
           "fields": [
             {
               "label": "HOUR",
-              "value": "12"
+              "value": "18"
             },
             {
               "label": "NO",
@@ -246,69 +279,6 @@
             "label": "panic",
             "value": 30
           }
-        }
-      }
-    },
-    {
-      "id": "08",
-      "chapter": 4,
-      "speaker": "davi",
-      "text": "Nina, has this park always been this pretty?",
-      "pose": "point",
-      "expression": "surprised"
-    },
-    {
-      "id": "09",
-      "chapter": 4,
-      "speaker": "nina",
-      "text": "Always. We were just staring at our screens.",
-      "pose": "shrug",
-      "expression": "happy",
-      "reaction": {
-        "expression": "confused"
-      }
-    },
-    {
-      "id": "10",
-      "chapter": 5,
-      "speaker": "narrator",
-      "text": "Fun fact: the internet isn't a cloud. It's cables on the ocean floor.",
-      "sfx": "ding",
-      "scene": {
-        "type": "scenario",
-        "background": {
-          "vector": "lab"
-        },
-        "characters": [],
-        "camera": {
-          "type": "zoom-in",
-          "to": {
-            "x": 0,
-            "y": 0.05,
-            "zoom": 1.2
-          }
-        },
-        "effects": [
-          {
-            "type": "glow",
-            "color": "#5fc3ff"
-          }
-        ],
-        "hud": {
-          "fields": [
-            {
-              "label": "HOUR",
-              "value": "23"
-            },
-            {
-              "label": "NO",
-              "value": "SIGNAL"
-            }
-          ],
-          "bar": {
-            "label": "panic",
-            "value": 20
-          }
         },
         "highlight": {
           "text": "CABLES ON THE OCEAN FLOOR",
@@ -318,30 +288,26 @@
       }
     },
     {
-      "id": "11",
-      "chapter": 6,
+      "id": "10",
+      "chapter": 5,
       "speaker": "narrator",
-      "text": "Hour twenty-four. The signal comes back, and millions of messages land at once.",
+      "text": "Hour twenty-four. The signal comes back, and everything lands at once.",
       "reaction": {
-        "expression": "excited",
+        "expression": "surprised",
         "look": "camera"
       },
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "night-sky",
-          "colors": {
-            "moon": "#141d42",
-            "moonGlow": "#141d42"
-          }
+          "vector": "city-night"
         },
         "characters": [
           {
-            "character": "nina",
+            "character": "caio",
             "position": "left"
           },
           {
-            "character": "davi",
+            "character": "bia",
             "position": "right"
           }
         ],
@@ -355,14 +321,12 @@
         },
         "effects": [
           {
-            "type": "fire",
-            "position": {
-              "x": 0.84,
-              "y": 0.86
-            }
+            "type": "particles",
+            "intensity": 0.3
           },
           {
-            "type": "vignette"
+            "type": "vignette",
+            "intensity": 0.6
           }
         ],
         "hud": {
@@ -373,7 +337,7 @@
             },
             {
               "label": "SIGNAL",
-              "value": "OK"
+              "value": "BACK"
             }
           ],
           "bar": {
@@ -384,11 +348,11 @@
       }
     },
     {
-      "id": "12",
-      "chapter": 6,
-      "speaker": "davi",
-      "text": "[Four hundred notifications]! You know what? I think I'll switch it off again.",
-      "pose": "shrug",
+      "id": "11",
+      "chapter": 5,
+      "speaker": "bia",
+      "text": "[Four hundred notifications]! You know what? I'm switching it off again.",
+      "pose": "hand-on-head",
       "expression": "surprised",
       "reaction": {
         "expression": "skeptical"
@@ -397,35 +361,48 @@
         {
           "sfx": "dings"
         }
-      ],
-      "pronunciation": "Four hundred notifications! You know what? I think I'll switch it off again."
+      ]
     },
     {
-      "id": "13",
-      "chapter": 6,
+      "id": "12",
+      "chapter": 5,
       "speaker": "narrator",
-      "text": "So... could you last a day offline?",
+      "text": "So... could you last a whole day offline?",
+      "reaction": {
+        "expression": "thinking",
+        "look": "camera"
+      },
       "sfx": "pop",
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "night-sky"
+          "vector": "city-night"
         },
-        "characters": [],
+        "characters": [
+          {
+            "character": "caio",
+            "position": "left"
+          },
+          {
+            "character": "bia",
+            "position": "right"
+          }
+        ],
         "camera": {
           "type": "zoom-in"
         },
         "effects": [
           {
-            "type": "fire",
-            "position": {
-              "x": 0.5,
-              "y": 0.84
-            }
+            "type": "particles",
+            "intensity": 0.3
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.6
           }
         ],
         "highlight": {
-          "text": "COULD YOU LAST A DAY?",
+          "text": "ONE DAY OFFLINE?",
           "color": "#ffd37a"
         }
       }

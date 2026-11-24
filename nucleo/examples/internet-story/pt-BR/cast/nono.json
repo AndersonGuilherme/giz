@@ -1,0 +1,21 @@
+{
+  "id": "nono",
+  "name": "Nono",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "chef",
+    "headwear": "chef-hat",
+    "skin": "fair",
+    "headShape": "round",
+    "hair": "short",
+    "facialHair": "mustache",
+    "hairColor": "#8a8580",
+    "eyeColor": "#5a6b8c"
+  },
+  "voice": {
+    "id": "dylan",
+    "style": "Fale em português do Brasil, com sotaque brasileiro, de forma firme e bem-humorada, como um cozinheiro veterano"
+  },
+  "personality": "cozinheiro exigente que prova tudo duas vezes",
+  "defaultExpression": "neutral"
+}

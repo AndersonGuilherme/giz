@@ -50,7 +50,44 @@
       "reaction": {
         "expression": "confused"
       },
-      "text": "Mais caro com desconto? Isso não deveria ser possível."
+      "text": "Mais caro com desconto? Isso não deveria ser possível.",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "office",
+          "colors": {
+            "glassTop": "#f2a86b",
+            "glassBottom": "#ffe3b8",
+            "city": "#b07a6a"
+          }
+        },
+        "characters": [
+          {
+            "character": "lia",
+            "position": "left"
+          },
+          {
+            "character": "teo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-in",
+          "to": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1.08
+          },
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "tint",
+            "color": "#ff9a4a",
+            "intensity": 0.35
+          }
+        ]
+      }
     },
     {
       "id": "003",
@@ -131,8 +168,7 @@
             }
           ]
         }
-      ],
-      "pronunciation": "E os testes passam. Os dois, verdinhos."
+      ]
     },
     {
       "id": "006",
@@ -177,8 +213,7 @@
           ],
           "sfx": "error"
         }
-      ],
-      "pronunciation": "Cinco menos dez dá menos cinco. Um preço negativo!"
+      ]
     },
     {
       "id": "008",
@@ -225,8 +260,7 @@
           "shown": 2,
           "sfx": "pop"
         }
-      ],
-      "pronunciation": "Desafio: escreva o teste e corrija o código."
+      ]
     },
     {
       "id": "010",
@@ -241,7 +275,35 @@
         "look": "camera"
       },
       "scene": {
-        "type": "talk"
+        "type": "scenario",
+        "background": {
+          "vector": "classroom"
+        },
+        "characters": [
+          {
+            "character": "lia",
+            "position": "left"
+          },
+          {
+            "character": "teo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "glow",
+            "color": "#fff1c4",
+            "intensity": 0.7
+          },
+          {
+            "type": "particles",
+            "intensity": 0.3
+          }
+        ]
       },
       "text": "Até a próxima!"
     }

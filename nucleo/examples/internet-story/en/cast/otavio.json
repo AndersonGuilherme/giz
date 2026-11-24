@@ -1,0 +1,20 @@
+{
+  "id": "otavio",
+  "name": "Otávio",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "suit",
+    "skin": "light",
+    "headShape": "soft-square",
+    "hair": "short",
+    "facialHair": "stubble",
+    "hairColor": "#6a6460",
+    "eyeColor": "#5a6b8c"
+  },
+  "voice": {
+    "id": "eric",
+    "style": "Speak in natural American English, hurried and a little embarrassed, like a businessman"
+  },
+  "personality": "busy executive who books meetings to talk about meetings",
+  "defaultExpression": "skeptical"
+}

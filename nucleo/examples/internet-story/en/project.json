@@ -7,8 +7,11 @@
   "captionStyle": "words",
   "cast": [
     "narrator",
-    "nina",
-    "davi"
+    "bia",
+    "caio",
+    "otavio",
+    "nono",
+    "helena"
   ],
   "voice": {
     "provider": "qwen",

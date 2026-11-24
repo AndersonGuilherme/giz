@@ -5,6 +5,16 @@
   "language": "pt-BR",
   "aspect": "9:16",
   "captionStyle": "words",
-  "cast": ["narrator", "nina", "davi"],
-  "voice": { "provider": "qwen", "model": "1.7b" }
+  "cast": [
+    "narrator",
+    "bia",
+    "caio",
+    "otavio",
+    "nono",
+    "helena"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
 }

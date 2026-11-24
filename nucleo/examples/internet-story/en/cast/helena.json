@@ -1,0 +1,20 @@
+{
+  "id": "helena",
+  "name": "Helena",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "lab-coat",
+    "skin": "tan",
+    "headShape": "bean",
+    "hair": "bun",
+    "hairColor": "#3a2418",
+    "glasses": true,
+    "eyeColor": "#4c9a5a"
+  },
+  "voice": {
+    "id": "serena",
+    "style": "Speak in natural American English, calm and clear, like a scientist explaining"
+  },
+  "personality": "patient scientist who explains everything with a kitchen example",
+  "defaultExpression": "thinking"
+}

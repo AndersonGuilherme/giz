@@ -1,0 +1,21 @@
+{
+  "id": "nono",
+  "name": "Nono",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "chef",
+    "headwear": "chef-hat",
+    "skin": "fair",
+    "headShape": "round",
+    "hair": "short",
+    "facialHair": "mustache",
+    "hairColor": "#8a8580",
+    "eyeColor": "#5a6b8c"
+  },
+  "voice": {
+    "id": "dylan",
+    "style": "Speak in natural American English, firm and good-humored, like a veteran cook"
+  },
+  "personality": "demanding cook who tastes everything twice",
+  "defaultExpression": "neutral"
+}

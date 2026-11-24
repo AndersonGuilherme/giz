@@ -1,0 +1,19 @@
+{
+  "id": "caio",
+  "name": "Caio",
+  "rig": "giz",
+  "parameters": {
+    "outfit": "casual",
+    "headwear": "cap",
+    "skin": "medium",
+    "headShape": "round",
+    "hair": "short",
+    "hairColor": "#2a1a12"
+  },
+  "voice": {
+    "id": "aiden",
+    "style": "Speak in natural American English, relaxed and overconfident, like a young skater"
+  },
+  "personality": "optimistic skater who thinks everything can wait until tomorrow",
+  "defaultExpression": "happy"
+}

@@ -3,8 +3,7 @@
     "Hora 0",
     "Hora 3",
     "Hora 6",
-    "Hora 12",
-    "Hora 23",
+    "Hora 18",
     "Hora 24"
   ],
   "lines": [
@@ -12,7 +11,7 @@
       "id": "01",
       "chapter": 1,
       "speaker": "narrator",
-      "text": "E se a internet do mundo inteiro parasse por um dia?",
+      "text": "Imagine: a internet do mundo inteiro desliga por um dia.",
       "sfx": "whoosh",
       "scene": {
         "type": "scenario",
@@ -29,7 +28,7 @@
           }
         ],
         "highlight": {
-          "text": "E SE A INTERNET PARASSE?",
+          "text": "24 HORAS SEM INTERNET",
           "entrance": "pop"
         }
       }
@@ -37,11 +36,11 @@
     {
       "id": "02",
       "chapter": 1,
-      "speaker": "nina",
-      "text": "Sem sinal, sem Wi-Fi. Meu celular virou uma calculadora!",
-      "pronunciation": "Sem sinal, sem uai-fai. Meu celular virou uma calculadora!",
+      "speaker": "bia",
+      "text": "Minha transmissão caiu! Sem sinal, sem Wi-Fi!",
+      "pronunciation": "Minha transmissão caiu! Sem sinal, sem uai-fai!",
       "pose": "hand-on-head",
-      "expression": "surprised",
+      "expression": "scared",
       "look": "camera",
       "sfx": "error",
       "scene": {
@@ -51,13 +50,13 @@
         },
         "characters": [
           {
-            "character": "nina",
+            "character": "bia",
             "position": "center"
           }
         ],
         "camera": {
           "type": "follow",
-          "target": "nina"
+          "target": "bia"
         },
         "hud": {
           "fields": [
@@ -81,7 +80,7 @@
       "id": "03",
       "chapter": 2,
       "speaker": "narrator",
-      "text": "Hora três. Sem mapa no celular, ninguém chega a lugar nenhum.",
+      "text": "Hora três. Sem mapa no celular, ninguém se acha.",
       "reaction": {
         "expression": "worried"
       },
@@ -92,11 +91,11 @@
         },
         "characters": [
           {
-            "character": "nina",
+            "character": "caio",
             "position": "left"
           },
           {
-            "character": "davi",
+            "character": "bia",
             "position": "right"
           }
         ],
@@ -133,10 +132,10 @@
     {
       "id": "04",
       "chapter": 2,
-      "speaker": "davi",
-      "text": "Como eu pago o ônibus? Meu cartão mora no celular!",
-      "pose": "hand-on-head",
-      "expression": "scared",
+      "speaker": "caio",
+      "text": "Relaxa! Eu sei o caminho de cor.",
+      "pose": "point",
+      "expression": "happy",
       "reaction": {
         "expression": "skeptical"
       }
@@ -144,10 +143,11 @@
     {
       "id": "05",
       "chapter": 2,
-      "speaker": "nina",
-      "text": "Calma. Dinheiro de papel ainda existe.",
-      "pose": "explain",
+      "speaker": "bia",
+      "text": "Caio, já passamos nessa esquina três vezes.",
+      "pose": "shrug",
       "expression": "skeptical",
+      "look": "other",
       "reaction": {
         "expression": "confused"
       }
@@ -156,20 +156,23 @@
       "id": "06",
       "chapter": 3,
       "speaker": "narrator",
-      "text": "Hora seis. As maquininhas param e as filas dobram o quarteirão.",
+      "text": "Hora seis. As maquininhas de cartão param.",
       "reaction": {
-        "expression": "worried",
-        "pose": "shrug"
+        "expression": "worried"
       },
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "village"
+          "vector": "fifties-diner"
         },
         "characters": [
           {
-            "character": "davi",
-            "position": "center"
+            "character": "otavio",
+            "position": "left"
+          },
+          {
+            "character": "nono",
+            "position": "right"
           }
         ],
         "camera": {
@@ -177,9 +180,13 @@
         },
         "effects": [
           {
-            "type": "tint",
-            "color": "#b8402f",
-            "intensity": 0.2
+            "type": "glow",
+            "color": "#ff8cc6",
+            "intensity": 0.6
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.4
           }
         ],
         "hud": {
@@ -202,41 +209,67 @@
     },
     {
       "id": "07",
-      "chapter": 4,
-      "speaker": "narrator",
-      "text": "Hora doze. Sem notificações, as pessoas olham pra cima.",
+      "chapter": 3,
+      "speaker": "otavio",
+      "text": "Eu pago depois, pode ser?",
+      "pose": "shrug",
+      "expression": "worried",
+      "look": "other",
       "reaction": {
-        "expression": "thinking",
-        "look": "other"
-      },
+        "expression": "skeptical"
+      }
+    },
+    {
+      "id": "08",
+      "chapter": 3,
+      "speaker": "nono",
+      "text": "Aqui é dinheiro na mão. Ou lava a louça.",
+      "pose": "point",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      }
+    },
+    {
+      "id": "09",
+      "chapter": 4,
+      "speaker": "helena",
+      "text": "Curiosidade: a internet passa por cabos no fundo do mar.",
+      "pose": "explain",
+      "expression": "happy",
+      "look": "camera",
+      "sfx": "ding",
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "field"
+          "vector": "classroom"
         },
         "characters": [
           {
-            "character": "nina",
-            "position": "left"
-          },
-          {
-            "character": "davi",
-            "position": "right"
+            "character": "helena",
+            "position": "center"
           }
         ],
         "camera": {
-          "type": "zoom-out"
+          "type": "still"
         },
         "effects": [
           {
-            "type": "particles"
+            "type": "glow",
+            "color": "#fff1c4",
+            "intensity": 0.7
+          },
+          {
+            "type": "particles",
+            "intensity": 0.3
           }
         ],
         "hud": {
           "fields": [
             {
               "label": "HORA",
-              "value": "12"
+              "value": "18"
             },
             {
               "label": "SEM",
@@ -247,104 +280,35 @@
             "label": "pânico",
             "value": 30
           }
-        }
-      },
-      "pronunciation": "Hora doze, sem notificações, as pessoas olham pra cima."
-    },
-    {
-      "id": "08",
-      "chapter": 4,
-      "speaker": "davi",
-      "text": "Esse parque sempre foi tão bonito?",
-      "pose": "point",
-      "expression": "surprised"
-    },
-    {
-      "id": "09",
-      "chapter": 4,
-      "speaker": "nina",
-      "text": "Sempre. A gente é que vivia na tela.",
-      "pose": "shrug",
-      "expression": "happy",
-      "reaction": {
-        "expression": "confused"
-      }
-    },
-    {
-      "id": "10",
-      "chapter": 5,
-      "speaker": "narrator",
-      "text": "Curiosidade: a internet não é nuvem. São cabos no fundo do mar.",
-      "sfx": "ding",
-      "scene": {
-        "type": "scenario",
-        "background": {
-          "vector": "lab"
-        },
-        "characters": [],
-        "camera": {
-          "type": "zoom-in",
-          "to": {
-            "x": 0,
-            "y": 0.05,
-            "zoom": 1.2
-          }
-        },
-        "effects": [
-          {
-            "type": "glow",
-            "color": "#5fc3ff"
-          }
-        ],
-        "hud": {
-          "fields": [
-            {
-              "label": "HORA",
-              "value": "23"
-            },
-            {
-              "label": "SEM",
-              "value": "SINAL"
-            }
-          ],
-          "bar": {
-            "label": "pânico",
-            "value": 20
-          }
         },
         "highlight": {
           "text": "CABOS NO FUNDO DO MAR",
           "color": "#7ee08a",
           "entrance": "rise"
         }
-      },
-      "pronunciation": "Curiosidade: a internet não é nuvem, são cabos no fundo do mar."
+      }
     },
     {
-      "id": "11",
-      "chapter": 6,
+      "id": "10",
+      "chapter": 5,
       "speaker": "narrator",
-      "text": "Hora vinte e quatro. O sinal volta, e tudo chega de uma vez.",
+      "text": "Hora vinte e quatro. O sinal volta, e chega tudo de uma vez.",
       "reaction": {
-        "expression": "excited",
+        "expression": "surprised",
         "look": "camera"
       },
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "night-sky",
-          "colors": {
-            "moon": "#141d42",
-            "moonGlow": "#141d42"
-          }
+          "vector": "city-night"
         },
         "characters": [
           {
-            "character": "nina",
+            "character": "caio",
             "position": "left"
           },
           {
-            "character": "davi",
+            "character": "bia",
             "position": "right"
           }
         ],
@@ -358,14 +322,12 @@
         },
         "effects": [
           {
-            "type": "fire",
-            "position": {
-              "x": 0.84,
-              "y": 0.86
-            }
+            "type": "particles",
+            "intensity": 0.3
           },
           {
-            "type": "vignette"
+            "type": "vignette",
+            "intensity": 0.6
           }
         ],
         "hud": {
@@ -387,11 +349,11 @@
       }
     },
     {
-      "id": "12",
-      "chapter": 6,
-      "speaker": "davi",
-      "text": "[Quatrocentas notificações]! Acho que vou desligar de novo.",
-      "pose": "shrug",
+      "id": "11",
+      "chapter": 5,
+      "speaker": "bia",
+      "text": "[Quatrocentas notificações]! Vou desligar de novo.",
+      "pose": "hand-on-head",
       "expression": "surprised",
       "reaction": {
         "expression": "skeptical"
@@ -400,36 +362,49 @@
         {
           "sfx": "dings"
         }
-      ],
-      "pronunciation": "Quatrocentas notificações! Acho que vou desligar de novo."
+      ]
     },
     {
-      "id": "13",
-      "chapter": 6,
+      "id": "12",
+      "chapter": 5,
       "speaker": "narrator",
-      "text": "E você? Aguentaria um dia offline?",
+      "text": "E você, aguentaria um dia offline?",
       "pronunciation": "E você, aguentaria um dia óflaine?",
+      "reaction": {
+        "expression": "thinking",
+        "look": "camera"
+      },
       "sfx": "pop",
       "scene": {
         "type": "scenario",
         "background": {
-          "vector": "night-sky"
+          "vector": "city-night"
         },
-        "characters": [],
+        "characters": [
+          {
+            "character": "caio",
+            "position": "left"
+          },
+          {
+            "character": "bia",
+            "position": "right"
+          }
+        ],
         "camera": {
           "type": "zoom-in"
         },
         "effects": [
           {
-            "type": "fire",
-            "position": {
-              "x": 0.5,
-              "y": 0.84
-            }
+            "type": "particles",
+            "intensity": 0.3
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.6
           }
         ],
         "highlight": {
-          "text": "E VOCÊ, AGUENTARIA?",
+          "text": "UM DIA OFFLINE?",
           "color": "#ffd37a"
         }
       }

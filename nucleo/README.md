@@ -9,8 +9,8 @@ Os exemplos completos estão em [`examples/`](examples/):
 
 | Pasta | O que é |
 |---|---|
-| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador, dois personagens no estilo giz, 6 fundos vetoriais, câmera, chuva, fogo, HUD e texto grande |
-| `examples/coupon-lesson/pt-BR` e `en` | Aula 16:9 sobre um bug de cupom de desconto, com Lia e Téo, cartão, título, código, terminal, citação e desafio |
+| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador e cinco personagens prontos do estilo giz (`casts/presets/present/`), 5 fundos vetoriais (quarto, rua, lanchonete, sala de aula e cidade à noite, três deles a partir de `presets/scenes/`), 6 movimentos de câmera, chuva, HUD com barra e texto grande |
+| `examples/coupon-lesson/pt-BR` e `en` | Aula 16:9 sobre um bug de cupom de desconto, com Lia e Téo, escritório e sala de aula na abertura e no fim, cartão, título, código, terminal, pausa "Ache o bug" com contagem, citação e desafio |
 
 Use qualquer uma dessas pastas como ponto de partida: copie a pasta, troque os textos e rode `produce`.
 
@@ -38,7 +38,7 @@ meu-video/
 ├── script.json         o roteiro: capítulos e falas, cada fala com sua cena
 └── cast/
     ├── narrator.json   um arquivo por personagem; o nome do arquivo é o id
-    └── nina.json
+    └── bia.json
 ```
 
 O `giz` cria sozinho, dentro da pasta:
@@ -74,7 +74,7 @@ Exemplos:
 ```bash
 node src/presentation/cli/giz.ts check examples/coupon-lesson/pt-BR
 node src/presentation/cli/giz.ts produce examples/internet-story/en
-node src/presentation/cli/giz.ts sheet giz examples/internet-story/pt-BR/cast/nina.json
+node src/presentation/cli/giz.ts sheet giz examples/internet-story/pt-BR/cast/bia.json
 ```
 
 Para ver um quadro só, sem renderizar o vídeo inteiro, rode `build` e depois:
@@ -95,7 +95,7 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
   "language": "pt-BR",
   "aspect": "9:16",
   "captionStyle": "words",
-  "cast": ["narrator", "nina", "davi"],
+  "cast": ["narrator", "bia", "caio", "otavio", "nono", "helena"],
   "voice": { "provider": "qwen", "model": "1.7b" }
 }
 ```
@@ -117,16 +117,16 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 
 ```json
 {
-  "id": "nina",
-  "name": "Nina",
+  "id": "bia",
+  "name": "Bia",
   "rig": "giz",
-  "parameters": { "outfit": "dress", "outfitColor": "#d0573f", "hair": "bun", "accessoryColor": "#f2d16b" },
+  "parameters": { "outfit": "hoodie", "outfitColor": "#8b5fbf", "headwear": "headphones", "skin": "deep", "hair": "afro" },
   "voice": {
-    "id": "serena",
-    "style": "Fale em português do Brasil, com sotaque brasileiro, de forma expressiva e natural, como uma jovem esperta"
+    "id": "vivian",
+    "style": "Fale em português do Brasil, com sotaque brasileiro, de forma exagerada e engraçada, como uma streamer jovem e dramática"
   },
-  "personality": "prática e curiosa",
-  "defaultExpression": "neutral"
+  "personality": "streamer animada que narra a própria vida em voz alta",
+  "defaultExpression": "excited"
 }
 ```
 
@@ -281,19 +281,19 @@ Uma fala com pose, expressão, olhar e reação:
 {
   "id": "04",
   "chapter": 2,
-  "speaker": "davi",
-  "text": "Como é que eu pago o ônibus? Meu cartão mora no celular!",
-  "pose": "hand-on-head",
-  "expression": "scared",
-  "look": "camera",
-  "reaction": { "expression": "skeptical" }
+  "speaker": "bia",
+  "text": "Caio, é a terceira vez que a gente passa nessa esquina.",
+  "pose": "shrug",
+  "expression": "skeptical",
+  "look": "other",
+  "reaction": { "expression": "confused" }
 }
 ```
 
 Uma pronúncia diferente da legenda:
 
 ```json
-{ "text": "Sem sinal. Sem Wi-Fi.", "pronunciation": "Sem sinal. Sem uai-fai." }
+{ "text": "Sem sinal, sem Wi-Fi.", "pronunciation": "Sem sinal, sem uai-fai." }
 ```
 
 ### `beats`: mudanças no meio da fala
@@ -331,11 +331,11 @@ segura nem ficar por cima de outro: o `check` mede cada caixa e aponta a fala qu
 {
   "type": "scenario",
   "background": { "vector": "street" },
-  "characters": [{ "character": "nina", "position": "left" }, { "character": "davi", "position": "right" }],
+  "characters": [{ "character": "caio", "position": "left" }, { "character": "bia", "position": "right" }],
   "camera": { "type": "shake", "intensity": 1.2 },
   "effects": [{ "type": "rain" }, { "type": "vignette" }],
   "hud": { "fields": [{ "label": "HORA", "value": "3" }, { "label": "SEM", "value": "SINAL" }], "bar": { "label": "pânico", "value": 40 } },
-  "highlight": { "text": "E SE A INTERNET PARASSE?" }
+  "highlight": { "text": "24 HORAS SEM INTERNET" }
 }
 ```
 
@@ -358,7 +358,7 @@ segura nem ficar por cima de outro: o `check` mede cada caixa e aponta a fala qu
 | `direction` | `front`, `left`, `right` | Para onde o corpo vira. Sem ele, cada um vira para o centro. |
 
 ```json
-{ "character": "davi", "position": { "x": 0.62, "y": 0.78 }, "scale": 0.9, "direction": "left" }
+{ "character": "caio", "position": { "x": 0.62, "y": 0.78 }, "scale": 0.9, "direction": "left" }
 ```
 
 ### 8.2 Fundos
@@ -474,7 +474,7 @@ Campos opcionais:
 - `easing`: `smooth` (padrão) ou `linear`.
 
 ```json
-{ "camera": { "type": "follow", "target": "nina" } }
+{ "camera": { "type": "follow", "target": "bia" } }
 { "camera": { "type": "zoom-out", "from": { "x": 0, "y": -0.04, "zoom": 1.25 } } }
 { "camera": { "type": "zoom-in", "to": { "x": 0, "y": 0.05, "zoom": 1.2 }, "easing": "linear" } }
 ```
@@ -649,8 +649,8 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
 - Rode `check` sempre antes do `produce`: ele é rápido e não gera nada.
 - Uma voz soa estranha? Ajuste o `style`, reescreva a frase ou use `pronunciation`. Só a fala alterada é gerada de novo.
   Nos exemplos, `"pronunciation": "... cúpom ..."` fez as vozes dizerem "cupom" direito.
-- Hoje a voz recebe o texto com os colchetes dos `[trechos]`, e isso deixa a fala lenta e cheia de pausas. Numa fala
-  com beats, repita o texto sem colchetes em `pronunciation`: os beats continuam saindo dos trechos do `text`.
+- A voz recebe a fala sem os colchetes dos `[trechos]`. Não é preciso repetir o texto em `pronunciation` só para
+  tirá-los: use `pronunciation` apenas quando a voz deve falar algo diferente da legenda.
 
 ---
 
