@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { FOCUS_RADIUS } from '../../../../domain/scenario/BackdropLayout.ts';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Placed, Ridge } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
 import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
@@ -44,7 +45,9 @@ const Back: FC<LayerProps> = (layer) => {
   );
 };
 
-// The sail: a square sail bellied by the wind, with an original compass star on it.
+// The sail: a square sail bellied by the wind, with an original compass star on it; drawn 170 units to each side, it is
+// scaled into the backdrop's focus radius.
+const SAIL_HALF_WIDTH = 170;
 const Sail: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -170 -150 Q 0 -120 170 -150 Q 200 0 170 150 Q 0 175 -170 150 Q -140 0 -170 -150 Z" fill={colors.sail} chalk={{ seed: 'ship-sail', width: 5 }} />
@@ -73,8 +76,8 @@ const Mast: FC<LayerProps> = ({ colors, width, height, unit, backdrop }) => {
     <>
       <path d={ropes.join(' ')} stroke={colors.rope} strokeWidth={5 * unit} />
       <ChalkBox x={focus.x - 18 * unit} y={-height * 0.1} width={36 * unit} height={horizon + height * 0.1} fill={colors.mast} chalk={{ seed: 'ship-mast', width: 4 * unit }} />
-      <ChalkBox x={focus.x - 210 * unit} y={focus.y - 166 * unit} width={420 * unit} height={18 * unit} corner={8 * unit} fill={colors.mast} chalk={{ seed: 'ship-yard', width: 4 * unit }} />
-      <Placed x={focus.x} y={focus.y} scale={unit}><Sail colors={colors} /></Placed>
+      <ChalkBox x={focus.x - backdrop.focusWidth / 2} y={focus.y - 166 * unit} width={backdrop.focusWidth} height={18 * unit} corner={8 * unit} fill={colors.mast} chalk={{ seed: 'ship-yard', width: 4 * unit }} />
+      <Placed x={focus.x} y={focus.y} scale={(unit * FOCUS_RADIUS) / SAIL_HALF_WIDTH}><Sail colors={colors} /></Placed>
     </>
   );
 };

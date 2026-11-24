@@ -84,3 +84,19 @@ test("9:16: the focus sits above the characters' heads and below the HUD panel",
   assert.ok(focus.y - radius > panel.y + panel.height, 'below the HUD');
   assert.ok(focus.y < stage.y, 'its center is above the heads');
 });
+
+test('16:9: a wide focus feature (focusWidth) stays clear of both characters and is at least the focus disc', () => {
+  const aspect = AspectRatio.of('16:9');
+  const { focus, focusWidth, unit } = BackdropLayout.for(aspect);
+  const [left, right] = Placement.for([{ character: 'ana', position: 'left' }, { character: 'bia', position: 'right' }], aspect);
+  assert.ok(focus.x - focusWidth / 2 > left!.x + 0.32 * left!.height, 'clear of the left character');
+  assert.ok(focus.x + focusWidth / 2 < right!.x - 0.32 * right!.height, 'clear of the right character');
+  assert.ok(focusWidth >= 2 * FOCUS_RADIUS * unit);
+});
+
+test('9:16: the focus feature, above the heads, may span the frame but keeps a margin on both sides', () => {
+  const aspect = AspectRatio.of('9:16');
+  const { focus, focusWidth, unit } = BackdropLayout.for(aspect);
+  assert.ok(focus.x - focusWidth / 2 >= 150 * unit - 1e-9 && focus.x + focusWidth / 2 <= aspect.width() - 150 * unit + 1e-9);
+  assert.ok(focusWidth > 2 * FOCUS_RADIUS * unit);
+});

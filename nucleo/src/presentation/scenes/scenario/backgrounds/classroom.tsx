@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { FOCUS_RADIUS } from '../../../../domain/scenario/BackdropLayout.ts';
 import { ChalkBox, ChalkDisc, ChalkShape, Fill, Glow, Placed } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
 import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
@@ -29,6 +30,9 @@ const palette = {
   book: '#3d6fb0',
   foreground: '#2a3634',
 };
+
+// The chalkboard is drawn 232 units to each side and scaled into the backdrop's focus radius.
+const BOARD_HALF_WIDTH = 232;
 
 // The chalkboard: a + b = ?, a triangle, a little sun and an arrow, drawn in chalk.
 const Board: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
@@ -64,7 +68,7 @@ const Back: FC<LayerProps> = (layer) => {
       {[0.1, 0.9].map((at) => <Glow key={at} id={`class-sun${at}`} x={width * at} y={focus.y + 40 * unit} radius={300 * unit} color={colors.sun} opacity={0.5} />)}
       <Placed x={width * 0.1} y={focus.y + 40 * unit} scale={unit}><Window colors={colors} seed="class-window-left" /></Placed>
       <Placed x={width * 0.9} y={focus.y + 40 * unit} scale={unit}><Window colors={colors} seed="class-window-right" /></Placed>
-      <Placed x={focus.x} y={focus.y} scale={unit * 0.66}><Board colors={colors} /></Placed>
+      <Placed x={focus.x} y={focus.y} scale={(unit * FOCUS_RADIUS) / BOARD_HALF_WIDTH}><Board colors={colors} /></Placed>
       <ChalkDisc x={focus.x} y={focus.y - 150 * unit} radius={30 * unit} fill={colors.clock} chalk={{ seed: 'class-clock', width: 3.5 * unit }} />
       <path d={`M ${focus.x} ${focus.y - 150 * unit} v ${-18 * unit} M ${focus.x} ${focus.y - 150 * unit} h ${14 * unit}`} stroke={colors.foreground} strokeWidth={4 * unit} strokeLinecap="round" />
     </>

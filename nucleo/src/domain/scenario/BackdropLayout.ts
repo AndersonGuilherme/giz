@@ -13,7 +13,8 @@ export type Corner = Readonly<{ x: number; y: number; scale: number }>;
  * The plan of a vector background, in video pixels: `ground` (the characters' feet), `horizon` (where the far
  * scenery or the back wall meets the floor), `stage` (where the characters stand, kept clear by the front layer), the
  * two `corners` where the front layer puts its props and the `focus`, the center of the background's main feature (a
- * window, a monument, a cave mouth), which fits in `FOCUS_RADIUS` units around it.
+ * window, a monument, a cave mouth), which fits in `FOCUS_RADIUS` units around it; a wide feature (a window band, a
+ * yard) may span `focusWidth` pixels centered on it: between the two characters in 16:9, nearly the frame in 9:16.
  */
 export type Backdrop = Readonly<{
   unit: number;
@@ -22,6 +23,7 @@ export type Backdrop = Readonly<{
   stage: Rectangle;
   corners: Readonly<{ left: Corner; right: Corner }>;
   focus: Point;
+  focusWidth: number;
 }>;
 
 /** The main feature of a background fits in this radius, in units, around the backdrop's `focus`. */
@@ -37,6 +39,10 @@ const HALF_FIGURE = 0.32;
 // 16:9: the focus is 330 units above the horizon, between the characters. 9:16: above their heads, 40 units under the HUD.
 const FOCUS_OVER_HORIZON = 330;
 const HUD_CLEARANCE = 40;
+// A wide focus feature keeps 20 units from the characters in 16:9 and 150 units from the frame's sides in 9:16 (room for
+// the side props hung there, such as lamps).
+const FIGURE_CLEARANCE = 20;
+const SIDE_MARGIN = 150;
 // A prop is never drawn larger than one video pixel per unit of the frame.
 const LARGEST_SCALE = 1;
 
@@ -77,6 +83,14 @@ function focusOf(stage: Rectangle, aspect: AspectRatio): Point {
   return { x, y: Math.min(belowHud, stage.y - unit) };
 }
 
+// 16:9: the gap between the pair of characters (the focus is at their height); 9:16: the frame (it is above the heads).
+function focusWidthOf(aspect: AspectRatio): number {
+  const unit = Math.min(aspect.width(), aspect.height()) / 1000;
+  if (aspect.vertical()) return aspect.width() - 2 * SIDE_MARGIN * unit;
+  const [left, right] = Placement.for([{ character: 'one', position: 'left' }, { character: 'two', position: 'right' }], aspect).map(figureOf);
+  return right!.x - (left!.x + left!.width) - 2 * FIGURE_CLEARANCE * unit;
+}
+
 /** The plan every vector background draws on, so the characters keep a clear stage in 9:16 and in 16:9. */
 export class BackdropLayout {
   static for(aspect: AspectRatio): Backdrop {
@@ -86,6 +100,6 @@ export class BackdropLayout {
     const scale = cornerScale(stage, aspect);
     const bottom = aspect.height();
     const corners = { left: { x: 0, y: bottom, scale }, right: { x: aspect.width(), y: bottom, scale } };
-    return { unit, ground, horizon: ground - HORIZON * unit, stage, corners, focus: focusOf(stage, aspect) };
+    return { unit, ground, horizon: ground - HORIZON * unit, stage, corners, focus: focusOf(stage, aspect), focusWidth: focusWidthOf(aspect) };
   }
 }

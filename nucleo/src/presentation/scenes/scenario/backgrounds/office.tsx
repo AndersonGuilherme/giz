@@ -34,9 +34,10 @@ const palette = {
   foreground: '#22302f',
 };
 
-// The window: glass, a skyline of plain towers and the mullions, `wide` × 300 units centered on (0, 0).
+// The window: glass, a skyline of plain towers and the mullions, `wide` × 300 units centered on (0, 0); the scene gives
+// it the backdrop's focus width, so it stays between the characters in 16:9.
 const Window: FC<Readonly<{ colors: Palette; wide: number }>> = ({ colors, wide }) => {
-  const towers = spread(9, -wide / 2 + 20, wide / 2 - 40).map((x, index) => `M ${x} 150 V ${60 - (index % 3) * 50 - (index % 2) * 30} h ${40 + (index % 2) * 16} V 150 Z`);
+  const towers = spread(Math.max(3, Math.round(wide / 80)), -wide / 2 + 20, wide / 2 - 76).map((x, index) => `M ${x} 150 V ${60 - (index % 3) * 50 - (index % 2) * 30} h ${40 + (index % 2) * 16} V 150 Z`);
   return (
     <g>
       <defs>
@@ -65,11 +66,10 @@ const Notes: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
 const Back: FC<LayerProps> = (layer) => {
   const { colors, width, unit, backdrop } = layer;
   const { horizon, focus } = backdrop;
-  const wide = Math.min(width / unit - 120, 700);
   return (
     <>
       <Fill id="office-wall" layer={layer} stops={[[0, colors.wallTop], [1, colors.wall]]} to={horizon} />
-      <Placed x={focus.x} y={focus.y + 20 * unit} scale={unit}><Window colors={colors} wide={wide} /></Placed>
+      <Placed x={focus.x} y={focus.y} scale={unit}><Window colors={colors} wide={backdrop.focusWidth / unit - 16} /></Placed>
       <Placed x={width * 0.88} y={horizon - 230 * unit} scale={unit * 0.8}><Notes colors={colors} /></Placed>
       {[0.08, 0.92].map((at) => <HangingLamp key={at} x={width * at} y={focus.y - 160 * unit} unit={unit} shade={colors.lamp} light={colors.light} seed={`office-lamp${at}`} />)}
     </>

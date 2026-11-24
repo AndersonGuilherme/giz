@@ -1,4 +1,5 @@
 import type { FC } from 'react';
+import { FOCUS_RADIUS } from '../../../../domain/scenario/BackdropLayout.ts';
 import { ChalkBox, ChalkShape, Fill, Placed, Ridge } from './parts.tsx';
 import { CornerProps, FloorLines, spread } from './sceneryParts.tsx';
 import type { LayerProps, Palette, VectorBackgroundModel } from './VectorBackgroundModel.ts';
@@ -34,6 +35,9 @@ const Column: FC<Readonly<{ colors: Palette; height: number; seed: string }>> = 
   </g>
 );
 
+// The temple is drawn 200 units to each side (its lower step) and scaled into the backdrop's focus radius.
+const TEMPLE_HALF_WIDTH = 200;
+
 const Temple: FC<Readonly<{ colors: Palette }>> = ({ colors }) => (
   <g>
     <ChalkShape path="M -170 -150 L 0 -230 L 170 -150 Z" fill={colors.roof} chalk={{ seed: 'rome-pediment', width: 5 }} />
@@ -57,7 +61,7 @@ const Back: FC<LayerProps> = (layer) => {
       <Ridge base={horizon + 10 * unit} fill={colors.hillsFar} points={[[-width * 0.1, horizon - 140 * unit], [width * 0.25, horizon - 210 * unit], [width * 0.5, horizon - 120 * unit], [width * 0.8, horizon - 230 * unit], [width * 1.1, horizon - 150 * unit]]} />
       <Ridge base={horizon + 10 * unit} fill={colors.hills} chalk={{ seed: 'rome-hill', width: 4 * unit }} points={[[-width * 0.1, horizon - 40 * unit], [focus.x - 330 * unit, top + 40 * unit], [focus.x, top + 10 * unit], [focus.x + 330 * unit, top + 40 * unit], [width * 1.1, horizon - 40 * unit]]} />
       {[-260, -200, 210, 270].map((offset) => <Placed key={offset} x={focus.x + offset * unit} y={top + 60 * unit} scale={unit * 0.8}><Cypress color={colors.cypress} /></Placed>)}
-      <Placed x={focus.x} y={top - 102 * unit} scale={unit * 0.9}><Temple colors={colors} /></Placed>
+      <Placed x={focus.x} y={top - 83 * unit} scale={(unit * FOCUS_RADIUS) / TEMPLE_HALF_WIDTH}><Temple colors={colors} /></Placed>
     </>
   );
 };

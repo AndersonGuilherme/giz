@@ -391,7 +391,8 @@ Os fundos vetoriais têm três camadas que se movem em velocidades diferentes co
 Todos os fundos seguem a mesma planta (`BackdropLayout`, no domínio): o chão onde os pés pisam, o horizonte 150
 unidades acima dele, o palco onde os personagens ficam livres de objetos da frente, os dois cantos de baixo para os
 objetos da camada da frente e o ponto de destaque (uma janela, um monumento) entre os personagens em 16:9 e acima das
-cabeças, abaixo do HUD, em 9:16. Assim cada fundo funciona nas duas proporções.
+cabeças, abaixo do HUD, em 9:16. O destaque cabe num raio de 150 unidades; um destaque largo (o janelão do escritório,
+a verga da vela) usa a largura de destaque, que fica entre os dois personagens em 16:9. Assim cada fundo funciona nas duas proporções.
 
 `colors` troca cores da paleta, uma a uma. Os nomes ficam no começo de cada arquivo em
 `src/presentation/scenes/scenario/backgrounds/` (por exemplo `skyTop`, `skyBottom` e `window` na `street`).
@@ -447,8 +448,10 @@ ou `highlight`). Por exemplo, com `presets/scenes/castle-rain.json`:
 }
 ```
 
-Depois de copiar, a cena é sua: mude o que quiser. Os testes garantem que toda cena pronta passa no esquema do roteiro e
-no `check` de layout, vazia e com o máximo de personagens de cada proporção.
+Depois de copiar, a cena é sua: mude o que quiser. Os testes validam cada cena pronta pelo esquema do roteiro e passam a
+cena validada pelo `check` de layout nas duas proporções, com o máximo de personagens (2 em 9:16, 3 em 16:9), um HUD de
+dois campos com barra e o texto grande "E SE A INTERNET PARASSE?". Um texto grande bem mais longo pode não caber em
+16:9; o `check` aponta.
 
 ### 8.3 Câmera
 

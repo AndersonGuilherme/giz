@@ -4,6 +4,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { createLayoutRegistry } from '../../src/domain/layout/defaultLayoutRegistry.ts';
+import { Box } from '../../src/domain/layout/Box.ts';
 import { SafeArea } from '../../src/domain/layout/SafeArea.ts';
 import { VECTOR_BACKGROUNDS } from '../../src/domain/scenario/BackgroundSource.ts';
 import type { ScenarioScene } from '../../src/domain/script/Scene.ts';
@@ -57,15 +58,27 @@ test('every era background has at least one ready scene', async () => {
   for (const background of ERA_BACKGROUNDS) assert.ok(used.has(background), background);
 });
 
-test('every scene preset passes the layout check in 9:16 and 16:9, empty and with the most characters the frame allows', async () => {
+// A full HUD (two fields and the bar) and the README's big text: the check must still find every box inside the safe area.
+const LONG_HUD = { fields: [{ label: 'DIA', value: '3' }, { label: 'SEM', value: 'WI-FI' }], bar: { label: 'PACIÊNCIA', value: 40 } };
+const LONG_HIGHLIGHT = { text: 'E SE A INTERNET PARASSE?' };
+
+test('every scene preset, with the most characters, a long HUD and a big text, passes the layout check in 9:16 and 16:9', async () => {
   const registry = createLayoutRegistry();
   const check = (file: string, candidate: ScenarioScene, aspect: AspectRatio) => {
     const boxes = registry.boxesOf(candidate, aspect, Language.PORTUGUESE)!;
-    assert.deepEqual(boxes.outsideOf(SafeArea.for(aspect)), [], `${file} ${aspect.text()}`);
-    assert.deepEqual(boxes.overlappingPairs(), [], `${file} ${aspect.text()}`);
+    const label = `${file} ${aspect.text()}`;
+    assert.ok(boxes.overlappingPairs().length + boxes.outsideOf(SafeArea.for(aspect)).length + boxes.overflowingTexts().length === 0, label);
+    return boxes;
   };
+  const nowhere = Box.of('nowhere', { x: 0, y: 0, width: 0, height: 0 });
   const aspects = ['9:16', '16:9'].map((text) => AspectRatio.of(text));
-  for (const { file, scene } of await presets()) {
-    aspects.forEach((aspect) => [scene, withCharacters(scene, aspect)].forEach((candidate) => check(file, candidate, aspect)));
+  for (const { file, scene: raw } of await presets()) {
+    const scene = sceneSchema.parse(raw) as ScenarioScene;
+    aspects.forEach((aspect) => {
+      const crowded = withCharacters(scene, aspect);
+      check(file, crowded, aspect);
+      const dressed = check(file, { ...crowded, hud: LONG_HUD, highlight: LONG_HIGHLIGHT }, aspect);
+      assert.ok(dressed.outsideOf(nowhere).length >= 3, `${file} ${aspect.text()}: the HUD and the big text are measured`);
+    });
   }
 });
