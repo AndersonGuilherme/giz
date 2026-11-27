@@ -14,7 +14,7 @@ function setup() {
   const grants = grantsFor('/p');
   const files = new MemoryMediaFiles();
   const shell = new FakeShell();
-  const service = new VideoService({ build: new BuildService({ core, grants, serve: () => undefined }), files, shell, grants });
+  const service = new VideoService({ core, build: new BuildService({ core, grants, serve: () => undefined }), files, shell, grants });
   return { core, files, shell, service };
 }
 
@@ -52,12 +52,15 @@ test('the videos rendered in each aspect can be played; the history comes newest
   assert.deepEqual(document.renders, [record]);
 });
 
-test('open folder shows the output folder (the project folder before any render)', async () => {
+test('open folder shows the output folder (the project folder before any render, or when output is not a folder)', async () => {
   const { files, shell, service } = setup();
   await service.openFolder('/p');
-  files.files.set('/p/output', new Uint8Array());
+  await files.write('/p', 'output', bytes('not a folder'));
   await service.openFolder('/p');
-  assert.deepEqual(shell.opened, ['/p', '/p/output']);
+  await files.remove('/p', 'output');
+  await files.write('/p', 'output/video.mp4', bytes('mp4'));
+  await service.openFolder('/p');
+  assert.deepEqual(shell.opened, ['/p', '/p', '/p/output']);
   await assert.rejects(service.openFolder('/etc'), { code: 'invalid-request' });
 });
 
@@ -71,4 +74,12 @@ test('the captions of an aspect are copied as text or saved where the person cho
   assert.deepEqual(shell.saved, [{ from: '/p/output/captions-9x16.srt', name: 'p-9x16.srt' }]);
   shell.saveTo = null;
   assert.equal(await service.exportCaptions('/p', '9:16'), null);
+});
+
+test("the captions only read the project's aspect: no montage, no check", async () => {
+  const { core, files, service } = setup();
+  await files.write('/p', 'output/captions.srt', bytes('1\nOi.\n'));
+  await service.copyCaptions('/p', '16:9');
+  assert.deepEqual([core.built, core.inspected], [[], []]);
+  assert.deepEqual(core.aspectsRead, ['/p']);
 });

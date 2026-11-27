@@ -8,8 +8,10 @@ type Parts = Readonly<{ allowed: (path: string) => boolean; fetch: (url: string,
 const NOT_FOUND = () => new Response(null, { status: 404 });
 
 /**
- * The answer to a `giz-media://file/<path>` request: only pictures and WAV audio, only where `allowed` says; anything
- * else is a 404, so the page cannot read any other file of the disk through it. The type comes from the extension.
+ * The answer to a `giz-media://file/<path>` request: only the types of MEDIA_TYPES (pictures, WAV audio, rendered MP4
+ * videos, core's fonts), only where `allowed` says; anything else is a 404, so the page cannot read any other file of
+ * the disk through it. The type comes from the extension. A font is loaded in CORS mode, so it says any origin may
+ * read it (only our window ever reaches this scheme).
  */
 export function mediaResponder({ allowed, fetch }: Parts): (request: Request) => Promise<Response> {
   return async (request) => {
@@ -20,6 +22,7 @@ export function mediaResponder({ allowed, fetch }: Parts): (request: Request) =>
     const headers = new Headers(answer.headers);
     headers.set('content-type', MEDIA_TYPES[extname(path).toLowerCase()] ?? 'application/octet-stream');
     headers.set('cache-control', 'no-store');
+    headers.set('access-control-allow-origin', '*');
     return new Response(answer.body, { status: answer.status, headers });
   };
 }

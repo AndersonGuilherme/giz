@@ -51,3 +51,10 @@ test('a file the disk cannot give is a 404', async () => {
   const broken = mediaResponder({ allowed: () => true, fetch: async () => { throw new Error('EACCES'); } });
   assert.equal((await broken(new Request(mediaUrlOf('/projects/cats/voice/9.wav', 1)))).status, 404);
 });
+
+test("a bundled font is served as font/ttf and readable by the page (the scheme answers CORS for it)", async () => {
+  const { answer } = responder(() => true);
+  const response = await answer(new Request(mediaUrlOf('/core/public/fonts/Nunito.ttf', 5)));
+  assert.equal(response.headers.get('content-type'), 'font/ttf');
+  assert.equal(response.headers.get('access-control-allow-origin'), '*');
+});

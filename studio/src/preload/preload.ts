@@ -48,7 +48,8 @@ const giz: GizApi = {
   },
   video: {
     render: (folder, aspect) => call('video.render', { folder, aspect }),
-    cancel: () => call('video.cancel', {}),
+    cancel: (folder) => call('video.cancel', { folder }),
+    status: () => call('video.status', {}),
     onProgress: listen(RENDER_PROGRESS_EVENT),
     preview: (folder, aspect) => call('video.preview', { folder, ...(aspect ? { aspect } : {}) }),
     openFolder: (folder) => call('video.openFolder', { folder }),

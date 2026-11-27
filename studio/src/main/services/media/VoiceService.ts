@@ -66,6 +66,11 @@ export class VoiceService {
     return this.#job.cancel();
   }
 
+  /** Resolves when the job in flight (if any) has really ended, even after a cancel answered at once (the render waits for it). */
+  ended(): Promise<void> {
+    return this.#job.ended();
+  }
+
   /** The take must be a 16-bit PCM WAV; it is saved as recordings/<id>.wav and the line is made from it at once. */
   record(folder: string, lineId: string, wav: Uint8Array): Promise<VoicesDocument> {
     const { disk, grants, core, files, saves } = this.#dependencies;

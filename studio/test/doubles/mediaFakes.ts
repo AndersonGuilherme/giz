@@ -91,8 +91,10 @@ export class MemoryMediaFiles implements MediaFiles {
     return this.files.get(join(folder, file));
   }
 
+  // A folder exists when some file is inside it, as on disk.
   async exists(folder: string, file: string) {
-    return this.files.has(join(folder, file));
+    const path = join(folder, file);
+    return this.files.has(path) || [...this.files.keys()].some((known) => known.startsWith(`${path}/`));
   }
 
   async modified(folder: string, file: string) {

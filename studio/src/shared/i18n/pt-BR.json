@@ -28,7 +28,6 @@
   "errors.title": "Algo deu errado",
   "errors.busy": "Já existe um vídeo sendo renderizado.",
   "errors.cancelled": "render cancelado",
-  "errors.aspect": "Este projeto é {project}, não {asked}.",
   "errors.noVault": "Este sistema não oferece um cofre para guardar a chave com segurança.",
   "errors.invalidRequest": "pedido inválido",
   "errors.invalidProject": "projeto inválido",

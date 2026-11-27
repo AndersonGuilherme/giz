@@ -11,15 +11,16 @@ const setup = () => {
   return { core, grants, served, service: new BuildService({ core, grants, serve: (folder) => void served.push(folder) }) };
 };
 
-test("without an aspect, the montage is in the project's own; the sounds folder is served, never granted", async () => {
+test("without an aspect, the montage is in the project's own; core's sounds and fonts folders are served, never granted", async () => {
   const { core, grants, served, service } = setup();
   const montage = await service.montage('/p');
   assert.equal(montage.aspect, '16:9');
   assert.deepEqual(core.built, ['16:9']);
   assert.equal(montage.failure, null);
   assert.equal(montage.build?.seconds, 62.5);
-  assert.deepEqual(served, ['/core/public/sounds']);
+  assert.deepEqual(served, ['/core/public/sounds', '/core/public/fonts']);
   assert.equal(grants.allows('/core/public/sounds/pop.wav'), false);
+  assert.equal(grants.allows('/core/public/fonts/Nunito.ttf'), false);
 });
 
 test('the other aspect is montaged and checked in that aspect', async () => {

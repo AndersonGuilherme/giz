@@ -42,7 +42,10 @@ export type CheckProblem = Readonly<{ line: string; message: string }>;
 export type CheckReport = Readonly<{ errors: readonly CheckProblem[]; warnings: readonly CheckProblem[] }>;
 
 export type RenderedFiles = Readonly<{ video: string; captions: string }>;
-export type RenderProgress = Readonly<{ fraction: number }>;
+/** One progress step of the running render, naming it (its folder and aspect). */
+export type RenderProgress = Readonly<{ folder: string; aspect: Aspect; fraction: number }>;
+/** The render running in the main process: its folder, aspect and progress (null while it prepares, before a frame). */
+export type RenderJobStatus = Readonly<{ folder: string; aspect: Aspect; fraction: number | null }>;
 
 type Channel<Request, Response> = Readonly<{ request: Request; response: Response }>;
 type Nothing = Readonly<Record<string, never>>;
@@ -61,7 +64,10 @@ export type Channels = CastChannels & ScenarioChannels & VoiceChannels & VideoCh
   'projects.check': Channel<FolderRequest, CheckReport>;
   /** Renders in that aspect (the other one gets its own files) after "montar" and the check; progress on `video.progress`. */
   'video.render': Channel<FolderRequest & Readonly<{ aspect: Aspect }>, RenderedFiles>;
-  'video.cancel': Channel<Nothing, boolean>;
+  /** Cancels the render of that folder (false when it is not rendering). */
+  'video.cancel': Channel<FolderRequest, boolean>;
+  /** The render running now, if any: a screen shown again (another tab, another project, Settings) re-attaches to it. */
+  'video.status': Channel<Nothing, RenderJobStatus | null>;
   /** Where the key went: the system keychain, or the 600-mode file when there is none. */
   'keys.set': Channel<ProviderRequest & Readonly<{ key: string }>, KeyStorage>;
   'keys.has': Channel<ProviderRequest, boolean>;

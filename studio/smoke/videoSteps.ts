@@ -67,9 +67,15 @@ async function seekTo(page: Page, frame: number): Promise<void> {
 
 const frameOf = async (page: Page) => Number(await page.evaluate(`document.querySelector('[data-testid="video-seek"]').value`));
 
-/** The Player draws the video; the slider seeks; a chapter and a line jump there; play moves the clock. */
+// The fonts the page has loaded: core's bundled Nunito and JetBrains Mono, served by the media scheme (no network).
+const loadedFonts = (page: Page) => page.evaluate(`[...document.fonts].filter((font) => font.status === 'loaded').map((font) => font.family.replace(/"/g, '')).join(',')`) as Promise<string>;
+
+/** The Player draws the video with the bundled fonts; the slider seeks; a chapter and a line jump there; play moves the clock. */
 async function playAndSeek({ page, shoot }: Context): Promise<void> {
   await until(async () => Boolean(await page.evaluate(`document.querySelector('.video-frame svg, .video-frame canvas, .video-frame img') !== null`)), 'the Player drawing the video');
+  await until(async () => /Nunito/.test(await loadedFonts(page)) && /JetBrains Mono/.test(await loadedFonts(page)), 'the bundled fonts loaded in the window');
+  const policy = (await page.evaluate(`document.querySelector('meta[http-equiv="Content-Security-Policy"]')?.content ?? ''`)) as string;
+  assert.doesNotMatch(policy, /https?:\/\/(?!localhost)/, 'the page names no network origin');
   await seekTo(page, 60);
   await page.untilText('.video-frame', /Reclamação #4521/);
   await shoot(page, 's5-02-previa');
@@ -102,10 +108,24 @@ async function otherAspect({ page, shoot }: Context): Promise<void> {
   await page.untilText('[data-testid="video-check"]', /Verificação em 16:9[\s\S]*Tudo certo/);
 }
 
-/** A render cancelled while it prepares, then a short real one, watched, with its folder and captions. */
+/**
+ * A render survives leaving the Video stage: started, then the Script tab and back, the card shows it again (still
+ * running, with Cancel); it is cancelled there. Then a short real one, watched, with its folder and captions.
+ */
 async function render({ page, shoot, home }: Context, folder: string): Promise<void> {
+  assert.equal(await page.evaluate(`document.querySelector('[data-testid="video-render"] progress') === null`), true, 'no progress bar before any render');
   await page.click('[data-testid="video-render"] .render-actions .primary');
   await page.untilText('[data-testid="video-render"] .status', /Preparando|Renderizando/);
+  await page.click('[data-testid="tab-script"]');
+  await page.until('[data-testid="check-report"]');
+  await page.click('[data-testid="tab-video"]');
+  await page.untilText('[data-testid="video-render"] .status', /Preparando|Renderizando/);
+  await page.until('[data-testid="video-render"] .render-actions button:not(.primary)');
+  await shoot(page, 's5-fix-01-render-de-volta');
+  const status = (await page.evaluate('window.giz.video.status()')) as { value: { folder: string; aspect: string } | null };
+  assert.deepEqual([status.value?.folder, status.value?.aspect], [folder, '16:9']);
+  const voices = (await page.evaluate(`window.giz.voices.generate(${JSON.stringify(folder)})`)) as { failure?: { code: string } };
+  assert.equal(voices.failure?.code, 'busy', 'no voices are made while that project renders');
   await page.click('[data-testid="video-render"] .render-actions button:not(.primary)');
   await page.untilText('[data-testid="video-render"] .status', /Render cancelado/);
   await page.click('[data-testid="video-render"] .render-actions .primary');

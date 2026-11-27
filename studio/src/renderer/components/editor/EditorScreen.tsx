@@ -8,7 +8,6 @@ import { EditorContext, type EditorTools } from './EditorContext.ts';
 import { EditorToolbar } from './EditorToolbar.tsx';
 import { LineList } from './LineList.tsx';
 import { ProblemsPanel } from './ProblemsPanel.tsx';
-import { RenderBox } from './RenderBox.tsx';
 import { useUndoKeys } from './useUndoKeys.ts';
 
 type Props = Readonly<{ api: GizApi; folder: string; focus?: string }>;
@@ -41,7 +40,7 @@ function Body({ editor }: Readonly<{ editor: Editor }>) {
   return (
     <div className="editor-body">
       <LineList />
-      <aside className="editor-side"><ProblemsPanel saving={editor.saving} saveFailure={editor.saveFailure} /><RenderBox /></aside>
+      <aside className="editor-side"><ProblemsPanel saving={editor.saving} saveFailure={editor.saveFailure} /></aside>
     </div>
   );
 }
@@ -66,7 +65,7 @@ function useFocus(tools: EditorTools | null, focus: string | undefined): void {
   }, [ready, focus]);
 }
 
-/** The Script stage: the stages on top, the lines in the middle, the check and the render beside them. */
+/** The Script stage: the stages on top, the lines in the middle, the check beside them (the render is in the Video stage). */
 export function EditorScreen({ api, folder, focus }: Props) {
   const translate = useTranslate();
   const editor = useEditor(api, folder);

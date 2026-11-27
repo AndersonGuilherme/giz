@@ -48,5 +48,9 @@
   "video.exportTitle": "Save the captions (SRT)",
   "video.noCaptions": "There are no captions in {aspect} yet: render the video in that aspect first.",
   "video.history": "Latest renders",
-  "video.noRenders": "No renders yet."
+  "video.noRenders": "No renders yet.",
+  "video.busy.render": "This project's video is being rendered. Wait for the render to end (or cancel it) before making voices or scenarios.",
+  "video.busy.voices": "This project's voices are being made. Wait for them to end (or cancel) before rendering.",
+  "video.busy.scenarios": "A scenario of this project is being made. Wait for it to end (or cancel) before rendering.",
+  "video.otherRendering": "Another project is rendering now ({folder}). Wait for it to end to render this one."
 }

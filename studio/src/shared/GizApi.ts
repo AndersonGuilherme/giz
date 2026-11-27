@@ -1,5 +1,5 @@
 import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
-import type { Aspect, CheckReport, ProjectSummary, RenderedFiles, RenderProgress, Result } from './contract.ts';
+import type { Aspect, CheckReport, ProjectSummary, RenderedFiles, RenderJobStatus, RenderProgress, Result } from './contract.ts';
 import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from './setup.ts';
 import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, ScriptProgress, StageBrief } from './projects.ts';
@@ -42,7 +42,10 @@ export type GizApi = MediaApi & Readonly<{
   }>;
   video: Readonly<{
     render(folder: string, aspect: Aspect): Reply<RenderedFiles>;
-    cancel(): Reply<boolean>;
+    /** Cancels the render of that folder (false when that folder is not rendering). */
+    cancel(folder: string): Reply<boolean>;
+    /** The render running now (another screen or project may have started it), or null. */
+    status(): Reply<RenderJobStatus | null>;
     /** Calls `listener` on each progress step of the running render; returns the function that stops listening. */
     onProgress(listener: (progress: RenderProgress) => void): () => void;
     /** "Montar" and everything the Video stage shows, in `aspect` (the project's own when absent). */

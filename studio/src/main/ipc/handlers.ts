@@ -12,6 +12,8 @@ import type { VoiceService } from '../services/media/VoiceService.ts';
 import type { VideoService } from '../services/video/VideoService.ts';
 import type { FolderGrants } from '../services/FolderGrants.ts';
 import type { ServedFolders } from '../services/media/ServedFolders.ts';
+import { FolderJobs } from '../services/FolderJobs.ts';
+import { folderJobsGuard } from './folderJobsGuard.ts';
 import { mediaHandlers } from './mediaHandlers.ts';
 import { projectHandlers, scriptHandlers } from './projectHandlers.ts';
 import { videoHandlers } from './videoHandlers.ts';
@@ -36,10 +38,10 @@ export type Services = Readonly<{
   served: ServedFolders;
 }>;
 
-/** The channel map: each channel name to the service call that answers it. */
+/** The channel map: each channel name to the service call that answers it (a render and a voice or image job never share a folder). */
 export function handlersOf(services: Services): Handlers {
   const { projects, listing, ideas, script, video, keys, settings, setup } = services;
-  return {
+  return folderJobsGuard({
     ...mediaHandlers(services),
     ...projectHandlers(projects, listing),
     ...scriptHandlers(ideas, script),
@@ -52,7 +54,7 @@ export function handlersOf(services: Services): Handlers {
     'models.status': () => setup.models(),
     'setup.run': ({ task }) => setup.run(task),
     'setup.stop': async ({ task }) => setup.stop(task),
-  };
+  }, new FolderJobs(), { voices: () => services.voices.ended() });
 }
 
 function keyHandlers(keys: KeyService): Pick<Handlers, 'keys.set' | 'keys.has' | 'keys.remove' | 'keys.status' | 'keys.test'> {

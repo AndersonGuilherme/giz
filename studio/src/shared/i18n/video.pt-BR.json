@@ -48,5 +48,9 @@
   "video.exportTitle": "Salvar a legenda (SRT)",
   "video.noCaptions": "Ainda não há legenda em {aspect}: renderize o vídeo nessa proporção primeiro.",
   "video.history": "Últimos renders",
-  "video.noRenders": "Nenhum render ainda."
+  "video.noRenders": "Nenhum render ainda.",
+  "video.busy.render": "O vídeo deste projeto está sendo renderizado. Espere o render terminar (ou cancele-o) antes de gerar vozes ou cenários.",
+  "video.busy.voices": "As vozes deste projeto estão sendo geradas. Espere terminar (ou cancele) antes de renderizar.",
+  "video.busy.scenarios": "Um cenário deste projeto está sendo gerado. Espere terminar (ou cancele) antes de renderizar.",
+  "video.otherRendering": "Outro projeto está renderizando agora ({folder}). Espere terminar para renderizar este."
 }

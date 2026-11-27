@@ -1,9 +1,9 @@
 import { join } from 'node:path';
 import type { Aspect, RenderedFiles } from '../../../shared/contract.ts';
 import type { StageItems } from '../../ports/MediaCore.ts';
-import type { VideoBuild, VideoCore, VideoInspection, VideoRenderJob } from '../../ports/VideoCore.ts';
+import type { OutputFiles, VideoBuild, VideoCore, VideoInspection, VideoRenderJob } from '../../ports/VideoCore.ts';
 import { stageItemsOf } from '../media/coreJobs.ts';
-import { coreMain } from '../media/mediaModules.ts';
+import { coreAspect, coreMain } from '../media/mediaModules.ts';
 
 type CoreVideo = typeof import('giz-core/src/presentation/cli/composition/video.ts');
 type CoreClock = typeof import('giz-core/src/domain/video/VideoClock.ts');
@@ -18,6 +18,13 @@ function linesOf(project: Project): VideoInspection['lines'] {
   return project.script().lines().each().map((line) => ({ lineId: line.id(), text: line.text(), speakerName: nameOf(line.speaker()) }));
 }
 
+// The project loaded once, and seen in `aspect` when one is given.
+async function loaded(folder: string, aspect: Aspect | undefined): Promise<Readonly<{ own: Project; project: Project }>> {
+  const [video, { AspectRatio }] = await Promise.all([coreVideo(), coreAspect()]);
+  const own = await video.projectInAspect(folder);
+  return { own, project: aspect === undefined ? own : own.inAspect(AspectRatio.of(aspect)) };
+}
+
 /**
  * Core's Video stage through its composition point (loaded on first use). `frames`: renders only the first frames
  * (the rehearsal mode's short real render); none: the whole video.
@@ -30,10 +37,13 @@ export class GizVideoCore implements VideoCore {
   }
 
   async inspect(folder: string, aspect: Aspect | undefined): Promise<VideoInspection> {
-    const [video, main] = await Promise.all([coreVideo(), coreMain()]);
-    const [own, project] = await Promise.all([video.projectInAspect(folder), video.projectInAspect(folder, aspect)]);
+    const [{ own, project }, main] = await Promise.all([loaded(folder, aspect), coreMain()]);
     const check = await main.checkProject().run(project);
-    return { projectAspect: own.aspect().text() as Aspect, title: own.title(), lines: linesOf(own), check: structuredClone(check) };
+    return { projectAspect: own.aspect().text(), title: own.title(), lines: linesOf(own), check: structuredClone(check) };
+  }
+
+  async aspectOf(folder: string): Promise<Aspect> {
+    return (await (await coreVideo()).projectInAspect(folder)).aspect().text();
   }
 
   items(folder: string): Promise<StageItems> {
@@ -41,21 +51,25 @@ export class GizVideoCore implements VideoCore {
   }
 
   async build(folder: string, aspect: Aspect): Promise<VideoBuild> {
-    const [video, { VideoClock }] = await Promise.all([coreVideo(), coreClock()]);
-    const { props, files } = await video.videoPreview(folder, await video.projectInAspect(folder, aspect));
+    const [video, { VideoClock }, { project }] = await Promise.all([coreVideo(), coreClock(), loaded(folder, aspect)]);
+    const { props, files } = await video.videoPreview(folder, project);
     const seconds = VideoClock.of(props.totalFrames).durationInFrames() / props.fps;
-    return { props: structuredClone(props), files, seconds };
+    return { props: structuredClone(props), files, seconds, fps: props.fps };
   }
 
-  async soundsFolder(): Promise<string> {
-    return join((await coreMain()).publicFolder(), 'sounds');
+  async servedFolders(): Promise<readonly string[]> {
+    const publicFolder = (await coreMain()).publicFolder();
+    return [join(publicFolder, 'sounds'), join(publicFolder, 'fonts')];
   }
 
-  async render(folder: string, aspect: Aspect, job: VideoRenderJob): Promise<RenderedFiles & Readonly<{ seconds?: number }>> {
-    const [video, main] = await Promise.all([coreVideo(), coreMain()]);
-    const project = await video.projectInAspect(folder, aspect);
+  async outputFiles(variant: string | undefined): Promise<OutputFiles> {
+    return (await coreVideo()).outputFilesOf(variant);
+  }
+
+  async render(folder: string, aspect: Aspect, job: VideoRenderJob): Promise<RenderedFiles & Readonly<{ frames?: number }>> {
+    const [{ project }, main] = await Promise.all([loaded(folder, aspect), coreMain()]);
     const output = { ...(job.variant === undefined ? {} : { variant: job.variant }), ...(this.#frames === undefined ? {} : { frames: this.#frames }) };
     const files = await main.renderVideo(folder, job.signal, output).run(folder, project, job.onProgress);
-    return this.#frames === undefined ? files : { ...files, seconds: this.#frames / 30 };
+    return this.#frames === undefined ? files : { ...files, frames: this.#frames };
   }
 }

@@ -3,15 +3,16 @@ import { ASPECTS, type Aspect } from '../../../shared/contract.ts';
 import type { RenderedVideo, VideoDocument, VideoMissing, VideoMontage } from '../../../shared/video.ts';
 import type { DesktopShell } from '../../ports/DesktopShell.ts';
 import type { MediaFiles } from '../../ports/MediaCore.ts';
+import type { VideoCore } from '../../ports/VideoCore.ts';
 import { translate } from '../../text.ts';
 import type { FolderGrants } from '../FolderGrants.ts';
 import { mediaUrlOf } from '../media/mediaUrls.ts';
 import { StudioError } from '../StudioError.ts';
 import type { BuildService, Montage } from './BuildService.ts';
-import { outputOf, variantOf } from './outputFiles.ts';
+import { variantOf } from './outputFiles.ts';
 import { historyOf } from './renderHistory.ts';
 
-type Dependencies = Readonly<{ build: BuildService; files: MediaFiles; shell: DesktopShell; grants: FolderGrants }>;
+type Dependencies = Readonly<{ core: VideoCore; build: BuildService; files: MediaFiles; shell: DesktopShell; grants: FolderGrants }>;
 
 const missingOf = ({ items }: Montage): VideoMissing => ({
   voices: items.voices.missing, staleVoices: items.voices.stale,
@@ -36,12 +37,13 @@ export class VideoService {
     return { ...base, missing: missingOf(made), stages: made.items.stages, montage, failure: made.failure, rendered, renders };
   }
 
-  /** The output folder (the project folder while nothing was rendered). */
+  /** The output folder; the project folder while there is none, or when `output` is not a folder (never a file to run). */
   async openFolder(folder: string): Promise<true> {
     const { grants, files, shell } = this.#dependencies;
     const path = grants.require(folder);
-    const output = (await files.exists(path, 'output')) ? join(path, 'output') : path;
-    await shell.openFolder(output);
+    // Inside the project (no link out of it) and there, but not a file: a folder.
+    const isFolder = (await files.exists(path, 'output')) && (await files.modified(path, 'output')) === undefined;
+    await shell.openFolder(isFolder ? join(path, 'output') : path);
     return true;
   }
 
@@ -58,11 +60,13 @@ export class VideoService {
     return this.#dependencies.shell.saveCopy(join(path, captions), name);
   }
 
+  // Only the project's aspect is read (which files are the variant's): no montage, no check.
   async #captions(folder: string, aspect: Aspect) {
-    const montage = await this.#dependencies.build.montage(folder, aspect);
-    const { captions } = outputOf(variantOf(aspect, montage.inspection.projectAspect));
-    if (!(await this.#dependencies.files.exists(montage.folder, captions))) throw new StudioError('invalid-request', translate('video.noCaptions', { aspect }));
-    return { path: montage.folder, captions };
+    const { core, files, grants } = this.#dependencies;
+    const path = grants.require(folder);
+    const { captions } = await core.outputFiles(variantOf(aspect, await core.aspectOf(path)));
+    if (!(await files.exists(path, captions))) throw new StudioError('invalid-request', translate('video.noCaptions', { aspect }));
+    return { path, captions };
   }
 
   async #montageOf({ build }: Montage): Promise<VideoMontage | null> {
@@ -72,9 +76,9 @@ export class VideoService {
   }
 
   async #rendered({ folder, inspection }: Montage): Promise<readonly RenderedVideo[]> {
-    const { files } = this.#dependencies;
+    const { core, files } = this.#dependencies;
     const found = await Promise.all(ASPECTS.map(async (aspect) => {
-      const names = outputOf(variantOf(aspect, inspection.projectAspect));
+      const names = await core.outputFiles(variantOf(aspect, inspection.projectAspect));
       const version = await files.modified(folder, names.video);
       if (version === undefined) return [];
       return [{ aspect, url: mediaUrlOf(join(folder, names.video), version), captions: await files.exists(folder, names.captions) }];

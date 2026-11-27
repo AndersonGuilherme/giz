@@ -33,11 +33,11 @@ test('a valid payload runs the handler and its answer comes back as ok', async (
 });
 
 test('a StudioError keeps its code and message; any other error says it failed, with its own text in the details, never the stack', async () => {
-  const busy = guarded<'video.cancel'>(REQUEST_SCHEMAS['video.cancel'], async () => {
+  const busy = guarded<'video.status'>(REQUEST_SCHEMAS['video.status'], async () => {
     throw new StudioError('busy', 'ocupado');
   });
   assert.deepEqual(await busy({}), { ok: false, failure: { code: 'busy', message: 'ocupado', details: [] } });
-  const broken = guarded<'video.cancel'>(REQUEST_SCHEMAS['video.cancel'], async () => {
+  const broken = guarded<'video.status'>(REQUEST_SCHEMAS['video.status'], async () => {
     throw new Error('disco cheio');
   });
   const result = await broken(undefined);

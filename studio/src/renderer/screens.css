@@ -160,7 +160,6 @@ input.seconds { width: 90px; flex: none; }
 .save-status { margin: 0 0 8px; font-size: 13px; color: var(--chalk-dim); }
 .save-status.saved::before { content: '✓ '; color: var(--chalk-green); }
 .save-status.failed { color: var(--chalk-red); }
-.editor-side .render .chalk-button.primary { width: 100%; }
 .icon { display: inline-block; vertical-align: -3px; flex: none; }
 .chalk-button .icon { margin-right: 2px; }
 .field > .segmented { align-self: flex-start; }

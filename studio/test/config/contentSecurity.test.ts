@@ -11,11 +11,17 @@ test('the packaged page gets the strict policy: no websocket, no inline styles o
 
 test('only the Vite dev server adds its websocket and inline styles; scripts stay self-only', () => {
   const policy = contentSecurityPolicy(true);
-  assert.match(policy, /connect-src 'self' https:\/\/fonts\.gstatic\.com ws:\/\/localhost:\*/);
+  assert.match(policy, /connect-src 'self' ws:\/\/localhost:\*/);
   assert.match(policy, /style-src 'self' 'unsafe-inline'/);
   assert.match(policy, /script-src 'self';/);
 });
 
-test("the page connects only to itself and Google Fonts' font host (the video preview's Nunito and JetBrains Mono)", () => {
-  assert.match(contentSecurityPolicy(false), /connect-src 'self' https:\/\/fonts\.gstatic\.com;/);
+test('the packaged page names no network origin: no https:, no http:, no Google Fonts host', () => {
+  const policy = contentSecurityPolicy(false);
+  assert.doesNotMatch(policy, /https?:|gstatic|googleapis/);
+  assert.match(policy, /connect-src 'self';/);
+});
+
+test("the video's bundled fonts load from the page itself or the media scheme (core's fonts folder, served)", () => {
+  assert.match(contentSecurityPolicy(false), /font-src 'self' giz-media:;/);
 });

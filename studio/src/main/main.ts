@@ -18,6 +18,8 @@ import { WindowSlot } from './WindowSlot.ts';
 if (started) app.quit();
 
 const slot = new WindowSlot<BrowserWindow>();
+// How long a quit waits for a cancelled render to end before it quits anyway.
+const RENDER_STOP_WAIT = 5000;
 preparePaths();
 registerMediaScheme();
 
@@ -31,7 +33,8 @@ function register(): void {
   const restored = services.settings.restore().catch((error: unknown) => console.error('giz: the saved settings could not be restored:', error));
   const handlers = afterReady(handlersOf(services), restored);
   registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers, trusts: (event) => isTrustedSender(event, rules) });
-  quitAfterSaves(app, () => services.script.settled());
+  // Quitting waits for the writes in flight and stops a running render (its browser and encoder), briefly at most.
+  quitAfterSaves(app, () => Promise.all([services.script.settled(), services.video.stop(RENDER_STOP_WAIT)]).then(() => undefined));
 }
 
 function openWindow(): void {

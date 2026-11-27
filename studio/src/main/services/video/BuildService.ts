@@ -6,7 +6,7 @@ import { translate } from '../../text.ts';
 import type { FolderGrants } from '../FolderGrants.ts';
 import { StudioError } from '../StudioError.ts';
 
-/** `serve` lets the media scheme serve a folder of the Studio's own (core's sound effects), without granting it. */
+/** `serve` lets the media scheme serve a folder of the Studio's own (core's sound effects and fonts), without granting it. */
 type Dependencies = Readonly<{ core: VideoCore; grants: FolderGrants; serve: (folder: string) => void }>;
 
 /** The project in the chosen aspect, what its stages lack, and its montage (or why there is none). */
@@ -53,7 +53,7 @@ export class BuildService {
     if (failure) return { ...base, build: null, failure };
     try {
       const build = await core.build(path, base.aspect);
-      serve(await core.soundsFolder());
+      (await core.servedFolders()).forEach(serve);
       return { ...base, build, failure: null };
     } catch (error) {
       return { ...base, build: null, failure: failureOf(error) };

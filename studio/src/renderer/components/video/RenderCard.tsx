@@ -1,10 +1,10 @@
-import { useCallback, useEffect, useReducer, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Failure, Result } from '../../../shared/contract.ts';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import type { VideoDocument } from '../../../shared/video.ts';
 import { useTranslate } from '../../i18n.ts';
-import { renderProject } from '../../state/actions.ts';
-import { INITIAL_STATE, reduce } from '../../state/studioState.ts';
+import { renderOf, type RenderJobState, type RenderView } from '../../state/renderJob.ts';
+import { useRenderJobTools } from '../../state/useRenderJob.ts';
 import { FailurePanel } from '../FailurePanel.tsx';
 import { RenderPanel } from '../RenderPanel.tsx';
 import { RenderHistory } from './RenderHistory.tsx';
@@ -58,20 +58,50 @@ function Outputs({ api, document }: Readonly<{ api: GizApi; document: VideoDocum
   );
 }
 
-/** The render in the chosen aspect (blocked while the montage fails or the check has errors), its outputs and history. */
+// The document is read again once when this project's render ends: never again for that end, whatever changes later
+// (another aspect chosen afterwards makes no extra montage).
+function useReloadOnEnd(folder: string, onRendered: () => void): void {
+  const { state } = useRenderJobTools();
+  const latest = useRef(onRendered);
+  const seen = useRef(state.ended.count);
+  useEffect(() => void (latest.current = onRendered), [onRendered]);
+  useEffect(() => {
+    if (state.ended.count === seen.current) return;
+    seen.current = state.ended.count;
+    if (state.ended.folder === folder) latest.current();
+  }, [state.ended, folder]);
+}
+
+// The folder of a render running for another project, which blocks this one's.
+const otherRendering = ({ job }: RenderJobState, folder: string) => (job.status === 'running' && job.folder !== folder ? job.folder : null);
+const isBlocked = (document: VideoDocument, other: string | null) => document.montage === null || document.check.errors.length > 0 || other !== null;
+const failureOf = (render: RenderView) => (render.status === 'idle' ? render.failure : undefined);
+
+function BlockedNote({ document, other }: Readonly<{ document: VideoDocument; other: string | null }>) {
+  const translate = useTranslate();
+  const reason = other === null ? (document.montage ? 'video.blockedByCheck' : 'video.blockedByMontage') : 'video.otherRendering';
+  return <p className="muted small" data-testid="render-blocked">{translate(reason, { folder: other ?? '' })}</p>;
+}
+
+/**
+ * The render in the chosen aspect (blocked while the montage fails, the check has errors or another project renders),
+ * its outputs and history. The render itself lives above the screens: back on this card, a running one shows again,
+ * labelled with its own aspect.
+ */
 export function RenderCard({ api, document, onRendered }: Props) {
   const translate = useTranslate();
-  const [state, dispatch] = useReducer(reduce, INITIAL_STATE);
-  useEffect(() => api.video.onProgress(({ fraction }) => dispatch({ type: 'render-progress', fraction })), [api]);
-  useEffect(() => (state.render.status === 'done' ? onRendered() : undefined), [state.render.status, onRendered]);
-  const render = () => void renderProject(api, dispatch, { folder: document.folder, aspect: document.aspect });
-  const blocked = document.montage === null || document.check.errors.length > 0;
+  const { state, start, cancel } = useRenderJobTools();
+  useReloadOnEnd(document.folder, onRendered);
+  const render = renderOf(state, document.folder);
+  const other = otherRendering(state, document.folder);
+  const blocked = isBlocked(document, other);
+  const failure = failureOf(render);
   return (
     <section className="render-card" data-testid="video-render">
-      <h2>{translate('video.renderTitle', { aspect: document.aspect })}</h2>
-      {blocked && <p className="muted small" data-testid="render-blocked">{translate(document.montage ? 'video.blockedByCheck' : 'video.blockedByMontage')}</p>}
-      {state.failure && <FailurePanel failure={state.failure} />}
-      <RenderPanel render={state.render} blocked={blocked} onRender={render} onCancel={() => void api.video.cancel()} />
+      <h2>{translate('video.renderTitle', { aspect: render.status === 'running' ? render.aspect : document.aspect })}</h2>
+      {blocked && <BlockedNote document={document} other={other} />}
+      {failure && <FailurePanel failure={failure} />}
+      <RenderPanel render={render} blocked={blocked} onRender={() => start(document.folder, document.aspect)} onCancel={() => cancel(document.folder)} />
       <Outputs api={api} document={document} />
       <RenderHistory renders={document.renders} />
     </section>

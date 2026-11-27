@@ -1,4 +1,6 @@
 /* giz identity: a slate board with chalk lines and one yellow chalk accent. */
+/* The window's Nunito is core's bundled file (OFL), built into the page: no font is ever fetched from the network. */
+@font-face { font-family: 'Nunito'; src: url('../../../core/public/fonts/Nunito.ttf') format('truetype'); font-weight: 200 1000; font-display: swap; }
 :root {
   --slate: #26302d;
   --slate-deep: #1d2523;
@@ -65,6 +67,8 @@ body {
 .chalk-button:hover:not(:disabled) { background: rgba(243, 239, 226, 0.08); }
 .chalk-button:disabled { opacity: 0.45; cursor: default; }
 .chalk-button.primary { color: var(--slate-deep); background: var(--chalk-yellow); border-color: var(--chalk-yellow); }
+/* A primary button that cannot be pressed now: plain chalk outline, not a faded yellow that still looks pressable. */
+.chalk-button.primary:disabled { color: var(--chalk-dim); background: transparent; border-color: rgba(243, 239, 226, 0.25); border-style: dashed; opacity: 1; }
 .chalk-button.small { padding: 5px 12px; font-size: 14px; border-radius: 8px; }
 .chalk-button.quiet { border-color: transparent; color: var(--chalk-dim); }
 .chalk-button.quiet:hover:not(:disabled) { color: var(--chalk); }

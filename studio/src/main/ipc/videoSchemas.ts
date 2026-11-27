@@ -11,7 +11,8 @@ type VideoChannel = Extract<ChannelName, `video.${string}`>;
 /** The Video stage's payloads: a folder (granted, checked by the services) and an aspect; never a file path. */
 export const VIDEO_SCHEMAS: { readonly [Name in VideoChannel]: z.ZodType<RequestOf<Name>> } = {
   'video.render': z.object({ folder, aspect }).strict(),
-  'video.cancel': nothing,
+  'video.cancel': z.object({ folder }).strict(),
+  'video.status': nothing,
   'video.preview': z.object({ folder, aspect: aspect.optional() }).strict(),
   'video.openFolder': z.object({ folder }).strict(),
   'video.copyCaptions': z.object({ folder, aspect }).strict(),

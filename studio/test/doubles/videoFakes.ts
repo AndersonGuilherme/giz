@@ -1,3 +1,4 @@
+import { outputFilesOf } from 'giz-core/src/application/use-cases/RenderVideo.ts';
 import type { Aspect, CheckReport, RenderedFiles } from '../../src/shared/contract.ts';
 import type { DesktopShell } from '../../src/main/ports/DesktopShell.ts';
 import type { StageItems } from '../../src/main/ports/MediaCore.ts';
@@ -21,9 +22,10 @@ export class FakeVideoCore implements VideoCore {
   items_: StageItems = NO_ITEMS;
   buildError: Error | undefined;
   renderWith: Render = async () => undefined;
-  /** Seconds the render says it made (a short rehearsal render); undefined: the whole video. */
-  renderedSeconds: number | undefined;
+  /** Frames the render says it made (a short rehearsal render); undefined: the whole video. */
+  renderedFrames: number | undefined;
   readonly inspected: Array<Aspect | undefined> = [];
+  readonly aspectsRead: string[] = [];
   readonly built: Aspect[] = [];
   readonly renders: Array<Readonly<{ folder: string; aspect: Aspect; variant?: string }>> = [];
 
@@ -31,6 +33,11 @@ export class FakeVideoCore implements VideoCore {
     this.inspected.push(aspect);
     const check = this.checks[aspect ?? this.projectAspect] ?? { errors: [], warnings: [] };
     return { projectAspect: this.projectAspect, title: 'O cupom', lines: LINES, check };
+  }
+
+  async aspectOf(folder: string): Promise<Aspect> {
+    this.aspectsRead.push(folder);
+    return this.projectAspect;
   }
 
   async items(): Promise<StageItems> {
@@ -41,19 +48,24 @@ export class FakeVideoCore implements VideoCore {
     this.built.push(aspect);
     if (this.buildError) throw this.buildError;
     const props = { width: aspect === '9:16' ? 1080 : 1920, height: aspect === '9:16' ? 1920 : 1080, fps: 30 };
-    return { props, files: [{ at: 'voice/a1.wav', from: `${folder}/voice/a1.wav` }, { at: 'sounds/pop.wav', from: '/core/public/sounds/pop.wav' }], seconds: 62.5 };
+    return { props, files: [{ at: 'voice/a1.wav', from: `${folder}/voice/a1.wav` }, { at: 'sounds/pop.wav', from: '/core/public/sounds/pop.wav' }], seconds: 62.5, fps: 30 };
   }
 
-  async soundsFolder(): Promise<string> {
-    return '/core/public/sounds';
+  async servedFolders(): Promise<readonly string[]> {
+    return ['/core/public/sounds', '/core/public/fonts'];
   }
 
-  async render(folder: string, aspect: Aspect, job: VideoRenderJob): Promise<RenderedFiles & Readonly<{ seconds?: number }>> {
+  // Core's own naming rule, not a copy of it.
+  async outputFiles(variant: string | undefined) {
+    return outputFilesOf(variant);
+  }
+
+  async render(folder: string, aspect: Aspect, job: VideoRenderJob): Promise<RenderedFiles & Readonly<{ frames?: number }>> {
     this.renders.push({ folder, aspect, ...(job.variant ? { variant: job.variant } : {}) });
     await this.renderWith(job);
-    const suffix = job.variant ? `-${job.variant}` : '';
-    const files = { video: `${folder}/output/video${suffix}.mp4`, captions: `${folder}/output/captions${suffix}.srt` };
-    return this.renderedSeconds === undefined ? files : { ...files, seconds: this.renderedSeconds };
+    const { video, captions } = outputFilesOf(job.variant);
+    const files = { video: `${folder}/${video}`, captions: `${folder}/${captions}` };
+    return this.renderedFrames === undefined ? files : { ...files, frames: this.renderedFrames };
   }
 }
 

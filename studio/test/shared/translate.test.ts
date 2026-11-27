@@ -13,7 +13,7 @@ test('pt-BR is the default and both languages have the same keys', () => {
 test('each {name} is replaced by its value; a missing value keeps the placeholder', () => {
   const translate = translator();
   assert.equal(translate('render.running', { percent: 42 }), 'Renderizando… 42%');
-  assert.equal(translate('errors.aspect', { project: '16:9' }), 'Este projeto é 16:9, não {asked}.');
+  assert.equal(translate('video.renderTitle'), 'Renderizar em {aspect}');
 });
 
 test('a count picks the plural form of the language (one, other, and an explicit zero), never "(s)"', () => {

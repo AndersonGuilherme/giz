@@ -28,7 +28,6 @@
   "errors.title": "Something went wrong",
   "errors.busy": "A video is already being rendered.",
   "errors.cancelled": "render cancelled",
-  "errors.aspect": "This project is {project}, not {asked}.",
   "errors.noVault": "This system offers no vault to keep the key safely.",
   "errors.invalidRequest": "invalid request",
   "errors.invalidProject": "invalid project",
