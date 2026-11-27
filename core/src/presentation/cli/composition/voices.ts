@@ -7,6 +7,7 @@ import { ElevenLabsVoice } from '../../../infrastructure/voice/external/ElevenLa
 import { externalSettings } from '../../../infrastructure/voice/external/externalSettings.ts';
 import { FishVoice } from '../../../infrastructure/voice/external/FishVoice.ts';
 import type { ServiceDependencies } from '../../../infrastructure/voice/external/serviceRequest.ts';
+import { realWait } from '../../../infrastructure/http/serviceRequest.ts';
 import { LazyVoice } from '../../../infrastructure/voice/LazyVoice.ts';
 import { RecordingVoice } from '../../../infrastructure/voice/RecordingVoice.ts';
 import { installConfig } from './install.ts';
@@ -20,8 +21,7 @@ async function qwenVoice(project: Project): Promise<VoiceProvider> {
 
 // The key is read only when a line is generated (check and build need none) and never printed.
 function service(name: ExternalService): ServiceDependencies {
-  const wait = (milliseconds: number) => new Promise<void>((done) => setTimeout(done, milliseconds));
-  return { fetch, key: () => apiKeyOf(name, { env: process.env, home: homedir() }), wait };
+  return { fetch, key: () => apiKeyOf(name, { env: process.env, home: homedir() }), wait: realWait };
 }
 
 const PROVIDERS: Readonly<Record<VoiceProviderName, (folder: string, project: Project) => VoiceProvider>> = {

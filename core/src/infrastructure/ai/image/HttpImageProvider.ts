@@ -6,9 +6,13 @@ import { sendWithRetries, ServiceHttpError, type SendPolicy, type Wait } from '.
 import { requiredKey } from '../../keys/requiredKey.ts';
 import { readableFailure, type FailureContext } from '../text/textErrors.ts';
 import type { ImageApi, ImageSource } from './imageApi.ts';
+import { cappedBytes, checkedImage, checkedLink, checkedType, MAXIMUM_IMAGE_BYTES, RejectedImage } from './imageDownload.ts';
 
-/** What an image provider needs from outside: the HTTP client, the keys, a timer and how to send (retries by default). */
-export type ImageDependencies = Readonly<{ fetch: typeof fetch; keys: KeyStore; wait: Wait; send?: SendPolicy }>;
+/**
+ * What an image provider needs from outside: the HTTP client, the keys, a timer, how to send (retries by default) and
+ * the largest image it takes (`MAXIMUM_IMAGE_BYTES` by default).
+ */
+export type ImageDependencies = Readonly<{ fetch: typeof fetch; keys: KeyStore; wait: Wait; send?: SendPolicy; maximumBytes?: number }>;
 type Link = Extract<ImageSource, { url: string }>;
 
 const NO_IMAGE = 'o serviço não devolveu imagem (o pedido pode ter sido recusado pelos filtros de conteúdo: mude o prompt e tente de novo)';
@@ -22,6 +26,12 @@ async function parsed(response: Response, api: ImageApi): Promise<ImageSource> {
   }
   if (!source) throw new Error(`${api.label}: ${NO_IMAGE}`);
   return source;
+}
+
+// The reason is the service's fault, not the person's: named after the service, never with the key or the link's path.
+function rejected(error: unknown, label: string): never {
+  if (error instanceof RejectedImage) throw new Error(`${label}: imagem recusada: ${error.message}`);
+  throw error;
 }
 
 function downloadFailure(error: unknown, context: FailureContext): Error {
@@ -58,16 +68,24 @@ export class HttpImageProvider implements ImageProvider {
       throw readableFailure(error, context);
     });
     const source = await parsed(response, this.#api);
-    return 'bytes' in source ? source : this.#download(source, context);
+    return this.#checked(source, context).catch((error: unknown) => rejected(error, context.label));
   }
 
-  // The link is public (fal's storage): it is fetched without the key.
-  async #download(link: Link, context: FailureContext): Promise<GeneratedImage> {
+  // The declared type of an inline image is not trusted either: the bytes decide.
+  async #checked(source: ImageSource, context: FailureContext): Promise<GeneratedImage> {
+    const maximum = this.#dependencies.maximumBytes ?? MAXIMUM_IMAGE_BYTES;
+    const bytes = 'bytes' in source ? source.bytes : await this.#download(source, context, maximum);
+    return checkedImage(bytes, maximum);
+  }
+
+  // Only from the service's own hosts over https, and fetched without the key; the type, size and bytes are checked.
+  async #download(link: Link, context: FailureContext, maximum: number): Promise<Uint8Array> {
     const { fetch, wait, send = sendWithRetries } = this.#dependencies;
-    const response = await send(this.#api.label, () => fetch(link.url), wait).catch((error: unknown) => {
+    const url = checkedLink(link.url, this.#api.downloadHosts);
+    const response = await send(this.#api.label, () => fetch(url.href), wait).catch((error: unknown) => {
       throw downloadFailure(error, context);
     });
-    const mime = link.mime ?? response.headers.get('content-type') ?? 'image/png';
-    return { bytes: new Uint8Array(await response.arrayBuffer()), mime };
+    checkedType(response);
+    return cappedBytes(response, maximum);
   }
 }

@@ -11,6 +11,8 @@ export type ImageApi = Readonly<{
   /** The name people know, for the messages. */
   label: string;
   defaultModel: string;
+  /** The hosts an image link may come from (with their subdomains); none: the API answers with the image itself. */
+  downloadHosts: readonly string[];
   call(model: string, request: ImageRequest, key: string): HttpCall;
   /** Reads the parsed JSON answer; `undefined` when it holds no image (a refused prompt); throws on another shape. */
   image(body: unknown): ImageSource | undefined;
@@ -18,11 +20,12 @@ export type ImageApi = Readonly<{
 
 export const inlineImage = (base64: string, mime: string): ImageSource => ({ bytes: new Uint8Array(Buffer.from(base64, 'base64')), mime });
 
-const DATA_URI = /^data:([^;,]+)?(?:;base64)?,(.*)$/s;
+// Only a base64 image data URI is decoded; any other `data:` stays a link, and a link must be https (so it is refused).
+const IMAGE_DATA_URI = /^data:(image\/(?:png|jpeg|webp));base64,(.+)$/s;
 
-/** A link to the image; a `data:` URI (base64) is the image itself, decoded with no download. */
+/** A link to the image; a `data:image/...;base64,` URI is the image itself, decoded with no download. */
 export function linkedImage(url: string, mime?: string): ImageSource {
-  const data = DATA_URI.exec(url);
+  const data = IMAGE_DATA_URI.exec(url);
   if (!data) return { url, mime };
-  return inlineImage(data[2] ?? '', data[1] ?? mime ?? 'image/png');
+  return inlineImage(data[2]!, data[1]!);
 }

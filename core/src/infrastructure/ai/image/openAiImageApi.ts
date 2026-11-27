@@ -34,6 +34,7 @@ export const OPENAI_IMAGE_API: ImageApi = {
   provider: 'openai',
   label: 'OpenAI',
   defaultModel: 'gpt-image-2.6-sunburst',
+  downloadHosts: [],
   call: (model, request, key) => jsonPost(URL, { authorization: `Bearer ${key}` }, body(model, request)),
   image: (json) => {
     const { data, output_format: format = 'png' } = ANSWER.parse(json);

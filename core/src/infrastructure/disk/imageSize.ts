@@ -22,6 +22,23 @@ function jpegSegment(bytes: Buffer, offset: number): ImageSize | undefined {
 
 const jpegSize = (bytes: Buffer): ImageSize | undefined => (bytes[0] === 0xff && bytes[1] === 0xd8 ? jpegSegment(bytes, 2) : undefined);
 
+/** The image formats giz takes from an image service. */
+export type ImageFormat = 'png' | 'jpeg' | 'webp';
+
+const ascii = (bytes: Buffer, start: number, end: number) => bytes.subarray(start, end).toString('latin1');
+// The signatures: PNG's 8 bytes, JPEG's start-of-image marker, and WebP's RIFF container naming WEBP.
+const SIGNATURES: Readonly<Record<ImageFormat, (bytes: Buffer) => boolean>> = {
+  png: (bytes) => bytes.length >= 8 && bytes.subarray(0, 8).equals(PNG_SIGNATURE),
+  jpeg: (bytes) => bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff,
+  webp: (bytes) => ascii(bytes, 0, 4) === 'RIFF' && ascii(bytes, 8, 12) === 'WEBP',
+};
+
+/** The format the bytes start with (their magic bytes), whatever the name or the declared type says. */
+export function imageFormatOf(data: Uint8Array): ImageFormat | undefined {
+  const bytes = Buffer.from(data.buffer, data.byteOffset, data.byteLength);
+  return (Object.keys(SIGNATURES) as ImageFormat[]).find((format) => SIGNATURES[format](bytes));
+}
+
 // A folder where a file was expected is the person's mistake: a readable message, not a raw EISDIR.
 function notAFile(path: string): (error: NodeJS.ErrnoException) => never {
   return (error) => {

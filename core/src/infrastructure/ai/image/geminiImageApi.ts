@@ -37,6 +37,7 @@ export const GEMINI_IMAGE_API: ImageApi = {
   provider: 'gemini',
   label: 'Google Gemini',
   defaultModel: 'gemini-nano-banana-2.1',
+  downloadHosts: [],
   call: (model, request, key) => jsonPost(`${API}/${encodeURIComponent(model)}:generateContent`, { 'x-goog-api-key': key }, body(request)),
   image: (json) => {
     const inline = partsOf(json).find((part) => part.inlineData)?.inlineData;

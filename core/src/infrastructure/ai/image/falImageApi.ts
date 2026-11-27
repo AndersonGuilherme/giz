@@ -19,6 +19,8 @@ export const FAL_IMAGE_API: ImageApi = {
   provider: 'fal',
   label: 'fal.ai',
   defaultModel: 'fal-ai/flux-2-pro',
+  // Generated media is served by fal's CDN (v3.fal.media, v3b.fal.media...).
+  downloadHosts: ['fal.media', 'fal.ai'],
   call: (model, request, key) => jsonPost(`${RUN}/${model}`, { authorization: `Key ${key}` }, body(request)),
   image: (json) => {
     const first = ANSWER.parse(json).images[0];

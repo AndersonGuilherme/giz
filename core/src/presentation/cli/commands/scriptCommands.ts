@@ -5,7 +5,7 @@ import type { ScriptResult, ScriptTarget } from '../../../application/use-cases/
 import { isTextProvider, TEXT_PROVIDERS } from '../../../domain/ai/TextProviderName.ts';
 import { DomainError } from '../../../domain/DomainError.ts';
 import { Idea } from '../../../domain/idea/Idea.ts';
-import type { TextOverrides } from '../composition/text.ts';
+import type { AiOverrides } from '../composition/aiOverrides.ts';
 import { dollars } from '../dollars.ts';
 import { UsageError } from '../usage.ts';
 
@@ -80,7 +80,7 @@ function report(folder: string, { files, repairs, usage }: ScriptResult): void {
 }
 
 // The estimate always comes first; with --estimate nothing is called.
-async function generated(idea: Idea, target: ScriptTarget, options: Options & { overrides: TextOverrides }): Promise<void> {
+async function generated(idea: Idea, target: ScriptTarget, options: Options & { overrides: AiOverrides }): Promise<void> {
   const { scriptGenerator, defaultTextProvider } = await script();
   const name = options.provider ?? defaultTextProvider(options.overrides);
   if (!isTextProvider(name)) throw new UsageError(`provedor "${name}" inválido (use ${TEXT_PROVIDERS.join(', ')})`);
@@ -94,7 +94,7 @@ async function generated(idea: Idea, target: ScriptTarget, options: Options & { 
 const exists = (path: string) => access(path).then(() => true, () => false);
 
 /** `giz new --idea <idea.json> <folder>`: a new project written by the text AI; the idea is kept as idea.json. */
-export async function newCommand(args: readonly string[], overrides: TextOverrides = {}): Promise<void> {
+export async function newCommand(args: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const options = optionsOf(args, NEW_USAGE);
   if (!options.idea) throw new UsageError(NEW_USAGE);
   if (await exists(join(options.folder, 'project.json'))) throw new Error(`já existe um projeto em ${options.folder} (para refazer o roteiro: giz script ${options.folder})`);
@@ -103,7 +103,7 @@ export async function newCommand(args: readonly string[], overrides: TextOverrid
 }
 
 /** `giz script <folder>`: the script of an existing project written again from its idea.json, keeping its voice. */
-export async function scriptCommand(args: readonly string[], overrides: TextOverrides = {}): Promise<void> {
+export async function scriptCommand(args: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const options = optionsOf(args, SCRIPT_USAGE);
   if (options.idea) throw new UsageError(SCRIPT_USAGE);
   const folder = (await script()).projectFolder();

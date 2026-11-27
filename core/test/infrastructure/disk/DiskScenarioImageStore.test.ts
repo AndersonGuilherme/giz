@@ -1,10 +1,12 @@
 import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
-import { cp, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
+import { createHash } from 'node:crypto';
+import { cp, mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { ProjectError } from '../../../src/application/ports/ProjectError.ts';
+import { ScenarioImageError } from '../../../src/application/use-cases/images/ScenarioImageError.ts';
 import { GenerateScenarioImages } from '../../../src/application/use-cases/images/GenerateScenarioImages.ts';
 import { DiskProjectRepository } from '../../../src/infrastructure/disk/DiskProjectRepository.ts';
 import { DiskScenarioImageStore } from '../../../src/infrastructure/disk/DiskScenarioImageStore.ts';
@@ -44,7 +46,9 @@ test('save writes scenes/<id>.png and scenes/<id>.json; savedHash needs both', a
   assert.equal(store.savedHash('1'), undefined);
   await store.save({ lineId: '1', image, hash: 'abc', madeBy });
   assert.deepEqual(await imageSize(join(folder, 'scenes/1.png')), { width: 1216, height: 2160 });
-  assert.deepEqual(await readJson(join(folder, 'scenes/1.json')), { file: 'scenes/1.png', hash: 'abc', provider: 'fal', model: 'fake-flux' });
+  const fileHash = createHash('sha256').update(image.bytes).digest('hex');
+  assert.deepEqual(await readJson(join(folder, 'scenes/1.json')), { file: 'scenes/1.png', hash: 'abc', fileHash, provider: 'fal', model: 'fake-flux' });
+  assert.equal(await store.foreignFile('1'), false);
   assert.equal(store.savedHash('1'), 'abc');
   await rm(join(folder, 'scenes/1.png'));
   assert.equal(store.savedHash('1'), undefined);
@@ -79,7 +83,7 @@ test('end to end: the "not generated" warning, then giz images, then a clean loa
   const scene = afterwards.script().lines().each()[0]!.scene();
   assert.equal(scene?.type === 'scenario' ? scene.background.image : undefined, 'scenes/1.png');
   const again = await new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) }).run(afterwards);
-  assert.deepEqual(again, { generated: [], kept: ['1'] });
+  assert.deepEqual(again, { generated: [], kept: ['1'], own: [] });
 });
 
 test('a generated image that went missing warns with the giz images hint', async () => {
@@ -109,4 +113,36 @@ test('project.json style and imageProvider, and background.generate, are validat
   assert.ok(found.includes('script.json lines[0].scene.background.generate.prompt: não pode ser vazio'), found.join('\n'));
   assert.ok(found.includes('script.json lines[0].scene.background.generate.style: "pastel" inválido (use painted-2d, flat-vector, watercolor, chalk)'), found.join('\n'));
   assert.ok(found.some((line) => /generate.*size/.test(line)), found.join('\n'));
+});
+
+test('save never overwrites a scenes/<id>.png it did not write: no record, or bytes changed since', async () => {
+  const folder = await projectFolder();
+  const store = new DiskScenarioImageStore(folder);
+  await mkdir(join(folder, 'scenes'));
+  const mine = Buffer.from(pngOfSize(800, 600));
+  await writeFile(join(folder, 'scenes/1.png'), mine);
+  assert.equal(await store.foreignFile('1'), true);
+  await assert.rejects(store.save({ lineId: '1', image, hash: 'abc', madeBy }), (error: Error) =>
+    error instanceof ScenarioImageError && /scenes\/1\.png já existe e não foi feito pelo giz images: o arquivo não foi sobrescrito/.test(error.message));
+  assert.deepEqual(await readFile(join(folder, 'scenes/1.png')), mine);
+  await rm(join(folder, 'scenes/1.png'));
+  await store.save({ lineId: '1', image, hash: 'abc', madeBy });
+  assert.equal(await store.foreignFile('1'), false);
+  await writeFile(join(folder, 'scenes/1.png'), mine);
+  assert.equal(await store.foreignFile('1'), true);
+});
+
+test('end to end: an edited generated image is refused readably when the prompt changes, before any call', async () => {
+  const folder = await projectFolder({ generate: { prompt: 'uma praça' } });
+  const images = new FakeImageProvider();
+  await new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) }).run(await repository().load(folder));
+  await writeFile(join(folder, 'scenes/1.png'), Buffer.concat([pngOfSize(1216, 2160), Buffer.from('retocada')]));
+  const script = await readJson(join(folder, 'script.json'));
+  const [first, ...rest] = script.lines as Json[];
+  const scene = first!.scene as Json;
+  const changed = { ...first, scene: { ...scene, background: { ...(scene.background as Json), generate: { prompt: 'uma praça à noite' } } } };
+  await writeFile(join(folder, 'script.json'), JSON.stringify({ ...script, lines: [changed, ...rest] }));
+  const project = await repository().load(folder);
+  await assert.rejects(new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) }).run(project), /scenes\/1\.png já existe/);
+  assert.equal(images.requests.length, 1);
 });

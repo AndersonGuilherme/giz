@@ -8,6 +8,7 @@ import { voiceFile, type VoiceStore } from '../ports/VoiceStore.ts';
 import type { Aligner } from '../ports/Aligner.ts';
 import type { Phonemizer } from '../ports/Phonemizer.ts';
 import type { VoiceRequest, VoiceProvider } from '../ports/VoiceProvider.ts';
+import { hexDigest } from './hexDigest.ts';
 
 export type Progress = Readonly<{ done: number; total: number; lineId: string; generated: boolean }>;
 export type VoiceReport = { generated: string[]; skipped: string[] };
@@ -15,11 +16,7 @@ type Dependencies = Readonly<{ voice: VoiceProvider; phonemizer: Phonemizer; sto
 
 const nothingToDo = () => undefined;
 
-// Web Crypto (a Node and browser global): the application does not import node:crypto.
-async function sha1(text: string): Promise<string> {
-  const digest = await crypto.subtle.digest('SHA-1', new TextEncoder().encode(text));
-  return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, '0')).join('');
-}
+const sha1 = (text: string): Promise<string> => hexDigest('SHA-1', text);
 
 function lineRequest(project: Project, line: Line): VoiceRequest {
   const cast = project.cast();

@@ -34,11 +34,12 @@ function keys(present: boolean): KeyStore {
   return { get: () => (present ? KEY : undefined), hint: (service) => `defina a chave da ${service}` };
 }
 
-function provider(api: ImageApi, responses: Array<Response | Error>, options: { model?: string; key?: boolean } = {}) {
+function provider(api: ImageApi, responses: Array<Response | Error>, options: { model?: string; key?: boolean; maximumBytes?: number } = {}) {
   const delays: number[] = [];
   const fake = fakeFetch(responses);
   const wait = async (milliseconds: number) => void delays.push(milliseconds);
-  const images = new HttpImageProvider(api, { fetch: fake.fetch, keys: keys(options.key ?? true), wait }, options.model);
+  const dependencies = { fetch: fake.fetch, keys: keys(options.key ?? true), wait, maximumBytes: options.maximumBytes };
+  const images = new HttpImageProvider(api, dependencies, options.model);
   return { ...fake, delays, images };
 }
 
@@ -123,6 +124,59 @@ test('fal.ai: a validation error (422, detail list) names what the service said'
 test('fal.ai: a failed download is a readable error', async () => {
   const { images } = provider(FAL_IMAGE_API, [json(FAL_OK), new Response('gone', { status: 404 })]);
   await assert.rejects(images.generate(vertical), /^Error: fal\.ai: não foi possível baixar a imagem \(404\)/);
+});
+
+const falAt = (url: string) => json({ images: [{ url }] });
+const refused = (reason: RegExp) => (error: Error) => /^fal\.ai: imagem recusada: /.test(error.message) && reason.test(error.message);
+
+test('fal.ai download: only https, only fal hosts (subdomains too, not look-alikes); nothing else is fetched', async () => {
+  for (const [url, reason] of [
+    ['http://v3.fal.media/files/a.png', /o endereço da imagem não é https/],
+    ['https://evil.example.com/a.png', /o endereço da imagem é de outro servidor \(evil\.example\.com\)/],
+    ['https://fal.media.evil.com/a.png', /outro servidor \(fal\.media\.evil\.com\)/],
+    ['file:///etc/passwd', /não é https/],
+    ['não é um endereço', /não é https/],
+  ] as const) {
+    const { calls, images } = provider(FAL_IMAGE_API, [falAt(url)]);
+    await assert.rejects(images.generate(vertical), refused(reason), url);
+    assert.equal(calls.length, 1, url);
+  }
+  const { calls, images } = provider(FAL_IMAGE_API, [falAt('https://v3b.fal.media/files/b/x.png'), bytes(PIXELS)]);
+  await images.generate(vertical);
+  assert.equal(calls[1]?.url, 'https://v3b.fal.media/files/b/x.png');
+});
+
+test('fal.ai download: a declared size over the limit is refused before reading; a streamed body stops at the limit', async () => {
+  const declared = new Response(new Uint8Array(PIXELS), { headers: { 'content-type': 'image/png', 'content-length': '999999999' } });
+  await assert.rejects(provider(FAL_IMAGE_API, [json(FAL_OK), declared]).images.generate(vertical), refused(/maior que 50 MB/));
+  let pulled = 0;
+  const endless = new ReadableStream<Uint8Array>({ pull: (controller) => { pulled += 1; controller.enqueue(new Uint8Array(PIXELS)); } });
+  const streamed = new Response(endless, { headers: { 'content-type': 'image/png' } });
+  await assert.rejects(provider(FAL_IMAGE_API, [json(FAL_OK), streamed], { maximumBytes: 30 }).images.generate(vertical), refused(/maior que/));
+  assert.ok(pulled <= 4, `read ${pulled} chunks`);
+});
+
+test('fal.ai download: a text/html answer, or image/png bytes that are not an image, are refused', async () => {
+  const html = new Response('<html>oi</html>', { headers: { 'content-type': 'text/html; charset=utf-8' } });
+  await assert.rejects(provider(FAL_IMAGE_API, [json(FAL_OK), html]).images.generate(vertical), refused(/o servidor mandou text\/html, não uma imagem PNG, JPEG ou WebP/));
+  const fake = new Response('<html>oi</html>', { headers: { 'content-type': 'image/png' } });
+  await assert.rejects(provider(FAL_IMAGE_API, [json(FAL_OK), fake]).images.generate(vertical), refused(/o conteúdo não é uma imagem PNG, JPEG ou WebP/));
+});
+
+test('fal.ai: a data URI that is not a base64 image is not decoded (and, not being https, not fetched)', async () => {
+  for (const url of [`data:text/html;base64,${Buffer.from('<script>').toString('base64')}`, `data:image/svg+xml;base64,${BASE64}`, `data:image/png,${BASE64}`]) {
+    const { calls, images } = provider(FAL_IMAGE_API, [falAt(url)]);
+    await assert.rejects(images.generate(vertical), refused(/não é https/), url);
+    assert.equal(calls.length, 1);
+  }
+});
+
+test('inline images are checked too: base64 that is not an image is refused; the type comes from the bytes', async () => {
+  const text = { data: [{ b64_json: Buffer.from('não sou imagem').toString('base64') }] };
+  await assert.rejects(provider(OPENAI_IMAGE_API, [json(text)]).images.generate(vertical), /^Error: OpenAI: imagem recusada: o conteúdo não é uma imagem/);
+  const jpeg = Buffer.from([0xff, 0xd8, 0xff, 0xe0, 0, 16]);
+  const declaredPng = { data: [{ b64_json: jpeg.toString('base64') }], output_format: 'png' };
+  assert.equal((await provider(OPENAI_IMAGE_API, [json(declaredPng)]).images.generate(vertical)).mime, 'image/jpeg');
 });
 
 for (const api of [OPENAI_IMAGE_API, GEMINI_IMAGE_API, FAL_IMAGE_API]) {

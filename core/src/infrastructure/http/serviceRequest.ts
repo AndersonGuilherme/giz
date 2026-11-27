@@ -1,5 +1,7 @@
 /** Waits the given milliseconds (injected, so tests do not wait). */
 export type Wait = (milliseconds: number) => Promise<void>;
+/** The real timer, for the composition (tests inject one that does not wait). */
+export const realWait: Wait = (milliseconds) => new Promise<void>((done) => setTimeout(done, milliseconds));
 type Send = () => Promise<Response>;
 /** How a request is sent: with the retries (`sendWithRetries`) or a single attempt (`sendOnce`). */
 export type SendPolicy = (service: string, send: Send, wait: Wait) => Promise<Response>;

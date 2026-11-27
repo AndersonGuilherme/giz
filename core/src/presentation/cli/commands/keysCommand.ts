@@ -1,5 +1,5 @@
 import { isTextProvider, TEXT_PROVIDERS } from '../../../domain/ai/TextProviderName.ts';
-import type { TextOverrides } from '../composition/text.ts';
+import type { AiOverrides } from '../composition/aiOverrides.ts';
 import { UsageError } from '../usage.ts';
 
 // `giz keys`: the keys of the paid services. The composition part loads on demand.
@@ -15,21 +15,21 @@ async function list(): Promise<void> {
 }
 
 // Runs only when asked: it calls the real service once (a single attempt, no retries) with the configured key.
-async function testKey(name: string | undefined, overrides: TextOverrides): Promise<void> {
+async function testKey(name: string | undefined, overrides: AiOverrides): Promise<void> {
   if (!isTextProvider(name)) throw new UsageError(USAGE);
   const provider = (await text()).keyCheckProviderOf(name, overrides);
   const { usage } = await provider.generate(PING);
   console.log(`${name}: ok (modelo ${provider.model()}, ${usage.inputTokens} tokens de entrada, ${usage.outputTokens} de saída)`);
 }
 
-type Action = (provider: string | undefined, overrides: TextOverrides) => Promise<void>;
+type Action = (provider: string | undefined, overrides: AiOverrides) => Promise<void>;
 const ACTIONS: Readonly<Record<string, Action>> = { list, test: testKey };
 
 /**
  * `giz keys list | test <provider>`: which keys exist (never their values), or one tiny real call to check a key.
  * `overrides` (the HTTP client, the key store) is for the tests.
  */
-export async function keysCommand([action = '', provider]: readonly string[], overrides: TextOverrides = {}): Promise<void> {
+export async function keysCommand([action = '', provider]: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const run = Object.hasOwn(ACTIONS, action) ? ACTIONS[action] : undefined;
   if (!run) throw new UsageError(USAGE);
   await run(provider, overrides);

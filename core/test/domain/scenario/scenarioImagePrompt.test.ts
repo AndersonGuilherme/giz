@@ -5,6 +5,8 @@ import { IMAGE_BLEED, ScenarioImageFrame } from '../../../src/domain/scenario/Sc
 import { scenarioImagePrompt } from '../../../src/domain/scenario/ScenarioImagePrompt.ts';
 import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 
+const STORY_WORDS = { format: 'story', style: 'words' } as const;
+
 test('the scenario image is the frame plus the 6% camera bleed on each side, in multiples of 16, same aspect', () => {
   assert.equal(IMAGE_BLEED, 0.06);
   const vertical = ScenarioImageFrame.sizeFor(AspectRatio.VERTICAL);
@@ -31,7 +33,7 @@ test('every style has its own preset text; the default is painted 2D', () => {
 });
 
 test('the prompt: style preset first, then the scene, the composition from the backdrop, no text, originality', () => {
-  const prompt = scenarioImagePrompt({ prompt: '  uma praça ao entardecer ', style: 'flat-vector', aspect: AspectRatio.VERTICAL });
+  const prompt = scenarioImagePrompt({ prompt: '  uma praça ao entardecer ', style: 'flat-vector', aspect: AspectRatio.VERTICAL, caption: STORY_WORDS });
   const parts = prompt.split('\n\n');
   assert.equal(parts.length, 5);
   assert.equal(parts[0], stylePresetOf('flat-vector'));
@@ -42,20 +44,25 @@ test('the prompt: style preset first, then the scene, the composition from the b
   assert.match(parts[4]!, /original scene/);
 });
 
-// 9:16 BackdropLayout: stage x 158–894 of 1080, heads at 682 and feet (ground) at 1450 of 1920, horizon 1288, focus (540, 609).
-test('9:16 composition: the characters\' stage, horizon and focus, in percent of the image (with the bleed)', () => {
-  const hint = scenarioImagePrompt({ prompt: 'p', style: 'painted-2d', aspect: AspectRatio.VERTICAL }).split('\n\n')[2]!;
-  const inImage = (pixels: number, side: number) => Math.round(ScenarioImageFrame.inImage(pixels / side) * 100);
-  assert.match(hint, new RegExp(`between ${inImage(158.304, 1080)}% to ${inImage(893.76, 1080)}% of the width`));
-  assert.match(hint, new RegExp(`feet at ${inImage(1449.6, 1920)}% and heads at ${inImage(681.6, 1920)}% of the height`));
-  assert.match(hint, new RegExp(`horizon line .* at about ${inImage(1287.6, 1920)}% from the top`));
-  assert.match(hint, new RegExp(`around 50% across and ${inImage(609.2, 1920)}% down`));
+// 9:16, in percent of the 1216×2160 image: BackdropLayout's stage x 158–894 of 1080 → 18–79%, feet (ground 1450) → 73%,
+// heads (681) → 37%, horizon 1288 → 65%, focus (540, 609) → 50%, 34%; the HUD panel ends at 404 → 24%; the story
+// word caption (y 1330–1427) → 67–72%, the block caption (y 1138–1498) → 58–75%.
+test('9:16 composition: the characters\' stage, horizon, focus and the calm text bands, hard-coded', () => {
+  const hint = scenarioImagePrompt({ prompt: 'p', style: 'painted-2d', aspect: AspectRatio.VERTICAL, caption: STORY_WORDS }).split('\n\n')[2]!;
+  assert.match(hint, /standing on the floor from 18% to 79% of the width, with their feet at 73% and heads at 37% of the height\./);
+  assert.match(hint, /horizon line \(where the floor meets the back wall or the far scenery\) at about 65% from the top\./);
+  assert.match(hint, /main feature of the place \(a window, a door, an archway\) around 50% across and 34% down\./);
   assert.match(hint, /no people, characters or animals/);
+  assert.match(hint, /Keep the top of the image down to 24% \(behind titles and the HUD\) and the band from 67% to 72% of the height \(behind the captions\) calm and low in detail/);
+  assert.doesNotMatch(hint, /monument/);
+  const blocks = scenarioImagePrompt({ prompt: 'p', style: 'painted-2d', aspect: AspectRatio.VERTICAL, caption: { format: 'story', style: 'blocks' } });
+  assert.match(blocks, /the band from 58% to 75% of the height \(behind the captions\)/);
 });
 
 test('16:9 composition differs from 9:16 (another stage)', () => {
-  const vertical = scenarioImagePrompt({ prompt: 'p', style: 'chalk', aspect: AspectRatio.VERTICAL });
-  const horizontal = scenarioImagePrompt({ prompt: 'p', style: 'chalk', aspect: AspectRatio.HORIZONTAL });
+  const vertical = scenarioImagePrompt({ prompt: 'p', style: 'chalk', aspect: AspectRatio.VERTICAL, caption: STORY_WORDS });
+  const horizontal = scenarioImagePrompt({ prompt: 'p', style: 'chalk', aspect: AspectRatio.HORIZONTAL, caption: STORY_WORDS });
   assert.notEqual(vertical, horizontal);
   assert.match(horizontal, /horizon line .* at about 74% from the top/);
+  assert.match(horizontal, /down to 21% \(behind titles and the HUD\) and the band from 70% to 78%/);
 });

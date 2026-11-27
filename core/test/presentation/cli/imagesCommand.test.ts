@@ -100,3 +100,32 @@ test('giz images --only: one call (injected fetch), the PNG saved, the script po
   assert.match(logs[5]!, /^0 gerada\(s\), 1 já em dia/);
   assert.doesNotMatch(logs.join('\n'), /fal-secreta-1/);
 });
+
+test('giz images: a scene on the person\'s own image is left alone, with the "usa imagem própria" note', async () => {
+  const { imagesCommand } = await import('../../../src/presentation/cli/commands/imagesCommand.ts');
+  const folder = await projectFolder({ imageProvider: 'fal' });
+  const script = await readJson(join(folder, 'script.json'));
+  const [first, second] = script.lines as Json[];
+  const scene = first!.scene as Json;
+  const own = { ...first, scene: { ...scene, background: { ...(scene.background as Json), image: 'images/minha.png' } } };
+  await writeFile(join(folder, 'script.json'), JSON.stringify({ ...script, lines: [own, second] }));
+  const calls: string[] = [];
+  const fetch = (async (url: string | URL | Request) => {
+    calls.push(String(url));
+    throw new Error('não devia chamar');
+  }) as typeof globalThis.fetch;
+  const logs: string[] = [];
+  const log = console.log;
+  console.log = (text: string) => void logs.push(text);
+  try {
+    await imagesCommand([folder, '--only', '1'], { fetch, keys: { get: () => 'k', hint: () => 'h' } });
+  } finally {
+    console.log = log;
+  }
+  assert.deepEqual(calls, []);
+  assert.match(logs[0]!, /0 imagem\(ns\) a gerar, até US\$ 0,00; 0 já em dia, 1 usa\(m\) imagem própria/);
+  assert.match(logs[1]!, /^cena da fala 1 \(1\/1\): usa imagem própria/);
+  assert.match(logs[2]!, /^0 gerada\(s\), 0 já em dia, 1 usa\(m\) imagem própria/);
+  const lines = (await readJson(join(folder, 'script.json'))).lines as Json[];
+  assert.equal(((lines[0]!.scene as Json).background as Json).image, 'images/minha.png');
+});
