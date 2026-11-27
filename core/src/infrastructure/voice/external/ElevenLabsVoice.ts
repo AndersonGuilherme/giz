@@ -1,4 +1,6 @@
 import type { VoiceRequest, VoiceProvider } from '../../../application/ports/VoiceProvider.ts';
+import type { CostEstimate } from '../../../domain/ai/CostEstimate.ts';
+import { voiceCostEstimate } from '../../../domain/ai/voicePrices.ts';
 import type { Audio } from '../../../domain/speech/Audio.ts';
 import type { ExternalSettings } from './externalSettings.ts';
 import { withPauses } from './sentencePauses.ts';
@@ -29,5 +31,10 @@ export class ElevenLabsVoice implements VoiceProvider {
   // The model and the pauses change the audio: changing them generates the lines again.
   async fingerprint(): Promise<string> {
     return JSON.stringify([this.#settings.elevenLabsModel, this.#settings.pauses]);
+  }
+
+  // What the service bills: the text as sent, with its <break> marks (billed as characters), at the price of the model.
+  estimate(request: VoiceRequest): CostEstimate {
+    return voiceCostEstimate('elevenlabs', this.#settings.elevenLabsModel, withPauses(request.text, this.#settings.pauses));
   }
 }

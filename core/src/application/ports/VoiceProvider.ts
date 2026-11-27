@@ -1,3 +1,4 @@
+import type { CostEstimate } from '../../domain/ai/CostEstimate.ts';
 import type { Audio } from '../../domain/speech/Audio.ts';
 import type { Language } from '../../domain/values/Language.ts';
 
@@ -11,4 +12,6 @@ export interface VoiceProvider {
    * there generates the line again. Absent or empty: nothing beyond the request.
    */
   fingerprint?(request: VoiceRequest): Promise<string>;
+  /** What generating the line costs, before calling (the text the service bills, its model). Absent: free (local). */
+  estimate?(request: VoiceRequest): CostEstimate;
 }

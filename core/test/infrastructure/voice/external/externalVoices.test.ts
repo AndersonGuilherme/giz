@@ -156,3 +156,15 @@ test('a pause that is not a number keeps the default and warns', () => {
   assert.equal(warnings.length, 2);
   assert.match(warnings[0]!, /GIZ_SENTENCE_PAUSE="meio" não é um número de segundos; usando 0\.15/);
 });
+
+test('the estimate prices the text the service bills, with the model of the settings, and reads no key nor calls anything', () => {
+  const calls = fakeFetch([]);
+  const deps = { fetch: calls.fetch, key: () => assert.fail('no key for an estimate'), wait: waits().wait };
+  const sent = withPauses(request.text, settings.pauses);
+  const eleven = new ElevenLabsVoice(deps, settings).estimate(request);
+  assert.ok(Math.abs(eleven.dollars()! - ([...sent].length * 80) / 1e6) < 1e-12, 'eleven_multilingual_v2: US$ 80 per million characters, <break> included');
+  const fish = new FishVoice(deps, settings).estimate(request);
+  assert.ok(Math.abs(fish.dollars()! - (Buffer.byteLength(request.text) * 15) / 1e6) < 1e-12, 's1: US$ 15 per million UTF-8 bytes');
+  assert.equal(new FishVoice(deps, { ...settings, fishModel: 'outro' }).estimate(request).isKnown(), false);
+  assert.equal(calls.calls.length, 0);
+});

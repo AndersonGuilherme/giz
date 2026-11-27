@@ -1,4 +1,6 @@
 import type { VoiceRequest, VoiceProvider } from '../../../application/ports/VoiceProvider.ts';
+import type { CostEstimate } from '../../../domain/ai/CostEstimate.ts';
+import { voiceCostEstimate } from '../../../domain/ai/voicePrices.ts';
 import type { Audio } from '../../../domain/speech/Audio.ts';
 import type { ExternalSettings } from './externalSettings.ts';
 import { SERVICE_RATE, serviceAudio, type ServiceDependencies } from './serviceRequest.ts';
@@ -28,5 +30,10 @@ export class FishVoice implements VoiceProvider {
   // The model changes the audio: changing it generates the lines again.
   async fingerprint(): Promise<string> {
     return JSON.stringify([this.#settings.fishModel]);
+  }
+
+  // What the service bills: the text as sent, at the price of the model.
+  estimate(request: VoiceRequest): CostEstimate {
+    return voiceCostEstimate('fish', this.#settings.fishModel, request.text);
   }
 }
