@@ -1,8 +1,10 @@
 import { StrictMode } from 'react';
 import { createRoot } from 'react-dom/client';
-import { App } from './components/App.tsx';
+import { ErrorBoundary } from './components/ErrorBoundary.tsx';
+import { Root } from './components/Root.tsx';
 import { giz } from './giz.ts';
 import './styles.css';
 
 const root = document.getElementById('root');
-if (root) createRoot(root).render(<StrictMode><App api={giz()} /></StrictMode>);
+// The boundary's title is fixed text: when it shows, the translations may be what broke.
+if (root) createRoot(root).render(<StrictMode><ErrorBoundary title="Algo deu errado · Something went wrong"><Root api={giz()} /></ErrorBoundary></StrictMode>);

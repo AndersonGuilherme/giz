@@ -1,6 +1,6 @@
 import { app, BrowserWindow, ipcMain, session } from 'electron';
 import started from 'electron-squirrel-startup';
-import { createServices } from './composition.ts';
+import { createServices, preparePaths } from './composition.ts';
 import { handlersOf } from './ipc/handlers.ts';
 import { registerChannels } from './ipc/registry.ts';
 import { REQUEST_SCHEMAS } from './ipc/schemas.ts';
@@ -15,12 +15,16 @@ import { WindowSlot } from './WindowSlot.ts';
 if (started) app.quit();
 
 const slot = new WindowSlot<BrowserWindow>();
+preparePaths();
 
 // Once per app run: the permission policy and the IPC channels (only our window's top frame may call them).
 function register(): void {
   denyAllPermissions(session.defaultSession);
   const rules = { window: () => slot.current(), origin: appOrigin() };
-  registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers: handlersOf(createServices(slot)), trusts: (event) => isTrustedSender(event, rules) });
+  const services = createServices(slot);
+  // The saved language and projects folder take effect (the window asks for the settings when it loads).
+  void services.settings.restore();
+  registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers: handlersOf(services), trusts: (event) => isTrustedSender(event, rules) });
 }
 
 function openWindow(): void {

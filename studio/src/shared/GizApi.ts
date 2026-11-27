@@ -1,4 +1,7 @@
-import type { Aspect, CheckReport, KeyProvider, ProjectSummary, RenderedFiles, RenderProgress, Result } from './contract.ts';
+import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
+import type { Aspect, CheckReport, ProjectSummary, RenderedFiles, RenderProgress, Result } from './contract.ts';
+import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
+import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from './setup.ts';
 
 type Reply<T> = Promise<Result<T>>;
 
@@ -18,8 +21,25 @@ export type GizApi = Readonly<{
   }>;
   /** The key goes in and never comes back out: there is no call that reads it. */
   keys: Readonly<{
-    set(provider: KeyProvider, key: string): Reply<true>;
+    set(provider: KeyProvider, key: string): Reply<KeyStorage>;
     has(provider: KeyProvider): Reply<boolean>;
     remove(provider: KeyProvider): Reply<boolean>;
+    status(): Reply<KeysStatus>;
+    test(provider: KeyProvider): Reply<KeyCheck>;
+  }>;
+  settings: Readonly<{
+    get(): Reply<Settings>;
+    update(patch: SettingsPatch): Reply<Settings>;
+    projectsFolder(source: FolderSource): Reply<Settings>;
+    modelsFolder(source: FolderSource): Reply<Settings>;
+    finish(): Reply<Settings>;
+  }>;
+  setup: Readonly<{
+    gpu(): Reply<GpuStatus>;
+    models(): Reply<ModelsStatus>;
+    run(task: SetupTask): Reply<true>;
+    stop(task: SetupTask): Reply<boolean>;
+    /** Calls `listener` on each progress step of any running setup task; returns the function that stops listening. */
+    onProgress(listener: (progress: TaskProgress) => void): () => void;
   }>;
 }>;

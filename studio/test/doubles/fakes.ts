@@ -61,6 +61,10 @@ export class FakeCipher implements Cipher {
   encrypt(text: string): string {
     return Buffer.from(`sealed:${text}`).toString('base64');
   }
+
+  decrypt(sealed: string): string {
+    return Buffer.from(sealed, 'base64').toString().replace(/^sealed:/, '');
+  }
 }
 
 const later = (milliseconds: number) => new Promise((done) => setTimeout(done, milliseconds));

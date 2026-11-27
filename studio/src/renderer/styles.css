@@ -7,7 +7,9 @@
   --chalk-dim: #a9c2b8;
   --chalk-yellow: #f2c14e;
   --chalk-red: #e8735a;
+  --chalk-green: #8fd19e;
   --line: rgba(243, 239, 226, 0.18);
+  --line-strong: rgba(243, 239, 226, 0.42);
   color-scheme: dark;
   font-family: 'Nunito', 'Segoe UI', 'Ubuntu', system-ui, sans-serif;
   color: var(--chalk);
@@ -67,9 +69,134 @@ body {
 .chalk-button:hover:not(:disabled) { background: rgba(243, 239, 226, 0.08); }
 .chalk-button:disabled { opacity: 0.45; cursor: default; }
 .chalk-button.primary { color: var(--slate-deep); background: var(--chalk-yellow); border-color: var(--chalk-yellow); }
+.chalk-button.small { padding: 5px 12px; font-size: 14px; border-radius: 8px; }
+.chalk-button.quiet { border-color: transparent; color: var(--chalk-dim); }
+.chalk-button.quiet:hover:not(:disabled) { color: var(--chalk); }
 
 .render-actions { display: flex; gap: 10px; }
 .chalk-progress { width: 100%; height: 14px; margin-top: 14px; appearance: none; border: none; border-radius: 7px; overflow: hidden; background: var(--slate-deep); }
 .chalk-progress::-webkit-progress-bar { background: var(--slate-deep); }
 .chalk-progress::-webkit-progress-value { background: var(--chalk-yellow); transition: width 0.2s; }
 .status { margin: 8px 0 0; color: var(--chalk-dim); min-height: 1.2em; word-break: break-all; }
+
+/* Scrollbars that belong on a dark board. */
+* { scrollbar-color: rgba(243, 239, 226, 0.25) transparent; }
+::-webkit-scrollbar { width: 10px; height: 10px; }
+::-webkit-scrollbar-thumb { background: rgba(243, 239, 226, 0.2); border-radius: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+
+:focus-visible { outline: 2px dashed var(--chalk-yellow); outline-offset: 3px; }
+.row { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
+.muted { color: var(--chalk-dim); }
+.small { font-size: 13px; }
+.intro { margin: 0 0 18px; color: var(--chalk-dim); font-size: 16px; line-height: 1.55; max-width: 62ch; }
+.panel h3 { margin: 22px 0 10px; }
+.badge { font-size: 12px; font-weight: 700; padding: 2px 9px; border-radius: 999px; background: rgba(242, 193, 78, 0.16); color: var(--chalk-yellow); }
+.badge.ok { background: rgba(143, 209, 158, 0.14); color: var(--chalk-green); }
+.warning-text { color: var(--chalk-red); font-size: 13px; }
+
+/* The first-run wizard. */
+.wizard { max-width: 860px; width: 100%; margin: 0 auto; padding: 28px 28px 32px; display: flex; flex-direction: column; gap: 22px; }
+.wizard-header { text-align: center; display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.wizard-header .brand { margin-bottom: 10px; }
+.wizard-header h2 { margin: 0; font-size: 28px; letter-spacing: 0.3px; }
+.wizard-header p { margin: 0; }
+
+.rail { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(6, 1fr); position: relative; }
+.rail::before { content: ''; position: absolute; top: 15px; left: 8%; right: 8%; border-top: 2px dashed var(--line-strong); }
+.rail li { position: relative; display: flex; flex-direction: column; align-items: center; gap: 6px; color: var(--chalk-dim); font-size: 13px; text-align: center; }
+.rail-dot {
+  width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 800;
+  background: var(--slate); border: 2px solid var(--line-strong); color: var(--chalk-dim);
+}
+.rail li.done .rail-dot { background: var(--chalk); border-color: var(--chalk); color: var(--slate-deep); }
+.rail li.current .rail-dot { background: var(--chalk-yellow); border-color: var(--chalk-yellow); color: var(--slate-deep); box-shadow: 0 0 0 5px rgba(242, 193, 78, 0.18); }
+.rail li.current { color: var(--chalk); font-weight: 700; }
+
+.panel { padding: 26px 30px 28px; }
+.panel-title { display: flex; align-items: center; gap: 12px; margin: 0 0 14px !important; font-size: 22px !important; }
+.step-number { width: 30px; height: 30px; border-radius: 50%; display: grid; place-items: center; font-size: 15px; background: rgba(242, 193, 78, 0.16); color: var(--chalk-yellow); }
+.wizard-footer { display: flex; justify-content: space-between; align-items: center; }
+.wizard-footer .chalk-button.primary { padding: 10px 26px; font-size: 16px; }
+
+/* Choices drawn as cards. */
+.options { display: grid; gap: 12px; }
+.options.two { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+.option { border: 2px solid var(--line); border-radius: 14px; padding: 14px 16px; background: rgba(0, 0, 0, 0.08); transition: border-color 0.15s; }
+.option:hover { border-color: var(--line-strong); }
+.option.selected { border-color: var(--chalk-yellow); background: rgba(242, 193, 78, 0.06); }
+.option-choose { all: unset; cursor: pointer; display: flex; align-items: center; gap: 12px; width: 100%; font-size: 17px; font-weight: 700; color: var(--chalk); }
+.option-choose:focus-visible { outline: 2px dashed var(--chalk-yellow); outline-offset: 6px; border-radius: 6px; }
+.option-dot { width: 18px; height: 18px; border-radius: 50%; border: 2px solid var(--line-strong); flex: none; }
+.option.selected .option-dot { border-color: var(--chalk-yellow); background: radial-gradient(circle, var(--chalk-yellow) 45%, transparent 50%); }
+.option-title { flex: 1; }
+.option-detail { margin: 6px 0 0 30px; color: var(--chalk-dim); font-size: 14px; line-height: 1.45; }
+.option .download { margin: 12px 0 0 30px; }
+
+.folder-box { display: flex; align-items: center; gap: 12px; padding: 12px 16px; margin-bottom: 16px; border: 2px dashed var(--line-strong); border-radius: 12px; background: var(--slate-deep); }
+.folder-box.chosen { border-style: solid; border-color: rgba(143, 209, 158, 0.55); }
+.folder-label { display: block; color: var(--chalk-dim); font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+.path { flex: 1; font-family: ui-monospace, 'Cascadia Code', monospace; font-size: 14px; color: var(--chalk); word-break: break-all; }
+.folder-box .folder-box.chosen { border-style: solid; border-color: rgba(143, 209, 158, 0.55); }
+.folder-label { flex: none; }
+.disk { position: relative; width: 26px; height: 16px; border-radius: 4px; border: 2px solid var(--chalk-dim); flex: none; }
+.disk::after { content: ''; position: absolute; right: 3px; top: 4px; width: 4px; height: 4px; border-radius: 50%; background: var(--chalk-green); }
+
+.notice { margin: 14px 0 0; padding: 10px 14px; border-radius: 10px; border-left: 4px solid var(--chalk-dim); background: rgba(169, 194, 184, 0.08); line-height: 1.5; }
+.notice.ok { border-left-color: var(--chalk-green); color: var(--chalk-green); background: rgba(143, 209, 158, 0.08); }
+.notice.warning { border-left-color: var(--chalk-yellow); background: rgba(242, 193, 78, 0.08); }
+
+/* The graphics card. */
+.gpu-card { display: flex; align-items: center; gap: 16px; padding: 14px 18px; border-radius: 12px; background: var(--slate-deep); border: 1px solid var(--line); margin-bottom: 16px; }
+.gpu-card strong, .gpu-card .muted { display: block; }
+.gpu-card strong { font-size: 17px; margin: 2px 0; }
+.gpu-chip {
+  width: 46px; height: 34px; border-radius: 6px; flex: none; border: 2px solid var(--chalk-green);
+  background: repeating-linear-gradient(90deg, transparent 0 6px, rgba(143, 209, 158, 0.35) 6px 8px);
+}
+
+/* A long task. */
+.task { margin-top: 12px; }
+.task .chalk-progress { margin-top: 0; }
+.task-line { display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 8px; color: var(--chalk-dim); font-size: 14px; }
+.task-line b { color: var(--chalk); font-weight: 700; }
+.download { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+.download .task { align-self: stretch; }
+.extra { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; margin-top: 14px; padding: 14px 16px; border-radius: 14px; border: 2px dashed var(--line); }
+.extra p { margin: 4px 0 0; font-size: 14px; }
+.extra .download { align-items: flex-end; min-width: 240px; }
+
+/* The AI accounts. */
+.choices { display: grid; gap: 10px; }
+.choice { display: grid; grid-template-columns: 170px 1fr; align-items: center; gap: 12px; }
+.choice-label { color: var(--chalk-dim); font-size: 14px; }
+.segmented { display: inline-flex; flex-wrap: wrap; border: 2px solid var(--line-strong); border-radius: 10px; overflow: hidden; justify-self: start; }
+.segmented button { font: inherit; font-size: 14px; color: var(--chalk-dim); background: transparent; border: none; padding: 6px 14px; cursor: pointer; }
+.segmented button + button { border-left: 1px solid var(--line); }
+.segmented button.on { background: var(--chalk); color: var(--slate-deep); font-weight: 700; }
+.keys { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
+.key-row { display: grid; grid-template-columns: 230px 1fr; gap: 14px; align-items: start; padding: 12px 14px; border-radius: 12px; background: rgba(0, 0, 0, 0.1); border: 1px solid var(--line); }
+.key-name strong, .key-name span { display: block; }
+.key-name span { font-size: 13px; margin-top: 2px; }
+.key-body form { flex-wrap: nowrap; }
+.chalk-input {
+  flex: 1; min-width: 0; font: inherit; font-size: 14px; color: var(--chalk); background: var(--slate-deep);
+  border: 2px solid var(--line); border-radius: 8px; padding: 6px 10px;
+}
+.chalk-input:focus { border-color: var(--chalk-yellow); outline: none; }
+.chalk-input::placeholder { color: rgba(169, 194, 184, 0.6); }
+.chip { font-size: 13px; padding: 4px 10px; border-radius: 999px; margin-right: auto; }
+.chip.keychain { background: rgba(143, 209, 158, 0.14); color: var(--chalk-green); }
+.chip.file { background: rgba(242, 193, 78, 0.14); color: var(--chalk-yellow); }
+.key-outcome { margin: 8px 0 0; font-size: 13px; }
+.key-outcome.ok { color: var(--chalk-green); }
+.key-outcome.warning { color: var(--chalk-red); }
+
+/* Settings. */
+.settings { flex: 1; display: grid; grid-template-columns: 230px 1fr; gap: 22px; padding: 24px 28px; max-width: 1140px; width: 100%; margin: 0 auto; align-items: start; }
+.settings-nav { display: flex; flex-direction: column; gap: 4px; position: sticky; top: 24px; }
+.settings-nav h2 { margin: 4px 10px 14px; font-size: 20px; }
+.settings-nav > button:not(.chalk-button) { all: unset; cursor: pointer; padding: 9px 12px; border-radius: 10px; color: var(--chalk-dim); font-weight: 600; }
+.settings-nav > button:not(.chalk-button):hover { background: rgba(243, 239, 226, 0.06); color: var(--chalk); }
+.settings-nav > button.on { background: var(--slate-raised); color: var(--chalk); box-shadow: inset 3px 0 0 var(--chalk-yellow); }
+.settings-nav .back { margin-top: 18px; align-self: flex-start; }

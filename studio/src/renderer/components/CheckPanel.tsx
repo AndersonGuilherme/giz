@@ -1,10 +1,11 @@
 import type { CheckProblem, CheckReport } from '../../shared/contract.ts';
 import type { MessageKey } from '../../shared/i18n/translate.ts';
-import { translate } from '../i18n.ts';
+import { useTranslate } from '../i18n.ts';
 
 type ListProps = Readonly<{ title: MessageKey; problems: readonly CheckProblem[]; tone: 'error' | 'warning' }>;
 
 function ProblemList({ title, problems, tone }: ListProps) {
+  const translate = useTranslate();
   if (problems.length === 0) return null;
   return (
     <div className={`problems ${tone}`}>
@@ -19,6 +20,7 @@ function ProblemList({ title, problems, tone }: ListProps) {
 }
 
 export function CheckPanel({ report }: Readonly<{ report: CheckReport }>) {
+  const translate = useTranslate();
   const { errors, warnings } = report;
   const clean = errors.length + warnings.length === 0;
   return (

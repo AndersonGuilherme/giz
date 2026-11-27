@@ -22,6 +22,7 @@ test('the schemas refuse extra fields, an empty folder, an unknown provider and 
   assert.equal(REQUEST_SCHEMAS['projects.check'].safeParse({ folder: '/p', extra: 1 }).success, false);
   assert.equal(REQUEST_SCHEMAS['projects.open'].safeParse({ folder: '  ' }).success, false);
   assert.equal(REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'acme' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'google' }).success, false);
   assert.equal(REQUEST_SCHEMAS['keys.set'].safeParse({ provider: 'openai', key: '' }).success, false);
   assert.equal(REQUEST_SCHEMAS['keys.set'].safeParse({ provider: 'openai', key: 'sk-1' }).success, true);
 });
@@ -87,4 +88,17 @@ test('a call from an untrusted sender is refused before validation and never rea
   assert.equal(refused.ok, false);
   assert.equal(refused.failure.code, 'invalid-request');
   assert.equal(calls(), 0);
+});
+
+test('the setup channels refuse a folder named by the window, an unknown task, a bad patch, and accept the valid ones', () => {
+  assert.equal(REQUEST_SCHEMAS['settings.projectsFolder'].safeParse({ source: 'pick' }).success, true);
+  assert.equal(REQUEST_SCHEMAS['settings.projectsFolder'].safeParse({ source: 'pick', folder: '/etc' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.modelsFolder'].safeParse({ source: '/etc' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['setup.run'].safeParse({ task: 'voice-0.6b' }).success, true);
+  assert.equal(REQUEST_SCHEMAS['setup.run'].safeParse({ task: 'rm -rf' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ language: 'en', providers: { image: 'fal' } }).success, true);
+  assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ language: 'fr' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ modelsDir: '/etc' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ providers: { text: 'fal' } }).success, false);
+  assert.equal(REQUEST_SCHEMAS['keys.test'].safeParse({ provider: 'gemini' }).success, true);
 });

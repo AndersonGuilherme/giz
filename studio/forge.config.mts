@@ -30,6 +30,12 @@ const config: ForgeConfig = {
           target: 'main',
         },
         {
+          // The setup worker (GPU install, model downloads) runs in its own utility process, built next to main.cjs.
+          entry: 'src/main/worker/setupWorker.ts',
+          config: 'vite.main.config.mts',
+          target: 'main',
+        },
+        {
           entry: 'src/preload/preload.ts',
           config: 'vite.preload.config.mts',
           target: 'preload',

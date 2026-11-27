@@ -1,7 +1,8 @@
-/** Turns a key into its encrypted form (base64). `available` is false when the system offers no encryption. */
+/** Turns a key into its encrypted form (base64) and back. `available` is false when the system offers no encryption. */
 export interface Cipher {
   available(): boolean;
   encrypt(text: string): string;
+  decrypt(sealed: string): string;
 }
 
 /** The encrypted keys at rest, by provider name. */

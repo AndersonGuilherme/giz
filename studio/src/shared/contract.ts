@@ -1,12 +1,14 @@
 // The contract between the main process and the window: channel names and the data each one carries.
 // Plain types and constants only (no zod, no electron): the preload and the renderer import it too.
+import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
+import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
+import type { GpuStatus, ModelsStatus, SetupTask } from './setup.ts';
+
+export { KEY_PROVIDERS, type KeyProvider } from './accounts.ts';
 
 export const ASPECTS = ['9:16', '16:9'] as const;
 export type Aspect = (typeof ASPECTS)[number];
 
-/** The AI and voice services whose keys the Studio keeps (encrypted with Electron safeStorage). */
-export const KEY_PROVIDERS = ['anthropic', 'openai', 'google', 'fal', 'elevenlabs', 'fish'] as const;
-export type KeyProvider = (typeof KEY_PROVIDERS)[number];
 
 /** `details`: one readable line per problem (for example, each invalid field of a project). */
 export type FailureCode = 'invalid-request' | 'invalid-project' | 'busy' | 'cancelled' | 'unavailable' | 'failed';
@@ -36,6 +38,8 @@ type Channel<Request, Response> = Readonly<{ request: Request; response: Respons
 type Nothing = Readonly<Record<string, never>>;
 type FolderRequest = Readonly<{ folder: string }>;
 type ProviderRequest = Readonly<{ provider: KeyProvider }>;
+type SourceRequest = Readonly<{ source: FolderSource }>;
+type TaskRequest = Readonly<{ task: SetupTask }>;
 
 /** Every channel the window may invoke: what it sends and what it gets back (always wrapped in a `Result`). */
 export type Channels = Readonly<{
@@ -46,9 +50,24 @@ export type Channels = Readonly<{
   'projects.check': Channel<FolderRequest, CheckReport>;
   'video.render': Channel<FolderRequest & Readonly<{ aspect: Aspect }>, RenderedFiles>;
   'video.cancel': Channel<Nothing, boolean>;
-  'keys.set': Channel<ProviderRequest & Readonly<{ key: string }>, true>;
+  /** Where the key went: the system keychain, or the 600-mode file when there is none. */
+  'keys.set': Channel<ProviderRequest & Readonly<{ key: string }>, KeyStorage>;
   'keys.has': Channel<ProviderRequest, boolean>;
   'keys.remove': Channel<ProviderRequest, boolean>;
+  'keys.status': Channel<Nothing, KeysStatus>;
+  /** One tiny real call with the saved key (a single attempt); services without a check answer `unavailable`. */
+  'keys.test': Channel<ProviderRequest, KeyCheck>;
+  'settings.get': Channel<Nothing, Settings>;
+  'settings.update': Channel<SettingsPatch, Settings>;
+  'settings.projectsFolder': Channel<SourceRequest, Settings>;
+  'settings.modelsFolder': Channel<SourceRequest, Settings>;
+  /** Ends the first-run wizard: from then on the app opens on the Studio. */
+  'settings.finish': Channel<Nothing, Settings>;
+  'gpu.status': Channel<Nothing, GpuStatus>;
+  'models.status': Channel<Nothing, ModelsStatus>;
+  /** Runs a setup task to the end (progress on `setup.progress`); a stopped task answers `cancelled`. */
+  'setup.run': Channel<TaskRequest, true>;
+  'setup.stop': Channel<TaskRequest, boolean>;
 }>;
 
 export type ChannelName = keyof Channels;

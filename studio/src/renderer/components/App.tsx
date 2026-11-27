@@ -6,7 +6,7 @@ import { FailurePanel } from './FailurePanel.tsx';
 import { Header } from './Header.tsx';
 import { ProjectCard } from './ProjectCard.tsx';
 import { RenderPanel } from './RenderPanel.tsx';
-import { translate } from '../i18n.ts';
+import { useTranslate } from '../i18n.ts';
 
 type Actions = Readonly<{ render: () => void; cancel: () => void }>;
 
@@ -23,17 +23,19 @@ function OpenProject({ state, actions }: Readonly<{ state: StudioState; actions:
   );
 }
 
-export function App({ api }: Readonly<{ api: GizApi }>) {
+/** The Studio: open a project, see its check, render it. */
+export function App({ api, onSettings }: Readonly<{ api: GizApi; onSettings: () => void }>) {
+  const translate = useTranslate();
   const { state, open, render, cancel } = useStudio(api);
   const { project, failure } = state;
   return (
-    <div className="studio">
-      <Header opening={state.opening} onOpen={open} />
+    <>
+      <Header opening={state.opening} onOpen={open} onSettings={onSettings} />
       <main className="board">
         {failure && <FailurePanel failure={failure} />}
         {!project && !failure && <p className="hint">{translate('project.none')}</p>}
         <OpenProject state={state} actions={{ render, cancel }} />
       </main>
-    </div>
+    </>
   );
 }
