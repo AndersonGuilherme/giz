@@ -38,7 +38,7 @@ export function castVoices() {
   return { providers: VOICE_PROVIDERS, models: VOICE_MODELS, qwen: QWEN_VOICES, styles };
 }
 
-type SampleVoice = Readonly<{ provider: Exclude<VoiceProviderName, 'recording'>; model?: QwenModel; keys: VoiceKeys }>;
+export type SampleVoice = Readonly<{ provider: Exclude<VoiceProviderName, 'recording'>; model?: QwenModel; keys: VoiceKeys }>;
 
 async function qwenVoice(model: QwenModel | undefined) {
   const { QwenVoice } = await import('../../../infrastructure/voice/QwenVoice.ts');

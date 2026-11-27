@@ -10,7 +10,7 @@ import { CAPTION_LAYOUTS } from '../../domain/caption/captionLayouts.ts';
 import { createLayoutRegistry } from '../../domain/layout/defaultLayoutRegistry.ts';
 import type { Project } from '../../domain/project/Project.ts';
 import { EnvelopeAligner } from '../../infrastructure/alignment/EnvelopeAligner.ts';
-import { WhisperAligner } from '../../infrastructure/alignment/WhisperAligner.ts';
+import { WhisperAligner, type Listener } from '../../infrastructure/alignment/WhisperAligner.ts';
 import { WhisperListener } from '../../infrastructure/alignment/WhisperListener.ts';
 import { DiskVoiceStore } from '../../infrastructure/disk/DiskVoiceStore.ts';
 import { DiskProjectRepository } from '../../infrastructure/disk/DiskProjectRepository.ts';
@@ -40,12 +40,15 @@ export function generateVoices(folder: string, project: Project): GenerateVoices
 
 /**
  * The Studio's voices: the project voice with the Studio's keys, or another voice (its rehearsal voice); a line the
- * person recorded comes from that take either way. `whisper` false aligns the words by the envelope only (no model).
+ * person recorded comes from that take either way. `whisper` false aligns the words by the envelope only (no model);
+ * `listener`: a Whisper already loaded (the Studio's voice worker keeps one).
  */
-export function generateVoicesWith(folder: string, project: Project, options: Readonly<{ keys?: VoiceKeys; voice?: VoiceProvider; whisper?: boolean }>): GenerateVoices {
+export type StudioVoices = Readonly<{ keys?: VoiceKeys; voice?: VoiceProvider; whisper?: boolean; listener?: Listener }>;
+
+export function generateVoicesWith(folder: string, project: Project, options: StudioVoices): GenerateVoices {
   const voice = options.voice ? new OwnRecordingFirst(options.voice, folder) : voiceOf(folder, project, options.keys);
   const envelope = new EnvelopeAligner();
-  const aligner = options.whisper === false ? envelope : new WhisperAligner(envelope, new WhisperListener(), warn);
+  const aligner = options.whisper === false ? envelope : new WhisperAligner(envelope, options.listener ?? new WhisperListener(), warn);
   return new GenerateVoices({ voice, phonemizer: new EspeakPhonemizer(), store: new DiskVoiceStore(folder), aligner });
 }
 
