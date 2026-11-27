@@ -19,6 +19,7 @@ import { RemotionRenderer } from '../../infrastructure/render/RemotionRenderer.t
 import { RemotionPortraits } from '../../infrastructure/render/RemotionPortraits.ts';
 import { RemotionSheet } from '../../infrastructure/render/RemotionSheet.ts';
 import { headlessShellIn } from '../../infrastructure/render/browserLocation.ts';
+import { prebuiltBundleIn } from '../../infrastructure/render/stagedBundle.ts';
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
 import { RigCatalogFromRegistry } from '../rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../rigs/rigRegistry.ts';
@@ -61,12 +62,14 @@ export function buildTimeline(folder: string): BuildTimeline {
 }
 
 // The Remotion entry point (the compositions), the package public folder (the sound effects) and the package's Chrome
-// Headless Shell: all resolved from the package, so `giz` works from any working directory (and later from Electron).
+// Headless Shell: all resolved from the package, so `giz` works from any working directory (and from Electron). The
+// installed Studio's package also has the compositions bundled at package time (no webpack at run time).
 const PACKAGE_FOLDER = fileURLToPath(new URL('../../..', import.meta.url));
 const REMOTION = {
   entryPoint: fileURLToPath(new URL('../remotion/index.ts', import.meta.url)),
   publicFolder: fileURLToPath(new URL('../../../public', import.meta.url)),
   browserExecutable: headlessShellIn(PACKAGE_FOLDER),
+  prebuilt: prebuiltBundleIn(PACKAGE_FOLDER),
 };
 
 /** The package public folder: the sound effects the video plays (`sounds/<name>.wav`), also for the Studio's preview. */

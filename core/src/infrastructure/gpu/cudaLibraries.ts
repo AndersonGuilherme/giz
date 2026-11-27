@@ -91,6 +91,6 @@ export async function ensureCudaLibraries(modelsDir: string, log: Log, onProgres
 
 /** Everything the voice needs to run on the GPU: the CUDA provider and the NVIDIA libraries (`onProgress`: their bytes). */
 export async function installGpu(modelsDir: string, log: Log, onProgress: Progress = quiet): Promise<void> {
-  ensureOrtCuda(log);
+  await ensureOrtCuda(modelsDir, log, onProgress);
   await ensureCudaLibraries(modelsDir, log, onProgress);
 }

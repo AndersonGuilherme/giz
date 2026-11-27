@@ -1,9 +1,16 @@
-import { existsSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { mergedConfig, type Environment, type GizConfig } from './GizConfig.ts';
 
 /** giz.config.json at the repository root (the folder above core/), where the motor kept it. */
 export const CONFIG_PATH = fileURLToPath(new URL('../../../../giz.config.json', import.meta.url));
+
+/**
+ * The file this process uses: GIZ_CONFIG when it names one (the installed Studio, whose package folder is read-only,
+ * keeps it in ~/.config/giz), otherwise the repository one.
+ */
+export const configPath = (env: Environment = process.env): string => env.GIZ_CONFIG?.trim() || CONFIG_PATH;
 
 type Sources = Readonly<{ env: Environment; home: string; warn: (message: string) => void }>;
 
@@ -37,6 +44,7 @@ export class ConfigFile {
   }
 
   save(config: GizConfig): void {
+    mkdirSync(dirname(this.#path), { recursive: true });
     writeFileSync(this.#path, `${JSON.stringify(config, null, 2)}\n`);
   }
 }

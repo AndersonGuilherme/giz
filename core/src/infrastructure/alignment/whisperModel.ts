@@ -37,8 +37,14 @@ export function whisperProgressOf(event: TransformersEvent): DownloadProgress | 
 /** `cacheDir`: another cache than transformers' own (the download into a partial folder, see whisperDownload.ts). */
 export type RecognizerOptions = Readonly<{ onProgress?: (progress: DownloadProgress) => void; cacheDir?: string }>;
 
+/**
+ * GIZ_WHISPER_CACHE: another cache folder than the transformers package's own, which is read-only once the Studio is
+ * installed (the Studio sets it); undefined keeps transformers' own.
+ */
+export const whisperCacheOf = (env: Readonly<Record<string, string | undefined>>): string | undefined => env.GIZ_WHISPER_CACHE?.trim() || undefined;
+
 // Late import: commands that do not listen never load transformers (and its onnxruntime session).
-export async function loadRecognizer({ onProgress, cacheDir }: RecognizerOptions = {}): Promise<AutomaticSpeechRecognitionPipeline> {
+export async function loadRecognizer({ onProgress, cacheDir = whisperCacheOf(process.env) }: RecognizerOptions = {}): Promise<AutomaticSpeechRecognitionPipeline> {
   const transformers = await import('@huggingface/transformers');
   const create = transformers.pipeline as CreateRecognizer;
   const progress_callback = (event: TransformersEvent) => {

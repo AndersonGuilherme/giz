@@ -59,3 +59,10 @@ test("transformers' progress events become download progress (file, bytes); othe
   assert.equal(whisperProgressOf({ status: 'initiate', file: 'config.json' }), undefined);
   assert.equal(whisperProgressOf({ status: 'ready' }), undefined);
 });
+
+test('GIZ_WHISPER_CACHE moves the Whisper cache out of the transformers package (read-only once installed)', async () => {
+  const { whisperCacheOf } = await import('../../../src/infrastructure/alignment/whisperModel.ts');
+  assert.equal(whisperCacheOf({ GIZ_WHISPER_CACHE: '/home/x/.config/giz-estudio/whisper' }), '/home/x/.config/giz-estudio/whisper');
+  assert.equal(whisperCacheOf({ GIZ_WHISPER_CACHE: ' ' }), undefined);
+  assert.equal(whisperCacheOf({}), undefined);
+});

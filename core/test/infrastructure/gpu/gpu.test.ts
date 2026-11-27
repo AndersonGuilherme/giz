@@ -61,10 +61,3 @@ test('the CUDA libraries are ready only once their done marker exists', async ()
   assert.equal(cudaLibrariesReady(modelsDir, () => 13), true);
   assert.equal(cudaLibrariesReady(modelsDir, () => { throw new Error('sem provider'); }), false);
 });
-
-test('the ONNX Runtime installer runs as Node inside Electron (whose binary is not node) and without the npm variables', async () => {
-  const { installerEnvironment } = await import('../../../src/infrastructure/gpu/onnxRuntimeCuda.ts');
-  const env = { PATH: '/bin', npm_config_x: '1', ONNXRUNTIME_NODE_INSTALL_CUDA: 'skip' };
-  assert.deepEqual(installerEnvironment(env, undefined), { PATH: '/bin' });
-  assert.deepEqual(installerEnvironment(env, '45.5.0'), { PATH: '/bin', ELECTRON_RUN_AS_NODE: '1' });
-});

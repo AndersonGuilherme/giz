@@ -2,7 +2,7 @@ import { existsSync, mkdirSync, renameSync, rmSync, writeFileSync } from 'node:f
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import type { DownloadProgress } from '../download/resumableDownload.ts';
-import { loadRecognizer, WHISPER_MODEL, type RecognizerOptions } from './whisperModel.ts';
+import { loadRecognizer, whisperCacheOf, WHISPER_MODEL, type RecognizerOptions } from './whisperModel.ts';
 
 // transformers writes each file straight to its final name and cannot resume: a download stopped halfway would leave
 // a broken model that looks complete. So the explicit download (`giz models --whisper`, the Studio) goes to a partial
@@ -11,9 +11,11 @@ const DONE_MARKER = '.giz-complete';
 const PARTIAL = '.giz-partial';
 const WHISPER_FILES = ['config.json', 'onnx/encoder_model_quantized.onnx', 'onnx/decoder_model_merged_quantized.onnx'];
 
-// transformers' default cache: the .cache folder of its own package (where loadRecognizer reads from). Its entry is
-// <package>/dist/<file>; its package.json is not in its exports, so it cannot be resolved directly.
-const transformersCache = () => join(dirname(dirname(createRequire(import.meta.url).resolve('@huggingface/transformers'))), '.cache');
+// transformers' default cache: the .cache folder of its own package (where loadRecognizer reads from), unless
+// GIZ_WHISPER_CACHE names another. Its entry is <package>/dist/<file>; its package.json is not in its exports, so it
+// cannot be resolved directly.
+const packageCache = () => join(dirname(dirname(createRequire(import.meta.url).resolve('@huggingface/transformers'))), '.cache');
+const transformersCache = () => whisperCacheOf(process.env) ?? packageCache();
 
 /** Whether Whisper (q8) was downloaded whole into the cache: its files and the done marker (checked without loading transformers). */
 export function whisperDownloaded(cache: string = transformersCache()): boolean {

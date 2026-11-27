@@ -4,7 +4,7 @@ import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { CONFIG_PATH, ConfigFile } from '../../../src/infrastructure/config/ConfigFile.ts';
+import { CONFIG_PATH, ConfigFile, configPath } from '../../../src/infrastructure/config/ConfigFile.ts';
 import { defaultConfig } from '../../../src/infrastructure/config/GizConfig.ts';
 
 const folder = () => mkdtempSync(join(tmpdir(), 'giz-config-'));
@@ -12,6 +12,12 @@ const quiet = { env: {}, home: '/home/test', warn: () => undefined };
 
 test('the file is giz.config.json at the repository root, the same one the motor used', () => {
   assert.equal(CONFIG_PATH, fileURLToPath(new URL('../../../../giz.config.json', import.meta.url)));
+});
+
+test('GIZ_CONFIG names another file (the installed Studio keeps it in ~/.config/giz); blank or absent: the repository one', () => {
+  assert.equal(configPath({ GIZ_CONFIG: '/home/x/.config/giz/giz.config.json' }), '/home/x/.config/giz/giz.config.json');
+  assert.equal(configPath({ GIZ_CONFIG: '  ' }), CONFIG_PATH);
+  assert.equal(configPath({}), CONFIG_PATH);
 });
 
 test('without the file the defaults apply (CPU, ~/.cache/giz, 0.6b) and a warning says how to configure', () => {
@@ -62,4 +68,10 @@ test('a file that is not JSON gives a readable error with the path', () => {
   const path = join(folder(), 'giz.config.json');
   writeFileSync(path, '{ quebrado');
   assert.throws(() => new ConfigFile(path, quiet).load(), (error: Error) => error.message.includes(path));
+});
+
+test('saving creates the folder of the file (~/.config/giz may not exist yet on a new machine)', () => {
+  const path = join(folder(), 'new', 'giz', 'giz.config.json');
+  new ConfigFile(path, quiet).save(defaultConfig('/home/test'));
+  assert.equal(JSON.parse(readFileSync(path, 'utf8')).device, 'cpu');
 });

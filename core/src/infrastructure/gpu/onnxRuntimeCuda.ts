@@ -1,7 +1,7 @@
-import { execFileSync } from 'node:child_process';
 import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
+import { installOrtCuda, type OrtCudaReport } from './ortCudaInstall.ts';
 
 const require = createRequire(import.meta.url);
 const packageFolder = () => dirname(require.resolve('onnxruntime-node/package.json'));
@@ -27,22 +27,12 @@ export function cudaMajorIn(binary: string): number {
 /** The CUDA major version the installed provider needs. */
 export const requiredCudaMajor = (): number => cudaMajorIn(readFileSync(providerPath()).toString('latin1'));
 
-type Environment = Readonly<Record<string, string | undefined>>;
+/** The ONNX Runtime version of core's onnxruntime-node (its CUDA provider must be the same one). */
+const ortVersion = (): string => (JSON.parse(readFileSync(require.resolve('onnxruntime-node/package.json'), 'utf8')) as { version: string }).version;
 
-// Without the npm_* variables: when called from `npm run`, the ONNX Runtime installer thinks it is a local install
-// and exits; the ONNXRUNTIME_NODE_INSTALL* ones would make it skip CUDA again. Inside Electron (the Studio)
-// process.execPath is the Electron binary: ELECTRON_RUN_AS_NODE makes it run the installer as plain Node.
-export function installerEnvironment(env: Environment = process.env, electron: string | undefined = process.versions.electron): NodeJS.ProcessEnv {
-  const kept = Object.fromEntries(Object.entries(env).filter(([name]) => !/^npm_|^ONNXRUNTIME_NODE_INSTALL/i.test(name)));
-  return electron ? { ...kept, ELECTRON_RUN_AS_NODE: '1' } : kept;
-}
-
-/** Downloads the ONNX Runtime CUDA provider with the package's own installer, if it is not there yet. */
-export function ensureOrtCuda(log: (message: string) => void): void {
+/** Downloads the ONNX Runtime CUDA provider (resumable, `onProgress`: its bytes) next to ONNX Runtime, if it is not there yet. */
+export async function ensureOrtCuda(modelsDir: string, log: (message: string) => void, onProgress: OrtCudaReport['onProgress']): Promise<void> {
   if (ortHasCuda()) return;
-  const script = join(packageFolder(), 'script', 'install.js');
-  log('  baixando o ONNX Runtime com CUDA...');
-  const options = { stdio: 'inherit', cwd: dirname(script), env: installerEnvironment() } as const;
-  execFileSync(process.execPath, [script, '--onnxruntime-node-install=cuda12'], options);
+  await installOrtCuda({ modelsDir, binFolder: binaryFolder(), version: ortVersion() }, { log, onProgress });
   if (!ortHasCuda()) throw new Error('o ONNX Runtime não instalou o provider CUDA');
 }

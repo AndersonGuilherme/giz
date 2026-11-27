@@ -1,10 +1,10 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync } from 'node:fs';
+import { chmodSync, existsSync } from 'node:fs';
 import { mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { withPublicDir } from '../../../src/infrastructure/render/stagedBundle.ts';
+import { withBundle, withPublicDir } from '../../../src/infrastructure/render/stagedBundle.ts';
 
 // A package public folder with one sound, a project voice and an empty scratch folder for the temporary public dir.
 async function setup() {
@@ -57,5 +57,54 @@ test('a staged file outside the public dir, or taken from outside the project, i
   await assert.rejects(withPublicDir(sources, outside, async () => undefined), /voz\.wav está fora da pasta do projeto/);
   assert.equal(existsSync(join(root, 'escaped.wav')), false);
   assert.deepEqual(await readdir(scratch), []);
+  await cleanup();
+});
+
+test('a bundle made at package time is copied with the staged files in its public folder: no webpack, and it is left as it was', async () => {
+  const { root, sources, scratch, cleanup } = await setup();
+  const prebuilt = join(root, 'remotion-bundle');
+  await mkdir(join(prebuilt, 'public', 'sounds'), { recursive: true });
+  await writeFile(join(prebuilt, 'index.html'), '<html>');
+  await writeFile(join(prebuilt, 'public', 'sounds', 'pop.wav'), 'pop');
+  const seen = await withBundle({ ...sources, entryPoint: join(root, 'missing-entry.ts'), prebuilt }, [{ from: join(root, 'voz.wav'), at: 'voice/1.wav' }], async (serveUrl) => ({
+    page: await readFile(join(serveUrl, 'index.html'), 'utf8'),
+    sound: await readFile(join(serveUrl, 'public', 'sounds', 'pop.wav'), 'utf8'),
+    voice: await readFile(join(serveUrl, 'public', 'voice', '1.wav'), 'utf8'),
+    serveUrl,
+  }));
+  assert.deepEqual([seen.page, seen.sound, seen.voice], ['<html>', 'pop', 'voz']);
+  assert.notEqual(seen.serveUrl, prebuilt);
+  assert.equal(existsSync(seen.serveUrl), false);
+  assert.deepEqual(await readdir(scratch), []);
+  assert.deepEqual((await readdir(prebuilt, { recursive: true })).sort(), ['index.html', 'public', 'public/sounds', 'public/sounds/pop.wav']);
+  await cleanup();
+});
+
+test('a prebuilt bundle still refuses a staged file from outside the project and leaves nothing behind', async () => {
+  const { root, sources, scratch, cleanup } = await setup();
+  const prebuilt = join(root, 'remotion-bundle');
+  await mkdir(prebuilt);
+  const outside = [{ from: join(root, 'voz.wav'), at: 'voice/1.wav', project: join(root, 'project') }];
+  await assert.rejects(withBundle({ ...sources, prebuilt }, outside, async () => undefined), /fora da pasta do projeto/);
+  assert.deepEqual(await readdir(scratch), []);
+  await cleanup();
+});
+
+test('the prebuilt bundle is <package>/remotion-bundle when the package ships one (the installed Studio), else none', async () => {
+  const { prebuiltBundleIn } = await import('../../../src/infrastructure/render/stagedBundle.ts');
+  assert.equal(prebuiltBundleIn('/app/core', (path) => path === '/app/core/remotion-bundle/index.html'), '/app/core/remotion-bundle');
+  assert.equal(prebuiltBundleIn('/repo/core', () => false), undefined);
+});
+
+test('a read-only prebuilt bundle (an app installed by the system) is copied into a writable folder and removed after use', { skip: process.getuid?.() === 0 }, async () => {
+  const { root, sources, scratch, cleanup } = await setup();
+  const prebuilt = join(root, 'remotion-bundle');
+  await mkdir(join(prebuilt, 'public', 'fonts'), { recursive: true });
+  await writeFile(join(prebuilt, 'public', 'fonts', 'Nunito.ttf'), 'font');
+  for (const path of [join(prebuilt, 'public', 'fonts', 'Nunito.ttf'), join(prebuilt, 'public', 'fonts'), join(prebuilt, 'public'), prebuilt]) chmodSync(path, 0o555);
+  const voice = await withBundle({ ...sources, prebuilt }, [{ from: join(root, 'voz.wav'), at: 'fonts/extra.wav' }], (serveUrl) => readFile(join(serveUrl, 'public', 'fonts', 'extra.wav'), 'utf8'));
+  assert.equal(voice, 'voz');
+  assert.deepEqual(await readdir(scratch), []);
+  for (const path of [prebuilt, join(prebuilt, 'public'), join(prebuilt, 'public', 'fonts')]) chmodSync(path, 0o755);
   await cleanup();
 });
