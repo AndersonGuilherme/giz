@@ -1,5 +1,6 @@
 import { join } from 'node:path';
-import { BrowserWindow } from 'electron';
+import { BrowserWindow, nativeImage } from 'electron';
+import iconDataUrl from '../../assets/icon/icon-256.png?inline';
 import type { AppOrigin } from './ipc/senderTrust.ts';
 
 // The window runs only the renderer bundle: no Node in it, an isolated preload world, the Chromium sandbox on.
@@ -36,10 +37,12 @@ function logPageProblems(window: BrowserWindow): void {
   });
 }
 
-/** The Studio window, with the slate background already painted while the page loads. */
+/** The Studio window, with the slate background already painted while the page loads and the giz icon. */
 export function createMainWindow(title: string): BrowserWindow {
   const preload = join(__dirname, 'preload.cjs');
-  const window = new BrowserWindow({ width: 1100, height: 760, minWidth: 720, minHeight: 520, title, backgroundColor: '#26302d', webPreferences: { ...WEB_PREFERENCES, preload } });
+  // The window icon (taskbar, title bar) on Linux and Windows; macOS takes the app bundle's icon.icns instead.
+  const icon = nativeImage.createFromDataURL(iconDataUrl);
+  const window = new BrowserWindow({ width: 1100, height: 760, minWidth: 720, minHeight: 520, title, icon, backgroundColor: '#26302d', webPreferences: { ...WEB_PREFERENCES, preload } });
   lockNavigation(window);
   logPageProblems(window);
   void load(window);

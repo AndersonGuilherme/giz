@@ -36,11 +36,7 @@ body {
 .brand { display: flex; align-items: center; gap: 14px; }
 .brand h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
 .tagline { margin: 2px 0 0; color: var(--chalk-dim); font-size: 13px; }
-.logo {
-  width: 34px; height: 12px; border-radius: 3px; transform: rotate(-12deg);
-  background: linear-gradient(90deg, var(--chalk) 70%, var(--chalk-yellow) 70%);
-  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
-}
+.logo { flex: none; display: block; filter: drop-shadow(0 2px 0 rgba(0, 0, 0, 0.35)); }
 
 .board { flex: 1; padding: 24px 28px; display: grid; gap: 18px; align-content: start; max-width: 980px; width: 100%; margin: 0 auto; }
 .hint { color: var(--chalk-dim); font-size: 16px; text-align: center; margin-top: 18vh; }
