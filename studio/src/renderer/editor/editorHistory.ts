@@ -33,3 +33,15 @@ export function redone(history: History): History {
   if (!next) return history;
   return { past: [...history.past, history.present], present: next, future };
 }
+
+/**
+ * A change that comes from disk (a scenario image core linked) put into every version, past and future too: it is no
+ * step to undo, redo stays, and undoing an edit never takes the link away. Nothing changed: the same history.
+ */
+export function throughout(history: History, change: (script: ScriptJson) => ScriptJson): History {
+  const present = change(history.present);
+  const past = history.past.map(change);
+  const future = history.future.map(change);
+  const same = present === history.present && [...past, ...future].every((script, at) => script === [...history.past, ...history.future][at]);
+  return same ? history : { ...history, past, present, future };
+}

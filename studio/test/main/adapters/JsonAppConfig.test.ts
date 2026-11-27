@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { JsonAppConfig } from '../../../src/main/adapters/JsonAppConfig.ts';
 
-const CONFIG = { language: 'en', projectsFolder: '/p', providers: { text: 'gemini', image: 'fal', voice: 'fish' }, firstRunDone: true } as const;
+const CONFIG = { language: 'en', projectsFolder: '/p', providers: { text: 'gemini', image: 'fal', voice: 'fish' }, firstRunDone: true, toursSeen: ['script'] } as const;
 
 test('no file is the first run; a written config reads back; the write leaves no draft behind', async () => {
   const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
@@ -29,6 +29,21 @@ test('a broken or foreign file reads as none (the wizard runs again), never as h
     assert.equal(await store.read(), null);
     await writeFile(file, JSON.stringify({ ...CONFIG, language: 'fr' }));
     assert.equal(await store.read(), null);
+  } finally {
+    await rm(folder, { recursive: true, force: true });
+  }
+});
+
+test('a config written before the tours existed reads with no tour seen; an unknown tour is dropped', async () => {
+  const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
+  try {
+    const file = join(folder, 'studio.json');
+    const store = new JsonAppConfig(file);
+    const older = Object.fromEntries(Object.entries(CONFIG).filter(([key]) => key !== 'toursSeen'));
+    await writeFile(file, JSON.stringify(older));
+    assert.deepEqual(await store.read(), { ...older, toursSeen: [] });
+    await writeFile(file, JSON.stringify({ ...CONFIG, toursSeen: ['script', 'nope'] }));
+    assert.deepEqual((await store.read())?.toursSeen, ['script']);
   } finally {
     await rm(folder, { recursive: true, force: true });
   }

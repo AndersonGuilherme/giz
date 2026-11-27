@@ -69,6 +69,8 @@ const giz: GizApi = {
     projectsFolder: (source) => call('settings.projectsFolder', { source }),
     modelsFolder: (source) => call('settings.modelsFolder', { source }),
     finish: () => call('settings.finish', {}),
+    tourSeen: (tour) => call('settings.tourSeen', { tour }),
+    resetTours: () => call('settings.resetTours', {}),
   },
   setup: {
     gpu: () => call('gpu.status', {}),

@@ -1,7 +1,7 @@
 // The contract between the main process and the window: channel names and the data each one carries.
 // Plain types and constants only (no zod, no electron): the preload and the renderer import it too.
 import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
-import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
+import type { FolderSource, Settings, SettingsPatch, TourId } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask } from './setup.ts';
 import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, StageBrief } from './projects.ts';
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
@@ -81,6 +81,10 @@ export type Channels = CastChannels & ScenarioChannels & VoiceChannels & VideoCh
   'settings.modelsFolder': Channel<SourceRequest, Settings>;
   /** Ends the first-run wizard: from then on the app opens on the Studio. */
   'settings.finish': Channel<Nothing, Settings>;
+  /** A guided tour finished or skipped (kept in the Studio's userData, never in a project). */
+  'settings.tourSeen': Channel<Readonly<{ tour: TourId }>, Settings>;
+  /** "Mostrar tutoriais de novo" in Settings. */
+  'settings.resetTours': Channel<Nothing, Settings>;
   'gpu.status': Channel<Nothing, GpuStatus>;
   'models.status': Channel<Nothing, ModelsStatus>;
   /** Runs a setup task to the end (progress on `setup.progress`); a stopped task answers `cancelled`. */

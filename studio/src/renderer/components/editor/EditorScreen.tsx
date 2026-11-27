@@ -1,13 +1,19 @@
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useEditor, type Editor } from '../../state/useEditor.ts';
+import { useTour, type TourControl } from '../../state/useTour.ts';
+import { SCRIPT_TOUR } from '../../tour/scriptTour.ts';
+import { Icon } from '../common/Icon.tsx';
 import { StageBar } from '../common/StageBar.tsx';
+import { TourOverlay } from '../tour/TourOverlay.tsx';
 import { FailurePanel } from '../FailurePanel.tsx';
 import { EditorContext, type EditorTools } from './EditorContext.ts';
 import { EditorToolbar } from './EditorToolbar.tsx';
+import { FoldingContext } from './FoldingContext.ts';
 import { LineList } from './LineList.tsx';
 import { ProblemsPanel } from './ProblemsPanel.tsx';
+import { useFocusLine, useScriptFolding, useTourLine } from './useScriptFolding.ts';
 import { useUndoKeys } from './useUndoKeys.ts';
 
 type Props = Readonly<{ api: GizApi; folder: string; focus?: string }>;
@@ -45,42 +51,49 @@ function Body({ editor }: Readonly<{ editor: Editor }>) {
   );
 }
 
-function Title({ tools }: Readonly<{ tools: EditorTools }>) {
+function Title({ tools, tour }: Readonly<{ tools: EditorTools; tour: TourControl }>) {
+  const translate = useTranslate();
   const { document } = tools;
   return (
     <div className="editor-title">
       <h2>{document.title}</h2>
       <p className="folder">{document.folder}</p>
+      <button type="button" className="chalk-button small quiet tour-show" data-testid="tour-show" title={translate('tour.showTitle')} onClick={tour.start}><Icon name="help" /> {translate('tour.show')}</button>
     </div>
   );
 }
 
-// A line named by another stage (the Video stage's check) is selected once the script is loaded (the card scrolls to it).
-function useFocus(tools: EditorTools | null, focus: string | undefined): void {
-  const ready = tools !== null;
-  useEffect(() => {
-    if (!tools || focus === undefined) return;
-    const index = tools.script.lines.findIndex((line) => line.id === focus);
-    if (index >= 0) tools.select(index);
-  }, [ready, focus]);
+function Board({ editor, tools, tour }: Readonly<{ editor: Editor; tools: EditorTools; tour: TourControl }>) {
+  return (
+    <>
+      <main className="editor" data-testid="editor">
+        <div className="editor-head"><Title tools={tools} tour={tour} /><StageBar stages={editor.report?.stages ?? []} /></div>
+        <EditorToolbar editor={editor} />
+        <Body editor={editor} />
+      </main>
+      <TourOverlay control={tour} />
+    </>
+  );
 }
 
-/** The Script stage: the stages on top, the lines in the middle, the check beside them (the render is in the Video stage). */
+/**
+ * The Script stage: the stages on top, the folded lines in the middle, the check beside them (the render is in the Video
+ * stage), and the tour the first time.
+ */
 export function EditorScreen({ api, folder, focus }: Props) {
   const translate = useTranslate();
   const editor = useEditor(api, folder);
   const tools = useTools(api, editor, useLocal());
-  useFocus(tools, focus);
+  const folding = useScriptFolding(folder, tools);
+  const tour = useTour(SCRIPT_TOUR, tools !== null);
+  useFocusLine(tools, folding, focus);
+  useTourLine(tour, folding, tools);
   useUndoKeys(editor.undo, editor.redo);
   if (editor.failure) return <main className="board"><FailurePanel failure={editor.failure} /></main>;
   if (!tools) return <p className="hint">{translate('editor.loading')}</p>;
   return (
     <EditorContext.Provider value={tools}>
-      <main className="editor" data-testid="editor">
-        <div className="editor-head"><Title tools={tools} /><StageBar stages={editor.report?.stages ?? []} /></div>
-        <EditorToolbar editor={editor} />
-        <Body editor={editor} />
-      </main>
+      <FoldingContext.Provider value={folding}><Board editor={editor} tools={tools} tour={tour} /></FoldingContext.Provider>
     </EditorContext.Provider>
   );
 }

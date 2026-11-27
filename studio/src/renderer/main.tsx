@@ -7,6 +7,7 @@ import './styles.css';
 import './screens.css';
 import './stages.css';
 import './video.css';
+import './guides.css';
 
 const root = document.getElementById('root');
 // The boundary's title is fixed text: when it shows, the translations may be what broke.

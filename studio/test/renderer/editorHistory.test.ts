@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { edited, HISTORY_LIMIT, historyOf, redone, undone } from '../../src/renderer/editor/editorHistory.ts';
+import { edited, HISTORY_LIMIT, historyOf, redone, throughout, undone } from '../../src/renderer/editor/editorHistory.ts';
 import type { ScriptJson } from '../../src/shared/script.ts';
 
 const version = (text: string): ScriptJson => ({ chapters: ['x'], lines: [{ id: '01', chapter: 1, speaker: 'a', text }] });
@@ -41,4 +41,20 @@ test('at least the last 50 edits can be undone (the oldest beyond the limit are 
   assert.equal(history.past.length, HISTORY_LIMIT);
   for (let step = 0; step < 50; step++) history = undone(history);
   assert.equal(textOf(history.present), String(HISTORY_LIMIT + 20 - 50));
+});
+
+test('a change from disk goes into every version, as no step: undo and redo keep it', () => {
+  const stamp = (script: ScriptJson): ScriptJson => ({ ...script, lines: script.lines.map((line) => ({ ...line, image: 'a.png' })) });
+  let history = historyOf(version('a'));
+  history = edited(history, version('b'));
+  history = edited(history, version('c'));
+  history = undone(history);
+  const linked = throughout(history, stamp);
+  assert.equal(linked.past.length, history.past.length, 'no new step to undo');
+  assert.equal(linked.future.length, 1, 'redo is not cleared');
+  assert.equal(textOf(linked.present), 'b');
+  assert.equal(linked.present.lines[0]!.image, 'a.png');
+  assert.equal(undone(linked).present.lines[0]!.image, 'a.png', 'undo does not remove the link');
+  assert.equal(redone(linked).present.lines[0]!.image, 'a.png');
+  assert.equal(throughout(linked, (script) => script), linked, 'nothing changed: the same history');
 });

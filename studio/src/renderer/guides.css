@@ -1,0 +1,60 @@
+/* The script's folded lines and the guided tours (chalk on the slate board). */
+
+/* A line: one row, always; its fields below when it is open. */
+.line-card { gap: 0; padding: 6px 10px 6px 8px; }
+.line-card.open { padding-bottom: 16px; }
+.line-row { display: flex; align-items: center; gap: 6px; min-height: 40px; }
+.line-row .drag-handle { padding: 4px 2px; }
+.line-toggle { all: unset; flex: 1; min-width: 0; display: flex; align-items: center; gap: 10px; cursor: pointer; padding: 4px 8px 4px 4px; border-radius: 9px; }
+.line-toggle:hover { background: rgba(243, 239, 226, 0.05); }
+.line-toggle:focus-visible { outline: 2px dashed var(--chalk-yellow); outline-offset: 2px; }
+.toggle-mark { display: grid; place-items: center; color: var(--chalk-dim); transition: transform 140ms ease-out; }
+.line-card.open .toggle-mark { transform: rotate(90deg); color: var(--chalk-yellow); }
+.line-row .line-number { width: 26px; height: 26px; font-size: 13px; flex: none; }
+.row-speaker { display: flex; align-items: center; gap: 6px; flex: none; max-width: 150px; }
+.speaker-chip { flex: none; width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 12px; font-weight: 900; color: var(--slate-deep); background: var(--speaker); }
+.speaker-name { font-weight: 700; font-size: 14px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.row-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--chalk-dim); font-size: 14px; }
+.line-card.open .row-text { visibility: hidden; }
+.row-facts { display: flex; gap: 6px; flex: none; }
+.row-chip { font-size: 12px; padding: 2px 8px; border-radius: 999px; background: rgba(243, 239, 226, 0.08); color: var(--chalk-dim); white-space: nowrap; }
+.row-chip.scene-chip { color: var(--chalk); border: 1px dashed var(--line-strong); background: transparent; }
+.problem-badge.error { background: rgba(232, 115, 90, 0.2); color: #ffb3a1; font-weight: 800; }
+.problem-badge.warning { background: rgba(242, 193, 78, 0.16); color: var(--chalk-yellow); font-weight: 800; }
+.line-row .line-actions { opacity: 0.45; transition: opacity 120ms; }
+.line-row:hover .line-actions, .line-row:focus-within .line-actions, .line-card.open .line-actions { opacity: 1; }
+.line-body:not([hidden]) { display: flex; flex-direction: column; gap: 12px; padding: 10px 10px 0 42px; animation: unfold 160ms ease-out; }
+@keyframes unfold { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+.editor-title { display: grid; grid-template-columns: auto auto; column-gap: 14px; align-items: center; justify-content: start; }
+.editor-title .folder { grid-column: 1; }
+.editor-title .tour-show { grid-row: 1; grid-column: 2; }
+
+/* The tour: the page dimmed (the hole's shadow), the target lit up with a yellow chalk ring, the card beside it. */
+.tour { position: fixed; inset: 0; z-index: 60; }
+.tour-dim { position: absolute; inset: 0; background: rgba(14, 19, 18, 0.72); }
+.tour-hole { position: absolute; border-radius: 12px; box-shadow: 0 0 0 4000px rgba(14, 19, 18, 0.72); outline: 2.5px dashed var(--chalk-yellow); outline-offset: 2px; transition: top 180ms ease, left 180ms ease, width 180ms ease, height 180ms ease; }
+.tour-card {
+  position: absolute; width: 380px; max-width: calc(100vw - 32px); padding: 16px 20px 16px; border-radius: 16px;
+  background: var(--slate-raised); border: 2px solid rgba(243, 239, 226, 0.55); box-shadow: 0 18px 50px rgba(0, 0, 0, 0.45), inset 0 0 0 4px rgba(243, 239, 226, 0.04);
+  animation: unfold 160ms ease-out;
+}
+.tour-card[data-centred="true"] { width: 440px; }
+.tour-top { display: flex; align-items: center; justify-content: space-between; margin-bottom: 4px; }
+.tour-top .logo { width: 44px; height: 44px; transform: rotate(-6deg); }
+.tour-count { font-weight: 800; color: var(--chalk-dim); font-size: 13px; letter-spacing: 1px; }
+.tour-card h2 { margin: 2px 0 6px; font-size: 20px; color: var(--chalk-yellow); }
+.tour-card p { margin: 0 0 10px; line-height: 1.5; font-size: 15px; }
+.tour-absent { color: var(--chalk-dim); border-left: 3px dashed var(--chalk-yellow); padding-left: 10px; font-size: 14px !important; }
+.tour-dots { display: flex; gap: 5px; margin: 2px 0 12px; }
+.tour-dots i { width: 7px; height: 7px; border-radius: 50%; background: rgba(243, 239, 226, 0.2); }
+.tour-dots i.past { background: rgba(242, 193, 78, 0.5); }
+.tour-dots i.on { background: var(--chalk-yellow); width: 18px; border-radius: 4px; }
+.tour-buttons { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.tour-reset { margin-top: 18px; padding: 10px; border-top: 1px dashed var(--line); display: flex; flex-direction: column; gap: 6px; align-items: flex-start; max-width: 220px; }
+.tour-reset p { margin: 0; }
+
+@media (prefers-reduced-motion: reduce) {
+  .line-body:not([hidden]), .tour-card { animation: none; }
+  .toggle-mark, .tour-hole, .line-row .line-actions { transition: none; }
+}

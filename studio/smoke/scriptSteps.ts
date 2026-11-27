@@ -35,6 +35,14 @@ async function choose(page: Page, selector: string, value: string): Promise<void
   })()`);
 }
 
+/** Opens a folded line (its row's toggle), so its fields are on the page. */
+export async function openLine(page: Page, index: number): Promise<void> {
+  const toggle = `[data-testid="line-toggle-${index}"]`;
+  await page.until(toggle);
+  if ((await page.evaluate(`document.querySelector(${JSON.stringify(toggle)}).getAttribute('aria-expanded')`)) !== 'true') await page.click(toggle);
+  await page.until(`[data-testid="line-${index}"][data-open="true"] [data-testid="text-${index}"]`);
+}
+
 const savedAndChecked = (page: Page) => page.until('[data-testid="save-status"][data-status="saved"]');
 
 async function fillIdea(page: Page, theme: string): Promise<void> {
@@ -75,7 +83,8 @@ export async function editLines({ page, shoot, home }: Context): Promise<string>
   const folder = join(PROJECTS(home), 'e-se-os-gatos-acordassem-falando');
   await page.click('[data-testid="add-line"]');
   await page.click('[data-testid="add-line"]');
-  await page.until('[data-testid="line-2"]');
+  await page.until('[data-testid="line-2"][data-open="true"]');
+  await openLine(page, 1);
   await replace(page, '[data-testid="text-1"]', 'Ela disse [oi] e saiu correndo.');
   await page.until('[data-testid="line-problems-1"]');
   await page.untilText('[data-testid="check-summary"]', /Erros: 1 /);
@@ -104,6 +113,7 @@ export async function undoMoveAndScene({ page, shoot }: Context, folder: string)
   await until(async () => (await count(page, '[data-testid="line-problems-1"]')) === 0, 'redo to clear the error');
   await page.click('[data-testid="down-0"]');
   await until(async () => (await scriptOf(folder)).lines[1].id === '01', 'the first line saved one place down');
+  await openLine(page, 2);
   await page.click('[data-testid="scene-mode-2"] button[data-value="new"]');
   await choose(page, '[data-testid="scene-type-2"]', 'versus');
   await page.untilText('[data-testid="scene-problems-2"]', /obrigatório/);
@@ -122,6 +132,7 @@ export async function undoMoveAndScene({ page, shoot }: Context, folder: string)
 
 /** Back home: an edit made just before leaving is on disk; a copy is made and trashed; the outside project is only forgotten. */
 export async function duplicateAndTrash({ page, shoot, home }: Context, folder: string): Promise<void> {
+  await openLine(page, 2);
   await replace(page, '[data-testid="text-2"]', 'Saiu sem esperar o salvamento.');
   await page.click('[data-testid="go-home"]');
   await page.until('[data-testid="projects-screen"]');

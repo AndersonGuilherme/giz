@@ -102,7 +102,7 @@ async function otherAspect({ page, shoot }: Context): Promise<void> {
   await page.until('[data-testid="render-blocked"]');
   await shoot(page, 's5-04-9x16-com-erro');
   await page.click('[data-testid="video-check"] [data-testid="video-jump"][data-line="003"]');
-  await page.until('[data-testid="line-2"].selected');
+  await page.until('[data-testid="line-2"].selected[data-open="true"]');
   await shoot(page, 's5-05-fala-no-roteiro');
   await page.click('[data-testid="tab-video"]');
   await page.untilText('[data-testid="video-check"]', /Verificação em 16:9[\s\S]*Tudo certo/);

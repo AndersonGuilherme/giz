@@ -3,12 +3,13 @@ import type { EditorProblem } from '../../../shared/script.ts';
 import { useTranslate } from '../../i18n.ts';
 import type { SaveStatus } from '../../state/useAutosave.ts';
 import { useEditorTools } from './EditorContext.ts';
+import { useFolding } from './FoldingContext.ts';
 
 type ListProps = Readonly<{ title: 'check.errors' | 'check.warnings'; problems: readonly EditorProblem[]; tone: 'error' | 'warning' }>;
 
 function ProblemList({ title, problems, tone }: ListProps) {
   const translate = useTranslate();
-  const { select } = useEditorTools();
+  const { show } = useFolding();
   if (problems.length === 0) return null;
   return (
     <div className={`problems ${tone}`}>
@@ -16,7 +17,7 @@ function ProblemList({ title, problems, tone }: ListProps) {
       <ul>
         {problems.map((problem, at) => (
           <li key={at}>
-            {problem.line === null ? <code>{translate('check.wholeProject')}</code> : <button type="button" className="jump" data-testid="jump" onClick={() => select(problem.line)}>{translate('editor.lineNumber', { number: problem.line + 1 })}</button>}
+            {problem.line === null ? <code>{translate('check.wholeProject')}</code> : <button type="button" className="jump" data-testid="jump" onClick={() => show(problem.line!)}>{translate('editor.lineNumber', { number: problem.line + 1 })}</button>}
             {problem.field && <code>{problem.field}</code>} {problem.message}
           </li>
         ))}
@@ -39,7 +40,7 @@ export function ProblemsPanel({ saving, saveFailure }: Readonly<{ saving: SaveSt
   const { errors, warnings } = useEditorTools();
   const clean = errors.length + warnings.length === 0;
   return (
-    <section className="card problems-panel" data-testid="check-report">
+    <section className="card problems-panel" data-testid="check-report" data-tour="check">
       <h2>{translate('check.title')}</h2>
       <SaveLine saving={saving} saveFailure={saveFailure} />
       <p className={clean ? 'ok' : 'summary'} data-testid="check-summary">{clean ? translate('check.ok') : translate('check.summary', { errors: errors.length, warnings: warnings.length })}</p>

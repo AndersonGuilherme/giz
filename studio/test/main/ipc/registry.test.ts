@@ -100,5 +100,10 @@ test('the setup channels refuse a folder named by the window, an unknown task, a
   assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ language: 'fr' }).success, false);
   assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ modelsDir: '/etc' }).success, false);
   assert.equal(REQUEST_SCHEMAS['settings.update'].safeParse({ providers: { text: 'fal' } }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.tourSeen'].safeParse({ tour: 'script' }).success, true);
+  assert.equal(REQUEST_SCHEMAS['settings.tourSeen'].safeParse({ tour: '../studio' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.tourSeen'].safeParse({ tour: 'script', firstRunDone: false }).success, false);
+  assert.equal(REQUEST_SCHEMAS['settings.resetTours'].safeParse({}).success, true);
+  assert.equal(REQUEST_SCHEMAS['settings.resetTours'].safeParse({ tours: [] }).success, false);
   assert.equal(REQUEST_SCHEMAS['keys.test'].safeParse({ provider: 'gemini' }).success, true);
 });

@@ -67,7 +67,7 @@ function keyHandlers(keys: KeyService): Pick<Handlers, 'keys.set' | 'keys.has' |
   };
 }
 
-type SettingsChannels = 'settings.get' | 'settings.update' | 'settings.projectsFolder' | 'settings.modelsFolder' | 'settings.finish';
+type SettingsChannels = 'settings.get' | 'settings.update' | 'settings.projectsFolder' | 'settings.modelsFolder' | 'settings.finish' | 'settings.tourSeen' | 'settings.resetTours';
 
 function settingsHandlers(settings: SettingsService): Pick<Handlers, SettingsChannels> {
   return {
@@ -76,5 +76,7 @@ function settingsHandlers(settings: SettingsService): Pick<Handlers, SettingsCha
     'settings.projectsFolder': ({ source }) => settings.projectsFolder(source),
     'settings.modelsFolder': ({ source }) => settings.modelsFolder(source),
     'settings.finish': () => settings.finish(),
+    'settings.tourSeen': ({ tour }) => settings.tourSeen(tour),
+    'settings.resetTours': () => settings.resetTours(),
   };
 }

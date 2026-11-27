@@ -14,6 +14,10 @@ export type RemotionLicense = (typeof REMOTION_LICENSES)[number];
 export const TEXT_PROVIDERS = ['anthropic', 'openai', 'gemini'] as const;
 export const IMAGE_PROVIDERS = ['openai', 'gemini', 'fal'] as const;
 export const VOICE_PROVIDERS = ['qwen', 'elevenlabs', 'fish'] as const;
+/** The guided tours of the screens (the Script tab has one): each is shown by itself only the first time. */
+export const TOURS = ['script'] as const;
+export type TourId = (typeof TOURS)[number];
+
 export type ProviderChoices = Readonly<{
   text: (typeof TEXT_PROVIDERS)[number];
   image: (typeof IMAGE_PROVIDERS)[number];
@@ -35,6 +39,8 @@ export type Settings = Readonly<{
   device: Device;
   model: VoiceModel;
   remotionLicense: RemotionLicense;
+  /** The tours already seen (finished or skipped); Settings can forget them all. */
+  toursSeen: readonly TourId[];
 }>;
 
 /** What `settings.update` may change; folders change only through `settings.projectsFolder` / `settings.modelsFolder`. */

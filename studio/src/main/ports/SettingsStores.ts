@@ -1,5 +1,5 @@
 import type { InterfaceLanguage } from '../../shared/i18n/translate.ts';
-import type { Device, ProviderChoices, RemotionLicense, VoiceModel } from '../../shared/settings.ts';
+import type { Device, ProviderChoices, RemotionLicense, TourId, VoiceModel } from '../../shared/settings.ts';
 
 /** The Studio's own settings, in its userData folder (`studio.json`). */
 export type AppConfig = Readonly<{
@@ -7,6 +7,7 @@ export type AppConfig = Readonly<{
   projectsFolder: string | null;
   providers: ProviderChoices;
   firstRunDone: boolean;
+  toursSeen: readonly TourId[];
 }>;
 
 export interface AppConfigStore {

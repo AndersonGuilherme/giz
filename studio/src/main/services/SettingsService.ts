@@ -1,5 +1,5 @@
 import type { InterfaceLanguage } from '../../shared/i18n/translate.ts';
-import type { FolderSource, Settings, SettingsPatch } from '../../shared/settings.ts';
+import type { FolderSource, Settings, SettingsPatch, TourId } from '../../shared/settings.ts';
 import type { FolderPicker } from '../ports/FolderPicker.ts';
 import type { AppConfig, AppConfigStore, SharedConfigStore, SharedSettings } from '../ports/SettingsStores.ts';
 import type { FolderGrants } from './FolderGrants.ts';
@@ -20,7 +20,7 @@ type Dependencies = Readonly<{
 }>;
 
 const firstRun = (language: InterfaceLanguage): AppConfig => ({
-  language, projectsFolder: null, providers: { text: 'anthropic', image: 'openai', voice: 'qwen' }, firstRunDone: false,
+  language, projectsFolder: null, providers: { text: 'anthropic', image: 'openai', voice: 'qwen' }, firstRunDone: false, toursSeen: [],
 });
 
 const sharedPatchOf = ({ device, model, remotionLicense }: SettingsPatch): Partial<SharedSettings> =>
@@ -68,8 +68,22 @@ export class SettingsService {
   }
 
   finish(): Promise<Settings> {
+    return this.#changeApp((app) => ({ ...app, firstRunDone: true }));
+  }
+
+  /** A tour finished or skipped: it does not start by itself again. */
+  tourSeen(tour: TourId): Promise<Settings> {
+    return this.#changeApp((app) => ({ ...app, toursSeen: [...new Set([...app.toursSeen, tour])] }));
+  }
+
+  /** "Mostrar tutoriais de novo": every tour starts by itself again. */
+  resetTours(): Promise<Settings> {
+    return this.#changeApp((app) => ({ ...app, toursSeen: [] }));
+  }
+
+  #changeApp(change: (app: AppConfig) => AppConfig): Promise<Settings> {
     return this.#exclusive(async () => {
-      await this.#saveApp({ ...(await this.#app()), firstRunDone: true });
+      await this.#saveApp(change(await this.#app()));
       return this.get();
     });
   }

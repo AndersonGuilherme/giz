@@ -20,7 +20,7 @@ export function LineText({ index }: Readonly<{ index: number }>) {
   const { line, set, text } = useLine(index);
   const pronunciation = text('pronunciation');
   return (
-    <div className="line-text">
+    <div className="line-text" data-tour="text">
       <TextField label={translate('editor.text')} value={line.text ?? ''} multiline onChange={(value) => set('text', value)} testId={`text-${index}`} hint={translate('editor.textHint')} />
       <Spans text={pronunciation ?? line.text ?? ''} />
       <details className="fold" open={pronunciation !== undefined}>

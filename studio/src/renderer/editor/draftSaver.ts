@@ -28,6 +28,7 @@ export class DraftSaver<Value, Report> {
   #timer: unknown;
   #chain: Promise<unknown> = Promise.resolve();
   #sent = 0;
+  #landed = 0;
 
   constructor(options: Options<Value, Report>) {
     this.#options = options;
@@ -37,8 +38,10 @@ export class DraftSaver<Value, Report> {
   change(value: Value): void {
     const { timers = REAL_TIMERS, delay, onAnswer } = this.#options;
     timers.clear(this.#timer);
+    const waiting = this.#pending !== null;
     this.#pending = value === this.#saved ? null : value;
-    if (this.#pending === null) return;
+    // Taken back to what was sent last (an undo before the delay): nothing to send, and no "pending" left behind.
+    if (this.#pending === null) return void (waiting && onAnswer({ status: this.#settled() }));
     onAnswer({ status: 'pending' });
     this.#timer = timers.set(() => void this.#send(), delay);
   }
@@ -53,6 +56,11 @@ export class DraftSaver<Value, Report> {
     return this.#chain.then(() => undefined);
   }
 
+  // What the status is with nothing waiting: the last save still on its way, or everything on disk.
+  #settled(): SaveStatus {
+    return this.#landed < this.#sent ? 'saving' : 'saved';
+  }
+
   #send(): Promise<unknown> {
     const value = this.#pending;
     if (value === null) return this.#chain;
@@ -65,6 +73,7 @@ export class DraftSaver<Value, Report> {
   }
 
   #answered(number: number, result: Result<Report>): void {
+    this.#landed = number;
     if (number !== this.#sent) return;
     const status = this.#pending !== null ? 'pending' : result.ok ? 'saved' : 'failed';
     this.#options.onAnswer({ status, result });

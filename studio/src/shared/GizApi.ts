@@ -1,6 +1,6 @@
 import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
 import type { Aspect, CheckReport, ProjectSummary, RenderedFiles, RenderJobStatus, RenderProgress, Result } from './contract.ts';
-import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
+import type { FolderSource, Settings, SettingsPatch, TourId } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from './setup.ts';
 import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, ScriptProgress, StageBrief } from './projects.ts';
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
@@ -68,6 +68,8 @@ export type GizApi = MediaApi & Readonly<{
     projectsFolder(source: FolderSource): Reply<Settings>;
     modelsFolder(source: FolderSource): Reply<Settings>;
     finish(): Reply<Settings>;
+    tourSeen(tour: TourId): Reply<Settings>;
+    resetTours(): Reply<Settings>;
   }>;
   setup: Readonly<{
     gpu(): Reply<GpuStatus>;

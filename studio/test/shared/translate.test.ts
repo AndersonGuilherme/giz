@@ -33,7 +33,7 @@ test('no text of any area says "(s)": every count has its plural forms', async (
   const { readdir, readFile } = await import('node:fs/promises');
   const folder = new URL('../../src/shared/i18n/', import.meta.url);
   const files = (await readdir(folder)).filter((name) => name.endsWith('.json'));
-  assert.equal(files.length, 8);
+  assert.equal(files.length, 10);
   const texts = await Promise.all(files.map(async (name) => [name, JSON.parse(await readFile(new URL(name, folder), 'utf8')) as Record<string, string>] as const));
   const entries = texts.flatMap(([name, each]) => Object.entries(each).map(([key, text]) => [`${name}: ${key}`, text] as const));
   for (const [key, text] of entries) assert.doesNotMatch(text, /\(s\)/, key);

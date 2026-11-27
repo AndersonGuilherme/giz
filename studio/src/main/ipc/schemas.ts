@@ -1,7 +1,7 @@
 import { z } from 'zod';
 import { onInterfaceLanguage, translate } from '../text.ts';
 import { KEY_PROVIDERS, type ChannelName, type RequestOf } from '../../shared/contract.ts';
-import { DEVICES, IMAGE_PROVIDERS, INTERFACE_LANGUAGES, REMOTION_LICENSES, TEXT_PROVIDERS, VOICE_MODELS, VOICE_PROVIDERS } from '../../shared/settings.ts';
+import { DEVICES, IMAGE_PROVIDERS, INTERFACE_LANGUAGES, REMOTION_LICENSES, TEXT_PROVIDERS, TOURS, VOICE_MODELS, VOICE_PROVIDERS } from '../../shared/settings.ts';
 import { SETUP_TASKS } from '../../shared/setup.ts';
 import { MEDIA_SCHEMAS } from './mediaSchemas.ts';
 import { VIDEO_SCHEMAS } from './videoSchemas.ts';
@@ -43,6 +43,8 @@ export const REQUEST_SCHEMAS: { readonly [Name in ChannelName]: z.ZodType<Reques
   'settings.projectsFolder': source,
   'settings.modelsFolder': source,
   'settings.finish': nothing,
+  'settings.tourSeen': z.object({ tour: z.enum(TOURS) }).strict(),
+  'settings.resetTours': nothing,
   'gpu.status': nothing,
   'models.status': nothing,
   'setup.run': task,

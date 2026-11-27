@@ -34,3 +34,14 @@ test('the file as it opened is not saved again, and a flush with nothing pending
   await instance.flush();
   assert.deepEqual(sent, []);
 });
+
+test('a change taken back before its delay (back to what is on disk) sends nothing and says saved, never "pending" forever', async () => {
+  const sent: string[] = [];
+  const { instance, answers } = saver(async (file) => (sent.push(file.name), SAVED(file)));
+  instance.change({ ...ANA, name: 'Ana Maria' });
+  instance.change(ANA);
+  assert.equal(instance.hasPending(), false);
+  await instance.flush();
+  assert.deepEqual(sent, []);
+  assert.deepEqual(answers.map(({ status }) => status), ['pending', 'saved']);
+});

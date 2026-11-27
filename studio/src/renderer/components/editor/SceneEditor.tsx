@@ -35,7 +35,7 @@ export function SceneEditor({ index }: Readonly<{ index: number }>) {
   const bodies = document.cast.filter(({ body }) => body).map(({ id }) => id);
   const choose = (mode: Mode) => set('scene', mode === 'inherit' ? undefined : sceneTemplate(defaultSceneType(document.format), bodies));
   return (
-    <details className="fold scene" open={scene !== undefined}>
+    <details className="fold scene" open={scene !== undefined} data-tour="scene">
       <summary>{translate('editor.scene')}: <b>{scene ? labelOf(translate, 'sceneType', scene.type) : translate('editor.sceneInherit')}</b></summary>
       <Segmented label={translate('editor.sceneMode')} value={scene ? 'new' : 'inherit'} options={['inherit', 'new'] as const} name={(mode) => translate(mode === 'inherit' ? 'editor.sceneInherit' : 'editor.sceneNew')} onChange={choose} testId={`scene-mode-${index}`} />
       {scene && <SceneBody index={index} scene={scene} />}

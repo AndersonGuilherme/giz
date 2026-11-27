@@ -7,6 +7,10 @@ const PATHS = {
   down: 'M12 5v14M6 13l6 6 6-6',
   undo: 'M9 14L4 9l5-5M4 9h10a6 6 0 010 12h-3',
   redo: 'M15 14l5-5-5-5M20 9H10a6 6 0 000 12h3',
+  chevron: 'M9 6l6 6-6 6',
+  unfold: 'M8 9l4-4 4 4M8 15l4 4 4-4',
+  fold: 'M8 5l4 4 4-4M8 19l4-4 4 4',
+  help: 'M12 21a9 9 0 100-18 9 9 0 000 18zM9.6 9.4a2.5 2.5 0 014.8 1c0 1.6-2.4 2-2.4 3.6M12 17.2v.1',
 } as const;
 
 export type IconName = keyof typeof PATHS;

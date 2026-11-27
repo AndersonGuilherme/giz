@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Failure, Result } from '../../shared/contract.ts';
 import type { GizApi } from '../../shared/GizApi.ts';
-import type { FolderSource, Settings, SettingsPatch } from '../../shared/settings.ts';
+import type { FolderSource, Settings, SettingsPatch, TourId } from '../../shared/settings.ts';
 import { serially } from './serially.ts';
 
 /**
@@ -24,7 +24,9 @@ export function useSettings(api: GizApi) {
   const projectsFolder = useCallback((source: FolderSource) => send(() => api.settings.projectsFolder(source)), [api, send]);
   const modelsFolder = useCallback((source: FolderSource) => send(() => api.settings.modelsFolder(source)), [api, send]);
   const finish = useCallback(() => send(() => api.settings.finish()), [api, send]);
-  return { settings, failure, reload, update, projectsFolder, modelsFolder, finish };
+  const tourSeen = useCallback((tour: TourId) => send(() => api.settings.tourSeen(tour)), [api, send]);
+  const resetTours = useCallback(() => send(() => api.settings.resetTours()), [api, send]);
+  return { settings, failure, reload, update, projectsFolder, modelsFolder, finish, tourSeen, resetTours };
 }
 
 export type SettingsActions = Omit<ReturnType<typeof useSettings>, 'settings' | 'failure'>;

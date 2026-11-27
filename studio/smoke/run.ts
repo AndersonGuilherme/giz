@@ -12,6 +12,7 @@ import assert from 'node:assert/strict';
 import { devtools, poll, type Page } from './devtools.ts';
 import { castStage, scenariosStage, storyProject, voicesStage } from './mediaSteps.ts';
 import { videoStage } from './videoSteps.ts';
+import { firstTour, foldedLines, tourAgain, tourInEnglish } from './s6Steps.ts';
 import { brokenScript, duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
@@ -46,7 +47,7 @@ const S3_VIEW = { width: 1280, height: 860 };
 
 async function shoot(page: Page, name: string): Promise<void> {
   const file = join(SHOTS, `${name}.png`);
-  await page.screenshot(file, /^s[345]b?-/.test(name) ? S3_VIEW : undefined);
+  await page.screenshot(file, /^s[3456]b?-/.test(name) ? S3_VIEW : undefined);
   shots.push(file);
 }
 
@@ -183,6 +184,9 @@ async function settings(page: Page): Promise<void> {
   await page.click('[data-testid="settings-tab-models"]');
   await page.until('[data-testid="ready-voice-1.7b"]');
   await shoot(page, '08a-configuracoes-modelos');
+  await page.click('[data-testid="tours-reset"]');
+  await page.untilText('[data-testid="tours-reset-note"]', /vão aparecer de novo/);
+  assert.deepEqual((await json(join(HOME, 'userData', 'studio.json'))).toursSeen, [], 'the tours are forgotten');
   await page.click('[data-testid="settings-tab-language"]');
   await page.click('[data-testid="language-en"] button');
   await page.click('[data-testid="settings-tab-accounts"]');
@@ -230,11 +234,16 @@ async function smoke(): Promise<void> {
   lastPage = page;
   await mkdir(SHOTS, { recursive: true });
   for (const step of [languageStep, projectsStep, gpuStep, modelsStep, accountsStep, licenseStep]) await step(page);
+  const context = { page, shoot, home: HOME };
+  await firstTour(context);
   const bridge = await studio(page);
+  await tourAgain(context);
   await scriptStage(page);
+  await foldedLines(context);
   await mediaStages(page);
   await videoStage({ page, shoot, home: HOME }, FOLDER);
   await settings(page);
+  await tourInEnglish(context);
   await inEnglish({ page, shoot, home: HOME });
   page.close();
   console.log(JSON.stringify({ window: target.url, ...bridge, screenshots: shots }, null, 1));

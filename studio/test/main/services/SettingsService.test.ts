@@ -26,7 +26,7 @@ test('the first run: no app config yet, the system language, core values from gi
   const { service } = settingsService();
   assert.deepEqual(await service.get(), {
     firstRun: true, language: 'en', projectsFolder: null, defaultProjectsFolder: '/home/ana/giz/projetos',
-    providers: { text: 'anthropic', image: 'openai', voice: 'qwen' }, ...CORE_DEFAULTS,
+    providers: { text: 'anthropic', image: 'openai', voice: 'qwen' }, toursSeen: [], ...CORE_DEFAULTS,
   });
 });
 
@@ -93,4 +93,23 @@ test('changes made at the same time all survive (the read-modify-writes run one 
   assert.equal(app.config?.projectsFolder, '/home/ana/giz/projetos');
   await service.finish();
   assert.equal(app.config?.language, 'pt-BR');
+});
+
+test('a tour seen is remembered once in the app config; "show the tours again" forgets them all', async () => {
+  const { service, app, shared } = settingsService();
+  assert.deepEqual((await service.tourSeen('script')).toursSeen, ['script']);
+  assert.deepEqual((await service.tourSeen('script')).toursSeen, ['script'], 'seen twice is still one entry');
+  assert.deepEqual(app.config?.toursSeen, ['script']);
+  assert.deepEqual(shared.writes, [], 'the tours are the Studio\'s own, never in giz.config.json');
+  assert.deepEqual((await service.resetTours()).toursSeen, []);
+  assert.deepEqual(app.config?.toursSeen, []);
+});
+
+test('a tour seen during the first run keeps the other choices of the app config', async () => {
+  const { service, app } = settingsService();
+  await service.update({ language: 'pt-BR' });
+  await Promise.all([service.tourSeen('script'), service.update({ providers: { text: 'gemini' } })]);
+  assert.equal(app.config?.language, 'pt-BR');
+  assert.equal(app.config?.providers.text, 'gemini');
+  assert.deepEqual(app.config?.toursSeen, ['script']);
 });
