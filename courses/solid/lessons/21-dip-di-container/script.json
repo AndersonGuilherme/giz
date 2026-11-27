@@ -1,0 +1,1134 @@
+{
+  "chapters": [
+    "A polêmica",
+    "Três palavras",
+    "Injeção sem inversão",
+    "Inversão sem injeção",
+    "Raiz de composição",
+    "O contêiner",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "quiz/b-recebe-concreto.ts",
+        "lines": [
+          "// B: recebe a peça pelo construtor... mas o tipo é a classe do Postgres.",
+          "import { PostgresOrderRepository } from '../infra/postgres-order-repository.ts';",
+          "",
+          "export class OrderServiceB {",
+          "  repository: PostgresOrderRepository;",
+          "",
+          "  constructor(repository: PostgresOrderRepository) {",
+          "    this.repository = repository;",
+          "  }",
+          "}"
+        ],
+        "highlight": [
+          "constructor("
+        ]
+      },
+      "text": "Essa classe recebe o repositório pelo construtor. Então ela segue a inversão de dependência, né?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Sim ou não?"
+      },
+      "reading": false
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Não. Ela tem injeção. Inversão, não tem."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Pera. Injeção não é a mesma coisa que inversão?"
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 21",
+        "title": "Recebe pelo construtor, então segue o DIP?",
+        "subtitle": "Inversão ≠ injeção ≠ contêiner"
+      },
+      "text": "São três ideias que andam juntas e quase todo mundo mistura. Hoje a gente separa uma da outra."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "objective",
+        "title": "Três palavras",
+        "shown": 0,
+        "items": [
+          "Inversão: para onde apontam as setas (projeto)",
+          "Injeção: como a peça chega ao objeto (técnica)",
+          "Contêiner: quem monta as peças por você (ferramenta)"
+        ]
+      },
+      "text": "[Inversão] é sobre direção: para onde apontam os imports. Foi a aula passada inteira.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Injeção] é sobre entrega: o objeto recebe a peça pronta, em vez de criar.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E [contêiner] é uma ferramenta que faz essa entrega por você. Opcional.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Uma é projeto, outra é técnica, outra é ferramenta. Saquei."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "domain/order-service.ts",
+        "lines": [
+          "export class OrderService {",
+          "  private repository: OrderRepository;",
+          "  private notifier: Notifier;",
+          "",
+          "  constructor(repository: OrderRepository, notifier: Notifier) {",
+          "    this.repository = repository;",
+          "    this.notifier = notifier;",
+          "  }",
+          "",
+          "  async checkout(order: Order, customer: Customer, now: Date) {",
+          "    const subtotal = subtotalOf(order.items);",
+          "    const discount = discountFor(customer.kind, subtotal, now);",
+          "    const shipping = shippingFor(order.shippingMethod, subtotal);",
+          "    const total = subtotal - discount + shipping;",
+          "    const id = await this.repository.save({ email: customer.email, total, discount });",
+          "    await this.notifier.orderConfirmed(customer.email, total, discount);",
+          "    return { id, total };",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E você usa injeção desde o módulo um. Olha [o now do checkout]: a data chega de fora, por parâmetro.",
+      "pronunciation": "E você usa injeção desde o módulo um. Olha [a data do chéquiaute]: ela chega de fora, por parâmetro.",
+      "beats": [
+        {
+          "highlight": [
+            "now: Date"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 3
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "É por isso que dá pra testar a Black Friday numa terça-feira qualquer?"
+    },
+    {
+      "id": "011",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Exatamente. Construtor, parâmetro, função: tudo é injeção. O que importa é a peça não nascer lá dentro."
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node deps.ts quiz/b-recebe-concreto.ts",
+        "lines": []
+      },
+      "text": "Volta na classe B. A trilha: [o import ainda desce pra infra].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "quiz/b-recebe-concreto.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  → infra/postgres-order-repository.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "    → domain/ports.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "    → infra/pg-pool.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "3 dependência(s), incluindo as transitivas",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Mas eu posso passar um repositório falso no construtor. Não posso?"
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test b-injecao.demo.ts",
+        "lines": []
+      },
+      "text": "Tenta. [O falso nem chega a ser usado].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "Error: DATABASE_URL ausente: suba o Postgres",
+              "tone": "fail"
+            },
+            {
+              "text": "✖ b-injecao.demo.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "O import carregou o Postgres antes do meu falso existir!",
+      "pronunciation": "O import carregou o póstgres antes do meu falso existir!"
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E o tipo do parâmetro é a classe do Postgres: o domínio ainda fala a língua do banco. A peça chega de fora, mas a seta não virou.",
+      "pronunciation": "E o tipo do parâmetro é a classe do póstgres: o domínio ainda fala a língua do banco. A peça chega de fora, mas a seta não virou."
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E o contrário existe? Inversão sem injeção?"
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "quiz/d-busca-porta.ts",
+        "lines": [
+          "// D: ninguém entrega nada. A classe vai buscar a porta num registro do domínio.",
+          "import type { OrderRepository } from '../domain/ports.ts';",
+          "import { registry } from '../domain/registry.ts';",
+          "",
+          "export class OrderServiceD {",
+          "  get repository() {",
+          "    return registry.get<OrderRepository>('orders');",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Existe. Essa classe vai buscar a porta num registro do próprio domínio. Ninguém entrega nada pra ela."
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node deps.ts quiz/d-busca-porta.ts",
+        "lines": []
+      },
+      "text": "A trilha: [só domínio]. A seta está certa.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "quiz/d-busca-porta.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  → domain/ports.ts",
+              "tone": "ok"
+            },
+            {
+              "text": "  → domain/registry.ts",
+              "tone": "ok"
+            },
+            {
+              "text": "2 dependência(s), incluindo as transitivas",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Então está tudo bem?"
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Funciona, mas esconde. Olhando a classe por fora, você não sabe do que ela precisa. E se ninguém registrar a peça, só descobre rodando."
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Duas perguntas diferentes",
+        "columns": [
+          "recebe de fora?",
+          "seta pro domínio?"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "A · cria com new",
+            "cells": [
+              "Não",
+              "Não"
+            ]
+          },
+          {
+            "label": "B · recebe a classe Postgres",
+            "cells": [
+              "Sim",
+              "Não"
+            ]
+          },
+          {
+            "label": "D · busca no registro",
+            "cells": [
+              "Não",
+              "Sim"
+            ]
+          },
+          {
+            "label": "C · recebe a porta",
+            "cells": [
+              "Sim",
+              "Sim"
+            ]
+          }
+        ]
+      },
+      "text": "Juntando tudo: [A] não recebe nem inverte. [B] recebe, mas não inverte. [D] inverte sem receber. E [C] faz as duas coisas.",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 4,
+          "highlightedRow": 3,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Dois eixos independentes. Por isso dá pra ter um sem o outro."
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Fico com a C. Mas aí, de novo: quem dá o new?",
+      "pronunciation": "Fico com a C. Mas aí, de novo: quem dá o niú?"
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "main.ts",
+        "lines": [
+          "// Raiz de composição: o ÚNICO lugar que dá new na infra e liga as peças. Mora na borda.",
+          "import { OrderService } from './domain/order-service.ts';",
+          "import { PostgresOrderRepository } from './infra/postgres-order-repository.ts';",
+          "import { SmtpNotifier } from './infra/smtp-notifier.ts';",
+          "",
+          "export function compose() {",
+          "  const repository = new PostgresOrderRepository();",
+          "  const notifier = new SmtpNotifier();",
+          "  const orderService = new OrderService(repository, notifier);",
+          "  return { orderService };",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "O arquivo da borda, da aula passada, agora com nome: [raiz de composição]. O único lugar que dá new na infra.",
+      "pronunciation": "O arquivo da borda, da aula passada, agora com nome: [raiz de composição]. O único lugar que dá niú na infra.",
+      "beats": [
+        {
+          "highlight": [
+            "export function compose"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E trocar o SMTP pelo provedor novo é mudar [uma linha aqui].",
+      "pronunciation": "E trocar o ésse eme tê pê pelo provedor novo é mudar [uma linha aqui].",
+      "beats": [
+        {
+          "highlight": [
+            "new SmtpNotifier()"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E no teste você monta a sua própria raiz, com peças de mentira. A mesma classe, outra montagem."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então fora da raiz eu nunca mais posso dar new?",
+      "pronunciation": "Então fora da raiz eu nunca mais posso dar niú?"
+    },
+    {
+      "id": "029",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pode, no que é estável: uma data, uma lista, um valor do pedido. A regra vale pro volátil: banco, rede, e-mail, fornecedor."
+    },
+    {
+      "id": "030",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Isso é injeção feita à mão, sem biblioteca nenhuma?"
+    },
+    {
+      "id": "031",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "tsc --noEmit main-typo.demo.ts",
+        "lines": []
+      },
+      "text": "Nenhuma. E com bônus: errou o nome de uma peça? [O compilador avisa antes de rodar].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "main-typo.demo.ts(9,53): error TS2552:",
+              "tone": "fail"
+            },
+            {
+              "text": "  Cannot find name 'notfier'.",
+              "tone": "fail"
+            },
+            {
+              "text": "  Did you mean 'notifier'?",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E o contêiner? Todo framework grande tem um.",
+      "pronunciation": "E o contêiner? Todo frêimuork grande tem um."
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "container.ts",
+        "lines": [
+          "type Factory = (c: Container) => unknown;",
+          "",
+          "export class Container {",
+          "  private factories = new Map<string, Factory>();",
+          "  private instances = new Map<string, unknown>();",
+          "",
+          "  register(name: string, factory: Factory) {",
+          "    this.factories.set(name, factory);",
+          "  }",
+          "",
+          "  resolve<T>(name: string): T {",
+          "    if (!this.instances.has(name)) {",
+          "      const factory = this.factories.get(name);",
+          "      if (!factory) throw new Error(`nada registrado como \"${name}\"`);",
+          "      this.instances.set(name, factory(this));",
+          "    }",
+          "    return this.instances.get(name) as T;",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "No fundo, um contêiner é isso: um mapa de receitas por nome. Quando alguém pede uma peça, ele monta e guarda."
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "main-container.ts",
+        "lines": [
+          "export function compose() {",
+          "  const c = new Container();",
+          "  c.register('repository', () => new PostgresOrderRepository());",
+          "  c.register('notifier', () => new SmtpNotifier());",
+          "  c.register('orderService', (c) => new OrderService(",
+          "    c.resolve<OrderRepository>('repository'),",
+          "    c.resolve<Notifier>('notifier'),",
+          "  ));",
+          "  return { orderService: c.resolve<OrderService>('orderService') };",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "A mesma montagem, com ele. Repara: [as ligações viraram nomes escritos em texto].",
+      "beats": [
+        {
+          "highlight": [
+            "c.resolve<OrderRepository>('repository')",
+            "c.resolve<Notifier>('notifier')"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "raise",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test container-typo.demo.ts",
+        "lines": []
+      },
+      "text": "E se eu errar o nome aqui? [Só descubro rodando].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ container monta o serviço",
+              "tone": "fail"
+            },
+            {
+              "text": "  Error: nada registrado como \"notfier\"",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Num sistema deste tamanho, o contêiner trocou um erro de compilação por um erro na hora de rodar."
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então contêiner é ruim?"
+    },
+    {
+      "id": "038",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Quando o contêiner vale",
+        "columns": [
+          "à mão",
+          "contêiner"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "Poucas dúzias de classes",
+            "cells": [
+              "✓ basta",
+              "✕ exagero"
+            ]
+          },
+          {
+            "label": "Centenas de peças",
+            "cells": [
+              "✕ cansa",
+              "✓ ajuda"
+            ]
+          },
+          {
+            "label": "Peça nova por requisição",
+            "cells": [
+              "✕ trabalhoso",
+              "✓ ajuda"
+            ]
+          },
+          {
+            "label": "O framework já traz um",
+            "cells": [
+              "—",
+              "✓ use o dele"
+            ]
+          }
+        ]
+      },
+      "text": "É questão de tamanho. [Poucas classes]: à mão é mais claro. [Centenas de peças], ou [uma peça nova a cada requisição], como uma transação: aí ele se paga. E [se o framework já traz um], use o dele.",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "039",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E se eu registrar a classe B no contêiner? Aí vira inversão?"
+    },
+    {
+      "id": "040",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Não vira. O contêiner não inverte nada. A seta continua descendo, só que montada automaticamente."
+    },
+    {
+      "id": "041",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Resumo",
+        "shown": 0,
+        "items": [
+          "Inversão: a seta aponta para o domínio",
+          "Injeção: a peça chega de fora",
+          "Contêiner: ferramenta opcional para a injeção",
+          "Raiz de composição: um lugar só, na borda"
+        ]
+      },
+      "text": "[Inversão]: a seta aponta pro domínio. [Injeção]: a peça chega de fora.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "text": "[Contêiner]: ferramenta opcional. E [a raiz de composição] fica num lugar só, na borda.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "043",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E a classe B, do começo? Segue a inversão?"
+    },
+    {
+      "id": "044",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Não. O construtor diz como a peça chega. Quem diz a direção é o import. E o dela ainda aponta pro Postgres.",
+      "pronunciation": "Não. O construtor diz como a peça chega. Quem diz a direção é o import. E o dela ainda aponta pro póstgres."
+    },
+    {
+      "id": "045",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Inversão decide a direção.\nInjeção entrega a peça.\nContêiner é só o entregador."
+      },
+      "text": "Inversão decide a direção. Injeção entrega a peça. Contêiner é só o entregador."
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Ache uma classe que recebe uma classe concreta da infra",
+          "Responda: tem injeção? tem inversão?",
+          "Escreva a raiz de composição do projeto num arquivo só"
+        ]
+      },
+      "text": "Desafio: [acha uma classe] que recebe uma classe concreta da infra. [Tem injeção? Tem inversão?]",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "Depois [escreve a raiz de composição] do seu projeto num arquivo só. Conta quantos new aparecem.",
+      "pronunciation": "Depois [escreve a raiz de composição] do seu projeto num arquivo só. Conta quantos niú aparecem.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "048",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "Testando com dublês: dummy, stub, fake, spy e mock, e o tempo real dos testes"
+        ],
+        "shown": 1
+      },
+      "text": "Na próxima aula: dublês de teste. Cinco tipos, e quanto tempo a suíte economiza de verdade."
+    },
+    {
+      "id": "049",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Testar o pedido sem subir banco. Tô dentro."
+    },
+    {
+      "id": "050",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até a próxima!"
+    }
+  ]
+}

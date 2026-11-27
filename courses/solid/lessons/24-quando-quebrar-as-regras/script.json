@@ -1,0 +1,1042 @@
+{
+  "chapters": [
+    "O exagero",
+    "O script",
+    "O protótipo",
+    "O laço quente",
+    "Equipe e prazo",
+    "A régua",
+    "O curso todo",
+    "Até logo"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node linhas.ts relatorio-solid/*.ts",
+        "lines": []
+      },
+      "text": "Apliquei os cinco princípios no script do relatório! [De doze linhas pra cinquenta e uma, em sete arquivos].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "  4  relatorio-solid/console-output.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  5  relatorio-solid/csv-formatter.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  6  relatorio-solid/day-filter.ts",
+              "tone": "dim"
+            },
+            {
+              "text": " 17  relatorio-solid/export-service.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  7  relatorio-solid/json-source.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  7  relatorio-solid/main.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  5  relatorio-solid/ports.ts",
+              "tone": "dim"
+            },
+            {
+              "text": " 51  total",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Bonito. E quantas vezes esse script mudou no último ano?"
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Hum... nenhuma.",
+      "pronunciation": "Hum... nenhuma."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "confused"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 24",
+        "title": "Quando quebrar as regras",
+        "subtitle": "Onde SOLID custa mais do que economiza"
+      },
+      "text": "Então a pergunta de hoje é a mais difícil do curso: quando não usar nada disso."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "relatorio.ts · o original",
+        "lines": [
+          "type Order = { id: string; customer: string; total: number; createdAt: string };",
+          "",
+          "export function toCsv(orders: Order[], day: string): string {",
+          "  const rows = orders",
+          "    .filter((o) => o.createdAt.startsWith(day))",
+          "    .map((o) => `${o.id};${o.customer};${(o.total / 100).toFixed(2).replace('.', ',')}`);",
+          "  return ['pedido;cliente;total', ...rows].join('\\n');",
+          "}",
+          "",
+          "if (process.argv[1] === import.meta.filename) {",
+          "  const [file, day] = process.argv.slice(2);",
+          "  console.log(toCsv(JSON.parse(readFileSync(file, 'utf8')), day));",
+          "}"
+        ]
+      },
+      "text": "Olha o original. Um dono, o financeiro. Roda toda noite e não muda há um ano."
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "relatorio-solid/export-service.ts",
+        "lines": [
+          "import type { OrderSource, OrderFilter, RowFormatter, Output } from './ports.ts';",
+          "",
+          "export class ExportService {",
+          "  private source: OrderSource;",
+          "  private filter: OrderFilter;",
+          "  private format: RowFormatter;",
+          "  private output: Output;",
+          "  constructor(source: OrderSource, filter: OrderFilter, format: RowFormatter, output: Output) {",
+          "    this.source = source;",
+          "    this.filter = filter;",
+          "    this.format = format;",
+          "    this.output = output;",
+          "  }",
+          "  run(): void {",
+          "    const rows = this.source.load().filter((o) => this.filter.accepts(o)).map((o) => this.format.row(o));",
+          "    this.output.write([this.format.header(), ...rows].join('\\n'));",
+          "  }",
+          "}"
+        ]
+      },
+      "text": "E o meu tem porta pra tudo: [fonte, filtro, formato e saída]. Se um dia virar banco, ou planilha...",
+      "beats": [
+        {
+          "highlight": [
+            "private source",
+            "private filter",
+            "private format",
+            "private output"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Se um dia. Cada porta é uma aposta de que aquilo vai mudar. Sem mudança à vista, você paga hoje por um benefício que talvez nunca chegue."
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "É o YAGNI da aula doze, de novo.",
+      "pronunciation": "É o iágni da aula doze, de novo."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test relatorio.test.ts",
+        "lines": []
+      },
+      "text": "E repara: [os dois passam no mesmo teste]. Mesmo comportamento, quatro vezes mais coisa pra ler.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ script de um arquivo: CSV dos pedidos do dia",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ versão \"SOLID\" de sete arquivos: o mesmo CSV",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 2   ℹ pass 2   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E se ele começar a mudar toda semana?"
+    },
+    {
+      "id": "011",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Aí sim: rede de testes e um princípio por passo, como na aula passada. Você refatora quando a mudança chega, não antes."
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Pré-venda de um produto novo",
+        "shown": 0,
+        "items": [
+          "Pergunta: alguém compra?",
+          "Fica no ar por uma semana",
+          "Depois, vai pro lixo"
+        ]
+      },
+      "text": "Segundo caso: uma página de pré-venda. [A pergunta é se alguém compra]. [Fica uma semana no ar] [e vai pro lixo].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Aqui o que importa é a resposta, e rápido. Código que vai pro lixo não precisa ser fácil de mudar."
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Então protótipo pode ser bagunçado?"
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pode ser simples: um arquivo, sem portas, sem camadas. Bagunçado a ponto de você não confiar na resposta, não."
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "E se a pré-venda der certo e ninguém jogar fora?"
+    },
+    {
+      "id": "017",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Protótipo que vira produção",
+          "text": "Ninguém decidiu. Ele só foi ficando."
+        },
+        "right": {
+          "title": "Protótipo com data de validade",
+          "text": "Se ficar, ganha a rede de testes e os passos da aula 23."
+        }
+      },
+      "text": "Esse é o perigo de verdade. Protótipo precisa de data de validade escrita. Se sobreviver, ganha a rede e os passos da aula passada."
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E desempenho? Dizem que interface e polimorfismo deixam tudo mais lento."
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "hot-path.ts",
+        "lines": [
+          "// 1) Regras plugáveis, perguntadas a CADA item (como no checkout, que tem 3 itens, não 1 milhão).",
+          "export function rulesPerItem(prices: Int32Array, customer: Customer, bf: boolean): number {",
+          "  let sum = 0;",
+          "  for (let i = 0; i < prices.length; i++) {",
+          "    const rate = Math.max(0, ...rules.map((rule) => rule(customer, bf)));",
+          "    sum += Math.round(prices[i] * (1 - rate));",
+          "  }",
+          "  return sum;",
+          "}",
+          "",
+          "// 2) As MESMAS regras plugáveis, perguntadas uma vez, na borda. O miolo do laço fica direto.",
+          "export function rulesOnce(prices: Int32Array, customer: Customer, bf: boolean): number {",
+          "  const rate = Math.max(0, ...rules.map((rule) => rule(customer, bf)));",
+          "  let sum = 0;",
+          "  for (let i = 0; i < prices.length; i++) sum += Math.round(prices[i] * (1 - rate));",
+          "  return sum;",
+          "}",
+          "",
+          "// 3) Tudo escrito à mão, sem regra plugável nenhuma.",
+          "export function handWritten(prices: Int32Array, customer: Customer, bf: boolean): number {",
+          "  let rate = bf ? 0.2 : 0;",
+          "  if (customer.type === 'vip') rate = Math.max(rate, 0.1);",
+          "  if (customer.type === 'employee') rate = Math.max(rate, 0.3);",
+          "  let sum = 0;",
+          "  for (let i = 0; i < prices.length; i++) sum += Math.round(prices[i] * (1 - rate));",
+          "  return sum;",
+          "}"
+        ]
+      },
+      "text": "Então a gente mede. Um milhão de preços na virada da Black Friday, de três jeitos, todos com o mesmo total."
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node bench.ts",
+        "lines": []
+      },
+      "text": "Regras plugáveis: [oitenta e seis milissegundos]. Escrito à mão: [um e meio]. Quase sessenta vezes!",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "regras por item    86.3 ms  total 20799600000",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "error"
+        },
+        {
+          "lines": [
+            {
+              "text": "regras por item    86.3 ms  total 20799600000",
+              "tone": "fail"
+            },
+            {
+              "text": "regras na borda     1.5 ms  total 20799600000",
+              "tone": "ok"
+            },
+            {
+              "text": "à mão               1.5 ms  total 20799600000",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Agora olha [a linha do meio]: as mesmas regras plugáveis, perguntadas uma vez só, antes do laço. Um e meio também.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "regras por item    86.3 ms  total 20799600000",
+              "tone": "fail"
+            },
+            {
+              "text": "regras na borda     1.5 ms  total 20799600000",
+              "tone": "ok"
+            },
+            {
+              "text": "à mão               1.5 ms  total 20799600000",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então o custo nem era a abstração?"
+    },
+    {
+      "id": "023",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Era perguntar um milhão de vezes uma coisa que não muda por item. A abstração fica na borda, e o miolo do laço fica direto."
+    },
+    {
+      "id": "024",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E se a regra mudasse a cada item?"
+    },
+    {
+      "id": "025",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Aí, num laço desses, escrever à mão pode valer. Mas com a medição na mão. No checkout, com três itens, essa diferença nem aparece."
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Lançamento na sexta",
+        "shown": 2,
+        "items": [
+          "Equipe de duas pessoas",
+          "Ninguém conhece portas e adaptadores"
+        ]
+      },
+      "text": "Último caso: lançamento na sexta, equipe de duas pessoas, e ninguém ali conhece portas e adaptadores."
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Um desenho que a equipe não entende não é limpo. É só difícil de outro jeito. O desenho certo é o que o seu time consegue manter."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "Dívida consciente",
+        "shown": 0,
+        "items": [
+          "Decidida em voz alta, não escondida",
+          "Regras de negócio com teste, mesmo no atalho",
+          "Data para pagar: antes da próxima mudança ali"
+        ]
+      },
+      "text": "Então você pega o atalho, mas como decisão. [Em voz alta]. [Com teste nas regras de negócio]. [E com data pra pagar].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Diferente do dryRun da aula um, que ninguém decidiu. Só foi ficando.",
+      "pronunciation": "Diferente do drai ran da aula um, que ninguém decidiu. Só foi ficando."
+    },
+    {
+      "id": "030",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Vale aplicar SOLID?",
+        "columns": [
+          "muda quando…",
+          "aplicar?"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "Script do relatório",
+            "cells": [
+              "quase nunca",
+              "✕ não"
+            ]
+          },
+          {
+            "label": "Protótipo de uma semana",
+            "cells": [
+              "vai pro lixo",
+              "✕ não"
+            ]
+          },
+          {
+            "label": "Laço de 1 milhão",
+            "cells": [
+              "quase nunca",
+              "✓ só na borda"
+            ]
+          },
+          {
+            "label": "Checkout da loja",
+            "cells": [
+              "toda semana",
+              "✓ sim"
+            ]
+          }
+        ]
+      },
+      "text": "Percebeu o padrão? [O script] e [o protótipo] não mudam. [O laço quente] muda pouco e roda muito. [O checkout] muda toda semana.",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 4,
+          "highlightedRow": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então a pergunta é sempre a mesma: isso vai mudar, e quanto custa mudar?"
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Só que eu não leio o futuro. Como eu sei o que vai mudar?"
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Ninguém lê. Por isso a gente olha pra trás: o que mudou nos últimos meses tende a mudar de novo. O histórico de commits é a melhor bola de cristal.",
+      "pronunciation": "Ninguém lê. Por isso a gente olha pra trás: o que mudou nos últimos meses tende a mudar de novo. O histórico de cômites é a melhor bola de cristal."
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Lembra da aula um? Código apodrece quando cada mudança fica mais cara. SOLID existe pra baixar esse custo. Onde não tem mudança, não tem custo pra baixar."
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "SOLID é ferramenta, não religião.\nUse onde a mudança custa caro."
+      },
+      "text": "SOLID é ferramenta, não religião. Use onde a mudança custa caro.",
+      "pronunciation": "Sólid é ferramenta, não religião. Use onde a mudança custa caro."
+    },
+    {
+      "id": "036",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "inbox",
+        "count": 3000,
+        "subject": "Pedido confirmado!",
+        "note": "Cenário simulado para fins didáticos"
+      },
+      "text": "Lembra como tudo começou? Três mil e-mails de um pedido que ninguém fez."
+    },
+    {
+      "id": "037",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "24 episódios",
+        "shown": 0,
+        "items": [
+          "01–04 · Os quatro sinais, coesão, dependências, abstração",
+          "05–08 · S: um motivo para mudar",
+          "09–12 · O: estender sem editar (e sem exagero)",
+          "13–16 · L: subtipo cumpre o contrato",
+          "17–18 · I: interface do tamanho do cliente",
+          "19–22 · D: a seta aponta para o que muda menos",
+          "23–24 · Tudo junto, e quando não usar"
+        ]
+      },
+      "text": "[Daí vieram os quatro sinais], coesão, dependências e abstração. [Responsabilidade única]: um motivo pra mudar.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "038",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Aberto e fechado]: estender sem editar. [Liskov]: todo subtipo cumpre o contrato.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Interfaces do tamanho de quem usa]. [E a seta apontando pro que muda menos].",
+      "beats": [
+        {
+          "shown": 5,
+          "sfx": "pop"
+        },
+        {
+          "shown": 6,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "040",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "celebrate",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "[E no fim, tudo junto], com teste verde a cada passo. E a coragem de não usar.",
+      "beats": [
+        {
+          "shown": 7,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "041",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio final",
+        "shown": 0,
+        "items": [
+          "Escolha um arquivo real do seu projeto",
+          "Pergunte: muda? quem pede? com que frequência?",
+          "Muda muito: rede de testes e um passo por vez",
+          "Não muda: deixe simples e siga em frente"
+        ]
+      },
+      "text": "O desafio final: [escolhe um arquivo de verdade] do seu projeto. [E pergunta: muda, quem pede, com que frequência?]",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Muda muito? Rede de testes e um passo por vez]. [Não muda? Deixa simples e segue a vida].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "043",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "O que estudar agora",
+        "shown": 0,
+        "items": [
+          "Testes e TDD: a rede que deixa refatorar",
+          "Refatoração, de Martin Fowler: passos pequenos com nome",
+          "Object Calisthenics: exercícios de design",
+          "Clean Architecture: SOLID na escala do sistema"
+        ]
+      },
+      "text": "E pra continuar: [testes e desenvolvimento guiado por testes], que é a rede de tudo isso. [O livro de refatoração do Martin Fowler].",
+      "pronunciation": "E pra continuar: [testes e desenvolvimento guiado por testes], que é a rede de tudo isso. [O livro de refatoração do Martin Fáuler].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "044",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Object Calisthenics], pra treinar o olho. [E Clean Architecture], que é esse curso na escala do sistema inteiro.",
+      "pronunciation": "[Óbjequit calistênics], pra treinar o olho. [E a Arquitetura Limpa], que é esse curso na escala do sistema inteiro.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "045",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Vinte e quatro aulas... e eu ainda te devo um café."
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Esse eu vou cobrar. E você aí, obrigada por investigar com a gente até o fim."
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Agora vai lá abrir aquele arquivo. A gente se vê na próxima investigação!"
+    }
+  ]
+}

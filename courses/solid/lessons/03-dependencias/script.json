@@ -1,0 +1,825 @@
+{
+  "chapters": [
+    "O alarme",
+    "A trilha",
+    "A seta",
+    "Transitiva",
+    "Estável × volátil",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test shipping-via-checkout.test.ts",
+        "lines": []
+      },
+      "text": "Trocaram o provedor de e-mail... e [o teste do frete quebrou]!",
+      "pronunciation": "Trocaram o provedor de e-mail... e [o teste do frete quebrou]!",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "Error: MAIL_API_KEY ausente: configure o provedor",
+              "tone": "fail"
+            },
+            {
+              "text": "       de e-mail",
+              "tone": "fail"
+            },
+            {
+              "text": "✖ shipping-via-checkout.test.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "O teste do frete? Ele nem manda e-mail."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pois é. Eu não mexi em nada de frete."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 03",
+        "title": "Por que trocar o e-mail quebrou o teste do frete",
+        "subtitle": "Dependências: quem conhece quem"
+      },
+      "text": "Então vamos seguir a trilha. Todo erro desse tipo deixa pegadas: os imports."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "shipping-via-checkout.test.ts",
+        "lines": [
+          "// O teste do frete escrito \"pelo checkout\". Ele não manda e-mail... mas carrega quem manda.",
+          "import { test } from 'node:test';",
+          "import assert from 'node:assert/strict';",
+          "import { OrderService } from './order-service.ts';",
+          "",
+          "test('frete grátis a partir de R$ 200 (via checkout)', () => {",
+          "  const order = { items: [{ price: 21000, quantity: 1 }], shippingMethod: 'standard' as const };",
+          "  assert.equal(new OrderService().quoteShipping(order), 0);",
+          "});"
+        ],
+        "highlight": []
+      },
+      "text": "O teste do frete [importa o checkout].",
+      "beats": [
+        {
+          "highlight": [
+            "from './order-service.ts'"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 2.5
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "order-service.ts",
+        "lines": [
+          "// O checkout ainda com o frete dentro (como antes da extração da aula 02).",
+          "import { db, mailer } from './infra.ts';",
+          "",
+          "export type Order = { items: Array<{ price: number; quantity: number }>; shippingMethod: 'standard' | 'pickup' | 'express' };",
+          "",
+          "export class OrderService {",
+          "  quoteShipping(order: Order): number {",
+          "    let subtotal = 0;",
+          "    for (const item of order.items) subtotal += item.price * item.quantity;",
+          "    if (order.shippingMethod === 'pickup') return 0;",
+          "    if (order.shippingMethod === 'express') return 3500;",
+          "    return subtotal >= 20000 ? 0 : 2000;",
+          "  }",
+          "",
+          "  checkout(order: Order, email: string) {",
+          "    const shipping = this.quoteShipping(order);",
+          "    db.insert('orders', { shipping });",
+          "    mailer.send(email, 'Pedido confirmado!');",
+          "    return { shipping };",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E o checkout [importa a infra].",
+      "beats": [
+        {
+          "highlight": [
+            "from './infra.ts'"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 2.5
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "infra.ts",
+        "lines": [
+          "// Infra: banco em memória e o mailer, que agora entrega pelo provedor novo.",
+          "import { deliver } from './mail-provider.ts';",
+          "",
+          "export const db = {",
+          "  rows: [] as Array<{ table: string; data: Record<string, unknown> }>,",
+          "  insert(table: string, data: Record<string, unknown>) { this.rows.push({ table, data }); },",
+          "};",
+          "",
+          "export const mailer = {",
+          "  send(to: string, body: string) { deliver(to, body); },",
+          "};"
+        ],
+        "highlight": []
+      },
+      "text": "E a infra [importa o provedor de e-mail].",
+      "beats": [
+        {
+          "highlight": [
+            "from './mail-provider.ts'"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 2.5
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "code",
+        "title": "mail-provider.ts",
+        "lines": [
+          "// O provedor de e-mail NOVO. Como muitos SDKs, ele exige a chave já no carregamento do módulo.",
+          "const apiKey = process.env.MAIL_API_KEY;",
+          "if (!apiKey) throw new Error('MAIL_API_KEY ausente: configure o provedor de e-mail');",
+          "",
+          "export function deliver(to: string, body: string): void {",
+          "  // aqui iria a chamada HTTP ao provedor",
+          "  void to; void body; void apiKey;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E o provedor novo [exige uma chave] assim que é carregado!",
+      "beats": [
+        {
+          "highlight": [
+            "if (!apiKey) throw"
+          ],
+          "sfx": "error"
+        }
+      ],
+      "reading": 2.5
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "graph",
+        "nodes": [
+          {
+            "id": "test",
+            "label": "Teste do frete",
+            "x": 14,
+            "y": 20,
+            "tone": "interface"
+          },
+          {
+            "id": "checkout",
+            "label": "order-service.ts\n(checkout)",
+            "x": 40,
+            "y": 72,
+            "tone": "core"
+          },
+          {
+            "id": "infra",
+            "label": "infra.ts",
+            "x": 66,
+            "y": 22,
+            "tone": "infrastructure"
+          },
+          {
+            "id": "mail",
+            "label": "mail-provider.ts\n(provedor novo)",
+            "x": 86,
+            "y": 76,
+            "tone": "infrastructure"
+          }
+        ],
+        "edges": [
+          {
+            "from": "test",
+            "to": "checkout",
+            "bad": true
+          },
+          {
+            "from": "checkout",
+            "to": "infra",
+            "bad": true
+          },
+          {
+            "from": "infra",
+            "to": "mail",
+            "bad": true
+          }
+        ],
+        "focusOnBad": false
+      },
+      "text": "Pronto: o teste do frete depende do provedor de e-mail. [Só que ninguém escreveu isso em lugar nenhum].",
+      "beats": [
+        {
+          "focusOnBad": true
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "objective",
+        "title": "Dependência é uma seta",
+        "shown": 0,
+        "items": [
+          "A → B: A conhece B (importa, chama ou herda)",
+          "Se B muda, A pode quebrar",
+          "B nem sabe que A existe"
+        ]
+      },
+      "text": "Dependência é uma seta. [A aponta pra B] quando A conhece B: importa, chama ou herda.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[E quando B muda, quem sofre é A].",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Exatamente. A mudança anda ao contrário da seta. [E B nem sabe que A existe].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Dá pra ver isso sem abrir arquivo por arquivo?"
+    },
+    {
+      "id": "014",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node deps.ts shipping-via-checkout.test.ts",
+        "lines": []
+      },
+      "text": "Dá. Esse script lê os imports e segue a trilha. [Três níveis] até o provedor.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "shipping-via-checkout.test.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  → order-service.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "    → infra.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "      → mail-provider.ts",
+              "tone": "fail"
+            },
+            {
+              "text": "3 dependência(s), incluindo as transitivas",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então o teste depende de tudo que o checkout depende."
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "neutral",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Isso é dependência transitiva. Você não importou o provedor, mas carrega ele junto."
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node deps.ts shipping.test.ts",
+        "lines": []
+      },
+      "text": "E o frete que a gente extraiu na aula passada?",
+      "beats": []
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "[Um arquivo só]: a própria regra, que não importa nada. Por isso o teste dele continuou passando.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "shipping.test.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  → shipping.ts",
+              "tone": "ok"
+            },
+            {
+              "text": "1 dependência(s), incluindo as transitivas",
+              "tone": "dim"
+            },
+            {
+              "text": "",
+              "tone": "dim"
+            },
+            {
+              "text": "✔ frete grátis a partir de R$ 200 (função extraída)",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "019",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Quem muda, e quando",
+        "columns": [
+          "muda quando…",
+          "estabilidade"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "Provedor de e-mail",
+            "cells": [
+              "troca o fornecedor",
+              "✕ volátil"
+            ]
+          },
+          {
+            "label": "Infra",
+            "cells": [
+              "troca banco ou provedor",
+              "✕ volátil"
+            ]
+          },
+          {
+            "label": "Checkout",
+            "cells": [
+              "toda regra nova",
+              "✕ volátil"
+            ]
+          },
+          {
+            "label": "Regra de frete",
+            "cells": [
+              "muda a política da loja",
+              "✓ estável"
+            ]
+          }
+        ]
+      },
+      "text": "Agora, a pergunta que importa: quem muda mais? [O provedor], [a infra] e [o checkout] mudam o tempo todo. [A regra de frete], só quando muda a política da loja.",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "020",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então a regra que quase não muda dependia de uma coisa que muda toda hora."
+    },
+    {
+      "id": "021",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Aponte as setas\npara o que muda menos."
+      },
+      "text": "É esse o problema. O que muda muito pode depender do que muda pouco. O contrário espalha cada mudança pelo sistema."
+    },
+    {
+      "id": "022",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Mas o checkout precisa mandar e-mail. Alguém tem que depender do provedor."
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Claro. A questão é quem. Hoje é o checkout inteiro, com a regra de frete dentro. Lá na aula de inversão de dependência, a gente vira essa seta."
+    },
+    {
+      "id": "024",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Dependências",
+        "shown": 0,
+        "items": [
+          "Dependência é uma seta: quem conhece quem",
+          "A mudança anda contra a seta, inclusive em cadeia",
+          "Aponte as setas para o que muda menos"
+        ]
+      },
+      "text": "[Dependência é uma seta]: quem conhece quem.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "text": "[A mudança anda contra a seta], inclusive em cadeia.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "026",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "text": "E [aponte as setas para o que muda menos].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Então o ideal é não importar nada?"
+    },
+    {
+      "id": "028",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Não. Software sem dependência não faz nada. O objetivo é escolher a direção das setas, não zerar as setas."
+    },
+    {
+      "id": "029",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Desenhe as setas do arquivo que você escolheu",
+          "Siga a trilha de imports até a infra",
+          "Marque o que é volátil e o que é estável"
+        ]
+      },
+      "text": "Desafio: [desenha as setas] daquele arquivo que você escolheu.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Segue a trilha até a infra]. E [marca o que é volátil e o que é estável].",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "031",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "Abstração, interface e polimorfismo: trocar um if gigante por peças que se encaixam"
+        ],
+        "shown": 1
+      },
+      "text": "Na próxima aula: abstração, interface e polimorfismo. Como trocar um if gigante por peças que se encaixam."
+    },
+    {
+      "id": "032",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Finalmente vou poder apagar aquele switch de quarenta linhas."
+    },
+    {
+      "id": "033",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até a próxima!"
+    }
+  ]
+}

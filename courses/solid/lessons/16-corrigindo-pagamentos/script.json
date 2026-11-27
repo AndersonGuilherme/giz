@@ -1,0 +1,1121 @@
+{
+  "chapters": [
+    "A conta",
+    "O diagnóstico",
+    "Capacidades",
+    "Composição",
+    "Quem usa",
+    "O contrato",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Pedido do produto (exemplo fictício)",
+        "shown": 0,
+        "items": [
+          "Novo pagamento: carteira digital",
+          "Reserva e cobra no envio",
+          "Estorno em até 180 dias"
+        ]
+      },
+      "text": "Pedido novo: [carteira digital]. [Reserva e cobra no envio], e [estorna em até cento e oitenta dias].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2
+        },
+        {
+          "shown": 3
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "text": "No código da aula passada, quantos arquivos você teria que abrir?",
+      "holdAfter": {
+        "seconds": 4,
+        "label": "Conte"
+      }
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Carteira digital no código de hoje",
+        "columns": [
+          "o que muda"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "methods.ts",
+            "cells": [
+              "uma classe nova"
+            ]
+          },
+          {
+            "label": "support.ts",
+            "cells": [
+              "mais um instanceof"
+            ]
+          },
+          {
+            "label": "receipt.ts",
+            "cells": [
+              "mais um case"
+            ]
+          },
+          {
+            "label": "payment.ts",
+            "cells": [
+              "mais um ATENÇÃO"
+            ]
+          }
+        ]
+      },
+      "text": "Quatro. [A classe nova], [o atendimento], com mais um instanceof, [o comprovante], com mais um case, e [um aviso novo] na base.",
+      "pronunciation": "Quatro. [A classe nova], [o atendimento], com mais um instance óf, [o comprovante], com mais um caso, e [um aviso novo] na base.",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2
+        },
+        {
+          "shownRows": 3
+        },
+        {
+          "shownRows": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E torcer pra ninguém esquecer nenhum."
+    },
+    {
+      "id": "005",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 16",
+        "title": "Quatro arquivos para um pagamento novo?",
+        "subtitle": "Corrigindo a hierarquia de pagamentos"
+      },
+      "text": "Hoje a gente conserta a hierarquia de verdade. E no fim, conta de novo."
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "O problema de fundo das últimas três aulas é um só: a base prometia coisas que nem todo pagamento faz."
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "O que cada um faz de verdade",
+        "columns": [
+          "captura em 2 etapas",
+          "devolve o dinheiro"
+        ],
+        "rows": [
+          {
+            "label": "Cartão",
+            "cells": [
+              "✓",
+              "✓"
+            ]
+          },
+          {
+            "label": "Pix",
+            "cells": [
+              "✕",
+              "✓ até 90 dias"
+            ]
+          },
+          {
+            "label": "Boleto",
+            "cells": [
+              "✕",
+              "✓ por transferência"
+            ]
+          },
+          {
+            "label": "Cartão-presente",
+            "cells": [
+              "✕",
+              "✕"
+            ]
+          }
+        ]
+      },
+      "text": "Põe numa tabela o que cada um faz de verdade. [Captura em duas etapas, só o cartão]. [Devolver o dinheiro, todos menos o cartão-presente], e o Pix com prazo.",
+      "beats": [
+        {
+          "highlightedColumn": 0,
+          "sfx": "pop"
+        },
+        {
+          "highlightedColumn": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E a base obrigava os quatro a ter as duas coisas."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Aí quem não tinha, fingia: lançava erro, deixava vazio, ou escondia um prazo. Os quatro sinais da aula passada."
+    },
+    {
+      "id": "010",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment.ts",
+        "lines": [
+          "// Pagamentos da loja, por CAPACIDADE. Valores em centavos.",
+          "// Payment: só o que TODO pagamento cumpre. O resto é opcional e está no tipo.",
+          "export interface Payment {",
+          "  readonly method: string;",
+          "  readonly amount: number;",
+          "  readonly capture?: Capturable; // só quem cobra em duas etapas (reserva, depois cobra)",
+          "  readonly refunds?: Refundable; // só quem devolve o dinheiro por conta própria",
+          "}",
+          "",
+          "// Capturable: capture() cobra o valor reservado. Nunca \"não suportado\".",
+          "export interface Capturable {",
+          "  readonly capturedAt: Date | null;",
+          "  capture(now: Date): void;",
+          "}",
+          "",
+          "// Refundable:",
+          "//   pré:        canRefund(value, now) é true (o prazo está no contrato, à vista)",
+          "//   pós:        refunded sobe exatamente value",
+          "//   invariante: 0 <= refunded <= amount",
+          "export interface Refundable {",
+          "  readonly refunded: number;",
+          "  readonly policy: string;",
+          "  canRefund(value: number, now: Date): boolean;",
+          "  refund(value: number, now: Date): void;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Então a base encolhe. [Todo pagamento tem só método e valor]. [Captura] e [estorno] viram capacidades separadas, e opcionais.",
+      "beats": [
+        {
+          "highlight": [
+            "readonly method",
+            "readonly amount"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "capture?: Capturable"
+          ]
+        },
+        {
+          "highlight": [
+            "refunds?: Refundable"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "O ponto de interrogação faz o trabalho do comentário!"
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E melhor: o que era \"não chame\" virou \"pode não existir\". E isso o compilador obriga a tratar."
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E o prazo do Pix, que estava escondido, [entrou no contrato]: antes de estornar, pergunte se pode. Vale pra todo mundo.",
+      "beats": [
+        {
+          "highlight": [
+            "pré:",
+            "canRefund(value: number"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pera. Isso não deixa a pré-condição mais forte pra todo mundo?"
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Deixa. Por isso ficou na base, e não numa filha. Mudar o contrato é legítimo; o que quebra é mudar escondido. Agora todo cliente sabe que pode ouvir um não."
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "capabilities.ts",
+        "lines": [
+          "export class RefundLedger implements Refundable {",
+          "  refunded = 0;",
+          "  readonly amount: number;",
+          "  readonly options: RefundOptions;",
+          "  constructor(amount: number, options: RefundOptions) { this.amount = amount; this.options = options; }",
+          "",
+          "  get policy() {",
+          "    const days = this.options.windowDays;",
+          "    return days ? `Estorno em até ${days} dias` : 'Estorno a qualquer momento';",
+          "  }",
+          "",
+          "  canRefund(value: number, now: Date) {",
+          "    const paidAt = this.options.paidAt();",
+          "    if (!paidAt || value <= 0 || value > this.amount - this.refunded) return false;",
+          "    const days = this.options.windowDays;",
+          "    return !days || (now.getTime() - paidAt.getTime()) / DAY <= days;",
+          "  }",
+          "",
+          "  refund(value: number, now: Date) {",
+          "    if (!this.canRefund(value, now)) throw new Error('estorno fora do contrato');",
+          "    this.refunded += value;",
+          "    this.options.payout(value);",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "As capacidades são peças. Esse livro de estornos faz [a trava do valor] e [a conta do prazo], num lugar só.",
+      "beats": [
+        {
+          "highlight": [
+            "value > this.amount - this.refunded"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "DAY <= days"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "methods.ts",
+        "lines": [
+          "export function pix(amount: number, paidAt: Date, ledger: Ledger): Payment {",
+          "  const refunds = new RefundLedger(amount, {",
+          "    paidAt: () => paidAt,",
+          "    windowDays: 90, // regra do Pix, agora no contrato",
+          "    payout: (v) => ledger.payouts.push(`pix: ${v}`),",
+          "  });",
+          "  return { method: 'pix', amount, refunds };",
+          "}",
+          "",
+          "export function boleto(amount: number, paidAt: Date, ledger: Ledger): Payment {",
+          "  const refunds = new RefundLedger(amount, {",
+          "    paidAt: () => paidAt,",
+          "    payout: (v) => ledger.payouts.push(`transferência agendada: ${v}`),",
+          "  });",
+          "  return { method: 'boleto', amount, refunds };",
+          "}",
+          "",
+          "// Cartão-presente: debita o saldo na hora e não devolve dinheiro.",
+          "export function giftCard(amount: number, card: { balance: number }): Payment {",
+          "  card.balance -= amount;",
+          "  return { method: 'cartão-presente', amount };",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E cada pagamento monta só as peças que tem. [O Pix passa noventa dias]. [O boleto, uma transferência agendada]. [O cartão-presente, nenhuma].",
+      "beats": [
+        {
+          "highlight": [
+            "windowDays: 90"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "transferência agendada"
+          ]
+        },
+        {
+          "highlight": [
+            "method: 'cartão-presente'"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Sem herança. Ninguém recebe um método que não sabe cumprir, então não sobra nada pra lançar erro nem deixar vazio."
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E por que não uma classe mãe que estorna, e as filhas herdam dela?"
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Funcionaria, desde que cada filha só herde o que cumpre. Mas o prazo, a trava e o jeito de devolver variam separados. Com peças, cada pagamento combina as suas, sem uma árvore de classes pra manter."
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o boleto, que só agendava e não registrava nada?"
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Agora o livro registra o estorno na hora; só a transferência é que demora. A pós-condição volta a valer, e o segundo clique bate na trava."
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "orders.ts",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "",
+          "export function shipOrder(payment: Payment, now: Date) {",
+          "  payment.capture?.capture(now); // quem não tem duas etapas já está pago",
+          "}",
+          "",
+          "export function cancelOrder(payment: Payment, now: Date) {",
+          "  if (payment.capture && !payment.capture.capturedAt) return 'reserva liberada';",
+          "  const r = payment.refunds;",
+          "  if (r?.canRefund(payment.amount - r.refunded, now)) {",
+          "    r.refund(payment.amount - r.refunded, now);",
+          "    return 'estornado';",
+          "  }",
+          "  return 'crédito na loja';",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "O envio: [captura, se tiver captura]. Nenhum instanceof.",
+      "pronunciation": "O envio: [captura, se tiver captura]. Nenhum instance óf.",
+      "beats": [
+        {
+          "highlight": [
+            "payment.capture?.capture(now)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[E] lembra do cartão-presente da aula treze, que sumia com o saldo no cancelamento? Agora \"reservado e não cobrado\" só existe em quem tem captura. Ninguém mais confunde reserva com cobrança.",
+      "beats": [
+        {
+          "highlight": [
+            "payment.capture && !payment.capture.capturedAt"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "support.ts",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "",
+          "const brl = (cents: number) => `R$ ${(cents / 100).toFixed(2).replace('.', ',')}`;",
+          "",
+          "export function refundFromSupport(payment: Payment, value: number, now: Date) {",
+          "  const r = payment.refunds;",
+          "  if (!r) return 'Sem estorno: oferecer crédito na loja';",
+          "  if (!r.canRefund(value, now)) return 'Fora do contrato: oferecer crédito na loja';",
+          "  r.refund(value, now);",
+          "  return `Estornado: ${brl(r.refunded)}`;",
+          "}",
+          "",
+          "export const refundPolicy = (payment: Payment) =>",
+          "  payment.refunds?.policy ?? 'Sem estorno: crédito na loja';"
+        ],
+        "highlight": []
+      },
+      "text": "O atendimento: [sem estorno], oferece crédito na loja. [Fora do prazo], também. Nenhuma linha sabe qual pagamento chegou.",
+      "beats": [
+        {
+          "highlight": [
+            "if (!r) return"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "if (!r.canRefund"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Mas isso ainda é um if. Não é o instanceof com outro nome?",
+      "pronunciation": "Mas isso ainda é um ífi. Não é o instance óf com outro nome?"
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "A diferença é a pergunta. Antes: qual classe você é? Agora: você sabe estornar? Essa pergunta está no contrato, e vale até pra pagamento que ainda nem existe."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[E] o comprovante lê o prazo do próprio contrato. O switch pelo nome da classe sumiu.",
+      "pronunciation": "E o comprovante lê o prazo do próprio contrato. O suítch pelo nome da classe sumiu.",
+      "beats": [
+        {
+          "highlight": [
+            "refunds?.policy"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "contract.test.ts",
+        "lines": [
+          "refundableContract('cartão', () => captured(creditCard(8000, ledger)));",
+          "refundableContract('pix', () => pix(8000, day(0), ledger).refunds!);",
+          "refundableContract('boleto', () => boleto(8000, day(0), ledger).refunds!);",
+          "refundableContract('carteira digital', () => captured(digitalWallet(8000, ledger)));",
+          "",
+          "capturableContract('cartão', () => creditCard(8000, ledger).capture!);",
+          "capturableContract('carteira digital', () => digitalWallet(8000, ledger).capture!);"
+        ],
+        "highlight": []
+      },
+      "text": "E o teste de contrato da aula catorze?"
+    },
+    {
+      "id": "030",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Agora é [um por capacidade], rodando em todo pagamento que declara aquela capacidade.",
+      "beats": [
+        {
+          "highlight": [
+            "refundableContract('",
+            "capturableContract('"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test contract.test.ts",
+        "lines": []
+      },
+      "text": "[Tudo verde]. Inclusive a carteira digital.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ Refundable: cartão",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Refundable: pix",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Refundable: boleto",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Refundable: carteira digital",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Capturable: cartão",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Capturable: carteira digital",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 18   ℹ pass 18   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "text": "E se alguém declarar que estorna e deixar o método vazio de novo?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test broken.demo.ts",
+        "lines": []
+      },
+      "text": "[O contrato pega na hora]. Pós-condição, invariante e prazo, os três vermelhos.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "▶ Refundable: cartão-presente promocional",
+              "tone": "dim"
+            },
+            {
+              "text": "  ✔ pré: se canRefund, refund não lança",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✖ pós: refunded sobe exatamente o valor",
+              "tone": "fail"
+            },
+            {
+              "text": "  ✖ invariante: nunca devolve mais que o pago",
+              "tone": "fail"
+            },
+            {
+              "text": "  ✖ prazo: refund faz o que canRefund disse",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 4   ℹ pass 1   ℹ fail 3",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então o teste é a cerca. Ninguém mais entra fingindo."
+    },
+    {
+      "id": "035",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "wallet.ts  (arquivo novo)",
+        "lines": [
+          "// Pagamento novo: carteira digital. Reserva, cobra no envio, estorna em até 180 dias.",
+          "// Nenhum outro arquivo da loja mudou.",
+          "export function digitalWallet(amount: number, ledger: Ledger): Payment {",
+          "  const capture = new TwoStepCapture();",
+          "  const refunds = new RefundLedger(amount, {",
+          "    paidAt: () => capture.capturedAt,",
+          "    windowDays: 180,",
+          "    payout: (v) => ledger.payouts.push(`carteira: ${v}`),",
+          "  });",
+          "  return { method: 'carteira digital', amount, capture, refunds };",
+          "}"
+        ],
+        "highlight": [
+          "windowDays: 180"
+        ]
+      },
+      "text": "E a carteira digital, no código novo: um arquivo. Mais uma linha no teste de contrato."
+    },
+    {
+      "id": "036",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Carteira digital",
+        "columns": [
+          "antes",
+          "depois"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "Arquivos abertos",
+            "cells": [
+              "4",
+              "1"
+            ]
+          },
+          {
+            "label": "instanceof novo?",
+            "cells": [
+              "Sim",
+              "Não"
+            ]
+          },
+          {
+            "label": "Contrato testado?",
+            "cells": [
+              "Não",
+              "Sim"
+            ]
+          }
+        ]
+      },
+      "text": "Então, [quatro arquivos ou um]? [Um]. E em vez de torcer, [um teste que confere].",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2,
+          "highlightedColumn": 1
+        },
+        {
+          "shownRows": 3,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "037",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Herança por \"é um\"",
+          "text": "A base promete tudo. Quem não cumpre finge, e quem usa compensa."
+        },
+        "right": {
+          "title": "Capacidades por contrato",
+          "text": "Cada um declara só o que cumpre. O tipo e o teste conferem."
+        }
+      },
+      "text": "De um lado, a base prometendo tudo, quem não cumpre fingindo, e quem usa compensando. Do outro, cada um declarando só o que cumpre."
+    },
+    {
+      "id": "038",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E aí Liskov sai de graça: ninguém promete o que não entrega.",
+      "pronunciation": "E aí Líscov sai de graça: ninguém promete o que não entrega."
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Não force um subtipo a prometer o que ele não cumpre.\nDeixe cada um declarar só o que sabe fazer."
+      },
+      "text": "Não force um subtipo a prometer o que ele não cumpre. Deixe cada um declarar só o que sabe fazer.",
+      "pronunciation": "Não force um subtipo a prometer o que ele não cumpre. Deixe cada um declarar só o que sabe fazer."
+    },
+    {
+      "id": "040",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Pegue a hierarquia que você caçou na aula 15",
+          "Monte a tabela: o que cada filha faz de verdade",
+          "Separe em capacidades e rode um contrato por capacidade"
+        ]
+      },
+      "text": "Desafio: [pega a hierarquia] que você caçou na aula quinze.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "041",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Monta a tabela] do que cada filha faz de verdade. E [separa em capacidades], com um contrato por capacidade.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próximo módulo",
+        "items": [
+          "Aula 17 · Interfaces gordas (o I do SOLID)"
+        ],
+        "shown": 1
+      },
+      "text": "Repara: hoje a gente quebrou um contrato grande em capacidades pequenas. No próximo módulo, isso ganha nome: interfaces gordas, e o custo pra quem implementa. O I do SOLID.",
+      "pronunciation": "Repara: hoje a gente quebrou um contrato grande em capacidades pequenas. No próximo módulo, isso ganha nome: interfaces gordas, e o custo pra quem implementa. O Í do sólid."
+    },
+    {
+      "id": "043",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Fim do L. E os pagamentos, finalmente, cumprem o que prometem."
+    },
+    {
+      "id": "044",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}

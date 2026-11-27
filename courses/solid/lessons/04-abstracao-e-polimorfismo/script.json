@@ -1,0 +1,746 @@
+{
+  "chapters": [
+    "O bug",
+    "O monstro",
+    "Abstração",
+    "Interface",
+    "Polimorfismo",
+    "Peça nova",
+    "Quando não usar",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test locker.demo.ts",
+        "lines": []
+      },
+      "text": "O cliente escolheu retirar no locker, nove reais. [Pagou trinta e cinco].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ locker custa R$ 9",
+              "tone": "fail"
+            },
+            {
+              "text": "  Expected values to be strictly equal:",
+              "tone": "dim"
+            },
+            {
+              "text": "  3500 !== 900",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "expression": "surprised",
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "surprised",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Trinta e cinco? Esse é o preço do expresso."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E eu só adicionei o locker. Não encostei no expresso."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 04",
+        "title": "O switch que cobrou R$ 35 por um locker de R$ 9",
+        "subtitle": "Abstração, interface e polimorfismo"
+      },
+      "text": "Então hoje a gente aprende a parar de mexer no mesmo lugar toda vez que aparece uma opção nova."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "shipping.ts",
+        "lines": [
+          "export function shippingFor(method: ShippingMethod, subtotal: number, distanceKm: number): number {",
+          "  let price = 0;",
+          "  switch (method) {",
+          "    case 'pickup':",
+          "      price = 0;",
+          "      break;",
+          "    case 'standard':",
+          "      price = subtotal >= 20000 ? 0 : 2000;",
+          "      break;",
+          "    case 'locker':",
+          "      price = 900;",
+          "    case 'express':",
+          "      price = 3500;",
+          "      break;",
+          "    case 'sameDay':",
+          "      if (distanceKm > 15) throw new Error('fora da área de entrega no mesmo dia');",
+          "      price = 2500 + distanceKm * 150;",
+          "      break;",
+          "  }",
+          "  return price;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Olha a função de frete depois de alguns meses de transportadora nova."
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Antes da Lia explicar: por que o locker cobrou trinta e cinco?",
+      "pronunciation": "Antes da Lia explicar: por que o locker cobrou trinta e cinco?",
+      "holdAfter": {
+        "seconds": 5,
+        "label": "Ache o bug"
+      }
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[Faltou um break]. O locker calcula nove reais e [cai direto no caso do expresso], que troca pra trinta e cinco.",
+      "beats": [
+        {
+          "highlight": [
+            "price = 900"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "price = 900",
+            "case 'express'",
+            "price = 3500"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Um break. Dois dias de cliente reclamando por causa de um break."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "tsc --noEmit --noFallthroughCasesInSwitch",
+        "lines": []
+      },
+      "text": "Dá pra pedir pro TypeScript avisar: [essa opção pega exatamente isso].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "shipping-switch.ts(13,5): error TS7029:",
+              "tone": "fail"
+            },
+            {
+              "text": "  Fallthrough case in switch.",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Mas o problema de fundo continua: toda forma nova de entrega mexe nessa mesma função. Rigidez e fragilidade de novo."
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "objective",
+        "title": "Três ideias",
+        "shown": 0,
+        "items": [
+          "Abstração: o que importa, sem o como",
+          "Interface: o contrato",
+          "Polimorfismo: a mesma chamada, cada um do seu jeito"
+        ]
+      },
+      "text": "Três ideias resolvem isso. A primeira é [abstração]: separar o que importa de como é feito.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tipo: o checkout precisa saber o preço do frete, mas não como cada transportadora calcula?"
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Exatamente. Pro checkout, frete é só um preço. [O resto é detalhe de cada um].",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "shipping.ts",
+        "lines": [
+          "// Abstração: o checkout só precisa saber QUE existe um preço de frete, não COMO cada um calcula.",
+          "export type Quote = { subtotal: number; distanceKm: number };",
+          "",
+          "// Interface: o contrato que todo método de entrega cumpre.",
+          "export interface ShippingMethod {",
+          "  readonly id: string;",
+          "  price(quote: Quote): number;",
+          "}",
+          "",
+          "// Polimorfismo: a mesma chamada, method.price(quote), com o comportamento de cada um.",
+          "export const pickup: ShippingMethod = { id: 'pickup', price: () => 0 };",
+          "export const standard: ShippingMethod = { id: 'standard', price: ({ subtotal }) => (subtotal >= 20000 ? 0 : 2000) };",
+          "export const locker: ShippingMethod = { id: 'locker', price: () => 900 };",
+          "export const express: ShippingMethod = { id: 'express', price: () => 3500 };",
+          "export const sameDay: ShippingMethod = {",
+          "  id: 'sameDay',",
+          "  price: ({ distanceKm }) => {",
+          "    if (distanceKm > 15) throw new Error('fora da área de entrega no mesmo dia');",
+          "    return 2500 + distanceKm * 150;",
+          "  },",
+          "};"
+        ],
+        "highlight": []
+      },
+      "text": "A segunda é [interface]: o contrato. Todo método de entrega tem um nome e sabe dizer o seu preço.",
+      "beats": [
+        {
+          "highlight": [
+            "export interface ShippingMethod",
+            "readonly id",
+            "price(quote: Quote)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "É só um tipo com uma função dentro?"
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "É. E é pequeno de propósito: quanto menor o contrato, mais fácil de cumprir."
+    },
+    {
+      "id": "017",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "A terceira é polimorfismo. Cada método cumpre o contrato do seu jeito: [retirada], [padrão], [locker], [entrega no mesmo dia].",
+      "beats": [
+        {
+          "highlight": [
+            "const pickup"
+          ]
+        },
+        {
+          "highlight": [
+            "const standard"
+          ]
+        },
+        {
+          "highlight": [
+            "const locker"
+          ]
+        },
+        {
+          "highlight": [
+            "const sameDay",
+            "distanceKm > 15",
+            "2500 + distanceKm"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "018",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "checkout.ts",
+        "lines": [
+          "// Quem usa não conhece nenhum método concreto: recebe qualquer um que cumpra a interface.",
+          "import type { ShippingMethod, Quote } from './shipping.ts';",
+          "",
+          "export function shippingCost(method: ShippingMethod, quote: Quote): number {",
+          "  return method.price(quote);",
+          "}"
+        ],
+        "highlight": [
+          "return method.price"
+        ]
+      },
+      "text": "E quem usa chama sempre a mesma coisa: method.price.",
+      "pronunciation": "E quem usa chama sempre a mesma coisa: o preço do método."
+    },
+    {
+      "id": "019",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "E quem decide o comportamento é o objeto que chegou, não um switch. Sem break pra esquecer."
+    },
+    {
+      "id": "020",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "drone.ts  (arquivo novo)",
+        "lines": [
+          "// Método novo: um arquivo novo. Nenhuma linha do checkout nem dos outros métodos foi tocada.",
+          "import type { ShippingMethod } from './shipping.ts';",
+          "",
+          "export const drone: ShippingMethod = { id: 'drone', price: ({ distanceKm }) => 1500 + distanceKm * 100 };"
+        ],
+        "highlight": [
+          "export const drone"
+        ]
+      },
+      "text": "Agora o produto quer entrega por drone."
+    },
+    {
+      "id": "021",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Um arquivo novo. Nenhuma linha do checkout nem dos outros métodos mudou."
+    },
+    {
+      "id": "022",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test shipping.test.ts",
+        "lines": []
+      },
+      "text": "E [os testes passam]!",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ polimorfismo: cada método calcula o seu preço",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ método novo (drone) entra sem alterar checkout",
+              "tone": "ok"
+            },
+            {
+              "text": "    nem outros métodos",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 3   ℹ pass 3   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o locker nunca mais cai no caso do vizinho."
+    },
+    {
+      "id": "024",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Então todo if vira uma interface?"
+    },
+    {
+      "id": "025",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Interface pra tudo",
+          "text": "Dois casos que nunca mudam? Um if é mais simples e mais claro."
+        },
+        "right": {
+          "title": "Interface quando vale",
+          "text": "As opções crescem, ou cada uma muda por um motivo diferente."
+        }
+      },
+      "text": "Não. Se são dois casos que nunca mudam, um if é mais simples e mais claro. A interface vale quando as opções crescem, ou quando cada uma muda por um motivo diferente."
+    },
+    {
+      "id": "026",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tipo transportadora: todo mês aparece uma nova."
+    },
+    {
+      "id": "027",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Estender sem modificar."
+      },
+      "text": "Isso. E guarda essa ideia: estender sem modificar. Ela vira um princípio inteiro, o O do SOLID."
+    },
+    {
+      "id": "028",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Resumo",
+        "shown": 0,
+        "items": [
+          "Abstração: o que importa, sem o como",
+          "Interface: um contrato pequeno",
+          "Polimorfismo: a mesma chamada, cada um do seu jeito"
+        ]
+      },
+      "text": "[Abstração]: o que importa, sem o como.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "text": "[Interface]: um contrato pequeno.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "text": "[Polimorfismo]: a mesma chamada, cada um do seu jeito.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "031",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Ache um switch ou if que cresce todo mês",
+          "Escreva a interface que cada caso cumpriria",
+          "Liste o que mudaria se surgisse um caso novo"
+        ]
+      },
+      "text": "Desafio: [acha um switch] no seu projeto que cresce todo mês.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Escreve a interface] que cada caso cumpriria. E [lista o que mudaria] se surgisse um caso novo.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "033",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próximo módulo",
+        "items": [
+          "O S do SOLID: responsabilidade única"
+        ],
+        "shown": 1
+      },
+      "text": "Fim do módulo de fundamentos. No próximo: o S do SOLID, responsabilidade única."
+    },
+    {
+      "id": "034",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Agora sim: SOLID de verdade."
+    },
+    {
+      "id": "035",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}

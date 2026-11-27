@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "title": "Cinco refatorações, nenhum teste vermelho",
+  "format": "lesson",
+  "language": "pt-BR",
+  "aspect": "16:9",
+  "captionStyle": "blocks",
+  "cast": [
+    "lia",
+    "teo"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
+}

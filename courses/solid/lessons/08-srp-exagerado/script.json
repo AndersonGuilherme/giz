@@ -1,0 +1,1164 @@
+{
+  "chapters": [
+    "O desafio",
+    "A defesa",
+    "O dono",
+    "O pedido",
+    "A regra sumida",
+    "O tamanho certo",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "O mesmo cálculo de preço, duas versões",
+        "columns": [
+          "Versão A",
+          "Versão B"
+        ],
+        "rows": [
+          {
+            "label": "Classes",
+            "cells": [
+              "1",
+              "7"
+            ]
+          },
+          {
+            "label": "Linhas",
+            "cells": [
+              "16",
+              "62"
+            ]
+          },
+          {
+            "label": "Preço hoje",
+            "cells": [
+              "✓ igual",
+              "✓ igual"
+            ]
+          }
+        ],
+        "shownRows": 0
+      },
+      "text": "Desafio rápido: duas versões do mesmo cálculo de preço, [com o mesmo resultado]. A tem uma classe, B tem sete. Qual é a mais SOLID?",
+      "pronunciation": "Desafio rápido: duas versões do mesmo cálculo de preço, [com o mesmo resultado]. A tem uma classe, B tem sete. Qual é a mais sólid?",
+      "beats": [
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        }
+      ],
+      "holdAfter": {
+        "seconds": 4,
+        "label": "A ou B?"
+      }
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Guarda a sua resposta. Um pedido do financeiro vai decidir."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Eu já votei: B. Fui eu que escrevi."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 08",
+        "title": "Sete classes, uma regra perdida",
+        "subtitle": "SRP exagerado: quando separar demais vira problema"
+      },
+      "text": "Então hoje é o outro lado do princípio: quando separar demais vira problema."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "versão B · price-calculator.ts",
+        "lines": [
+          "export class PriceCalculator {",
+          "  quote(items: Item[], customer: Customer, now: Date) {",
+          "    const subtotal = new SubtotalCalculator().sum(items);",
+          "    const rate = new RateSum().total([",
+          "      new VipDiscount().rate(customer, now),",
+          "      new EmployeeDiscount().rate(customer),",
+          "      new BlackFridayDiscount().rate(customer, now),",
+          "    ]);",
+          "    return { subtotal, discount: new DiscountApplier().apply(subtotal, rate) };",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Olha que limpo: [subtotal], [cada desconto na sua classe], [soma das taxas], [aplica]. Cada classe faz uma coisa só!",
+      "beats": [
+        {
+          "highlight": [
+            "SubtotalCalculator().sum"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "VipDiscount().rate",
+            "EmployeeDiscount().rate",
+            "BlackFridayDiscount().rate"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "RateSum().total"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "DiscountApplier().apply"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "wc -l fragmentado/*.ts",
+        "lines": []
+      },
+      "text": "E quantos arquivos você abre pra entender o preço? [Sete].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "   9 fragmentado/black-friday-discount.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   5 fragmentado/discount-applier.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   7 fragmentado/employee-discount.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  20 fragmentado/price-calculator.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   5 fragmentado/rate-sum.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   7 fragmentado/subtotal-calculator.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   9 fragmentado/vip-discount.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  62 total",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Arquivo pequeno é fácil de ler, ué."
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Cada um, sim. O preço inteiro, não: você pula de arquivo em arquivo e monta a regra na cabeça."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E \"faz uma coisa só\"... lembra da aula cinco?"
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Era a régua errada. A certa é quem pede a mudança."
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Quem pede mudança em cada classe da versão B",
+        "columns": [
+          "ator"
+        ],
+        "rows": [
+          {
+            "label": "SubtotalCalculator",
+            "cells": [
+              "Financeiro"
+            ]
+          },
+          {
+            "label": "VipDiscount",
+            "cells": [
+              "Financeiro"
+            ]
+          },
+          {
+            "label": "EmployeeDiscount",
+            "cells": [
+              "Financeiro"
+            ]
+          },
+          {
+            "label": "BlackFridayDiscount",
+            "cells": [
+              "Financeiro"
+            ]
+          },
+          {
+            "label": "RateSum",
+            "cells": [
+              "Financeiro"
+            ]
+          },
+          {
+            "label": "DiscountApplier",
+            "cells": [
+              "Financeiro"
+            ]
+          },
+          {
+            "label": "PriceCalculator",
+            "cells": [
+              "Financeiro"
+            ]
+          }
+        ],
+        "shownRows": 0
+      },
+      "text": "Então pergunta pra cada classe da versão B: [quem pede pra você mudar]?",
+      "beats": [
+        {
+          "shownRows": 7,
+          "sfx": "dings"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Financeiro, financeiro... [As sete respondem ao mesmo ator]!",
+      "beats": [
+        {
+          "highlightedColumn": 0,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Um ator, sete classes. O princípio não pediu esse corte. Pelo princípio, o que um ator pede deveria morar junto."
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tá, mas separar demais faz mal? Só fica mais arquivo."
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Faz. Quer ver? Vamos simular um pedido do financeiro."
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "E se o financeiro pedir…",
+        "shown": 0,
+        "items": [
+          "Black Friday passa de 20% para 35%",
+          "Continua valendo: não acumula, vale o maior"
+        ]
+      },
+      "text": "E se o financeiro pedir: [Black Friday de trinta e cinco por cento]? E [a regra de sempre continua]: não acumula, vale o maior.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "versão B · black-friday-discount.ts",
+        "lines": [
+          "export class BlackFridayDiscount {",
+          "  rate(c: Customer, now: Date) {",
+          "    // funcionário fica de fora (já tem mais)",
+          "    return isBlackFriday(now) && c.type !== 'employee' ? 0.35 : 0;",
+          "  }",
+          "}"
+        ],
+        "added": [
+          3
+        ],
+        "highlight": []
+      },
+      "text": "Fácil! Na versão B é [um número num arquivo]. Responsabilidade única funcionando.",
+      "beats": [
+        {
+          "highlight": [
+            "0.35"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "versão A · price-calculator.ts",
+        "lines": [
+          "export class PriceCalculator {",
+          "  quote(items: Item[], customer: Customer, now: Date) {",
+          "    let subtotal = 0;",
+          "    for (const item of items) subtotal += item.price * item.quantity;",
+          "",
+          "    let rate = 0;",
+          "    if (customer.type === 'vip') rate = 0.1;",
+          "    else if (customer.type === 'employee') rate = 0.3;",
+          "    if (isBlackFriday(now) && rate < 0.35) rate = 0.35;",
+          "    return { subtotal, discount: Math.round(subtotal * rate) };",
+          "  }",
+          "}"
+        ],
+        "added": [
+          8
+        ],
+        "highlight": []
+      },
+      "text": "Na versão A também é uma linha só.",
+      "reading": 3
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test bf35.demo.ts",
+        "lines": []
+      },
+      "text": "Agora o teste: funcionário na Black Friday tem que levar o maior, trinta e cinco. [A passou. B, não].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ A: funcionário na BF leva 35%",
+              "tone": "ok"
+            },
+            {
+              "text": "✖ B: funcionário na BF leva 35%",
+              "tone": "fail"
+            },
+            {
+              "text": "  3000 !== 3500",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 2   ℹ pass 1   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Trinta por cento? Mas eu mudei a Black Friday certinho!"
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "versão B · black-friday-discount.ts",
+        "lines": [
+          "import { isBlackFriday } from '../infra.ts';",
+          "import type { Customer } from '../types.ts';",
+          "",
+          "export class BlackFridayDiscount {",
+          "  rate(c: Customer, now: Date) {",
+          "    // funcionário fica de fora (já tem mais)",
+          "    return isBlackFriday(now) && c.type !== 'employee' ? 0.35 : 0;",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Antes da Lia: por que o funcionário ficou com trinta?",
+      "holdAfter": {
+        "seconds": 4,
+        "label": "Ache o bug"
+      },
+      "reading": 3
+    },
+    {
+      "id": "022",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[Nesse comentário]: funcionário fica de fora, porque já tem mais. Com vinte por cento, era verdade. Com trinta e cinco, não é mais.",
+      "beats": [
+        {
+          "highlight": [
+            "funcionário fica de fora",
+            "c.type !== 'employee'"
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "A regra do maior desconto estava escondida numa exceção."
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Mas cada classe da B tinha o seu teste. Todos verdes!"
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test units.test.ts",
+        "lines": []
+      },
+      "text": "E continuam verdes, [mesmo depois da mudança]. Cada peça está certa sozinha.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ BlackFriday: cliente comum leva 35%",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Employee: funcionário leva 30%",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ RateSum: soma as taxas",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Applier: arredonda ao centavo",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 4   ℹ pass 4   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "O erro mora entre as peças, num lugar que nenhum teste unitário olha. Quanto mais peças, mais esconderijos."
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "versão B · vip-discount.ts",
+        "lines": [
+          "import { isBlackFriday } from '../infra.ts';",
+          "import type { Customer } from '../types.ts';",
+          "",
+          "export class VipDiscount {",
+          "  rate(c: Customer, now: Date) {",
+          "    // na Black Friday o VIP fica de fora (lá ele ganha mais)",
+          "    return c.type === 'vip' && !isBlackFriday(now) ? 0.1 : 0;",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E [tem outra aqui], no VIP. A regra \"vale o maior\" não está escrita em lugar nenhum: virou exceções espalhadas, mais uma soma que só funciona por causa delas.",
+      "beats": [
+        {
+          "highlight": [
+            "na Black Friday o VIP",
+            "!isBlackFriday(now)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Então, pra mudar um número, eu precisava conhecer três arquivos."
+    },
+    {
+      "id": "029",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "versão A · price-calculator.ts",
+        "lines": [
+          "export class PriceCalculator {",
+          "  quote(items: Item[], customer: Customer, now: Date) {",
+          "    let subtotal = 0;",
+          "    for (const item of items) subtotal += item.price * item.quantity;",
+          "",
+          "    let rate = 0;",
+          "    if (customer.type === 'vip') rate = 0.1;",
+          "    else if (customer.type === 'employee') rate = 0.3;",
+          "    if (isBlackFriday(now) && rate < 0.2) rate = 0.2;",
+          "    return { subtotal, discount: Math.round(subtotal * rate) };",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Na versão A, a regra mora numa linha: [se a taxa for menor, vale a da Black Friday]. Quem muda o número enxerga a regra inteira.",
+      "beats": [
+        {
+          "highlight": [
+            "rate < 0.2"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Separar demais derrubou a coesão. O que mudava junto foi parar longe."
+    },
+    {
+      "id": "031",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E nem diminuiu o acoplamento. As classes continuam dependendo umas das outras. Só que agora em segredo, por comentário."
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Tá, me convenceu. Mas então qual é o tamanho certo de uma classe?"
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "Como decidir o tamanho",
+        "shown": 0,
+        "items": [
+          "Um ator por classe, e o ator inteiro nela",
+          "Uma regra de negócio, um lugar",
+          "Mudam sempre juntas? São uma classe só",
+          "Separe quando o histórico mostrar um ator novo"
+        ]
+      },
+      "text": "Não se mede em linhas. [Um ator por classe, e o ator inteiro nela].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Uma regra de negócio, um lugar]: dá pra ler a regra sem abrir três arquivos.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "[Classes que sempre mudam juntas] são uma classe só, morando em dois endereços.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E quando a classe cresce demais, mesmo com um ator só?"
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Primeiro, funções privadas com bons nomes. Classe nova, só quando aparecer outra razão pra mudar."
+    },
+    {
+      "id": "038",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[E o sinal pra separar vem do histórico]. Se o marketing começar a criar promoção toda semana, promoção vira um eixo próprio.",
+      "beats": [
+        {
+          "shown": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "039",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E aí as classes de desconto voltam?"
+    },
+    {
+      "id": "040",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Voltam, mas de outro jeito: com a regra do maior desconto escrita num lugar só. Esse é o próximo módulo."
+    },
+    {
+      "id": "041",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "table",
+        "title": "O mesmo cálculo de preço, duas versões",
+        "columns": [
+          "Versão A",
+          "Versão B"
+        ],
+        "rows": [
+          {
+            "label": "Classes",
+            "cells": [
+              "1",
+              "7"
+            ]
+          },
+          {
+            "label": "Linhas",
+            "cells": [
+              "16",
+              "62"
+            ]
+          },
+          {
+            "label": "Preço hoje",
+            "cells": [
+              "✓ igual",
+              "✓ igual"
+            ]
+          }
+        ],
+        "shownRows": 3
+      },
+      "text": "Então, a resposta do desafio: [a versão A é a mais SOLID]. Um ator, e a regra inteira num lugar só.",
+      "pronunciation": "Então, a resposta do desafio: [a versão A é a mais sólid]. Um ator, e a regra inteira num lugar só.",
+      "beats": [
+        {
+          "highlightedColumn": 0,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Perdi o meu voto. Mas ganhei um teste vermelho bem educativo."
+    },
+    {
+      "id": "043",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "SRP na medida",
+        "shown": 0,
+        "items": [
+          "Classe pequena não é sinônimo de SRP",
+          "Fragmentar espalha a regra e derruba a coesão",
+          "Corte por ator, não por linha"
+        ]
+      },
+      "text": "[Classe pequena não é sinônimo] de responsabilidade única.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "044",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "text": "[Fragmentar espalha a regra] e derruba a coesão.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "045",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "look": "camera",
+      "text": "E o corte [é por ator, não por linha].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "046",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Responsabilidade única\nnão é responsabilidade mínima."
+      },
+      "text": "Responsabilidade única não é responsabilidade mínima."
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Ache classes pequenas que sempre mudam juntas",
+          "Confira se respondem ao mesmo ator",
+          "Junte e conte os arquivos que o próximo pedido toca"
+        ]
+      },
+      "text": "Desafio: [acha um grupo de classes pequenas] que sempre mudam juntas no seu projeto.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "048",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Confere se respondem ao mesmo ator]. Se sim, [junta], e conta quantos arquivos o próximo pedido toca.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "049",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próximo módulo",
+        "items": [
+          "O que \"fechado para modificação\" quer dizer (OCP)"
+        ],
+        "shown": 1
+      },
+      "text": "Fim do módulo da responsabilidade única. No próximo: o O do SOLID, e o que \"fechado para modificação\" quer dizer de verdade.",
+      "pronunciation": "Fim do módulo da responsabilidade única. No próximo: o Ó do sólid, e o que \"fechado para modificação\" quer dizer de verdade."
+    },
+    {
+      "id": "050",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Fechado? Como é que eu mudo um código fechado?"
+    },
+    {
+      "id": "051",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Essa é a graça. Até lá!"
+    }
+  ]
+}

@@ -1,0 +1,999 @@
+{
+  "chapters": [
+    "A provocação",
+    "Regra é função",
+    "Fábricas",
+    "Compor",
+    "Tabela",
+    "O limite",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "store.ts",
+        "lines": [
+          "export const discount = capped(",
+          "  bestOf(",
+          "    percentOff(0.1, isVip),",
+          "    percentOff(0.3, isEmployee),",
+          "    percentOff(0.2, onBlackFriday),",
+          "    fixedOff(2500, couponIs('BEMVINDO')),",
+          "    percentOff(0.15, between('2026-05-04', '2026-05-10')),",
+          "  ),",
+          ");"
+        ],
+        "highlight": []
+      },
+      "text": "Sem classe, sem interface, sem herança. Isso ainda é aberto/fechado?",
+      "pronunciation": "Sem classe, sem interface, sem herança. Isso ainda é aberto e fechado?"
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "É. E, dependendo do que mudar, é até mais aberto que a versão da aula passada."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Mais aberto, sem nenhuma interface? Essa eu quero ver."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 11",
+        "title": "Aberto/fechado sem uma classe sequer",
+        "subtitle": "OCP com composição e funções"
+      },
+      "text": "Então vamos montar essa loja do zero, peça por peça. Só com funções."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "rules-fn.ts",
+        "lines": [
+          "export type Rule = (ctx: DiscountContext) => number; // centavos",
+          "export type Condition = (ctx: DiscountContext) => boolean;",
+          "",
+          "// Ordem superior: recebem a configuração, devolvem uma regra.",
+          "export const percentOff = (rate: number, when: Condition): Rule =>",
+          "  (ctx) => (when(ctx) ? Math.round(ctx.subtotal * rate) : 0);",
+          "",
+          "export const fixedOff = (cents: number, when: Condition): Rule =>",
+          "  (ctx) => (when(ctx) ? cents : 0);",
+          "",
+          "// Condições: funções pequenas que respondem sim ou não.",
+          "export const isVip: Condition = ({ customer }) => customer.type === 'vip';",
+          "export const isEmployee: Condition = ({ customer }) => customer.type === 'employee';",
+          "export const onBlackFriday: Condition = ({ now }) => isBlackFriday(now);",
+          "export const couponIs = (code: string): Condition => (ctx) => ctx.coupon === code;",
+          "export const between = (from: string, to: string): Condition =>",
+          "  ({ now }) => isoDay(now) >= from && isoDay(now) <= to;"
+        ],
+        "highlight": []
+      },
+      "text": "Começa pelo contrato. Na aula passada, a regra era um objeto com nome e método. [Aqui é só uma função]: recebe o contexto, devolve centavos.",
+      "beats": [
+        {
+          "highlight": [
+            "export type Rule"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "O contrato continua lá. Só que agora cabe em uma linha."
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Em TypeScript, o tipo de uma função já é um contrato. Quem tem esse formato, encaixa.",
+      "pronunciation": "Em táip script, o tipo de uma função já é um contrato. Quem tem esse formato, encaixa."
+    },
+    {
+      "id": "008",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E aqui está o pulo do gato: [uma função que recebe a configuração e devolve uma regra]. Entra taxa e condição, sai regra pronta.",
+      "beats": [
+        {
+          "highlight": [
+            "export const percentOff",
+            "Math.round(ctx.subtotal * rate)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "009",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Função que devolve função. É a tal função de ordem superior?"
+    },
+    {
+      "id": "010",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Ela mesma. [Desconto fixo] segue a mesma ideia. E as condições também são funções pequenas: [é VIP], [usou o cupom], [está entre duas datas].",
+      "pronunciation": "Ela mesma. [Desconto fixo] segue a mesma ideia. E as condições também são funções pequenas: [é vípi], [usou o cupom], [está entre duas datas].",
+      "beats": [
+        {
+          "highlight": [
+            "export const fixedOff"
+          ]
+        },
+        {
+          "highlight": [
+            "export const isVip"
+          ]
+        },
+        {
+          "highlight": [
+            "export const couponIs"
+          ]
+        },
+        {
+          "highlight": [
+            "export const between"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "store.ts",
+        "lines": [
+          "export const discount = capped(",
+          "  bestOf(",
+          "    percentOff(0.1, isVip),",
+          "    percentOff(0.3, isEmployee),",
+          "    percentOff(0.2, onBlackFriday),",
+          "    fixedOff(2500, couponIs('BEMVINDO')),",
+          "    percentOff(0.15, between('2026-05-04', '2026-05-10')),",
+          "  ),",
+          ");"
+        ],
+        "highlight": []
+      },
+      "text": "Agora eu leio a loja: [VIP é dez por cento, quando é VIP]. [O Dia das Mães, quinze, entre quatro e dez de maio].",
+      "pronunciation": "Agora eu leio a loja: [vípi é dez por cento, quando é vípi]. [O Dia das Mães, quinze, entre quatro e dez de maio].",
+      "beats": [
+        {
+          "highlight": [
+            "percentOff(0.1, isVip)"
+          ]
+        },
+        {
+          "highlight": [
+            "between('2026-05-04'"
+          ]
+        }
+      ],
+      "reading": 3
+    },
+    {
+      "id": "012",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "combinators.ts",
+        "lines": [
+          "// Não acumula: vale o maior.",
+          "export const bestOf = (...rules: Rule[]): Rule =>",
+          "  (ctx) => Math.max(0, ...rules.map((rule) => rule(ctx)));",
+          "",
+          "// Acumula: soma tudo.",
+          "export const sumOf = (...rules: Rule[]): Rule =>",
+          "  (ctx) => rules.reduce((total, rule) => total + rule(ctx), 0);",
+          "",
+          "// Nunca passa do subtotal.",
+          "export const capped = (rule: Rule): Rule =>",
+          "  (ctx) => Math.min(rule(ctx), ctx.subtotal);"
+        ],
+        "highlight": []
+      },
+      "text": "E a política da aula passada? Também virou função. [Melhor de] fica com o maior; [com teto] limita ao subtotal.",
+      "beats": [
+        {
+          "highlight": [
+            "export const bestOf"
+          ]
+        },
+        {
+          "highlight": [
+            "export const capped"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "think",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Pera. Melhor de recebe regras e devolve... uma regra?"
+    },
+    {
+      "id": "014",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Devolve. Então dá pra encaixar uma dentro da outra, quantas vezes quiser. Isso é composição."
+    },
+    {
+      "id": "015",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Pedido do financeiro",
+        "shown": 2,
+        "items": [
+          "Na Black Friday, o cupom acumula",
+          "O resto continua: vale o maior"
+        ]
+      },
+      "text": "Agora o pedido que derrubaria a aula passada: na Black Friday, o cupom passa a acumular. Na versão com classes, onde você mexeria?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Na calculadora. O vale o maior tava lá dentro, fixo no laço."
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "code",
+        "title": "store.ts",
+        "lines": [
+          "export const discount = capped(",
+          "  bestOf(",
+          "    percentOff(0.1, isVip),",
+          "    percentOff(0.3, isEmployee),",
+          "    sumOf(",
+          "      percentOff(0.2, onBlackFriday),",
+          "      fixedOff(2500, couponIs('BEMVINDO')),",
+          "    ),",
+          "    percentOff(0.15, between('2026-05-04', '2026-05-10')),",
+          "  ),",
+          ");"
+        ],
+        "added": [
+          4
+        ],
+        "highlight": []
+      },
+      "text": "Aqui, [somar é só mais uma peça]. Black Friday e cupom somam, e o resultado disputa com o resto.",
+      "beats": [
+        {
+          "highlight": [
+            "sumOf("
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 3
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test functions.test.ts",
+        "lines": []
+      },
+      "text": "[Vinte de Black Friday mais vinte e cinco de cupom]. E nenhuma regra foi editada.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ fábricas: regra pronta a partir da configuração",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ mesmos valores da aula 10, só com funções",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ política nova: cupom acumula com Black Friday",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Pra ser justa com as classes: dava pra fazer uma regra que soma outras duas. Composição não é exclusividade de função."
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Mas com função custa uma linha, não um arquivo."
+    },
+    {
+      "id": "021",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "E se eu tirar até o código? O marketing cadastra a promoção sozinho."
+    },
+    {
+      "id": "022",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "promotions.json",
+        "lines": [
+          "[",
+          "  { \"name\": \"VIP\", \"percent\": 10, \"customer\": \"vip\" },",
+          "  { \"name\": \"Funcionário\", \"percent\": 30, \"customer\": \"employee\" },",
+          "  { \"name\": \"Black Friday\", \"percent\": 20, \"from\": \"2026-11-24\", \"to\": \"2026-11-30\" },",
+          "  { \"name\": \"Cupom BEMVINDO\", \"fixed\": 2500, \"coupon\": \"BEMVINDO\" },",
+          "  { \"name\": \"Dia das Mães\", \"percent\": 15, \"from\": \"2026-05-04\", \"to\": \"2026-05-10\" }",
+          "]"
+        ],
+        "highlight": []
+      },
+      "text": "Dá. Cada linha é uma promoção: [quanto desconta] e [quando vale].",
+      "beats": [
+        {
+          "highlight": [
+            "\"percent\": 15"
+          ]
+        },
+        {
+          "highlight": [
+            "\"from\": \"2026-05-04\""
+          ]
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "from-config.ts",
+        "lines": [
+          "function toRule(row: PromoRow): Rule {",
+          "  validate(row);",
+          "  const when: Condition[] = [];",
+          "  if (row.customer) when.push(({ customer }) => customer.type === row.customer);",
+          "  if (row.coupon) when.push(couponIs(row.coupon));",
+          "  if (row.from && row.to) when.push(between(row.from, row.to));",
+          "  const all: Condition = (ctx) => when.every((c) => c(ctx));",
+          "  return row.percent !== undefined",
+          "    ? percentOff(row.percent / 100, all)",
+          "    : fixedOff(row.fixed ?? 0, all);",
+          "}",
+          "",
+          "// Dado vira código sem passar pelo compilador: validar é obrigatório.",
+          "export function validate(row: PromoRow): void {",
+          "  const { name, percent, fixed } = row;",
+          "  if ((percent === undefined) === (fixed === undefined))",
+          "    throw new Error(`${name}: use percent OU fixed`);",
+          "  if (percent !== undefined && (percent <= 0 || percent > 100))",
+          "    throw new Error(`${name}: percent ${percent} fora de 1 a 100`);",
+          "  if (fixed !== undefined && (!Number.isInteger(fixed) || fixed <= 0))",
+          "    throw new Error(`${name}: fixed precisa ser centavos > 0`);",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E um intérprete transforma cada linha em regra, [usando as mesmas fábricas].",
+      "beats": [
+        {
+          "highlight": [
+            "percentOff(row.percent",
+            "fixedOff(row.fixed"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "O Dia das Mães virou uma linha de JSON. Nem passa por revisão de código!",
+      "pronunciation": "O Dia das Mães virou uma linha de jêison. Nem passa por revisão de código!"
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Esse é justamente o risco. E se alguém digitar cento e cinquenta por cento?"
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node load.ts promotions-typo.json",
+        "lines": []
+      },
+      "text": "O intérprete valida cada linha. [Barrado na entrada].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ promotions-typo.json recusado",
+              "tone": "fail"
+            },
+            {
+              "text": "  Dia das Mães: percent 150 fora de 1 a 100",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Dado vira comportamento sem passar pelo compilador. Então validação é obrigatória, com teste próprio."
+    },
+    {
+      "id": "028",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E o leve três, pague dois, do desafio passado? Cabe numa linha da tabela?"
+    },
+    {
+      "id": "029",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Não cabe. A tabela só conhece porcentagem e valor fixo. Um tipo novo de promoção precisa de código no intérprete."
+    },
+    {
+      "id": "030",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então o ponto de extensão não sumiu. Só mudou de lugar."
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Exato. A tabela fica aberta pra promoção de um tipo que ela já conhece. Pra um tipo novo, quem abre é o intérprete."
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E reparou que uma coisa sumiu? O nome da promoção, que ia pro e-mail."
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "surprised",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Bem lembrado. Essa função devolve só um número. Se o nome importa, ela passa a devolver nome e valor, e o contrato cresce de novo."
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Função não é mágica. Ela é mais simples porque carrega menos coisa."
+    },
+    {
+      "id": "035",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Onde entra cada mudança",
+        "columns": [
+          "Classes (aula 10)",
+          "Funções",
+          "Tabela (JSON)"
+        ],
+        "rows": [
+          {
+            "label": "Promoção nova",
+            "cells": [
+              "Objeto novo",
+              "Uma linha",
+              "Uma linha no JSON"
+            ]
+          },
+          {
+            "label": "Mudar a política",
+            "cells": [
+              "Regra que combina",
+              "Trocar uma peça",
+              "Editar o intérprete"
+            ]
+          },
+          {
+            "label": "Tipo novo de promoção",
+            "cells": [
+              "Objeto novo",
+              "Função nova",
+              "Código no intérprete"
+            ]
+          },
+          {
+            "label": "Quem adiciona",
+            "cells": [
+              "Dev",
+              "Dev",
+              "Marketing (validado)"
+            ]
+          }
+        ],
+        "shownRows": 0
+      },
+      "text": "Juntando as três versões. [Promoção nova]: todas aguentam bem. [Mudar a política]: a função troca uma peça.",
+      "beats": [
+        {
+          "shownRows": 1
+        },
+        {
+          "shownRows": 2,
+          "highlightedRow": 1
+        }
+      ]
+    },
+    {
+      "id": "036",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Tipo novo]: a tabela precisa de código. [E quem adiciona]: só na tabela o marketing faz sozinho.",
+      "beats": [
+        {
+          "shownRows": 3,
+          "highlightedRow": 2
+        },
+        {
+          "shownRows": 4,
+          "highlightedRow": 3
+        }
+      ]
+    },
+    {
+      "id": "037",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tá, mas qual é a melhor?"
+    },
+    {
+      "id": "038",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Depende de quem muda e do quê. Classe ajuda quando a regra guarda estado ou precisa de banco. Função, quando é cálculo puro. Tabela, quando quem muda não programa."
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Aberto/fechado é sobre onde a mudança entra.\nNão sobre herança."
+      },
+      "text": "O princípio nunca foi sobre herança. Aberto e fechado é sobre onde a mudança entra."
+    },
+    {
+      "id": "040",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então, respondendo a minha provocação: nenhuma classe, e era aberto e fechado o tempo todo."
+    },
+    {
+      "id": "041",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Resumo",
+        "shown": 0,
+        "items": [
+          "Regra é função: o formato já é o contrato",
+          "Fábricas e combinadores: a política também é peça",
+          "Tabela: abre para quem não programa, e exige validação"
+        ]
+      },
+      "text": "[Regra é função]: o formato já é o contrato. [Fábricas e combinadores]: até a política vira peça.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "text": "[E a tabela] abre pra quem não programa, desde que tenha validação.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "043",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Reescreva uma regra sua como função",
+          "Monte a política com bestOf e sumOf",
+          "Ache uma mudança que a sua tabela NÃO aceita"
+        ]
+      },
+      "text": "Desafio: [reescreve uma regra do seu projeto como função], e [monta a política] com melhor de e soma de.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "044",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "camera",
+      "text": "E o mais importante: [acha uma mudança que a sua tabela não aceita].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "045",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "12 · Quando NÃO abrir (YAGNI)"
+        ],
+        "shown": 1
+      },
+      "text": "Agora eu quero abrir tudo. Imposto, frete, e-mail, tudo plugável!"
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Calma. Na próxima aula, a gente vê quanto custa um ponto de extensão que ninguém usou."
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}

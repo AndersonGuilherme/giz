@@ -1,0 +1,1750 @@
+{
+  "chapters": [
+    "A aposta",
+    "A rede",
+    "SRP",
+    "OCP e LSP",
+    "ISP e DIP",
+    "As medidas",
+    "Os 4 sinais",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "order-service.ts · aula 01",
+        "lines": [
+          "export class OrderService {",
+          "  checkout(order: Order, customer: Customer, now = new Date(), dryRun = false) {",
+          "    let subtotal = 0;",
+          "    for (const item of order.items) subtotal += item.price * item.quantity;",
+          "",
+          "    let rate = 0;",
+          "    if (customer.type === 'vip') rate = 0.1;",
+          "    else if (customer.type === 'employee') rate = 0.3;",
+          "    if (isBlackFriday(now) && rate < 0.2) rate = 0.2;",
+          "    const total = Math.round(subtotal * (1 - rate));",
+          "",
+          "    let shipping = 0;",
+          "    if (order.shippingMethod === 'standard') shipping = total >= 20000 ? 0 : 2000;",
+          "    else if (order.shippingMethod === 'express') shipping = 3500;",
+          "",
+          "    const finalTotal = total + shipping;",
+          "    if (!dryRun) {",
+          "      db.insert('orders', { customerId: customer.id, total: finalTotal });",
+          "      mailer.send(",
+          "        customer.email,",
+          "        `Pedido confirmado! Total: ${formatBRL(finalTotal)} (você economizou ${formatBRL(subtotal - total)})`,",
+          "      );",
+          "    }",
+          "    return { total: finalTotal, shipping };",
+          "  }",
+          "}"
+        ]
+      },
+      "text": "Aposto um café que esse checkout não sobrevive a cinco refatorações seguidas sem quebrar.",
+      "pronunciation": "Aposto um café que esse checkout não sobrevive a cinco refatorações seguidas... sem quebrar.",
+      "reading": false
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Aposta aceita. Um passo por princípio, e os testes não podem ficar vermelhos nem uma vez."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E no fim a gente mede. Dependências, linhas, tempo de teste. Número de verdade."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 23",
+        "title": "Cinco refatorações, nenhum teste vermelho",
+        "subtitle": "O checkout da aula 01 com os cinco princípios"
+      },
+      "text": "E de quebra, a gente encerra de vez o caso dos três mil e-mails."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "A rede de proteção",
+        "shown": 0,
+        "items": [
+          "As regras da loja viram 7 testes",
+          "Os mesmos testes rodam contra cada versão",
+          "Refatorar não muda nenhum resultado"
+        ]
+      },
+      "text": "Antes de mexer, a rede de proteção. [As regras da loja viram testes]: frete grátis, descontos, e-mail. [E os mesmos sete testes rodam contra cada versão].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Se um passo mudar qualquer resultado], ele volta.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test rede.demo.ts",
+        "lines": []
+      },
+      "text": "Rodando contra o código original da aula um... [dois vermelhos]!",
+      "pronunciation": "Rodando contra o código original da aula um... [dois vermelhos]!",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "▶ antes (v4 da aula 01)",
+              "tone": "dim"
+            },
+            {
+              "text": "  ✔ frete grátis: subtotal de R$ 210",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✖ frete grátis vale ANTES do desconto (VIP)",
+              "tone": "fail"
+            },
+            {
+              "text": "  ✖ frete grátis na Black Friday",
+              "tone": "fail"
+            },
+            {
+              "text": "  ✔ abaixo de R$ 200 paga R$ 20 de frete",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✔ expresso custa R$ 35 e nunca é grátis",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✔ descontos não acumulam: vale o maior",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✔ grava o pedido e manda o e-mail",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 7   ℹ pass 5   ℹ fail 2",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "O bug da aula um continua lá. Com desconto, o subtotal de duzentos e dez perde o frete grátis. O teste lembra da regra que o código esqueceu."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Então a gente aproveita e conserta durante a refatoração?"
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Num passo separado. Refatorar muda a estrutura; consertar muda o comportamento. Misturando os dois, quando algo quebra, ninguém sabe qual foi."
+    },
+    {
+      "id": "011",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "order-service.ts · conserto",
+        "lines": [
+          "export class OrderService {",
+          "  checkout(order: Order, customer: Customer, now = new Date(), dryRun = false) {",
+          "    let subtotal = 0;",
+          "    for (const item of order.items) subtotal += item.price * item.quantity;",
+          "",
+          "    let rate = 0;",
+          "    if (customer.type === 'vip') rate = 0.1;",
+          "    else if (customer.type === 'employee') rate = 0.3;",
+          "    if (isBlackFriday(now) && rate < 0.2) rate = 0.2;",
+          "    const total = Math.round(subtotal * (1 - rate));",
+          "",
+          "    let shipping = 0;",
+          "    if (order.shippingMethod === 'standard') shipping = subtotal >= 20000 ? 0 : 2000;",
+          "    else if (order.shippingMethod === 'express') shipping = 3500;",
+          "",
+          "    const finalTotal = total + shipping;",
+          "    if (!dryRun) {",
+          "      db.insert('orders', { customerId: customer.id, total: finalTotal });",
+          "      mailer.send(",
+          "        customer.email,",
+          "        `Pedido confirmado! Total: ${formatBRL(finalTotal)} (você economizou ${formatBRL(subtotal - total)})`,",
+          "      );",
+          "    }",
+          "    return { total: finalTotal, shipping };",
+          "  }",
+          "}"
+        ],
+        "added": [
+          12
+        ]
+      },
+      "text": "O conserto é [uma palavra]: total virou subtotal. Verde.",
+      "beats": [
+        {
+          "highlight": [
+            "subtotal >= 20000"
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Uma palavra conserta o sintoma. Mas o desenho que deixou esse bug nascer continua igualzinho. É ele que a gente vai mudar."
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "text": "[Passo] um, responsabilidade única. Quantos atores pedem mudança nesse método?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Quantos atores?"
+      },
+      "beats": [
+        {
+          "highlight": []
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[O financeiro], [a logística], [quem cuida do banco]... [e a comunicação]. Quatro.",
+      "beats": [
+        {
+          "highlight": [
+            "rate"
+          ]
+        },
+        {
+          "highlight": [
+            "shipping ="
+          ]
+        },
+        {
+          "highlight": [
+            "db.insert"
+          ]
+        },
+        {
+          "highlight": [
+            "mailer.send",
+            "economizou"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "passo1/order-service.ts",
+        "lines": [
+          "export class OrderService {",
+          "  private orders = new OrderRepository();",
+          "  private notify = new Notifications();",
+          "",
+          "  checkout(order: Order, customer: Customer, now = new Date()) {",
+          "    const price = priceOf(order.items, customer, now);",
+          "    const shipping = shippingFor(order.shippingMethod, price.subtotal);",
+          "    const total = price.total + shipping;",
+          "    this.orders.save({ customerId: customer.id, total });",
+          "    this.notify.orderConfirmed(customer.email, total, price.saved);",
+          "    return { total, shipping };",
+          "  }",
+          "}"
+        ]
+      },
+      "text": "Então são quatro módulos, cada um com um dono. E o checkout só orquestra."
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Olha o frete: [ele recebe o subtotal] direto do cálculo de preço.",
+      "beats": [
+        {
+          "highlight": [
+            "price.subtotal"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "017",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Por construção. Não existe mais uma variável total que muda de significado no meio do caminho."
+    },
+    {
+      "id": "018",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o dryRun, cadê?",
+      "pronunciation": "E o drai ran, cadê?"
+    },
+    {
+      "id": "019",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test passos.test.ts",
+        "lines": []
+      },
+      "text": "Sumiu. O carrinho chama a regra de frete direto, ninguém precisa de atalho. [E o passo um passou].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ antes (v5) (504.261178ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 1 · SRP (502.138794ms)",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "O que sempre travava",
+        "shown": 0,
+        "items": [
+          "Promoção nova",
+          "Frete novo: entrega no mesmo dia (aula 04)"
+        ]
+      },
+      "text": "Passo dois, aberto e fechado. O que sempre travava esse checkout: [promoção nova] e [frete novo].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "passo2/pricing.ts",
+        "lines": [
+          "export type DiscountRule = (customer: Customer, now: Date) => number; // taxa: 0.1 = 10%",
+          "",
+          "const isBlackFriday = (d: Date) => d.getMonth() === 10 && d.getDate() >= 24 && d.getDate() <= 30;",
+          "export const vip: DiscountRule = (c) => (c.type === 'vip' ? 0.1 : 0);",
+          "export const employee: DiscountRule = (c) => (c.type === 'employee' ? 0.3 : 0);",
+          "export const blackFriday: DiscountRule = (_, now) => (isBlackFriday(now) ? 0.2 : 0);",
+          "export const storeRules: DiscountRule[] = [vip, employee, blackFriday];",
+          "",
+          "export function priceOf(items: Item[], customer: Customer, now: Date, rules = storeRules) {",
+          "  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);",
+          "  const rate = Math.max(0, ...rules.map((rule) => rule(customer, now))); // vale o maior",
+          "  const total = Math.round(subtotal * (1 - rate));",
+          "  return { subtotal, total, saved: subtotal - total };",
+          "}"
+        ],
+        "added": [
+          0,
+          2,
+          3,
+          4,
+          5,
+          6,
+          8,
+          9,
+          10
+        ]
+      },
+      "text": "Cada desconto virou uma regra numa lista. [Vale o maior], como manda a loja.",
+      "beats": [
+        {
+          "highlight": [
+            "Math.max"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então promoção nova é [uma linha a mais na lista], e a função de preço nem fica sabendo.",
+      "beats": [
+        {
+          "highlight": [
+            "storeRules: DiscountRule[]"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "neutral",
+      "pose": "explain",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test passos.test.ts",
+        "lines": [
+          {
+            "text": "✔ antes (v5) (504.261178ms)",
+            "tone": "ok"
+          },
+          {
+            "text": "✔ passo 1 · SRP (502.138794ms)",
+            "tone": "ok"
+          }
+        ]
+      },
+      "text": "E o frete foi pelo mesmo caminho: cada método virou um objeto, como na aula quatro. [Passo dois, verde].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ antes (v5) (504.261178ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 1 · SRP (502.138794ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 2 · OCP (494.878883ms)",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "024",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test lsp.demo.ts",
+        "lines": []
+      },
+      "text": "Só que aí o carrinho passou a listar todos os fretes. E o contrato do frete [pegou um impostor].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ pickup: cumpre o contrato do frete",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ standard: cumpre o contrato do frete",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ express: cumpre o contrato do frete",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ locker: cumpre o contrato do frete",
+              "tone": "ok"
+            },
+            {
+              "text": "✖ sameDay: cumpre o contrato do frete",
+              "tone": "fail"
+            },
+            {
+              "text": "  Error: fora da área de entrega no mesmo dia",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 5   ℹ pass 4   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "O mesmo dia! Longe da loja, em vez de dar um preço, ele explode."
+    },
+    {
+      "id": "026",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E pra quem chama, todo método de entrega tem que valer o mesmo. Um que explode quebra a substituição. Passo três, Liskov."
+    },
+    {
+      "id": "027",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "passo3/shipping.ts",
+        "lines": [
+          "export interface ShippingMethod {",
+          "  readonly id: string;",
+          "  available(quote: Quote): boolean; // nunca lança",
+          "  price(quote: Quote): number; // se disponível: nunca lança, nunca negativo",
+          "}",
+          "",
+          "const yes = () => true;",
+          "export const pickup: ShippingMethod = { id: 'pickup', available: yes, price: () => 0 };",
+          "export const standard: ShippingMethod = {",
+          "  id: 'standard', available: yes, price: (q) => (q.subtotal >= 20000 ? 0 : 2000),",
+          "};",
+          "export const express: ShippingMethod = { id: 'express', available: yes, price: () => 3500 };",
+          "export const locker: ShippingMethod = { id: 'locker', available: yes, price: () => 900 };",
+          "export const sameDay: ShippingMethod = {",
+          "  id: 'sameDay',",
+          "  available: ({ distanceKm }) => distanceKm <= 15, // regra da loja: até 15 km",
+          "  price: ({ distanceKm }) => 2500 + distanceKm * 150,",
+          "};",
+          "export const allMethods = [pickup, standard, express, locker, sameDay];"
+        ],
+        "added": [
+          2,
+          3,
+          6,
+          7,
+          8,
+          9,
+          11,
+          12,
+          15,
+          16
+        ]
+      },
+      "text": "O contrato agora pergunta [se o método está disponível]. Regra da loja: o mesmo dia atende até quinze quilômetros. Quem não atende avisa, em vez de explodir.",
+      "beats": [
+        {
+          "highlight": [
+            "available(quote: Quote)",
+            "distanceKm <= 15"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "028",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o checkout, mudou?"
+    },
+    {
+      "id": "029",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test passos.test.ts",
+        "lines": [
+          {
+            "text": "✔ antes (v5) (504.261178ms)",
+            "tone": "ok"
+          },
+          {
+            "text": "✔ passo 1 · SRP (502.138794ms)",
+            "tone": "ok"
+          },
+          {
+            "text": "✔ passo 2 · OCP (494.878883ms)",
+            "tone": "ok"
+          }
+        ]
+      },
+      "text": "Nem uma linha. A correção coube inteira no contrato do frete. [Passo três, verde].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ antes (v5) (504.261178ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 1 · SRP (502.138794ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 2 · OCP (494.878883ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 3 · LSP (500.824387ms)",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "notifications.ts",
+        "lines": [
+          "export class Notifications {",
+          "  orderConfirmed(email: string, total: number, saved: number) {",
+          "    mailer.send(email, confirmationText(total, saved));",
+          "  }",
+          "  orderShipped(email: string, trackingCode: string) {",
+          "    mailer.send(email, `Seu pedido saiu para entrega. Rastreio: ${trackingCode}`);",
+          "  }",
+          "  cartReminder(email: string) {",
+          "    mailer.send(email, 'Você esqueceu itens no carrinho!');",
+          "  }",
+          "}"
+        ]
+      },
+      "text": "Agora a comunicação. Um dono só, então todos os e-mails da loja moram aqui."
+    },
+    {
+      "id": "031",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Mas o checkout só usa [um desses três].",
+      "beats": [
+        {
+          "highlight": [
+            "orderConfirmed("
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Coeso pro dono, gordo pro cliente. A responsabilidade única olha pra quem muda a classe. A segregação de interfaces olha pra quem usa."
+    },
+    {
+      "id": "033",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "passo4/order-service.ts",
+        "lines": [
+          "export type Order = { items: Item[]; shippingMethod: string; distanceKm?: number };",
+          "export interface ConfirmsOrders { orderConfirmed(email: string, total: number, saved: number): void }",
+          "",
+          "export class OrderService {",
+          "  private orders = new OrderRepository();",
+          "  private notify: ConfirmsOrders = new Notifications();",
+          "  rules = storeRules;",
+          "  methods = allMethods;",
+          "",
+          "  checkout(order: Order, customer: Customer, now = new Date()) {",
+          "    const price = priceOf(order.items, customer, now, this.rules);",
+          "    const quote = quoteFor(order.items, order.distanceKm);",
+          "    const shipping = shippingCost(this.methods, order.shippingMethod, quote);",
+          "    const total = price.total + shipping;",
+          "    this.orders.save({ customerId: customer.id, total });",
+          "    this.notify.orderConfirmed(customer.email, total, price.saved);",
+          "    return { total, shipping };",
+          "  }",
+          "}"
+        ],
+        "added": [
+          1,
+          5
+        ]
+      },
+      "text": "Passo quatro: o checkout declara o papel de que precisa. [Confirmar pedido], um método.",
+      "beats": [
+        {
+          "highlight": [
+            "ConfirmsOrders"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "034",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Mas ele ainda [cria o banco e as notificações] ali dentro, né?",
+      "beats": [
+        {
+          "highlight": [
+            "new OrderRepository()",
+            "new Notifications()"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "035",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "graph",
+        "nodes": [
+          {
+            "id": "test",
+            "label": "Teste do checkout",
+            "x": 14,
+            "y": 20,
+            "tone": "interface"
+          },
+          {
+            "id": "checkout",
+            "label": "OrderService\n(passo 4)",
+            "x": 40,
+            "y": 55,
+            "tone": "core"
+          },
+          {
+            "id": "repo",
+            "label": "OrderRepository",
+            "x": 70,
+            "y": 22,
+            "tone": "infrastructure"
+          },
+          {
+            "id": "notif",
+            "label": "Notifications",
+            "x": 70,
+            "y": 82,
+            "tone": "infrastructure"
+          },
+          {
+            "id": "infra",
+            "label": "infra.ts\nbanco + e-mail",
+            "x": 90,
+            "y": 52,
+            "tone": "infrastructure"
+          }
+        ],
+        "edges": [
+          {
+            "from": "test",
+            "to": "checkout"
+          },
+          {
+            "from": "checkout",
+            "to": "repo",
+            "bad": true
+          },
+          {
+            "from": "checkout",
+            "to": "notif",
+            "bad": true
+          },
+          {
+            "from": "repo",
+            "to": "infra"
+          },
+          {
+            "from": "notif",
+            "to": "infra"
+          }
+        ],
+        "focusOnBad": false
+      },
+      "text": "E é por isso que todo teste do checkout [ainda passa pelo banco e pelo e-mail]. A seta aponta do checkout pra infra.",
+      "beats": [
+        {
+          "focusOnBad": true,
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "036",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "passo5/order-service.ts",
+        "lines": [
+          "export interface SavesOrders { save(order: { customerId: string; total: number }): void }",
+          "export interface ConfirmsOrders { orderConfirmed(email: string, total: number, saved: number): void }",
+          "",
+          "export class OrderService {",
+          "  private orders: SavesOrders;",
+          "  private notify: ConfirmsOrders;",
+          "  rules = storeRules;",
+          "  methods = allMethods;",
+          "",
+          "  constructor(orders: SavesOrders, notify: ConfirmsOrders) {",
+          "    this.orders = orders;",
+          "    this.notify = notify;",
+          "  }",
+          "",
+          "  checkout(order: Order, customer: Customer, now = new Date()) {",
+          "    const price = priceOf(order.items, customer, now, this.rules);",
+          "    const quote = quoteFor(order.items, order.distanceKm);",
+          "    const shipping = shippingCost(this.methods, order.shippingMethod, quote);",
+          "    const total = price.total + shipping;",
+          "    this.orders.save({ customerId: customer.id, total });",
+          "    this.notify.orderConfirmed(customer.email, total, price.saved);",
+          "    return { total, shipping };",
+          "  }",
+          "}"
+        ]
+      },
+      "text": "Último passo, inversão de dependência. O checkout [define as portas] e [recebe quem implementa].",
+      "beats": [
+        {
+          "highlight": [
+            "export interface"
+          ]
+        },
+        {
+          "highlight": [
+            "constructor("
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "037",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "graph",
+        "nodes": [
+          {
+            "id": "main",
+            "label": "main.ts\nraiz de composição",
+            "x": 50,
+            "y": 14,
+            "tone": "interface"
+          },
+          {
+            "id": "checkout",
+            "label": "OrderService\n+ portas",
+            "x": 18,
+            "y": 60,
+            "tone": "core"
+          },
+          {
+            "id": "repo",
+            "label": "OrderRepository",
+            "x": 56,
+            "y": 52,
+            "tone": "infrastructure"
+          },
+          {
+            "id": "notif",
+            "label": "Notifications",
+            "x": 56,
+            "y": 86,
+            "tone": "infrastructure"
+          },
+          {
+            "id": "infra",
+            "label": "infra.ts\nbanco + e-mail",
+            "x": 88,
+            "y": 68,
+            "tone": "infrastructure"
+          }
+        ],
+        "edges": [
+          {
+            "from": "main",
+            "to": "checkout"
+          },
+          {
+            "from": "main",
+            "to": "repo"
+          },
+          {
+            "from": "main",
+            "to": "notif"
+          },
+          {
+            "from": "repo",
+            "to": "checkout"
+          },
+          {
+            "from": "notif",
+            "to": "checkout"
+          },
+          {
+            "from": "repo",
+            "to": "infra"
+          },
+          {
+            "from": "notif",
+            "to": "infra"
+          }
+        ]
+      },
+      "text": "Agora a seta vem da infra: o repositório e as notificações implementam as portas do checkout."
+    },
+    {
+      "id": "038",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E só a raiz de composição conhece todo mundo. É o único lugar que liga banco e e-mail de verdade."
+    },
+    {
+      "id": "039",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test passos.test.ts",
+        "lines": [
+          {
+            "text": "✔ antes (v5) (504.261178ms)",
+            "tone": "ok"
+          },
+          {
+            "text": "✔ passo 1 · SRP (502.138794ms)",
+            "tone": "ok"
+          },
+          {
+            "text": "✔ passo 2 · OCP (494.878883ms)",
+            "tone": "ok"
+          },
+          {
+            "text": "✔ passo 3 · LSP (500.824387ms)",
+            "tone": "ok"
+          }
+        ]
+      },
+      "text": "[Passo quatro, passo cinco]... [quarenta e dois de quarenta e dois]!",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ antes (v5) (504.261178ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 1 · SRP (502.138794ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 2 · OCP (494.878883ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 3 · LSP (500.824387ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 4 · ISP (491.565806ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 5 · DIP (2.230219ms)",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        },
+        {
+          "lines": [
+            {
+              "text": "✔ antes (v5) (504.261178ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 1 · SRP (502.138794ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 2 · OCP (494.878883ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 3 · LSP (500.824387ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 4 · ISP (491.565806ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ passo 5 · DIP (2.230219ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 42   ℹ pass 42   ℹ fail 0",
+              "tone": "dim"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "id": "040",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E olha o tempo. Com a nossa infra simulada, meio segundo por versão. No passo cinco, com dois dublês, menos de três milissegundos."
+    },
+    {
+      "id": "041",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E o banco de verdade, ninguém testa mais?"
+    },
+    {
+      "id": "042",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Testa, com um teste de integração pela raiz de composição. Um teste lento no lugar certo, em vez de todos passando pela rede."
+    },
+    {
+      "id": "043",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Antes × depois (medido)",
+        "columns": [
+          "antes",
+          "depois"
+        ],
+        "shownRows": 0,
+        "highlightedColumn": 1,
+        "rows": [
+          {
+            "label": "Método checkout",
+            "cells": [
+              "21 linhas",
+              "9 linhas"
+            ]
+          },
+          {
+            "label": "Setas do checkout à infra",
+            "cells": [
+              "✕ 1",
+              "✓ 0"
+            ]
+          },
+          {
+            "label": "Contrato (7 testes)",
+            "cells": [
+              "504 ms",
+              "2,2 ms"
+            ]
+          },
+          {
+            "label": "Linhas no total",
+            "cells": [
+              "27 em 1 arquivo",
+              "103 em 8 arquivos"
+            ]
+          }
+        ]
+      },
+      "text": "Agora os números. [O método checkout] caiu de vinte e uma pra nove linhas. [Setas do checkout até a infra]: de uma pra zero. [O contrato] foi de quinhentos milissegundos pra menos de três. [E o total de linhas]...",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 4,
+          "highlightedRow": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "044",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Peraí. Quase quatro vezes mais linhas? Isso é melhoria?"
+    },
+    {
+      "id": "045",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "SOLID não promete menos código. Promete mudança mais barata: cada arquivo muda por um motivo, e cada regra se testa sem a infra."
+    },
+    {
+      "id": "046",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Mais linhas pra escrever uma vez, menos linhas pra ler a cada mudança."
+    },
+    {
+      "id": "047",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test sinais.test.ts",
+        "lines": []
+      },
+      "text": "E os quatro sinais da aula um? Um teste pra cada. [Rigidez]: frete novo sem tocar no checkout. [Fragilidade]: a Black Friday não mexe no frete grátis.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ rigidez: frete novo sem editar o checkout",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        },
+        {
+          "lines": [
+            {
+              "text": "✔ rigidez: frete novo sem editar o checkout",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ fragilidade: Black Friday mantém frete grátis",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "048",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Imobilidade]: o carrinho usa o frete sozinho. [Viscosidade]: testar o checkout pede dois dublês de uma linha.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ rigidez: frete novo sem editar o checkout",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ fragilidade: Black Friday mantém frete grátis",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ imobilidade: carrinho sem pedido e sem e-mail",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        },
+        {
+          "lines": [
+            {
+              "text": "✔ rigidez: frete novo sem editar o checkout",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ fragilidade: Black Friday mantém frete grátis",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ imobilidade: carrinho sem pedido e sem e-mail",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ viscosidade: dois dublês de uma linha",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 4   ℹ pass 4   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "049",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "inbox",
+        "count": 3000,
+        "subject": "Pedido confirmado!",
+        "note": "Cenário simulado para fins didáticos"
+      },
+      "text": "Falta uma coisa. E os três mil e-mails?"
+    },
+    {
+      "id": "050",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node deps.ts passo5/cart-preview.ts",
+        "lines": []
+      },
+      "text": "Olha a trilha do carrinho agora: [uma dependência só], a regra de frete. Ele não alcança o e-mail nem se quiser.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "passo5/cart-preview.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  → passo5/shipping.ts",
+              "tone": "ok"
+            },
+            {
+              "text": "1 dependência(s), incluindo as transitivas",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "051",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "inbox",
+        "count": 3000,
+        "subject": "Pedido confirmado!",
+        "note": "Cenário simulado para fins didáticos"
+      },
+      "text": "O teste faz três mil consultas de frete... [e zero e-mails]. Caso encerrado!",
+      "pronunciation": "O teste faz três mil consultas de frete... [e zero e-mails]. Caso encerrado!",
+      "beats": [
+        {
+          "count": 0,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "052",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Tá bom, perdi o café."
+    },
+    {
+      "id": "053",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "symptoms",
+        "items": [
+          {
+            "name": "Rigidez",
+            "description": "Frete novo entra sem editar o checkout."
+          },
+          {
+            "name": "Fragilidade",
+            "description": "A Black Friday não mexe mais no frete grátis."
+          },
+          {
+            "name": "Imobilidade",
+            "description": "O carrinho usa o frete sem pedido e sem e-mail."
+          },
+          {
+            "name": "Viscosidade",
+            "description": "Testar o checkout pede dois dublês de uma linha."
+          }
+        ],
+        "shown": 4
+      },
+      "text": "Perdeu. Mas repara como: nenhum passo foi grande, e cada um foi conferido antes do próximo."
+    },
+    {
+      "id": "054",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Refatorar é mudar o desenho\nsem mudar o comportamento.\nUm passo verde de cada vez."
+      },
+      "text": "Refatorar é mudar o desenho sem mudar o comportamento. Um passo verde de cada vez.",
+      "pronunciation": "Refatorar é mudar o desenho sem mudar o comportamento. Um passo verde de cada vez."
+    },
+    {
+      "id": "055",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Escreva a rede: as regras do arquivo viram testes",
+          "Escolha UM princípio e dê UM passo",
+          "Rodou e ficou verde? Próximo passo"
+        ]
+      },
+      "text": "Desafio: pega aquele arquivo da aula um e [escreve a rede primeiro], as regras virando testes.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "056",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "Depois, [escolhe um princípio e dá um passo só]. [Ficou verde? Aí sim, o próximo].",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "057",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Última aula",
+        "items": [
+          "Quando quebrar as regras: onde SOLID não vale o custo"
+        ],
+        "shown": 1
+      },
+      "text": "Na última aula do curso: quando não fazer nada disso. Porque às vezes, a melhor refatoração é nenhuma."
+    },
+    {
+      "id": "058",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Depois de vinte e três aulas, você vai me dizer pra não usar SOLID?"
+    },
+    {
+      "id": "059",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical",
+        "pose": "neutral",
+        "look": "camera"
+      },
+      "text": "Às vezes. Até a próxima!"
+    }
+  ]
+}

@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "title": "A linha de cinco minutos que mudou o contrato",
+  "format": "lesson",
+  "language": "pt-BR",
+  "aspect": "16:9",
+  "captionStyle": "blocks",
+  "cast": [
+    "lia",
+    "teo"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
+}

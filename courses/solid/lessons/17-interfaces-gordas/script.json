@@ -1,0 +1,1170 @@
+{
+  "chapters": [
+    "O número",
+    "O suspeito",
+    "Quem implementa",
+    "Liskov de brinde",
+    "Quem usa",
+    "A mudança alheia",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node measure.ts",
+        "lines": []
+      },
+      "text": "[Nove métodos] no dublê do teste... [e o checkout usa um].",
+      "pronunciation": "[Nove métodos] no dublê do teste... [e o chéquiaute usa um].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "PaymentGateway exige 9 métodos",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "pop"
+        },
+        {
+          "lines": [
+            {
+              "text": "PaymentGateway exige 9 métodos",
+              "tone": "dim"
+            },
+            {
+              "text": "checkout.ts usa 1 de 9: charge",
+              "tone": "ok"
+            },
+            {
+              "text": "fake-gateway.ts: 19 linhas, 8 de 9 só lançam erro",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "surprised",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Um só? E os outros oito?"
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Só lançam erro. E nos adaptadores é igual: [o do cartão finge dois métodos]. [O do Pix, cinco].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "PaymentGateway exige 9 métodos",
+              "tone": "dim"
+            },
+            {
+              "text": "checkout.ts usa 1 de 9: charge",
+              "tone": "ok"
+            },
+            {
+              "text": "fake-gateway.ts: 19 linhas, 8 de 9 só lançam erro",
+              "tone": "fail"
+            },
+            {
+              "text": "card-gateway.ts: 2 de 9 lançam \"não suportado\"",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "pop"
+        },
+        {
+          "lines": [
+            {
+              "text": "PaymentGateway exige 9 métodos",
+              "tone": "dim"
+            },
+            {
+              "text": "checkout.ts usa 1 de 9: charge",
+              "tone": "ok"
+            },
+            {
+              "text": "fake-gateway.ts: 19 linhas, 8 de 9 só lançam erro",
+              "tone": "fail"
+            },
+            {
+              "text": "card-gateway.ts: 2 de 9 lançam \"não suportado\"",
+              "tone": "fail"
+            },
+            {
+              "text": "pix-gateway.ts: 5 de 9 lançam \"não suportado\"",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Um teste e dois adaptadores que nem se conhecem, inchados do mesmo jeito. Isso não é coincidência."
+    },
+    {
+      "id": "005",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então de onde vem esse inchaço?"
+    },
+    {
+      "id": "006",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 17",
+        "title": "Nove métodos para usar um",
+        "subtitle": "Interfaces gordas · Segregação de Interfaces"
+      },
+      "text": "De um lugar só. E ele está à vista desde o começo."
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment-gateway.ts",
+        "lines": [
+          "export interface PaymentGateway {",
+          "  // cartão (o primeiro provedor)",
+          "  charge(orderId: string, amount: number): Charge;",
+          "  capture(chargeId: string): Charge;",
+          "  cancel(chargeId: string): Charge;",
+          "  refund(chargeId: string, amount: number): Refund;",
+          "  getStatus(chargeId: string): Status;",
+          "  chargeInInstallments(orderId: string, amount: number, installments: number): Charge;",
+          "  disputeChargeback(chargeId: string, evidence: string): Dispute;",
+          "  // entrou com o boleto",
+          "  issueBoleto(orderId: string, amount: number, dueDate: string): Boleto;",
+          "  // entrou com o Pix",
+          "  createPixQrCode(orderId: string, amount: number): string;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "O suspeito: a interface de pagamento. Todo provedor implementa ela, e todo mundo que cobra depende dela."
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "E qual o problema? Tá tudo num lugar só. [Cobrar], [capturar], [estornar], [parcelar]... qualquer provedor pluga aqui.",
+      "beats": [
+        {
+          "highlight": [
+            "charge(orderId"
+          ]
+        },
+        {
+          "highlight": [
+            "charge(orderId",
+            "capture("
+          ]
+        },
+        {
+          "highlight": [
+            "charge(orderId",
+            "capture(",
+            "refund("
+          ]
+        },
+        {
+          "highlight": [
+            "charge(orderId",
+            "capture(",
+            "refund(",
+            "chargeInInstallments("
+          ]
+        }
+      ]
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "[Parece] organizado, né? Um lugar só, um tipo só. Agora olha quem precisa implementar isso.",
+      "beats": [
+        {
+          "highlight": []
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "pix-gateway.ts",
+        "lines": [
+          "export class PixGateway implements PaymentGateway {",
+          "  private ledger = new Ledger('pix');",
+          "",
+          "  charge(orderId: string, amount: number): Charge {",
+          "    const qrCode = this.createPixQrCode(orderId, amount);",
+          "    return this.ledger.add({ orderId, amount, status: 'pending', qrCode });",
+          "  }",
+          "  refund(chargeId: string, amount: number): Refund {",
+          "    this.ledger.move(chargeId, 'paid', 'refunded');",
+          "    return { chargeId, amount };",
+          "  }",
+          "  getStatus(chargeId: string): Status { return this.ledger.find(chargeId).status; }",
+          "  createPixQrCode(orderId: string, amount: number): string { return `pix:${orderId}:${amount}`; }",
+          "  capture(): Charge { throw new Error('não suportado no Pix: capture'); }",
+          "  cancel(): Charge { throw new Error('não suportado no Pix: cancel'); }",
+          "  chargeInInstallments(): Charge { throw new Error('não suportado no Pix: chargeInInstallments'); }",
+          "  disputeChargeback(): Dispute { throw new Error('não suportado no Pix: disputeChargeback'); }",
+          "  issueBoleto(): Boleto { throw new Error('não suportado no Pix: issueBoleto'); }",
+          "",
+          "  // webhook do banco: o cliente pagou o QR",
+          "  confirm(chargeId: string): void { this.ledger.move(chargeId, 'pending', 'paid'); }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "O adaptador do Pix. Quantos métodos aqui só fingem que existem?",
+      "pronunciation": "O adaptador do Pix. Quantos métodos aqui só fingem que existem?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Conte os falsos"
+      }
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[Cinco]. Pix não tem autorização prévia: não captura nem cancela. E o nosso provedor de Pix não parcela, não tem contestação de cartão nem emite boleto.",
+      "beats": [
+        {
+          "highlight": [
+            "não suportado"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "card-gateway.ts",
+        "lines": [
+          "  issueBoleto(): Boleto { throw new Error('não suportado no cartão: issueBoleto'); }",
+          "  createPixQrCode(): string { throw new Error('não suportado no cartão: createPixQrCode'); }",
+          "}"
+        ],
+        "highlight": [
+          "não suportado"
+        ]
+      },
+      "text": "E o do cartão, que veio primeiro, também finge: boleto e Pix.",
+      "reading": 2
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Ninguém escapa. Cada adaptador paga pelos métodos dos outros."
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Mas é uma linha cada. Lança erro e pronto. Ninguém vai chamar mesmo."
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Ninguém vai chamar? O tipo diz que todo provedor captura. E tem código que acredita nele.",
+      "pronunciation": "Ninguém vai chamar? O tipo diz que todo provedor captura. E tem código que acredita nele."
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "on-shipped.ts",
+        "lines": [
+          "// Quando o pedido sai do estoque, a loja captura o valor que foi autorizado na compra.",
+          "import type { PaymentGateway, Status } from './payment-gateway.ts';",
+          "",
+          "export function onShipped(gateway: PaymentGateway, chargeId: string): Status {",
+          "  const charge = gateway.capture(chargeId);",
+          "  return charge.status;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "O despacho. Quando o pedido sai do estoque, a loja [captura o valor] que foi autorizado na compra.",
+      "beats": [
+        {
+          "highlight": [
+            "gateway.capture("
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Fluxo de cartão: autoriza na compra, captura no despacho. E ele recebe qualquer provedor."
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test lsp.demo.ts",
+        "lines": []
+      },
+      "text": "Aí sai do estoque [um pedido pago com Pix]...",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ despachar pedido pago com Pix",
+              "tone": "fail"
+            },
+            {
+              "text": "  Error: não suportado no Pix: capture",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "O compilador aceitou, e a execução quebrou. Você já viu isso no módulo de Liskov: um subtipo que não cumpre o que o tipo promete."
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "on-shipped.ts",
+        "lines": [
+          "export function onShipped(gateway: PaymentGateway, chargeId: string): Status {",
+          "  if (gateway instanceof PixGateway) return gateway.getStatus(chargeId);",
+          "  const charge = gateway.capture(chargeId);",
+          "  return charge.status;",
+          "}"
+        ],
+        "added": [
+          1
+        ],
+        "highlight": []
+      },
+      "text": "Resolvo em uma linha: [se for Pix, pula a captura].",
+      "beats": [
+        {
+          "highlight": [
+            "instanceof PixGateway"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 3
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "E agora o despacho conhece cada provedor pelo nome. É o teste de tipo que a gente aprendeu a caçar."
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Então a interface gorda me deu uma violação de Liskov de brinde."
+    },
+    {
+      "id": "023",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Esse é o primeiro custo. Quem implementa é obrigado a prometer o que não sabe fazer."
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "checkout.ts",
+        "lines": [
+          "export type Order = { id: string; total: number };",
+          "",
+          "export function payOrder(order: Order, gateway: PaymentGateway) {",
+          "  if (order.total <= 0) throw new Error('pedido sem valor a cobrar');",
+          "  const charge = gateway.charge(order.id, order.total);",
+          "  return { orderId: order.id, chargeId: charge.id, status: charge.status };",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Agora o outro lado. O checkout [só chama o cobrar].",
+      "pronunciation": "Agora o outro lado. O chéquiaute [só chama o cobrar].",
+      "beats": [
+        {
+          "highlight": [
+            "gateway.charge("
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "fake-gateway.ts",
+        "lines": [
+          "export class FakeGateway implements PaymentGateway {",
+          "  calls: Array<{ orderId: string; amount: number }> = [];",
+          "",
+          "  charge(orderId: string, amount: number): Charge {",
+          "    this.calls.push({ orderId, amount });",
+          "    return { id: 'fake-1', orderId, amount, status: 'paid' };",
+          "  }",
+          "  capture(): Charge { throw new Error('não usado no teste'); }",
+          "  cancel(): Charge { throw new Error('não usado no teste'); }",
+          "  refund(): Refund { throw new Error('não usado no teste'); }",
+          "  getStatus(): Status { throw new Error('não usado no teste'); }",
+          "  chargeInInstallments(): Charge { throw new Error('não usado no teste'); }",
+          "  disputeChargeback(): Dispute { throw new Error('não usado no teste'); }",
+          "  issueBoleto(): Boleto { throw new Error('não usado no teste'); }",
+          "  createPixQrCode(): string { throw new Error('não usado no teste'); }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E pra testar essa linha, o dublê tem que ser um provedor inteiro. [Oito métodos] que o teste nunca chama.",
+      "beats": [
+        {
+          "highlight": [
+            "não usado no teste"
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Com uma biblioteca de dublês, isso vira uma linha por método. Fica bem menor."
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Fica menor de escrever. Mas o checkout continua dependendo dos nove. E quem lê o teste não sabe quais importam."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "E se o dublê tiver só o cobrar, e eu forçar o tipo? Um \"as\" resolve.",
+      "pronunciation": "E se o dublê tiver só o cobrar, e eu forçar o tipo?"
+    },
+    {
+      "id": "029",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Aí você desliga o compilador justo onde ele te protege. Se o checkout passar a chamar outro método, o teste quebra na execução, não na compilação.",
+      "pronunciation": "Aí você desliga o compilador justo onde ele te protege. Se o chéquiaute passar a chamar outro método, o teste quebra na execução, não na compilação."
+    },
+    {
+      "id": "030",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Depender de um método que eu nem chamo custa o quê, na prática?"
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Marketplace",
+        "shown": 0,
+        "items": [
+          "Dividir o pagamento entre vendedores",
+          "Novo método na interface: splitPayment",
+          "O checkout não muda nada"
+        ]
+      },
+      "text": "Pedido do time de vendedores parceiros: [dividir o pagamento entre vendedores]. [Entra mais um método na interface]. E [o checkout não muda nada].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "tsc --noEmit --strict fake-gateway.v2.ts",
+        "lines": []
+      },
+      "text": "Nada mesmo? Então compila [o dublê do checkout], sem mexer numa vírgula.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "fake-gateway.v2.ts(5,14): error TS2420:",
+              "tone": "fail"
+            },
+            {
+              "text": "  Class 'FakeGateway' incorrectly implements",
+              "tone": "fail"
+            },
+            {
+              "text": "  interface 'PaymentGateway'.",
+              "tone": "fail"
+            },
+            {
+              "text": "  Property 'splitPayment' is missing in type",
+              "tone": "dim"
+            },
+            {
+              "text": "  'FakeGateway' but required in type",
+              "tone": "dim"
+            },
+            {
+              "text": "  'PaymentGateway'.",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Eu não toquei no checkout... e o teste dele parou de compilar?",
+      "pronunciation": "Eu não toquei no chéquiaute... e o teste dele parou de compilar?"
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "É esse o custo. Quem depende de um método que não usa recebe todas as mudanças dele. E o Pix ganha o sexto \"não suportado\"."
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment-gateway.ts",
+        "lines": [
+          "export interface PaymentGateway {",
+          "  // cartão (o primeiro provedor)",
+          "  charge(orderId: string, amount: number): Charge;",
+          "  capture(chargeId: string): Charge;",
+          "  cancel(chargeId: string): Charge;",
+          "  refund(chargeId: string, amount: number): Refund;",
+          "  getStatus(chargeId: string): Status;",
+          "  chargeInInstallments(orderId: string, amount: number, installments: number): Charge;",
+          "  disputeChargeback(chargeId: string, evidence: string): Dispute;",
+          "  // entrou com o boleto",
+          "  issueBoleto(orderId: string, amount: number, dueDate: string): Boleto;",
+          "  // entrou com o Pix",
+          "  createPixQrCode(orderId: string, amount: number): string;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Pera aí. [Cartão], [boleto], [Pix]... cada provedor novo deixou os seus métodos aqui dentro.",
+      "pronunciation": "Pera aí. [Cartão], [boleto], [Pix]... cada provedor novo deixou os seus métodos aqui dentro.",
+      "beats": [
+        {
+          "highlight": [
+            "// cartão"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "// cartão",
+            "// entrou com o boleto"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "// cartão",
+            "// entrou com o boleto",
+            "// entrou com o Pix"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 2
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "graph",
+        "nodes": [
+          {
+            "id": "checkout",
+            "label": "Checkout\nusa 1",
+            "x": 14,
+            "y": 18,
+            "tone": "core"
+          },
+          {
+            "id": "ship",
+            "label": "Despacho\nusa 1",
+            "x": 14,
+            "y": 50,
+            "tone": "core"
+          },
+          {
+            "id": "test",
+            "label": "Teste do checkout\nusa 1",
+            "x": 14,
+            "y": 82,
+            "tone": "interface"
+          },
+          {
+            "id": "gw",
+            "label": "PaymentGateway\n9 métodos",
+            "x": 50,
+            "y": 50,
+            "tone": "soft"
+          },
+          {
+            "id": "card",
+            "label": "Cartão\n2 falsos",
+            "x": 86,
+            "y": 28,
+            "tone": "infrastructure"
+          },
+          {
+            "id": "pix",
+            "label": "Pix\n5 falsos",
+            "x": 86,
+            "y": 72,
+            "tone": "infrastructure"
+          }
+        ],
+        "edges": [
+          {
+            "from": "checkout",
+            "to": "gw",
+            "bad": true
+          },
+          {
+            "from": "ship",
+            "to": "gw",
+            "bad": true
+          },
+          {
+            "from": "test",
+            "to": "gw",
+            "bad": true
+          },
+          {
+            "from": "card",
+            "to": "gw"
+          },
+          {
+            "from": "pix",
+            "to": "gw",
+            "bad": true
+          }
+        ],
+        "focusOnBad": false
+      },
+      "text": "Achou. A interface cresceu pelo lado de quem implementa. [Ninguém perguntou o que cada cliente precisa].",
+      "beats": [
+        {
+          "focusOnBad": true,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Agora os nove métodos fazem sentido. É o cardápio de três provedores, servido pra todo mundo que cobra."
+    },
+    {
+      "id": "038",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Interface gorda",
+        "shown": 0,
+        "items": [
+          "Quem implementa promete o que não faz",
+          "Quem usa depende do que não chama",
+          "A mudança de um cliente chega em todos"
+        ]
+      },
+      "text": "[Quem implementa promete o que não faz]. E isso vira violação de Liskov.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Quem usa depende do que não chama]. E carrega um dublê enorme.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "040",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E [a mudança de um cliente chega em todos], até em quem não tem nada a ver com ela.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "041",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Então o certo é uma interface por método?"
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Não necessariamente. Cortar por método é o exagero do outro lado. O corte certo vem de quem usa, e isso é a próxima aula."
+    },
+    {
+      "id": "043",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Nenhum cliente deve ser forçado\na depender de métodos que não usa."
+      },
+      "text": "É a letra I do SOLID, a segregação de interfaces. Nenhum cliente deve ser forçado a depender de métodos que não usa.",
+      "pronunciation": "É a letra í do SOLID, a segregação de interfaces. Nenhum cliente deve ser forçado a depender de métodos que não usa."
+    },
+    {
+      "id": "044",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Escolha uma interface que tem dublê nos testes",
+          "Conte: métodos do dublê × métodos que o cliente chama",
+          "Procure \"não suportado\" nas implementações"
+        ]
+      },
+      "text": "Desafio: [escolhe uma interface] do seu projeto que tem dublê nos testes.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "045",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Conta os métodos do dublê e os que o cliente chama de verdade]. E [procura \"não suportado\" nas implementações].",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "Interface do ponto de vista do cliente: Charges, Refunds, Installments"
+        ],
+        "shown": 1
+      },
+      "text": "Na próxima aula: a interface do ponto de vista de quem usa. Cada cliente com o seu pedaço."
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Quero ver esse dublê de dezenove linhas encolher."
+    },
+    {
+      "id": "048",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até a próxima!"
+    }
+  ]
+}

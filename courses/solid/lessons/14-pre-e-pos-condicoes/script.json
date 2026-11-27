@@ -1,0 +1,1051 @@
+{
+  "chapters": [
+    "O pedido",
+    "A tela",
+    "Pré-condição",
+    "Pós-condição",
+    "Invariante",
+    "Teste de contrato",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Pedido do financeiro",
+        "shown": 0,
+        "items": [
+          "Pix: estorno só em até 90 dias",
+          "É regra do Pix, não é opcional"
+        ]
+      },
+      "text": "Pedido do financeiro: [Pix só pode ser estornado em até noventa dias]. Uma linha, cinco minutos.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Uma linha que muda o que todo pagamento da loja promete."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Promete? Eu só mexi no Pix."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 14",
+        "title": "A linha de cinco minutos que mudou o contrato",
+        "subtitle": "Pré-condições, pós-condições e invariantes"
+      },
+      "text": "Então vamos ver quem mais sentiu essa linha. E aprender a escrever promessas que dá pra testar."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "pix.ts",
+        "lines": [
+          "export class PixPayment extends Payment {",
+          "  refund(value: number, now: Date) {",
+          "    // Regra do Pix: a devolução só pode ser feita em até 90 dias.",
+          "    const days = (now.getTime() - this.capturedAt!.getTime()) / DAY;",
+          "    if (days > 90) throw new Error('Pix: prazo de 90 dias expirado');",
+          "    super.refund(value, now);",
+          "  }",
+          "}"
+        ],
+        "highlight": [
+          "if (days > 90)"
+        ]
+      },
+      "text": "Aqui. Passou de noventa dias, lança erro. Senão, estorna normal."
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "support.ts",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "",
+          "// Tela do atendimento: estorna e mostra quanto já foi devolvido.",
+          "// Escrita para QUALQUER Payment, confiando no contrato da base.",
+          "export function refundFromSupport(payment: Payment, value: number, now: Date) {",
+          "  payment.refund(value, now);",
+          "  return `Estornado: R$ ${(payment.refunded / 100).toFixed(2).replace('.', ',')}`;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E essa é a tela do atendimento. Foi escrita pra qualquer pagamento, quando todo estorno funcionava."
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "text": "Um cliente liga cento e vinte dias depois de pagar com Pix. O que acontece nessa tela?",
+      "pronunciation": "Um cliente liga cento e vinte dias depois de pagar com Pix. O que acontece nessa tela?",
+      "holdAfter": {
+        "seconds": 4,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test support.demo.ts",
+        "lines": []
+      },
+      "text": "[Explode]. A tela do atendimento cai com o erro do Pix.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ atendimento estorna um Pix de 120 dias atrás",
+              "tone": "fail"
+            },
+            {
+              "text": "  Error: Pix: prazo de 90 dias expirado",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Mas a regra é real. Eu devia ignorar?"
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Não. A regra é real; o problema é onde ela ficou. Escondida na subclasse, ninguém que usa a base sabe que ela existe."
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment.ts",
+        "lines": [
+          "// Pagamentos da loja. Valores em centavos.",
+          "// CONTRATO de refund(value, now), o que todo cliente de Payment pode assumir:",
+          "//   pré:        o pagamento foi capturado e 0 < value <= amount - refunded",
+          "//   pós:        refunded aumenta exatamente value",
+          "//   invariante: 0 <= refunded <= amount, sempre",
+          "export class Payment {",
+          "  readonly amount: number;",
+          "  status: 'new' | 'authorized' | 'captured' = 'new';",
+          "  capturedAt: Date | null = null;",
+          "  refunded = 0;",
+          "  constructor(amount: number) { this.amount = amount; }",
+          "",
+          "  authorize() { this.status = 'authorized'; }",
+          "  capture(now: Date) { this.status = 'captured'; this.capturedAt = now; }",
+          "",
+          "  refund(value: number, now: Date) {",
+          "    if (this.status !== 'captured') throw new Error('pagamento não capturado');",
+          "    if (value <= 0 || value > this.amount - this.refunded) throw new Error('valor inválido');",
+          "    this.refunded += value;",
+          "  }",
+          "}",
+          "",
+          "export class CreditCardPayment extends Payment {}"
+        ],
+        "highlight": []
+      },
+      "text": "Todo método tem um contrato em três partes. A primeira é a [pré-condição]: o que precisa ser verdade pra alguém chamar.",
+      "beats": [
+        {
+          "highlight": [
+            "pré:"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pra base, basta [estar capturado e o valor caber no que foi pago]. Nenhuma palavra sobre prazo.",
+      "beats": [
+        {
+          "highlight": [
+            "pré:",
+            "status !== 'captured'",
+            "value > this.amount - this.refunded"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o Pix pediu mais: capturado, valor certo, e menos de noventa dias."
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "O que um subtipo pode fazer",
+        "shown": 0,
+        "items": [
+          "Exigir menos que a base, nunca mais",
+          "Entregar mais que a base, nunca menos",
+          "Manter o que é sempre verdade"
+        ]
+      },
+      "text": "Primeira regra: [o subtipo pode exigir menos que a base, nunca mais]. Quem chama só conhece as exigências da base.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Pensa num estacionamento com uma placa: aceitamos qualquer carro. Um manobrista que só aceita carro automático está exigindo mais que a placa."
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E eu chego de carro manual e fico na rua."
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment.ts",
+        "lines": [
+          "// Pagamentos da loja. Valores em centavos.",
+          "// CONTRATO de refund(value, now), o que todo cliente de Payment pode assumir:",
+          "//   pré:        o pagamento foi capturado e 0 < value <= amount - refunded",
+          "//   pós:        refunded aumenta exatamente value",
+          "//   invariante: 0 <= refunded <= amount, sempre",
+          "export class Payment {",
+          "  readonly amount: number;",
+          "  status: 'new' | 'authorized' | 'captured' = 'new';",
+          "  capturedAt: Date | null = null;",
+          "  refunded = 0;",
+          "  constructor(amount: number) { this.amount = amount; }",
+          "",
+          "  authorize() { this.status = 'authorized'; }",
+          "  capture(now: Date) { this.status = 'captured'; this.capturedAt = now; }",
+          "",
+          "  refund(value: number, now: Date) {",
+          "    if (this.status !== 'captured') throw new Error('pagamento não capturado');",
+          "    if (value <= 0 || value > this.amount - this.refunded) throw new Error('valor inválido');",
+          "    this.refunded += value;",
+          "  }",
+          "}",
+          "",
+          "export class CreditCardPayment extends Payment {}"
+        ],
+        "highlight": [
+          "pós:"
+        ]
+      },
+      "text": "A segunda parte é a pós-condição: o que o método garante quando termina. Aqui, o valor estornado sobe exatamente o que foi pedido.",
+      "reading": 2
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "boleto.ts",
+        "lines": [
+          "export class BoletoPayment extends Payment {",
+          "  readonly transfers: number[] = []; // transferências agendadas para o cliente",
+          "",
+          "  // Boleto não volta pelo banco: o estorno é uma transferência,",
+          "  // feita em até 3 dias úteis. Então aqui só agenda.",
+          "  refund(value: number, now: Date) {",
+          "    this.transfers.push(value);",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "O boleto eu fiz semana passada. O estorno dele é uma transferência, em até três dias úteis. Então [aqui só agenda].",
+      "beats": [
+        {
+          "highlight": [
+            "this.transfers.push(value)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "text": "E o que a tela do atendimento mostra depois desse estorno?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test boleto.demo.ts",
+        "lines": []
+      },
+      "text": "[Zero reais]. O dinheiro vai sair, mas o pagamento não registrou nada.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ atendimento estorna R$ 80 de um boleto",
+              "tone": "fail"
+            },
+            {
+              "text": "  + actual - expected",
+              "tone": "dim"
+            },
+            {
+              "text": "  + 'Estornado: R$ 0,00'",
+              "tone": "fail"
+            },
+            {
+              "text": "  - 'Estornado: R$ 80,00'",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "A base garantia o valor exato. O boleto entregou menos."
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "O que um subtipo pode fazer",
+        "shown": 1,
+        "items": [
+          "Exigir menos que a base, nunca mais",
+          "Entregar mais que a base, nunca menos",
+          "Manter o que é sempre verdade"
+        ]
+      },
+      "text": "Segunda regra: [o subtipo pode entregar mais que a base garante, nunca menos]. O manobrista que devolve o carro lavado entrega mais. O que devolve sem a chave entrega menos.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E o atendente, vendo zero reais na tela, faz o quê?"
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Clica de novo."
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment.ts",
+        "lines": [
+          "// Pagamentos da loja. Valores em centavos.",
+          "// CONTRATO de refund(value, now), o que todo cliente de Payment pode assumir:",
+          "//   pré:        o pagamento foi capturado e 0 < value <= amount - refunded",
+          "//   pós:        refunded aumenta exatamente value",
+          "//   invariante: 0 <= refunded <= amount, sempre",
+          "export class Payment {",
+          "  readonly amount: number;",
+          "  status: 'new' | 'authorized' | 'captured' = 'new';",
+          "  capturedAt: Date | null = null;",
+          "  refunded = 0;",
+          "  constructor(amount: number) { this.amount = amount; }",
+          "",
+          "  authorize() { this.status = 'authorized'; }",
+          "  capture(now: Date) { this.status = 'captured'; this.capturedAt = now; }",
+          "",
+          "  refund(value: number, now: Date) {",
+          "    if (this.status !== 'captured') throw new Error('pagamento não capturado');",
+          "    if (value <= 0 || value > this.amount - this.refunded) throw new Error('valor inválido');",
+          "    this.refunded += value;",
+          "  }",
+          "}",
+          "",
+          "export class CreditCardPayment extends Payment {}"
+        ],
+        "highlight": [
+          "invariante:"
+        ]
+      },
+      "text": "Aí entra a terceira parte, a invariante: o que é verdade sempre, antes e depois de qualquer método. Nunca devolver mais do que foi pago.",
+      "reading": 2
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[Quem] garante isso é essa trava. Só que o boleto nunca mexe no valor estornado, então a trava nunca dispara. Dois cliques: cento e sessenta reais agendados de um pagamento de oitenta.",
+      "beats": [
+        {
+          "highlight": [
+            "value > this.amount - this.refunded"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "A pós-condição fraca derrubou a invariante junto."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "O que um subtipo pode fazer",
+        "shown": 2,
+        "items": [
+          "Exigir menos que a base, nunca mais",
+          "Entregar mais que a base, nunca menos",
+          "Manter o que é sempre verdade"
+        ]
+      },
+      "text": "É comum. A trava confiava na pós-condição. Daí a terceira regra: [o que a base mantém sempre verdadeiro, o subtipo também mantém].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tá. E como eu pego isso antes do atendimento?"
+    },
+    {
+      "id": "030",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "contract.ts",
+        "lines": [
+          "// O contrato de Payment, escrito UMA vez e aplicado a todo subtipo.",
+          "export function paymentContract(name: string, make: (amount: number) => Payment) {",
+          "  const captured = () => { const p = make(8000); p.authorize(); p.capture(day(0)); return p; };",
+          "",
+          "  describe(name, () => {",
+          "    test('pré: estorna capturado, mesmo 120 dias depois', () => {",
+          "      assert.doesNotThrow(() => captured().refund(8000, day(120)));",
+          "    });",
+          "    test('pós: refunded aumenta exatamente o valor', () => {",
+          "      const p = captured();",
+          "      p.refund(3000, day(1));",
+          "      assert.equal(p.refunded, 3000);",
+          "    });",
+          "    test('invariante: nunca devolve mais que o pago', () => {",
+          "      const p = captured();",
+          "      p.refund(8000, day(1));",
+          "      assert.throws(() => p.refund(8000, day(2)));",
+          "    });",
+          "  });",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Escrevendo o contrato uma vez só, como teste, e rodando em todo subtipo."
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Uma pré], [uma pós], [uma invariante]. Cada promessa da base vira um teste que qualquer filha tem que passar.",
+      "beats": [
+        {
+          "highlight": [
+            "'pré:"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "'pós:"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "'invariante:"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test contract.demo.ts",
+        "lines": []
+      },
+      "text": "Roda nos três. [O cartão passa]. [O Pix e o boleto, não].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ CreditCardPayment",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        },
+        {
+          "lines": [
+            {
+              "text": "✔ CreditCardPayment",
+              "tone": "ok"
+            },
+            {
+              "text": "▶ PixPayment",
+              "tone": "dim"
+            },
+            {
+              "text": "  ✖ pré: estorna capturado, mesmo 120 dias depois",
+              "tone": "fail"
+            },
+            {
+              "text": "  ✔ pós: refunded aumenta exatamente o valor",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✔ invariante: nunca devolve mais que o pago",
+              "tone": "ok"
+            },
+            {
+              "text": "▶ BoletoPayment",
+              "tone": "dim"
+            },
+            {
+              "text": "  ✔ pré: estorna capturado, mesmo 120 dias depois",
+              "tone": "ok"
+            },
+            {
+              "text": "  ✖ pós: refunded aumenta exatamente o valor",
+              "tone": "fail"
+            },
+            {
+              "text": "  ✖ invariante: nunca devolve mais que o pago",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 9   ℹ pass 6   ℹ fail 3",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E cada falha aponta a parte exata do contrato: o Pix na pré, o boleto na pós e na invariante. Sem cliente ligar."
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Fácil: no teste do Pix, eu tiro o caso dos cento e vinte dias."
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Contrato sob medida",
+          "text": "Cada subtipo pula o teste que não cumpre. Tudo passa, e o atendimento continua caindo."
+        },
+        "right": {
+          "title": "Um contrato para todos",
+          "text": "Se a regra é real, ela entra no contrato da base, onde todo cliente enxerga."
+        }
+      },
+      "text": "Aí tudo passa e o atendimento continua caindo. O teste só vale se for o mesmo pra todo mundo. Se o prazo é real, ele entra no contrato da base, onde todo cliente enxerga."
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E como a base fala de prazo sem virar uma lista de exceções?"
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Isso é a aula dezesseis. Antes, na quinze, a gente aprende a farejar esse problema no código."
+    },
+    {
+      "id": "038",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Resumo",
+        "shown": 0,
+        "items": [
+          "Pré-condição: não pode ficar mais forte",
+          "Pós-condição: não pode ficar mais fraca",
+          "Invariante: continua valendo",
+          "Teste de contrato: o mesmo para todos"
+        ]
+      },
+      "text": "[Pré-condição]: não pode ficar mais forte. [Pós-condição]: não pode ficar mais fraca.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Invariante]: continua valendo. E [o teste de contrato] é o mesmo pra todo subtipo.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "040",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Um subtipo pode exigir menos e entregar mais.\nNunca o contrário."
+      },
+      "text": "Então a linha de cinco minutos não era sobre o Pix. Ela mudou o que todo pagamento prometia ao atendimento, sem avisar ninguém. Um subtipo pode exigir menos e entregar mais. Nunca o contrário.",
+      "pronunciation": "Então a linha de cinco minutos não era sobre o Pix. Ela mudou o que todo pagamento prometia ao atendimento, sem avisar ninguém. Um subtipo pode exigir menos e entregar mais. Nunca o contrário."
+    },
+    {
+      "id": "041",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Escolha uma classe base do seu projeto",
+          "Escreva a pré, a pós e a invariante de um método",
+          "Vire isso em teste e rode em todas as filhas"
+        ]
+      },
+      "text": "Desafio: [escolhe uma classe base] do seu projeto.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Escreve a pré, a pós e a invariante] de um método. E [vira isso em teste], rodando em todas as filhas.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "043",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "Aula 15 · Sinais de violação de LSP"
+        ],
+        "shown": 1
+      },
+      "text": "Na próxima: os sinais de que uma hierarquia já está quebrando, e que dá pra achar com uma busca no código."
+    },
+    {
+      "id": "044",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Eu já sinto cheiro de if por tipo."
+    },
+    {
+      "id": "045",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}

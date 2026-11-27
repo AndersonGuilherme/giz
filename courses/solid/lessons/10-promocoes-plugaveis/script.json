@@ -1,0 +1,1011 @@
+{
+  "chapters": [
+    "A aposta",
+    "O cupom",
+    "O contrato",
+    "A calculadora",
+    "O teto",
+    "Dia das Mães",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Pedido do marketing",
+        "shown": 3,
+        "items": [
+          "Dia das Mães: 15% para todos",
+          "De 4 a 10 de maio",
+          "Não acumula: vale o maior"
+        ]
+      },
+      "text": "O Dia das Mães entra no ar na segunda. E a Lia me fez uma aposta."
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Colocar essa promoção no ar sem editar uma linha do cálculo de preço. E com teste provando."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Zero linhas? Até a aula passada, cada promoção era um else if novo.",
+      "pronunciation": "Zero linhas? Até a aula passada, cada promoção era um élse ífi novo."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 10",
+        "title": "Dia das Mães sem editar uma linha do cálculo",
+        "subtitle": "Promoções plugáveis"
+      },
+      "text": "Pra ganhar essa aposta, o ponto de extensão da aula passada precisa aguentar uma promoção bem diferente das outras."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Antes do Dia das Mães",
+        "shown": 3,
+        "items": [
+          "Cupom BEMVINDO: R$ 25 de desconto",
+          "Valor fixo, não porcentagem",
+          "Não acumula: vale o maior"
+        ]
+      },
+      "text": "Só que, antes do Dia das Mães, chegou um cupom: vinte e cinco reais de desconto, valor fixo."
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "Pergunta rápida. Vinte e cinco reais é mais que dez por cento de VIP?",
+      "pronunciation": "Pergunta rápida. Vinte e cinco reais é mais que dez por cento de vípi?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Depende do pedido! Em cem reais, o cupom ganha. Em quatrocentos, o VIP dá quarenta.",
+      "pronunciation": "Depende do pedido! Em cem reais, o cupom ganha. Em quatrocentos, o vípi dá quarenta."
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Então comparar taxas não funciona mais. Pra saber qual é o maior desconto, tem que comparar dinheiro."
+    },
+    {
+      "id": "009",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "discount-rule.ts",
+        "lines": [
+          "export type DiscountContext = {",
+          "  subtotal: number;",
+          "  customer: Customer;",
+          "  now: Date;",
+          "  coupon?: string; // opcional: quem não usa cupom nem percebe",
+          "};",
+          "",
+          "export interface DiscountRule {",
+          "  readonly name: string; // vai para o e-mail: \"você economizou R$ Y\"",
+          "  amount(ctx: DiscountContext): number; // centavos; 0 = não se aplica",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Por isso o contrato mudou. [Cada regra devolve quanto desconta, em centavos]. E ganhou [um nome], que vai pro e-mail de confirmação.",
+      "beats": [
+        {
+          "highlight": [
+            "amount(ctx"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "readonly name"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pera aí. Mudar o contrato não é justamente modificar?"
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "É, e custou: as três regras antigas tiveram que ser adaptadas. Mexer no contrato mexe em todo mundo que o cumpre."
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Por isso o contrato é a parte que vale acertar cedo. A gente aprendeu, com o cupom, que taxa era pouco."
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o código do cupom [entrou como campo opcional]. Quem não usa nem percebe.",
+      "beats": [
+        {
+          "highlight": [
+            "coupon?: string"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "rules.ts",
+        "lines": [
+          "export const vip: DiscountRule = {",
+          "  name: 'VIP',",
+          "  amount: ({ subtotal, customer }) =>",
+          "    customer.type === 'vip' ? percent(subtotal, 0.1) : 0,",
+          "};",
+          "",
+          "export const employee: DiscountRule = {",
+          "  name: 'Funcionário',",
+          "  amount: ({ subtotal, customer }) =>",
+          "    customer.type === 'employee' ? percent(subtotal, 0.3) : 0,",
+          "};",
+          "",
+          "export const blackFriday: DiscountRule = {",
+          "  name: 'Black Friday',",
+          "  amount: ({ subtotal, now }) => (isBlackFriday(now) ? percent(subtotal, 0.2) : 0),",
+          "};",
+          "",
+          "// Cupom: valor fixo. O código e o valor entram de fora.",
+          "export function coupon(code: string, cents: number): DiscountRule {",
+          "  return { name: `Cupom ${code}`, amount: (ctx) => (ctx.coupon === code ? cents : 0) };",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E as regras ficaram assim: cada uma decide sozinha [se vale] e [quanto desconta].",
+      "beats": [
+        {
+          "highlight": [
+            "customer.type === 'vip'"
+          ]
+        },
+        {
+          "highlight": [
+            "percent(subtotal, 0.1)"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o cupom é [uma função que fabrica a regra]. O código e o valor chegam de fora.",
+      "beats": [
+        {
+          "highlight": [
+            "export function coupon",
+            "ctx.coupon === code"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Então o cupom do mês que vem nem é regra nova. É a mesma, com outro código."
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "price-calculator.ts",
+        "lines": [
+          "export class PriceCalculator {",
+          "  private readonly rules: DiscountRule[];",
+          "  constructor(rules: DiscountRule[]) {",
+          "    this.rules = rules;",
+          "  }",
+          "",
+          "  bestDiscount(ctx: DiscountContext): Discount {",
+          "    let best: Discount = { name: 'nenhum', amount: 0 };",
+          "    for (const rule of this.rules) {",
+          "      const amount = rule.amount(ctx);",
+          "      // não acumula: vale o maior (empate fica com a primeira)",
+          "      if (amount > best.amount) best = { name: rule.name, amount };",
+          "    }",
+          "    return best;",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E a calculadora? Ela [pergunta pra cada regra] e [guarda a maior, com o nome].",
+      "beats": [
+        {
+          "highlight": [
+            "rule.amount(ctx)"
+          ]
+        },
+        {
+          "highlight": [
+            "amount > best.amount"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E se der empate? Dez reais de VIP contra um cupom de dez.",
+      "pronunciation": "E se der empate? Dez reais de vípi contra um cupom de dez."
+    },
+    {
+      "id": "019",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "O sinal é maior, não maior ou igual. Então o empate fica com a primeira da lista. Isso também é regra, e tem teste."
+    },
+    {
+      "id": "020",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E se o cliente usar o cupom de vinte e cinco num pedido de vinte?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "021",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test cap.demo.ts",
+        "lines": []
+      },
+      "text": "[O desconto passa do pedido]. O total fica negativo: a loja pagaria cinco reais pro cliente levar.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ desconto nunca passa do subtotal",
+              "tone": "fail"
+            },
+            {
+              "text": "  Expected values to be strictly equal:",
+              "tone": "dim"
+            },
+            {
+              "text": "  2500 !== 2000",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "expression": "surprised",
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "022",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E onde entra a correção? No cupom?"
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pensa no Dia das Mães, no próximo cupom, em qualquer regra futura. Todas precisam desse limite?"
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "price-calculator.ts",
+        "lines": [
+          "export class PriceCalculator {",
+          "  private readonly rules: DiscountRule[];",
+          "  constructor(rules: DiscountRule[]) {",
+          "    this.rules = rules;",
+          "  }",
+          "",
+          "  bestDiscount(ctx: DiscountContext): Discount {",
+          "    let best: Discount = { name: 'nenhum', amount: 0 };",
+          "    for (const rule of this.rules) {",
+          "      // nunca passa do subtotal",
+          "      const amount = Math.min(rule.amount(ctx), ctx.subtotal);",
+          "      // não acumula: vale o maior (empate fica com a primeira)",
+          "      if (amount > best.amount) best = { name: rule.name, amount };",
+          "    }",
+          "    return best;",
+          "  }",
+          "}"
+        ],
+        "added": [
+          9,
+          10
+        ],
+        "highlight": []
+      },
+      "text": "Todas. Então é regra da parte estável: [o desconto nunca passa do subtotal].",
+      "beats": [
+        {
+          "highlight": [
+            "Math.min"
+          ],
+          "sfx": "success"
+        }
+      ],
+      "reading": 3
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Só que isso foi editar a calculadora."
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Foi corrigir um bug na regra que vale pra todas. Lembra da aula passada? Fechado não é congelado."
+    },
+    {
+      "id": "027",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "code",
+        "title": "mothers-day.ts  (arquivo novo)",
+        "lines": [
+          "const start = new Date(2026, 4, 4);",
+          "const end = new Date(2026, 4, 11); // até o fim do dia 10",
+          "",
+          "export const mothersDay: DiscountRule = {",
+          "  name: 'Dia das Mães',",
+          "  amount: ({ subtotal, now }) =>",
+          "    now >= start && now < end ? Math.round(subtotal * 0.15) : 0,",
+          "};"
+        ],
+        "highlight": []
+      },
+      "text": "Agora sim, a aposta. O Dia das Mães é [um arquivo novo]: [quinze por cento], de quatro a dez de maio.",
+      "beats": [
+        {
+          "highlight": [
+            "export const mothersDay"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "0.15",
+            "now >= start"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "028",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o [fim é dia onze, sem incluir], pra valer o domingo inteiro.",
+      "beats": [
+        {
+          "highlight": [
+            "new Date(2026, 4, 11)",
+            "now < end"
+          ]
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "store.ts",
+        "lines": [
+          "export const calculator = new PriceCalculator([",
+          "  vip,",
+          "  employee,",
+          "  blackFriday,",
+          "  coupon('BEMVINDO', 2500),",
+          "  mothersDay,",
+          "]);"
+        ],
+        "added": [
+          5
+        ],
+        "highlight": []
+      },
+      "text": "E pra ligar a promoção, [ela entra na lista]. Essa é a linha que mudou.",
+      "beats": [
+        {
+          "highlight": [
+            "mothersDay,"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 3
+    },
+    {
+      "id": "030",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Ih. Então eu perdi a aposta? Mexi numa linha."
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "No cálculo, zero. Essa linha fica no arquivo que monta a loja, que existe justamente pra mudar quando a loja muda."
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Fechado nunca quis dizer zero linhas no sistema inteiro. Quer dizer que a mudança cai no lugar certo."
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test promotions.test.ts",
+        "lines": []
+      },
+      "text": "E [a prova].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ cada regra se testa sozinha",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ não acumula: cupom vence em R$ 100,",
+              "tone": "ok"
+            },
+            {
+              "text": "    VIP em R$ 400",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ desconto nunca passa do subtotal",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ empate: fica a primeira da lista",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Dia das Mães: 15% de 4 a 10 de maio",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Dia das Mães entra pela lista;",
+              "tone": "ok"
+            },
+            {
+              "text": "    o cálculo não muda",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 6   ℹ pass 6   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Repara no primeiro: cada regra se testa sozinha. Sem calculadora, sem banco, sem esperar maio chegar."
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E no último: o mesmo VIP leva dez antes e quinze depois. O funcionário continua com trinta.",
+      "pronunciation": "E no último: o mesmo vípi leva dez antes e quinze depois. O funcionário continua com trinta."
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E se o marketing pedir: Dia das Mães não vale pra quem usou cupom?"
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "A regra olha o contexto, que já tem o cupom. O que ela não pode é perguntar pras outras regras."
+    },
+    {
+      "id": "038",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "No dia em que uma peça conhece a outra, adicionar uma promoção volta a mexer nas vizinhas."
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Promoção = else if",
+          "text": "Cada promoção edita o cálculo e arrisca as outras."
+        },
+        "right": {
+          "title": "Promoção = peça",
+          "text": "Arquivo novo + uma linha na lista. O cálculo não muda."
+        }
+      },
+      "text": "Compara as duas. Antes, cada promoção editava o cálculo. Agora, promoção é uma peça: arquivo novo e uma linha na lista."
+    },
+    {
+      "id": "040",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E o que sobrou na calculadora foi só o que vale pra todas."
+    },
+    {
+      "id": "041",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "O que fica na calculadora",
+        "shown": 0,
+        "items": [
+          "Não acumula: vale o maior",
+          "Nunca passa do subtotal",
+          "Empate fica com a primeira da lista"
+        ]
+      },
+      "text": "[Vale o maior], [nunca passa do subtotal], [empate fica com a primeira]. Isso é a política. O resto é peça.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "A política fica no centro.\nAs promoções entram pela borda."
+      },
+      "text": "E é isso que torna a promoção plugável: a política fica no centro, e as promoções entram pela borda."
+    },
+    {
+      "id": "043",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então eu ganhei a aposta."
+    },
+    {
+      "id": "044",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Ganhou. Zero linhas no cálculo, e seis testes pra provar."
+    },
+    {
+      "id": "045",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Escreva a regra \"Leve 3, pague 2\"",
+          "O contexto tem o que ela precisa?",
+          "Se não tem, o que muda no contrato?"
+        ]
+      },
+      "text": "Desafio: [escreve a regra leve três, pague dois].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[O contexto de hoje tem o que ela precisa]? [Se não tem, o que muda no contrato], e quem sente essa mudança?",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "11 · OCP com composição e funções"
+        ],
+        "shown": 1
+      },
+      "text": "Agora, cada regra é um objeto com um nome e uma função dentro. Será que precisa mesmo de objeto?"
+    },
+    {
+      "id": "048",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "Na próxima aula: o mesmo princípio só com funções. E até com uma tabela."
+    },
+    {
+      "id": "049",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}

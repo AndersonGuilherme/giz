@@ -1,0 +1,1054 @@
+{
+  "chapters": [
+    "O número",
+    "O suspeito",
+    "O custo",
+    "A mudança que veio",
+    "Como decidir",
+    "Abrir depois",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "007",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Plugins de imposto · 2 anos (cenário simulado)",
+        "shown": 0,
+        "items": [
+          "6 arquivos, 76 linhas",
+          "Interface, registro, carregador, configuração",
+          "Plugins novos em 2 anos: zero"
+        ]
+      },
+      "text": "[Seis arquivos]. [Interface de plugin, registro, carregador]. E em dois anos, [nenhum plugin novo].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "008",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "E quanto essa preparação toda custou?"
+    },
+    {
+      "id": "009",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "É o que eu quero saber. Porque, na aula passada, eu saí querendo abrir tudo."
+    },
+    {
+      "id": "010",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 12",
+        "title": "O sistema de plugins que nunca recebeu um plugin",
+        "subtitle": "Quando NÃO abrir (YAGNI)"
+      },
+      "text": "Então hoje é o outro lado do princípio: quando um ponto de extensão sai mais caro do que ajuda."
+    },
+    {
+      "id": "011",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "wc -l v1/*.ts",
+        "lines": []
+      },
+      "text": "[Setenta e seis linhas] de máquina de imposto.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "   2 v1/config.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   9 v1/default.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  17 v1/loader.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  21 v1/registry.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "   9 v1/tax-plugin.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  18 v1/tax-service.ts",
+              "tone": "dim"
+            },
+            {
+              "text": "  76 total"
+            }
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "012",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "plugins/default.ts",
+        "lines": [
+          "export const defaultTaxPlugin: TaxPlugin = {",
+          "  id: 'default',",
+          "  priority: 0,",
+          "  appliesTo: () => true,",
+          "  rate: () => 0.05,",
+          "};"
+        ],
+        "highlight": []
+      },
+      "text": "E o único plugin que existe faz isto aqui: [cinco por cento sobre tudo].",
+      "beats": [
+        {
+          "highlight": [
+            "rate: () => 0.05"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Uma multiplicação. Setenta e seis linhas pra uma multiplicação."
+    },
+    {
+      "id": "014",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "tax.ts  (a versão sem plugin)",
+        "lines": [
+          "// Imposto estimado na nota: 5% do valor (alíquota fictícia, para fins didáticos).",
+          "const TAX_RATE = 0.05;",
+          "",
+          "export function taxFor(amount: number): number {",
+          "  return Math.round(amount * TAX_RATE);",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Pra comparar, a versão sem plugin nenhum. Mesmo resultado, com teste provando.",
+      "reading": 3
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "graph",
+        "nodes": [
+          {
+            "id": "checkout",
+            "label": "Checkout",
+            "x": 10,
+            "y": 50,
+            "tone": "interface"
+          },
+          {
+            "id": "service",
+            "label": "TaxService",
+            "x": 30,
+            "y": 22,
+            "tone": "core"
+          },
+          {
+            "id": "loader",
+            "label": "loadPlugins",
+            "x": 50,
+            "y": 78,
+            "tone": "soft"
+          },
+          {
+            "id": "config",
+            "label": "config",
+            "x": 66,
+            "y": 22,
+            "tone": "soft"
+          },
+          {
+            "id": "registry",
+            "label": "Registry\n(prioridade)",
+            "x": 76,
+            "y": 78,
+            "tone": "soft"
+          },
+          {
+            "id": "plugin",
+            "label": "defaultTaxPlugin\n5%",
+            "x": 90,
+            "y": 40,
+            "tone": "core"
+          }
+        ],
+        "edges": [
+          {
+            "from": "checkout",
+            "to": "service"
+          },
+          {
+            "from": "service",
+            "to": "loader",
+            "bad": true
+          },
+          {
+            "from": "loader",
+            "to": "config",
+            "bad": true
+          },
+          {
+            "from": "config",
+            "to": "registry",
+            "bad": true
+          },
+          {
+            "from": "registry",
+            "to": "plugin",
+            "bad": true
+          }
+        ],
+        "focusOnBad": false
+      },
+      "text": "Primeiro custo: ler. Quem quer saber o imposto sai do serviço, [passa pelo carregador, pela configuração, pelo registro], e só então acha a multiplicação.",
+      "beats": [
+        {
+          "focusOnBad": true
+        }
+      ]
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Quatro saltos pra achar um número que cabe numa linha."
+    },
+    {
+      "id": "017",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "plugins/registry.ts",
+        "lines": [
+          "export class TaxPluginRegistry {",
+          "  private readonly plugins = new Map<string, TaxPlugin>();",
+          "",
+          "  register(plugin: TaxPlugin): void {",
+          "    if (this.plugins.has(plugin.id)) throw new Error(`plugin duplicado: ${plugin.id}`);",
+          "    this.plugins.set(plugin.id, plugin);",
+          "  }",
+          "",
+          "  unregister(id: string): void {",
+          "    this.plugins.delete(id);",
+          "  }",
+          "",
+          "  resolve(item: TaxItem): TaxPlugin {",
+          "    const candidates = [...this.plugins.values()].filter((p) => p.appliesTo(item));",
+          "    if (candidates.length === 0) throw new Error(`nenhum plugin para ${item.sku}`);",
+          "    return candidates.sort((a, b) => b.priority - a.priority)[0];",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Segundo custo: manter. [Plugin duplicado], [prioridade entre plugins]... tudo isso tem código e teste.",
+      "beats": [
+        {
+          "highlight": [
+            "plugin duplicado"
+          ]
+        },
+        {
+          "highlight": [
+            "b.priority - a.priority"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "018",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Prioridade entre plugins, com um plugin só?"
+    },
+    {
+      "id": "019",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Pois é. Testando com cuidado um caso que nunca aconteceu. E todo mundo que entra no time precisa entender isso."
+    },
+    {
+      "id": "020",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "ticket",
+        "title": "Pedido do financeiro",
+        "shown": 2,
+        "items": [
+          "Imposto passa a depender do estado de destino",
+          "SP 7% · RJ 8% · demais 5% (valores fictícios)"
+        ]
+      },
+      "text": "Até que um dia, depois de dois anos, o imposto mudou: passou a depender do estado pra onde vai o pedido."
+    },
+    {
+      "id": "021",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Finalmente! Chegou a hora do plugin brilhar."
+    },
+    {
+      "id": "022",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "confused"
+      },
+      "scene": {
+        "type": "code",
+        "title": "plugins/tax-plugin.ts",
+        "lines": [
+          "export type TaxItem = { sku: string; category: string; amount: number };",
+          "",
+          "export interface TaxPlugin {",
+          "  readonly id: string;",
+          "  readonly priority: number; // o maior vence",
+          "  appliesTo(item: TaxItem): boolean;",
+          "  rate(item: TaxItem): number;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Será? Olha o contrato do plugin. Ele está pronto pra essa mudança?",
+      "holdAfter": {
+        "seconds": 4,
+        "label": "Pense"
+      }
+    },
+    {
+      "id": "023",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[O plugin recebe o item]. Ninguém passa pra ele o estado de destino!",
+      "beats": [
+        {
+          "highlight": [
+            "appliesTo(item: TaxItem)",
+            "rate(item: TaxItem)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "024",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "diff -rq v1 v2",
+        "lines": []
+      },
+      "text": "Então, pra encaixar o estado, [mudaram o contrato, o registro, o serviço e o próprio plugin].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "Files v1/default.ts and v2/default.ts differ",
+              "tone": "fail"
+            },
+            {
+              "text": "Files v1/registry.ts and v2/registry.ts differ",
+              "tone": "fail"
+            },
+            {
+              "text": "Files v1/tax-plugin.ts and v2/tax-plugin.ts differ",
+              "tone": "fail"
+            },
+            {
+              "text": "Files v1/tax-service.ts and v2/tax-service.ts differ",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Quatro de seis arquivos. O ponto de extensão foi modificado pra receber a primeira extensão."
+    },
+    {
+      "id": "026",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "tax.ts",
+        "lines": [
+          "const RATE_BY_STATE: Record<string, number> = { SP: 0.07, RJ: 0.08 };",
+          "const DEFAULT_RATE = 0.05;",
+          "",
+          "export function taxFor(amount: number, state: string): number {",
+          "  return Math.round(amount * (RATE_BY_STATE[state] ?? DEFAULT_RATE));",
+          "}"
+        ],
+        "added": [
+          0,
+          1,
+          3,
+          4
+        ],
+        "highlight": []
+      },
+      "text": "E a versão simples? [Uma tabela de estados e um parâmetro novo].",
+      "beats": [
+        {
+          "highlight": [
+            "RATE_BY_STATE",
+            "state: string"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 4
+    },
+    {
+      "id": "027",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "O plugin apostou que a mudança viria pelo produto. Ela veio pelo destino. Ponto de extensão por palpite costuma errar o eixo."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Mas nas aulas nove e dez abrir foi ótimo. Como eu sei quando abrir?"
+    },
+    {
+      "id": "029",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "Mudanças nos últimos 12 meses (cenário simulado)",
+        "columns": [
+          "Vezes",
+          "Por quê"
+        ],
+        "rows": [
+          {
+            "label": "Descontos",
+            "cells": [
+              "14",
+              "Promoção nova"
+            ]
+          },
+          {
+            "label": "Frete",
+            "cells": [
+              "5",
+              "Transportadora nova"
+            ]
+          },
+          {
+            "label": "E-mail",
+            "cells": [
+              "2",
+              "Texto da mensagem"
+            ]
+          },
+          {
+            "label": "Imposto",
+            "cells": [
+              "1",
+              "Estado de destino"
+            ]
+          }
+        ],
+        "shownRows": 0
+      },
+      "text": "Com evidência. Olha quantas vezes cada parte mudou no último ano: [descontos, catorze vezes], [frete, cinco], [e-mail, duas], [imposto, uma].",
+      "beats": [
+        {
+          "shownRows": 1
+        },
+        {
+          "shownRows": 2
+        },
+        {
+          "shownRows": 3
+        },
+        {
+          "shownRows": 4
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Descontos mudam sempre pelo mesmo motivo]: promoção nova. Ali o ponto de extensão se paga.",
+      "beats": [
+        {
+          "highlightedRow": 0,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "031",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E dá pra levantar isso de verdade: o histórico do controle de versão mostra quantas vezes cada arquivo mudou, e por quê."
+    },
+    {
+      "id": "032",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "rule",
+        "title": "Regra de três",
+        "shown": 0,
+        "items": [
+          "1ª vez: escreva direto",
+          "2ª vez: repare na repetição, e aguente",
+          "3ª vez: agora você conhece o formato. Abra."
+        ]
+      },
+      "text": "Quando não tem histórico, tem a regra de três. [Na primeira vez, escreve direto]. [Na segunda, repara na repetição e aguenta].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "033",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "[Na terceira, você já sabe o formato da mudança]. Agora vale abrir.",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "034",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Foi o que aconteceu com os descontos! VIP, funcionário, Black Friday... e o aniversário foi o quarto.",
+      "pronunciation": "Foi o que aconteceu com os descontos! Vípi, funcionário, bléqui fráidei... e o aniversário foi o quarto."
+    },
+    {
+      "id": "035",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Exato. Quando a gente abriu, já tinha visto três promoções. O contrato nasceu de casos reais, não de palpite."
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Mas abrir depois não sai mais caro?"
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Se o código é simples e tem teste, não. A versão de seis linhas mudou em minutos."
+    },
+    {
+      "id": "038",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Já desfazer uma abstração errada é caro, porque o resto do sistema passou a depender dela."
+    },
+    {
+      "id": "039",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então uma abstração errada pode ser pior que nenhuma."
+    },
+    {
+      "id": "040",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Muitas vezes, é. E essa prudência tem nome: YAGNI. Do inglês: você não vai precisar disso.",
+      "pronunciation": "Muitas vezes, é. E essa prudência tem nome: iágni. Do inglês: você não vai precisar disso."
+    },
+    {
+      "id": "041",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E YAGNI não briga com o aberto/fechado?",
+      "pronunciation": "E iágni não briga com o aberto e fechado?"
+    },
+    {
+      "id": "042",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Completa. Lembra da aula nove: você escolhe contra qual mudança se fechar. YAGNI diz pra escolher pelo que já aconteceu.",
+      "pronunciation": "Completa. Lembra da aula nove: você escolhe contra qual mudança se fechar. Iágni diz pra escolher pelo que já aconteceu."
+    },
+    {
+      "id": "043",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E nunca vale abrir antes? Nem uma vez?"
+    },
+    {
+      "id": "044",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Vale quando mudar depois é caro de verdade. Uma interface pública que outros times já usam, um formato de arquivo gravado em milhões de pedidos."
+    },
+    {
+      "id": "045",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Ali, pensar antes é barato perto do conserto. Dentro do seu código, com teste, quase sempre dá pra esperar."
+    },
+    {
+      "id": "046",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Abrir por palpite",
+          "text": "Custa leitura e manutenção desde o primeiro dia, e costuma errar o eixo."
+        },
+        "right": {
+          "title": "Abrir por evidência",
+          "text": "Histórico e regra de três: abre onde a mudança já chegou, do mesmo jeito."
+        }
+      },
+      "text": "De um lado, abrir por palpite: paga desde o primeiro dia e costuma errar. Do outro, abrir por evidência."
+    },
+    {
+      "id": "047",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Agora os seis arquivos fazem sentido: eram um seguro contra uma mudança que nunca veio. E não cobriram a que veio."
+    },
+    {
+      "id": "048",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Abra onde a mudança já bateu,\nnão onde você acha que ela vai bater."
+      },
+      "text": "Abra o código onde a mudança já bateu, não onde você acha que ela vai bater."
+    },
+    {
+      "id": "049",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Ache uma interface com uma implementação só",
+          "Conte quantas vezes ela mudou no último ano",
+          "Decida: mantém, ou volta a ser uma função simples?"
+        ]
+      },
+      "text": "Desafio: [acha uma interface] no seu projeto que só tem uma implementação.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "050",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Conta quantas vezes ela mudou] no último ano. E [decide]: mantém, ou volta a ser uma função simples?",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "051",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próximo módulo",
+        "items": [
+          "13 · Subtipo é contrato (LSP)"
+        ],
+        "shown": 1
+      },
+      "text": "Fechou o O. E agora?"
+    },
+    {
+      "id": "052",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Agora uma pergunta que parece boba: se uma classe filha herda tudo da mãe, ela sempre pode ocupar o lugar dela?"
+    },
+    {
+      "id": "053",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Pela cara da Lia, a resposta é não."
+    },
+    {
+      "id": "054",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      },
+      "text": "No próximo módulo: o L do SOLID, com pagamentos que prometem mais do que cumprem."
+    },
+    {
+      "id": "055",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}

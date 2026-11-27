@@ -1,0 +1,16 @@
+{
+  "version": 2,
+  "title": "O switch que cobrou R$ 35 por um locker de R$ 9",
+  "format": "lesson",
+  "language": "pt-BR",
+  "aspect": "16:9",
+  "captionStyle": "blocks",
+  "cast": [
+    "lia",
+    "teo"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
+}

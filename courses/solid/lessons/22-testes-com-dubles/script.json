@@ -1,0 +1,1114 @@
+{
+  "chapters": [
+    "O número",
+    "Onde o tempo vai",
+    "Dummy e stub",
+    "Fake",
+    "Spy e mock",
+    "O resultado",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test checkout-infra.test.ts",
+        "lines": []
+      },
+      "text": "Seis testes do checkout. [Quase cinco segundos].",
+      "pronunciation": "Seis testes do chéquiaute. [Quase cinco segundos].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ pedido sem itens é recusado (0.73742ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ VIP ganha 10% (928.569923ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Black Friday: vale o maior desconto (929.807316ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ frete grátis pelo subtotal, antes do desconto",
+              "tone": "ok"
+            },
+            {
+              "text": "    (924.064767ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ grava o pedido com total e desconto (1042.751138ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ avisa o cliente com total e economia (924.925943ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 6   ℹ pass 6   ℹ fail 0",
+              "tone": "dim"
+            },
+            {
+              "text": "ℹ duration_ms 4887.589181",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "tick"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "E nenhum deles testa o banco ou o e-mail. Testam desconto, frete e se o cliente foi avisado."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Quase um segundo cada. Com seiscentos testes assim, dá mais de nove minutos esperando."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 22",
+        "title": "Seis testes, cinco segundos: pra onde vai o tempo?",
+        "subtitle": "Testando com dublês"
+      },
+      "text": "Hoje esses mesmos seis vão rodar em milissegundos. Sem mudar uma linha do checkout.",
+      "pronunciation": "Hoje esses mesmos seis vão rodar em milissegundos. Sem mudar uma linha do chéquiaute."
+    },
+    {
+      "id": "005",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "code",
+        "title": "infra/latency.ts  (simulado)",
+        "lines": [
+          "// Latência SIMULADA (para fins didáticos): ida e volta ao banco e conversa com o servidor SMTP.",
+          "export const DB_ROUND_TRIP_MS = 120;",
+          "export const SMTP_SEND_MS = 800;",
+          "export const wait = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));"
+        ],
+        "highlight": []
+      },
+      "text": "A infra desta aula é simulada: [cento e vinte milissegundos] por ida ao banco, [oitocentos] pra enviar um e-mail.",
+      "beats": [
+        {
+          "highlight": [
+            "DB_ROUND_TRIP_MS = 120"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "SMTP_SEND_MS = 800"
+          ],
+          "sfx": "pop"
+        }
+      ],
+      "reading": 2
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Oitocentos pra um e-mail? Não é exagero?"
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Servidor de e-mail tem aperto de mão, autenticação, envio. Pode ser até mais. O ponto é: cada teste espera a rede, e nenhum se importa com ela."
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Só que desde a aula vinte o checkout recebe as portas. Dá pra entregar qualquer coisa pra ele.",
+      "pronunciation": "Só que desde a aula vinte o chéquiaute recebe as portas. Dá pra entregar qualquer coisa pra ele."
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "objective",
+        "title": "Dublês de teste",
+        "shown": 0,
+        "items": [
+          "Dummy: só ocupa o lugar",
+          "Stub: devolve uma resposta pronta",
+          "Fake: funciona, por um atalho",
+          "Spy: anota as chamadas",
+          "Mock: já sabe o que esperar"
+        ]
+      },
+      "text": "Isso. Com dublês, como no cinema: alguém entra no lugar do ator na cena perigosa. São cinco: [dummy], [stub], [fake], [spy] e [mock].",
+      "pronunciation": "Isso. Com dublês, como no cinema: alguém entra no lugar do ator na cena perigosa. São cinco: [dâmi], [stâb], [fêique], [spái] e [móqui].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "pop"
+        },
+        {
+          "shown": 5,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "010",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "doubles.ts",
+        "lines": [
+          "// Dummy: só ocupa o lugar. Se alguém usar, o teste está errado.",
+          "const fail = async (): Promise<never> => { throw new Error('dummy: não deveria ser usado'); };",
+          "export const dummyRepository: OrderRepository = { save: fail, findById: fail };",
+          "export const dummyNotifier: Notifier = { orderConfirmed: fail };",
+          "",
+          "// Stub: devolve uma resposta pronta, sempre a mesma.",
+          "export const stubRepository = (id: number): OrderRepository => ({",
+          "  save: async () => id,",
+          "  findById: async () => undefined,",
+          "});",
+          "export const stubNotifier: Notifier = { orderConfirmed: async () => {} };",
+          "",
+          "// Fake: funciona de verdade, mas por um atalho (memória em vez de banco).",
+          "export class InMemoryOrderRepository implements OrderRepository {",
+          "  private rows = new Map<number, PlacedOrder>();",
+          "  async save(order: PlacedOrder) {",
+          "    this.rows.set(this.rows.size + 1, order);",
+          "    return this.rows.size;",
+          "  }",
+          "  async findById(id: number) { return this.rows.get(id); }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Os três primeiros não se importam com como foram chamados."
+    },
+    {
+      "id": "011",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "text": "Primeiro caso: pedido sem itens. O serviço recusa antes de gravar ou avisar. Do que esse teste precisa?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Qual dublê?"
+      }
+    },
+    {
+      "id": "012",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "De quase nada. [Um dummy]: só ocupa o lugar. Se alguém usar, explode.",
+      "pronunciation": "De quase nada. [Um dâmi]: só ocupa o lugar. Se alguém usar, explode.",
+      "beats": [
+        {
+          "highlight": [
+            "const fail",
+            "dummyRepository",
+            "dummyNotifier"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "013",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Isso. O construtor exige duas peças, mas o pedido é recusado antes de usar qualquer uma. Se um dummy explodir, a regra mudou."
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Stub]: resposta pronta. Mandou gravar? Devolve o número que eu escolhi, sempre.",
+      "pronunciation": "[Stâb]: resposta pronta. Mandou gravar? Devolve o número que eu escolhi, sempre.",
+      "beats": [
+        {
+          "highlight": [
+            "stubRepository",
+            "save: async () => id",
+            "stubNotifier"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Perfeito pra desconto e frete. O teste quer saber o total; o banco só precisa responder alguma coisa."
+    },
+    {
+      "id": "016",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[O fake] é diferente: ele funciona de verdade. Grava num mapa em memória, e busca de volta.",
+      "pronunciation": "[O fêique] é diferente: ele funciona de verdade. Grava num mapa em memória, e busca de volta.",
+      "beats": [
+        {
+          "highlight": [
+            "class InMemoryOrderRepository",
+            "this.rows.set",
+            "this.rows.get(id)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "017",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então dá pra testar se o pedido foi gravado com o total certo, sem banco nenhum."
+    },
+    {
+      "id": "018",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Isso. O fake guarda estado. É o dublê mais parecido com o real, e costuma ser o que mais rende.",
+      "pronunciation": "Isso. O fêique guarda estado. É o dublê mais parecido com o real, e costuma ser o que mais rende."
+    },
+    {
+      "id": "019",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "neutral",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "doubles-calls.ts",
+        "lines": [
+          "type Call = [email: string, total: number, saved: number];",
+          "",
+          "// Spy: anota cada chamada. O teste confere depois.",
+          "export class SpyNotifier implements Notifier {",
+          "  calls: Call[] = [];",
+          "  async orderConfirmed(...call: Call) { this.calls.push(call); }",
+          "}",
+          "",
+          "// Mock: já nasce sabendo o que esperar, e confere sozinho.",
+          "export class MockNotifier implements Notifier {",
+          "  private expected: Call;",
+          "  private called = 0;",
+          "  constructor(...expected: Call) { this.expected = expected; }",
+          "  async orderConfirmed(...call: Call) {",
+          "    assert.deepEqual(call, this.expected); // falha na hora, se vier diferente",
+          "    this.called++;",
+          "  }",
+          "  verify() { assert.equal(this.called, 1, 'esperava exatamente 1 aviso'); }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Os outros dois olham justamente isso: como a peça foi chamada."
+    },
+    {
+      "id": "020",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "[Spy] anota cada chamada, e o teste confere depois.",
+      "pronunciation": "[Spái] anota cada chamada, e o teste confere depois.",
+      "beats": [
+        {
+          "highlight": [
+            "class SpyNotifier",
+            "this.calls.push(call)"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "021",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "E o [mock] já nasce sabendo o que esperar. Se vier diferente, falha na hora. No fim, [o teste pede pra ele conferir].",
+      "pronunciation": "E o [móqui] já nasce sabendo o que esperar. Se vier diferente, falha na hora. No fim, [o teste pede pra ele conferir].",
+      "beats": [
+        {
+          "highlight": [
+            "class MockNotifier",
+            "assert.deepEqual(call, this.expected)"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "verify()"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "022",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Spy e mock não são a mesma coisa?",
+      "pronunciation": "Spái e móqui não são a mesma coisa?"
+    },
+    {
+      "id": "023",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Quase. Muda onde mora a expectativa. No spy, ela fica no teste. No mock, fica dentro do dublê.",
+      "pronunciation": "Quase. Muda onde mora a expectativa. No spái, ela fica no teste. No móqui, fica dentro do dublê."
+    },
+    {
+      "id": "024",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test mock.demo.ts",
+        "lines": []
+      },
+      "text": "Escrevi esse aqui: VIP na Black Friday, e o e-mail mostra trinta reais de economia. [Falhou].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ VIP na Black Friday: o e-mail mostra a economia",
+              "tone": "fail"
+            },
+            {
+              "text": "  + actual - expected",
+              "tone": "dim"
+            },
+            {
+              "text": "      'ana@exemplo.com',",
+              "tone": "dim"
+            },
+            {
+              "text": "      24000,",
+              "tone": "dim"
+            },
+            {
+              "text": "  +   6000",
+              "tone": "fail"
+            },
+            {
+              "text": "  -   3000",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "025",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "confused"
+      },
+      "text": "O mock reclamou no instante em que o serviço avisou o cliente. A economia foi de sessenta reais, não trinta.",
+      "pronunciation": "O móqui reclamou no instante em que o serviço avisou o cliente. A economia foi de sessenta reais, não trinta."
+    },
+    {
+      "id": "026",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Ah! Desconto não acumula: na Black Friday vale o maior, vinte por cento. O errado era o meu teste."
+    },
+    {
+      "id": "027",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Acontece. Às vezes o dublê pega o teste, e não o código. Pelo menos ele mostrou exatamente onde."
+    },
+    {
+      "id": "028",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "code",
+        "title": "checkout.test.ts",
+        "lines": [
+          "test('VIP ganha 10%', async () => {",
+          "  const mock = new MockNotifier('ana@exemplo.com', 27000, 3000);",
+          "  const { id, total } = await new OrderService(stubRepository(7), mock).checkout(cart(30000), ana, tuesday);",
+          "  assert.deepEqual([id, total], [7, 27000]);",
+          "  mock.verify();",
+          "});",
+          "test('Black Friday: vale o maior desconto', async () => {",
+          "  const service = new OrderService(stubRepository(1), stubNotifier);",
+          "  assert.equal((await service.checkout(cart(30000), ana, blackFriday)).total, 24000);",
+          "});",
+          "test('frete grátis pelo subtotal, antes do desconto', async () => {",
+          "  const service = new OrderService(stubRepository(1), stubNotifier);",
+          "  assert.equal((await service.checkout(cart(20000), ana, tuesday)).total, 18000);",
+          "});",
+          "test('grava o pedido com total e desconto', async () => {",
+          "  const repository = new InMemoryOrderRepository();",
+          "  const { id } = await new OrderService(repository, stubNotifier).checkout(cart(30000), ana, tuesday);",
+          "  assert.deepEqual(await repository.findById(id), { email: 'ana@exemplo.com', total: 27000, discount: 3000 });",
+          "});",
+          "test('avisa o cliente com total e economia', async () => {",
+          "  const spy = new SpyNotifier();",
+          "  await new OrderService(stubRepository(1), spy).checkout(cart(30000), ana, tuesday);",
+          "  assert.deepEqual(spy.calls, [['ana@exemplo.com', 27000, 3000]]);",
+          "});"
+        ],
+        "highlight": []
+      },
+      "text": "No teste, cada um no seu papel. [Mock e stub] no desconto VIP. [O fake] no pedido gravado. [O spy] no aviso.",
+      "pronunciation": "No teste, cada um no seu papel. [Móqui e stâb] no desconto VIP. [O fêique] no pedido gravado. [O spái] no aviso.",
+      "beats": [
+        {
+          "highlight": [
+            "new MockNotifier(",
+            "stubRepository(7)"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "new InMemoryOrderRepository()"
+          ],
+          "sfx": "pop"
+        },
+        {
+          "highlight": [
+            "new SpyNotifier()",
+            "spy.calls"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "029",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test checkout.test.ts",
+        "lines": []
+      },
+      "text": "Hora da verdade. [Os mesmos seis testes].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ pedido sem itens é recusado (8.822971ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ VIP ganha 10% (0.566745ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Black Friday: vale o maior desconto (0.112231ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ frete grátis pelo subtotal, antes do desconto",
+              "tone": "ok"
+            },
+            {
+              "text": "    (0.094653ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ grava o pedido com total e desconto (0.228431ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ avisa o cliente com total e economia (0.154897ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "ℹ tests 6   ℹ pass 6   ℹ fail 0",
+              "tone": "dim"
+            },
+            {
+              "text": "ℹ duration_ms 152.696822",
+              "tone": "ok"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "030",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Cento e cinquenta milissegundos no total, e quase tudo é o Node acordando. Cada teste, menos de um milissegundo.",
+      "pronunciation": "Cento e cinquenta milissegundos no total, e quase tudo é o nôude acordando. Cada teste, menos de um milissegundo."
+    },
+    {
+      "id": "031",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "De quase cinco segundos pra isso. E o checkout não mudou nada.",
+      "pronunciation": "De quase cinco segundos pra isso. E o chéquiaute não mudou nada."
+    },
+    {
+      "id": "032",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Mas pera. Se tudo é dublê, como eu sei que o Postgres funciona?",
+      "pronunciation": "Mas pera. Se tudo é dublê, como eu sei que o póstgres funciona?"
+    },
+    {
+      "id": "033",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "repository-contract.ts",
+        "lines": [
+          "export function orderRepositoryContract(name: string, make: () => OrderRepository) {",
+          "  test(`${name}: o que foi salvo volta igual`, async () => {",
+          "    const repository = make();",
+          "    const id = await repository.save({ email: 'ana@exemplo.com', total: 27000, discount: 3000 });",
+          "    assert.deepEqual(await repository.findById(id), { email: 'ana@exemplo.com', total: 27000, discount: 3000 });",
+          "  });",
+          "  test(`${name}: id desconhecido não existe`, async () => {",
+          "    assert.equal(await make().findById(999), undefined);",
+          "  });",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Com um teste de contrato. O mesmo teste roda contra o fake e contra o Postgres.",
+      "pronunciation": "Com um teste de contrato. O mesmo teste roda contra o fêique e contra o póstgres."
+    },
+    {
+      "id": "034",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test contract.test.ts",
+        "lines": []
+      },
+      "text": "[Os dois cumprem o contrato]. O do Postgres é lento, então roda em menos lugares: antes de publicar, não a cada tecla.",
+      "pronunciation": "[Os dois cumprem o contrato]. O do póstgres é lento, então roda em menos lugares: antes de publicar, não a cada tecla.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✔ fake: o que foi salvo volta igual (0.958683ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ fake: id desconhecido não existe (0.111351ms)",
+              "tone": "ok"
+            },
+            {
+              "text": "✔ Postgres: o que foi salvo volta igual",
+              "tone": "ok"
+            },
+            {
+              "text": "    (241.383214ms)",
+              "tone": "dim"
+            },
+            {
+              "text": "✔ Postgres: id desconhecido não existe",
+              "tone": "ok"
+            },
+            {
+              "text": "    (120.714445ms)",
+              "tone": "dim"
+            },
+            {
+              "text": "ℹ tests 4   ℹ pass 4   ℹ fail 0",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "035",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Então o contrato garante que o fake não mente.",
+      "pronunciation": "Então o contrato garante que o fêique não mente."
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Garante que ele se comporta como o real naquilo que o domínio usa. O resto, o adaptador testa sozinho."
+    },
+    {
+      "id": "037",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "text": "Então a regra é mockar tudo?",
+      "pronunciation": "Então a regra é usar móqui pra tudo?"
+    },
+    {
+      "id": "038",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Mock pra tudo",
+          "text": "O teste confere cada chamada interna. Refatorou sem mudar o resultado? Quebra."
+        },
+        "right": {
+          "title": "Cada dublê no seu papel",
+          "text": "Fake e stub para estado e respostas. Spy e mock quando a chamada é o objetivo."
+        }
+      },
+      "text": "Cuidado. Teste que confere cada chamada interna quebra quando você refatora sem mudar o resultado. Fake e stub pra estado; spy e mock só quando a chamada é o próprio objetivo, como avisar o cliente.",
+      "pronunciation": "Cuidado. Teste que confere cada chamada interna quebra quando você refatora sem mudar o resultado. Fêique e stâb pra estado; spái e móqui só quando a chamada é o próprio objetivo, como avisar o cliente."
+    },
+    {
+      "id": "039",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "summary",
+        "title": "Resumo",
+        "shown": 0,
+        "items": [
+          "Dummy ocupa, stub responde, fake funciona",
+          "Spy anota, mock já sabe o que esperar",
+          "Teste de contrato mantém o fake honesto",
+          "4,9 s → 0,15 s sem mudar o checkout"
+        ]
+      },
+      "text": "[Dummy ocupa, stub responde, fake funciona]. [Spy anota, mock já sabe o que esperar].",
+      "pronunciation": "[Dâmi ocupa, stâb responde, fêique funciona]. [Spái anota, móqui já sabe o que esperar].",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        },
+        {
+          "shown": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "040",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "look": "camera",
+      "text": "[O contrato mantém o fake honesto]. E [a suíte caiu de quase cinco segundos pra menos de dois décimos].",
+      "pronunciation": "[O contrato mantém o fêique honesto]. E [a suíte caiu de quase cinco segundos pra menos de dois décimos].",
+      "beats": [
+        {
+          "shown": 3,
+          "sfx": "pop"
+        },
+        {
+          "shown": 4,
+          "sfx": "success"
+        }
+      ]
+    },
+    {
+      "id": "041",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E os cinco segundos do começo, eram o quê?"
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Espera. Rede, não regra. E só deu pra tirar a espera porque, duas aulas atrás, a seta foi virada."
+    },
+    {
+      "id": "043",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Teste a regra sem esperar a rede.\nA rede ganha o teste dela."
+      },
+      "text": "Teste a regra sem esperar a rede. A rede ganha o teste dela."
+    },
+    {
+      "id": "044",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Meça a sua suíte: quanto é espera de rede?",
+          "Troque uma peça lenta por um fake ou um stub",
+          "Escreva um teste de contrato para o fake"
+        ]
+      },
+      "text": "Desafio: [mede a sua suíte]. Quanto daquele tempo é espera de rede?",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "045",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "[Troca uma peça lenta por um dublê], e [escreve o contrato] que mantém esse dublê honesto.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "Refatorando o sistema de pedidos inteiro: os cinco princípios juntos, com números antes e depois"
+        ],
+        "shown": 1
+      },
+      "text": "Na próxima aula: o sistema de pedidos inteiro, refatorado com os cinco princípios. Com números de antes e depois."
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "O checkout da aula um vai levar um susto.",
+      "pronunciation": "O chéquiaute da aula um vai levar um susto."
+    },
+    {
+      "id": "048",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até a próxima!"
+    }
+  ]
+}

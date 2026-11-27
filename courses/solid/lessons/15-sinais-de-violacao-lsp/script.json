@@ -1,0 +1,1112 @@
+{
+  "chapters": [
+    "A busca",
+    "Perguntar o tipo",
+    "Não suportado",
+    "O vazio",
+    "O comentário",
+    "Falso alarme",
+    "A lição",
+    "Desafio"
+  ],
+  "lines": [
+    {
+      "id": "001",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "grep -rnoEf sinais.txt loja/",
+        "lines": []
+      },
+      "text": "Uma busca de dez segundos no código de pagamentos. [Sete resultados]. E todos os testes passam.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "loja/payment.ts:11:ATENÇÃO",
+              "tone": "fail"
+            },
+            {
+              "text": "loja/payment.ts:14:ATENÇÃO",
+              "tone": "fail"
+            },
+            {
+              "text": "loja/support.ts:5:instanceof GiftCardPayment",
+              "tone": "fail"
+            },
+            {
+              "text": "loja/support.ts:6:instanceof PixPayment",
+              "tone": "fail"
+            },
+            {
+              "text": "loja/receipt.ts:5:constructor.name",
+              "tone": "fail"
+            },
+            {
+              "text": "loja/methods.ts:14:não suporta captura",
+              "tone": "fail"
+            },
+            {
+              "text": "loja/orders.ts:5:instanceof BoletoPayment",
+              "tone": "fail"
+            }
+          ],
+          "sfx": "dings"
+        }
+      ]
+    },
+    {
+      "id": "002",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "Sete linhas dizendo que essa herança não substitui. E ainda falta o pior sinal, aquele que busca nenhuma acha."
+    },
+    {
+      "id": "003",
+      "chapter": 1,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Metade dessas linhas fui eu, consertando as duas últimas aulas."
+    },
+    {
+      "id": "004",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Normal. Cada um resolveu um problema real, com pressa. A pergunta é por que precisou de tantos."
+    },
+    {
+      "id": "005",
+      "chapter": 1,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "title",
+        "overline": "Téo e Lia explicam SOLID · Aula 15",
+        "title": "Sete linhas que denunciam uma herança quebrada",
+        "subtitle": "Sinais de violação de Liskov"
+      },
+      "text": "Então hoje é caça: os quatro sinais de que um subtipo não cumpre o contrato, no código de verdade."
+    },
+    {
+      "id": "006",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "symptoms",
+        "shown": 0,
+        "items": [
+          {
+            "name": "Pergunta o tipo",
+            "description": "instanceof ou switch pela classe"
+          },
+          {
+            "name": "Não suportado",
+            "description": "o método lança em vez de cumprir"
+          },
+          {
+            "name": "Override que ignora",
+            "description": "corpo vazio ou devolve null"
+          },
+          {
+            "name": "Comentário \"não chame\"",
+            "description": "o contrato escrito só para gente"
+          }
+        ]
+      },
+      "text": "Primeiro sinal: [perguntar o tipo].",
+      "beats": [
+        {
+          "shown": 1,
+          "focus": 0,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "007",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "orders.ts",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "import { BoletoPayment } from './methods.ts';",
+          "",
+          "export function shipOrder(payment: Payment, now: Date) {",
+          "  if (!(payment instanceof BoletoPayment)) payment.capture(now);",
+          "}"
+        ],
+        "highlight": [
+          "instanceof BoletoPayment"
+        ]
+      },
+      "text": "O envio. Boleto não tem captura, então eu pulo."
+    },
+    {
+      "id": "008",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "support.ts",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "import { PixPayment, GiftCardPayment, daysSince } from './methods.ts';",
+          "",
+          "export function refundFromSupport(payment: Payment, value: number, now: Date) {",
+          "  if (payment instanceof GiftCardPayment) return 'Abrir chamado no financeiro';",
+          "  if (payment instanceof PixPayment && daysSince(payment.capturedAt!, now) > 90)",
+          "    return 'Pix vencido: oferecer crédito na loja';",
+          "  payment.refund(value, now);",
+          "  return `Estornado: R$ ${(payment.refunded / 100).toFixed(2).replace('.', ',')}`;",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E o atendimento já tem [um caminho pra cada tipo].",
+      "beats": [
+        {
+          "highlight": [
+            "instanceof GiftCardPayment",
+            "instanceof PixPayment"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "009",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Se quem usa precisa saber qual subtipo chegou, o subtipo não está substituindo nada. E todo pagamento novo obriga a editar esses lugares."
+    },
+    {
+      "id": "010",
+      "chapter": 2,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Pera aí. Isso é o aberto-fechado quebrando de novo."
+    },
+    {
+      "id": "011",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "É. Quebrar Liskov quase sempre empurra o problema pro O.",
+      "pronunciation": "É. Quebrar Líscov quase sempre empurra o problema pro Ó."
+    },
+    {
+      "id": "012",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking",
+        "pose": "think"
+      },
+      "scene": {
+        "type": "code",
+        "title": "receipt.ts",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "",
+          "// Texto do comprovante: quanto tempo o cliente tem para pedir estorno.",
+          "export function refundPolicy(payment: Payment) {",
+          "  switch (payment.constructor.name) {",
+          "    case 'PixPayment': return 'Estorno em até 90 dias';",
+          "    case 'GiftCardPayment': return 'Estorno pelo atendimento';",
+          "    default: return 'Estorno a qualquer momento';",
+          "  }",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "E esse aqui não tem instanceof nenhum. Onde está a pergunta?",
+      "pronunciation": "E esse aqui não tem instance óf nenhum. Onde está a pergunta?",
+      "holdAfter": {
+        "seconds": 3,
+        "label": "Ache o sinal"
+      }
+    },
+    {
+      "id": "013",
+      "chapter": 2,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "[No switch pelo nome da classe]. A mesma pergunta, disfarçada. Por isso a busca também procura nome de classe em texto.",
+      "beats": [
+        {
+          "highlight": [
+            "constructor.name",
+            "case 'PixPayment'",
+            "case 'GiftCardPayment'"
+          ],
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "014",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "symptoms",
+        "shown": 1,
+        "focus": 0,
+        "items": [
+          {
+            "name": "Pergunta o tipo",
+            "description": "instanceof ou switch pela classe"
+          },
+          {
+            "name": "Não suportado",
+            "description": "o método lança em vez de cumprir"
+          },
+          {
+            "name": "Override que ignora",
+            "description": "corpo vazio ou devolve null"
+          },
+          {
+            "name": "Comentário \"não chame\"",
+            "description": "o contrato escrito só para gente"
+          }
+        ]
+      },
+      "text": "Segundo sinal: [o método que lança \"não suportado\"].",
+      "beats": [
+        {
+          "shown": 2,
+          "focus": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "015",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "explain",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "methods.ts",
+        "lines": [
+          "export class BoletoPayment extends Payment {",
+          "  capture(now: Date) {",
+          "    throw new Error('boleto não suporta captura');",
+          "  }",
+          "}",
+          "",
+          "export class GiftCardPayment extends Payment {",
+          "  refund(value: number, now: Date) {",
+          "    // cartão-presente: o estorno é feito à mão pelo financeiro",
+          "  }",
+          "}"
+        ],
+        "highlight": [
+          "não suporta captura"
+        ]
+      },
+      "text": "Boleto não tem captura: quem confirma é o banco. Lançar erro é honesto, né?"
+    },
+    {
+      "id": "016",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "É honesto. Mas é a pré-condição mais forte que existe: não me chame. E quem escreve código novo só lê a base."
+    },
+    {
+      "id": "017",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "jobs.ts  (código novo)",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "",
+          "// Código NOVO, escrito por quem só leu a classe base:",
+          "// toda noite, captura os pedidos que saíram para entrega.",
+          "export function captureShipped(payments: Payment[], now: Date) {",
+          "  for (const p of payments) if (p.status === 'authorized') p.capture(now);",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Como esse job novo: toda noite, captura o que saiu pra entrega.",
+      "pronunciation": "Como essa rotina nova: toda noite, captura o que saiu pra entrega."
+    },
+    {
+      "id": "018",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "surprised",
+      "pose": "shrug",
+      "reaction": {
+        "expression": "worried"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test jobs.demo.ts",
+        "lines": []
+      },
+      "text": "E [quebra no primeiro boleto].",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ job da noite captura os pedidos enviados",
+              "tone": "fail"
+            },
+            {
+              "text": "  Error: boleto não suporta captura",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "019",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Mas cartão também pode ser recusado. Todo erro é sinal?"
+    },
+    {
+      "id": "020",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Não. A recusa está no contrato da base: qualquer cartão pode ser recusado, e quem chama se prepara. \"Não suportado\" é o subtipo recusando o próprio contrato."
+    },
+    {
+      "id": "021",
+      "chapter": 3,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E se a própria base avisasse que nem todo pagamento captura?"
+    },
+    {
+      "id": "022",
+      "chapter": 3,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "text": "Aí já é outro desenho, e é pra lá que a gente vai na aula dezesseis: quem não captura nem deveria ter o método."
+    },
+    {
+      "id": "023",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "symptoms",
+        "shown": 2,
+        "focus": 1,
+        "items": [
+          {
+            "name": "Pergunta o tipo",
+            "description": "instanceof ou switch pela classe"
+          },
+          {
+            "name": "Não suportado",
+            "description": "o método lança em vez de cumprir"
+          },
+          {
+            "name": "Override que ignora",
+            "description": "corpo vazio ou devolve null"
+          },
+          {
+            "name": "Comentário \"não chame\"",
+            "description": "o contrato escrito só para gente"
+          }
+        ]
+      },
+      "text": "Terceiro sinal, e o pior: [o override que não faz nada].",
+      "beats": [
+        {
+          "shown": 3,
+          "focus": 2,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "024",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "methods.ts",
+        "lines": [
+          "export class GiftCardPayment extends Payment {",
+          "  refund(value: number, now: Date) {",
+          "    // cartão-presente: o estorno é feito à mão pelo financeiro",
+          "  }",
+          "}"
+        ],
+        "highlight": [
+          "estorno é feito à mão"
+        ]
+      },
+      "text": "Cartão-presente: o estorno é manual, então deixei vazio. Esse não quebra nada."
+    },
+    {
+      "id": "025",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "skeptical",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "code",
+        "title": "returns.ts  (código novo)",
+        "lines": [
+          "import type { Payment } from './payment.ts';",
+          "",
+          "// Código NOVO: devolução de produto. Estorna e marca o pedido como reembolsado.",
+          "export function returnProduct(payment: Payment, value: number, now: Date) {",
+          "  payment.refund(value, now);",
+          "  return { status: 'reembolsado', refunded: payment.refunded };",
+          "}"
+        ],
+        "highlight": []
+      },
+      "text": "Não quebra. Agora olha a devolução de produto, outro código novo, escrito pra qualquer pagamento."
+    },
+    {
+      "id": "026",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "worried",
+      "pose": "point",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "terminal",
+        "command": "node --test returns.demo.ts",
+        "lines": []
+      },
+      "text": "[Zero]. O pedido fica como reembolsado, e o cliente não recebe nada.",
+      "beats": [
+        {
+          "lines": [
+            {
+              "text": "✖ devolução de cartão-presente devolve R$ 50",
+              "tone": "fail"
+            },
+            {
+              "text": "  Expected values to be strictly equal:",
+              "tone": "dim"
+            },
+            {
+              "text": "  0 !== 5000",
+              "tone": "fail"
+            },
+            {
+              "text": "ℹ tests 1   ℹ pass 0   ℹ fail 1",
+              "tone": "dim"
+            }
+          ],
+          "sfx": "error"
+        }
+      ]
+    },
+    {
+      "id": "027",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "worried"
+      },
+      "text": "E nenhum erro. Nenhum aviso."
+    },
+    {
+      "id": "028",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Por isso é o pior. O \"não suportado\" explode no teste; o vazio só aparece quando o cliente reclama. E é esse que nenhuma busca acha. Devolver nulo onde a base devolve um valor é da mesma família."
+    },
+    {
+      "id": "029",
+      "chapter": 4,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "O teste de contrato da aula passada pegaria esse?"
+    },
+    {
+      "id": "030",
+      "chapter": 4,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Na hora. A pós-condição diz que o valor estornado sobe. O vazio não sobe nada, e o teste fica vermelho."
+    },
+    {
+      "id": "031",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "symptoms",
+        "shown": 3,
+        "focus": 2,
+        "items": [
+          {
+            "name": "Pergunta o tipo",
+            "description": "instanceof ou switch pela classe"
+          },
+          {
+            "name": "Não suportado",
+            "description": "o método lança em vez de cumprir"
+          },
+          {
+            "name": "Override que ignora",
+            "description": "corpo vazio ou devolve null"
+          },
+          {
+            "name": "Comentário \"não chame\"",
+            "description": "o contrato escrito só para gente"
+          }
+        ]
+      },
+      "text": "Quarto sinal: [o comentário que avisa].",
+      "beats": [
+        {
+          "shown": 4,
+          "focus": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "032",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "confused",
+      "pose": "point",
+      "reaction": {
+        "expression": "skeptical"
+      },
+      "scene": {
+        "type": "code",
+        "title": "payment.ts",
+        "lines": [
+          "export class Payment {",
+          "  readonly amount: number;",
+          "  status: 'new' | 'authorized' | 'captured' = 'new';",
+          "  capturedAt: Date | null = null;",
+          "  refunded = 0;",
+          "  constructor(amount: number) { this.amount = amount; }",
+          "",
+          "  authorize() { this.status = 'authorized'; }",
+          "",
+          "  // ATENÇÃO: não chame capture() em boleto. Quem confirma boleto é o banco.",
+          "  capture(now: Date) { this.status = 'captured'; this.capturedAt = now; }",
+          "",
+          "  // ATENÇÃO: Pix só estorna em até 90 dias. Confira antes de chamar.",
+          "  refund(value: number, now: Date) {",
+          "    if (value <= 0 || value > this.amount - this.refunded) throw new Error('valor inválido');",
+          "    this.refunded += value;",
+          "  }",
+          "}",
+          "",
+          "export class CreditCardPayment extends Payment {}"
+        ],
+        "highlight": [
+          "ATENÇÃO"
+        ]
+      },
+      "text": "Mas eu documentei! Está escrito ali, em maiúsculas."
+    },
+    {
+      "id": "033",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Está escrito pra gente. O compilador não lê, o teste de contrato não lê, e quem chama pela base nem abre esse arquivo. É uma pré-condição mais forte, só que em português."
+    },
+    {
+      "id": "034",
+      "chapter": 5,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Um contrato que só vale se alguém ler."
+    },
+    {
+      "id": "035",
+      "chapter": 5,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "shrug",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "Comentário de aviso costuma nascer depois de um incidente. Alguém se queimou e deixou um bilhete pro próximo."
+    },
+    {
+      "id": "036",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "skeptical",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "Então todo instanceof é proibido?",
+      "pronunciation": "Então todo instance óf é proibido?"
+    },
+    {
+      "id": "037",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "versus",
+        "wrong": {
+          "title": "Sinal",
+          "text": "Usar o tipo para escolher o comportamento de uma hierarquia que é sua."
+        },
+        "right": {
+          "title": "Tudo bem",
+          "text": "Na borda: separar tipos de erro, validar um dado que chegou de fora."
+        }
+      },
+      "text": "Não. Na borda é normal: separar tipos de erro, ou validar um dado que chegou de fora. O sinal é usar o tipo pra escolher o comportamento de uma hierarquia que é sua."
+    },
+    {
+      "id": "038",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "happy",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tipo tratar cartão recusado diferente de queda de rede."
+    },
+    {
+      "id": "039",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Isso. Ali o tipo é a própria informação, não um remendo."
+    },
+    {
+      "id": "040",
+      "chapter": 6,
+      "speaker": "teo",
+      "expression": "thinking",
+      "pose": "raise",
+      "look": "other",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "text": "E um override que chama a base e só acrescenta um log?"
+    },
+    {
+      "id": "041",
+      "chapter": 6,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "Tudo bem. Faz tudo o que a base fazia e mais um pouco. Entrega mais, nunca menos, como na aula passada."
+    },
+    {
+      "id": "042",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "thinking",
+      "pose": "explain",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "symptoms",
+        "shown": 4,
+        "items": [
+          {
+            "name": "Pergunta o tipo",
+            "description": "instanceof ou switch pela classe"
+          },
+          {
+            "name": "Não suportado",
+            "description": "o método lança em vez de cumprir"
+          },
+          {
+            "name": "Override que ignora",
+            "description": "corpo vazio ou devolve null"
+          },
+          {
+            "name": "Comentário \"não chame\"",
+            "description": "o contrato escrito só para gente"
+          }
+        ]
+      },
+      "text": "Quatro sinais, uma causa só: o subtipo não cumpre o contrato da base, e alguém de fora fica compensando."
+    },
+    {
+      "id": "043",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "point",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "table",
+        "title": "O que cada sinal quebra",
+        "columns": [
+          "parte do contrato"
+        ],
+        "shownRows": 0,
+        "rows": [
+          {
+            "label": "Não suportado",
+            "cells": [
+              "pré mais forte: não me chame"
+            ]
+          },
+          {
+            "label": "Comentário \"não chame\"",
+            "cells": [
+              "pré mais forte, escondida"
+            ]
+          },
+          {
+            "label": "Override vazio ou null",
+            "cells": [
+              "pós mais fraca"
+            ]
+          },
+          {
+            "label": "Pergunta o tipo",
+            "cells": [
+              "o remendo, do lado de fora"
+            ]
+          }
+        ]
+      },
+      "text": "E dá pra ligar cada um à aula passada. [O \"não suportado\"] e [o comentário] são pré-condições mais fortes. [O vazio] é pós-condição mais fraca. E [o instanceof] é o remendo do lado de fora.",
+      "pronunciation": "E dá pra ligar cada um à aula passada. [O \"não suportado\"] e [o comentário] são pré-condições mais fortes. [O vazio] é pós-condição mais fraca. E [o instance óf] é o remendo do lado de fora.",
+      "beats": [
+        {
+          "shownRows": 1,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 2
+        },
+        {
+          "shownRows": 3,
+          "sfx": "pop"
+        },
+        {
+          "shownRows": 4,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "044",
+      "chapter": 7,
+      "speaker": "teo",
+      "expression": "worried",
+      "pose": "think",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "text": "E todo conserto meu foi no lugar errado: em quem usa, não no subtipo."
+    },
+    {
+      "id": "045",
+      "chapter": 7,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "quote",
+        "text": "Quando quem usa precisa saber qual subtipo chegou,\no subtipo já não substitui."
+      },
+      "text": "As sete linhas da busca não eram sete problemas. Era um só, vazando em sete lugares. Quando quem usa precisa saber qual subtipo chegou, o subtipo já não substitui.",
+      "pronunciation": "As sete linhas da busca não eram sete problemas. Era um só, vazando em sete lugares. Quando quem usa precisa saber qual subtipo chegou, o subtipo já não substitui."
+    },
+    {
+      "id": "046",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "point",
+      "look": "camera",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "challenge",
+        "title": "Desafio",
+        "shown": 0,
+        "items": [
+          "Busque instanceof e switch por tipo no seu projeto",
+          "Busque \"não suportado\" e comentários \"não chame\"",
+          "Procure overrides vazios ou que devolvem null"
+        ]
+      },
+      "text": "Desafio: [roda essa busca no seu projeto]. Instanceof e switch por tipo.",
+      "pronunciation": "Desafio: [roda essa busca no seu projeto]. Instance óf e suítch por tipo.",
+      "beats": [
+        {
+          "shown": 1,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "047",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "happy",
+      "pose": "explain",
+      "look": "camera",
+      "text": "Depois [\"não suportado\" e \"não chame\"]. E o difícil: [procurar os métodos vazios] na mão.",
+      "beats": [
+        {
+          "shown": 2,
+          "sfx": "pop"
+        },
+        {
+          "shown": 3,
+          "sfx": "pop"
+        }
+      ]
+    },
+    {
+      "id": "048",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "point",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "card",
+        "variant": "next",
+        "title": "Próxima aula",
+        "items": [
+          "Aula 16 · Corrigindo a hierarquia de pagamentos"
+        ],
+        "shown": 1
+      },
+      "text": "Na próxima, a gente conserta de verdade: a hierarquia inteira, com o teste de contrato passando pra todo mundo."
+    },
+    {
+      "id": "049",
+      "chapter": 8,
+      "speaker": "teo",
+      "expression": "excited",
+      "pose": "celebrate",
+      "look": "other",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "talk"
+      },
+      "text": "E eu apago os meus ifs."
+    },
+    {
+      "id": "050",
+      "chapter": 8,
+      "speaker": "lia",
+      "expression": "excited",
+      "pose": "wave",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited",
+        "pose": "wave",
+        "look": "camera"
+      },
+      "text": "Até lá!"
+    }
+  ]
+}
