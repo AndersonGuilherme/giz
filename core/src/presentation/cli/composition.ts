@@ -22,7 +22,9 @@ import { headlessShellIn } from '../../infrastructure/render/browserLocation.ts'
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
 import { RigCatalogFromRegistry } from '../rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../rigs/rigRegistry.ts';
-import { voiceOf } from './composition/voices.ts';
+import { voiceOf, type VoiceKeys } from './composition/voices.ts';
+import type { VoiceProvider } from '../../application/ports/VoiceProvider.ts';
+import { OwnRecordingFirst } from '../../infrastructure/voice/OwnRecordingFirst.ts';
 
 export function projectRepository(): ProjectRepository {
   return new DiskProjectRepository({ catalog: new RigCatalogFromRegistry(rigRegistry) });
@@ -33,6 +35,17 @@ const warn = (message: string) => console.log(`AVISO: ${message}`);
 export function generateVoices(folder: string, project: Project): GenerateVoices {
   const voice = voiceOf(folder, project);
   const aligner = new WhisperAligner(new EnvelopeAligner(), new WhisperListener(), warn);
+  return new GenerateVoices({ voice, phonemizer: new EspeakPhonemizer(), store: new DiskVoiceStore(folder), aligner });
+}
+
+/**
+ * The Studio's voices: the project voice with the Studio's keys, or another voice (its rehearsal voice); a line the
+ * person recorded comes from that take either way. `whisper` false aligns the words by the envelope only (no model).
+ */
+export function generateVoicesWith(folder: string, project: Project, options: Readonly<{ keys?: VoiceKeys; voice?: VoiceProvider; whisper?: boolean }>): GenerateVoices {
+  const voice = options.voice ? new OwnRecordingFirst(options.voice, folder) : voiceOf(folder, project, options.keys);
+  const envelope = new EnvelopeAligner();
+  const aligner = options.whisper === false ? envelope : new WhisperAligner(envelope, new WhisperListener(), warn);
   return new GenerateVoices({ voice, phonemizer: new EspeakPhonemizer(), store: new DiskVoiceStore(folder), aligner });
 }
 

@@ -1,4 +1,5 @@
 // Part of the composition point (see composition.ts): the image AI providers and the scenario images.
+import type { ImageProvider } from '../../../application/ports/ImageProvider.ts';
 import { GenerateScenarioImages } from '../../../application/use-cases/images/GenerateScenarioImages.ts';
 import { IMAGE_PROVIDERS, type ImageProviderName } from '../../../domain/ai/ImageProviderName.ts';
 import type { Project } from '../../../domain/project/Project.ts';
@@ -31,6 +32,11 @@ export function imageProviderOf(name: ImageProviderName, overrides: AiOverrides 
 export function scenarioImages(folder: string, name: ImageProviderName, overrides: AiOverrides = {}): Readonly<{ generate: GenerateScenarioImages; model: string }> {
   const images = imageProviderOf(name, overrides);
   return { generate: new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) }), model: images.identity().model };
+}
+
+/** The scenario images made with any image provider (the Studio's rehearsal painter): the same store and rules. */
+export function scenarioImagesWith(folder: string, images: ImageProvider): GenerateScenarioImages {
+  return new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) });
 }
 
 /** The project's `imageProvider`; without it, the first one with a key (OpenAI when none has, whose error says where to put it). */

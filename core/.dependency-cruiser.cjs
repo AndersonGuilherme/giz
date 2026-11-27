@@ -34,6 +34,13 @@ module.exports = {
       from: { path: PRESENTATION, pathNot: COMPOSITION },
       to: { path: INFRASTRUCTURE },
     },
+    {
+      name: 'studio-drawing-is-web-only',
+      comment: 'src/presentation/studio is drawn in the Studio window (a web page): nothing it reaches may need Node.',
+      severity: 'error',
+      from: { path: '^src/presentation/studio/' },
+      to: { reachable: true, path: '^(node:)?(fs|path|os|crypto|child_process|url|module|worker_threads|stream|util|zlib|http|https|net)(/|$)|^src/infrastructure/' },
+    },
   ],
   options: {
     tsConfig: { fileName: 'tsconfig.json' },

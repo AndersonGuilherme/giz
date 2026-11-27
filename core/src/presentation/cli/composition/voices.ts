@@ -9,6 +9,7 @@ import { FishVoice } from '../../../infrastructure/voice/external/FishVoice.ts';
 import type { ServiceDependencies } from '../../../infrastructure/voice/external/serviceRequest.ts';
 import { realWait } from '../../../infrastructure/http/serviceRequest.ts';
 import { LazyVoice } from '../../../infrastructure/voice/LazyVoice.ts';
+import { OwnRecordingFirst } from '../../../infrastructure/voice/OwnRecordingFirst.ts';
 import { RecordingVoice } from '../../../infrastructure/voice/RecordingVoice.ts';
 import { installConfig } from './install.ts';
 
@@ -19,18 +20,28 @@ async function qwenVoice(project: Project): Promise<VoiceProvider> {
   return new QwenVoice(installConfig(), project.voice().model);
 }
 
+/** A paid voice's key (the Studio's own key store; absent: the environment or ~/.config/giz); throws a readable error without one. */
+export type VoiceKeys = (service: ExternalService) => string;
+
+const cliVoiceKeys: VoiceKeys = (name) => apiKeyOf(name, { env: process.env, home: homedir() });
+
 // The key is read only when a line is generated (check and build need none) and never printed.
-function service(name: ExternalService): ServiceDependencies {
-  return { fetch, key: () => apiKeyOf(name, { env: process.env, home: homedir() }), wait: realWait };
+function service(name: ExternalService, keys: VoiceKeys): ServiceDependencies {
+  return { fetch, key: () => keys(name), wait: realWait };
 }
 
-const PROVIDERS: Readonly<Record<VoiceProviderName, (folder: string, project: Project) => VoiceProvider>> = {
-  qwen: (_folder, project) => new LazyVoice(() => qwenVoice(project)),
-  recording: (folder) => new RecordingVoice(folder),
-  elevenlabs: () => new ElevenLabsVoice(service('elevenlabs'), externalSettings(process.env)),
-  fish: () => new FishVoice(service('fish'), externalSettings(process.env)),
+type Source = Readonly<{ folder: string; project: Project; keys: VoiceKeys }>;
+
+const PROVIDERS: Readonly<Record<VoiceProviderName, (source: Source) => VoiceProvider>> = {
+  qwen: ({ project }) => new LazyVoice(() => qwenVoice(project)),
+  recording: ({ folder }) => new RecordingVoice(folder),
+  elevenlabs: ({ keys }) => new ElevenLabsVoice(service('elevenlabs', keys), externalSettings(process.env)),
+  fish: ({ keys }) => new FishVoice(service('fish', keys), externalSettings(process.env)),
 };
 
-export function voiceOf(folder: string, project: Project): VoiceProvider {
-  return PROVIDERS[project.voice().provider](folder, project);
+/** The project voice; a line the person recorded (`recordings/<id>.wav`) comes from that take, whatever the voice. */
+export function voiceOf(folder: string, project: Project, keys: VoiceKeys = cliVoiceKeys): VoiceProvider {
+  const provider = project.voice().provider;
+  const voice = PROVIDERS[provider]({ folder, project, keys });
+  return provider === 'recording' ? voice : new OwnRecordingFirst(voice, folder);
 }

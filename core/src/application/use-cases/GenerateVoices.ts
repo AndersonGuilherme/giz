@@ -12,6 +12,11 @@ import { currentVoice } from './voiceHash.ts';
 
 export type Progress = Readonly<{ done: number; total: number; lineId: string; generated: boolean }>;
 export type VoiceReport = { generated: string[]; skipped: string[] };
+/**
+ * `only`: just these lines (in script order; a current one is kept); `force`: make them again even when current;
+ * `signal`: checked before each line, so a cancel keeps what was made and calls nothing more.
+ */
+export type VoiceRun = Readonly<{ only?: readonly string[]; force?: boolean; signal?: AbortSignal }>;
 type Dependencies = Readonly<{ voice: VoiceProvider; phonemizer: Phonemizer; store: VoiceStore; aligner: Aligner }>;
 
 const nothingToDo = () => undefined;
@@ -24,23 +29,22 @@ export class GenerateVoices {
     this.#dependencies = dependencies;
   }
 
-  async run(project: Project, onProgress: (progress: Progress) => void = nothingToDo): Promise<VoiceReport> {
-    const script = project.script();
-    const all = script.lines();
-    const lines = all.each();
+  async run(project: Project, onProgress: (progress: Progress) => void = nothingToDo, options: VoiceRun = {}): Promise<VoiceReport> {
+    const lines = selectedLines(project, options.only);
     const report: VoiceReport = { generated: [], skipped: [] };
     for (const [index, line] of lines.entries()) {
-      const generated = await this.#process(project, line);
+      options.signal?.throwIfAborted();
+      const generated = await this.#process(project, line, options.force === true);
       (generated ? report.generated : report.skipped).push(line.id());
       onProgress({ done: index + 1, total: lines.length, lineId: line.id(), generated });
     }
     return report;
   }
 
-  async #process(project: Project, line: Line): Promise<boolean> {
+  async #process(project: Project, line: Line, force: boolean): Promise<boolean> {
     const { store, voice } = this.#dependencies;
     const { request, hash } = await currentVoice(project, line, voice);
-    if (store.savedHash(line.id()) === hash) return false;
+    if (!force && store.savedHash(line.id()) === hash) return false;
     await this.#save(line, request, hash);
     return true;
   }
@@ -66,6 +70,17 @@ export class GenerateVoices {
     const sequence = map.convert(ipa);
     return sequence.spreadOver(envelope.voicedFrames());
   }
+}
+
+// Every line, or only the named ones (each must exist: a wrong id is a readable error before any call).
+function selectedLines(project: Project, only: readonly string[] | undefined): readonly Line[] {
+  const script = project.script();
+  const all = script.lines();
+  const lines = all.each();
+  if (only === undefined) return lines;
+  const unknown = only.find((id) => !lines.some((line) => line.id() === id));
+  if (unknown !== undefined) throw new Error(`a fala "${unknown}" não existe no roteiro`);
+  return lines.filter((line) => only.includes(line.id()));
 }
 
 function processed(raw: Audio): Audio {

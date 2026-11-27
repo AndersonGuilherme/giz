@@ -59,7 +59,7 @@ O `giz` cria sozinho, dentro da pasta:
 
 - `voice/`: as vozes geradas, uma por fala (`<id>.wav` e as palavras com tempo). Só as falas que mudaram são geradas de novo.
 - `output/`: `video.mp4`, `captions.srt` e, com `build`, `props.json`.
-- `recordings/`: você cria esta pasta só se for gravar a própria voz (veja `voice.provider`).
+- `recordings/`: você cria esta pasta só se for gravar a própria voz (veja `voice.provider`). Com qualquer outra voz, uma fala que tenha a sua gravação (`recordings/<id-da-fala>.wav`) usa a gravação, e as demais usam a voz do projeto; apagar a gravação volta a fala para a voz do projeto.
 
 `voice/` e `output/` não vão para o git.
 
