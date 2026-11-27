@@ -9,9 +9,12 @@ export type GeneratedImage = Readonly<{ bytes: Uint8Array; mime: string }>;
 /** Which service and model make the images (part of the cache key: another model makes another image). */
 export type ImageModel = Readonly<{ provider: ImageProviderName; model: string }>;
 
+/** `signal`: aborting it stops the paid call in flight (and its download, and any retry); the call rejects with an AbortError. */
+export type ImageCallOptions = Readonly<{ signal?: AbortSignal }>;
+
 /** An image AI (GPT Image, Gemini, Flux...): the image of a request and, before calling, what it can cost. */
 export interface ImageProvider {
-  generate(request: ImageRequest): Promise<GeneratedImage>;
+  generate(request: ImageRequest, options?: ImageCallOptions): Promise<GeneratedImage>;
   estimate(request: ImageRequest): CostEstimate;
   identity(): ImageModel;
 }

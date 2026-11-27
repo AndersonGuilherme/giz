@@ -250,3 +250,39 @@ test('estimates: GPT Image by output tokens, Gemini per resolution class, Flux p
   assert.ok(Math.abs(provider(FAL_IMAGE_API, []).images.estimate(vertical).dollars()! - 0.165) < 1e-9);
   assert.equal(provider(FAL_IMAGE_API, [], { model: 'fal-ai/outro' }).images.estimate(vertical).isKnown(), false);
 });
+
+test('a cancel aborts the paid image call in flight: the signal reaches fetch, the abort is not retried', async () => {
+  const controller = new AbortController();
+  const calls: RequestInit[] = [];
+  const waits: number[] = [];
+  const hanging = (_url: string | URL | Request, init?: RequestInit) => {
+    calls.push(init ?? {});
+    return new Promise<Response>((_done, fail) => init?.signal?.addEventListener('abort', () => fail(init.signal?.reason), { once: true }));
+  };
+  const images = new HttpImageProvider(FAL_IMAGE_API, { fetch: hanging as typeof fetch, keys: keys(true), wait: async (milliseconds) => void waits.push(milliseconds) });
+  const answer = images.generate(vertical, { signal: controller.signal });
+  await new Promise((done) => setImmediate(done));
+  controller.abort();
+  await assert.rejects(answer, { name: 'AbortError' });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]!.signal, controller.signal);
+  assert.deepEqual(waits, []);
+});
+
+test('a cancel during the image download aborts it too; an already aborted signal sends nothing', async () => {
+  const controller = new AbortController();
+  const seen: Array<AbortSignal | null | undefined> = [];
+  const fetch = async (url: string | URL | Request, init?: RequestInit) => {
+    seen.push(init?.signal);
+    if (String(url).startsWith('https://fal.run')) return json(FAL_OK);
+    controller.abort();
+    throw init?.signal?.reason;
+  };
+  const images = new HttpImageProvider(FAL_IMAGE_API, { fetch: fetch as typeof globalThis.fetch, keys: keys(true), wait: async () => {} });
+  await assert.rejects(images.generate(vertical, { signal: controller.signal }), { name: 'AbortError' });
+  assert.deepEqual(seen, [controller.signal, controller.signal]);
+  const fake = fakeFetch([json(FAL_OK)]);
+  const idle = new HttpImageProvider(FAL_IMAGE_API, { fetch: fake.fetch, keys: keys(true), wait: async () => {} });
+  await assert.rejects(idle.generate(vertical, { signal: AbortSignal.abort() }), { name: 'AbortError' });
+  assert.equal(fake.calls.length, 0);
+});

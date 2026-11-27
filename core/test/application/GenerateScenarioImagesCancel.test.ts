@@ -54,6 +54,13 @@ test('a cancel while an image is being made: nothing is saved nor linked, the ne
   assert.deepEqual(store.linked, []);
 });
 
+test('the run passes its signal to the image AI, so a cancel can stop the paid call itself', async () => {
+  const controller = new AbortController();
+  const images = new FakeImageProvider();
+  await new GenerateScenarioImages({ images, store: new InMemoryScenarioImageStore() }).run(project(), { only: '1', signal: controller.signal });
+  assert.equal(images.signals[0], controller.signal);
+});
+
 test('an already aborted signal calls nothing', async () => {
   const images = new FakeImageProvider();
   const useCase = new GenerateScenarioImages({ images, store: new InMemoryScenarioImageStore() });

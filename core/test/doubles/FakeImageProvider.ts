@@ -1,4 +1,4 @@
-import type { GeneratedImage, ImageModel, ImageProvider, ImageRequest } from '../../src/application/ports/ImageProvider.ts';
+import type { GeneratedImage, ImageCallOptions, ImageModel, ImageProvider, ImageRequest } from '../../src/application/ports/ImageProvider.ts';
 import { CostEstimate } from '../../src/domain/ai/CostEstimate.ts';
 
 /** A PNG header of the size (the pixels are never read): enough for imageSize and the aspect check. */
@@ -15,14 +15,16 @@ export function pngOfSize(width: number, height: number): Uint8Array {
 /** Answers every request with a PNG of the size asked for and keeps the requests; never calls a service. */
 export class FakeImageProvider implements ImageProvider {
   readonly requests: ImageRequest[] = [];
+  readonly signals: Array<AbortSignal | undefined> = [];
   readonly #identity: ImageModel;
 
   constructor(identity: ImageModel = { provider: 'fal', model: 'fake-flux' }) {
     this.#identity = identity;
   }
 
-  async generate(request: ImageRequest): Promise<GeneratedImage> {
+  async generate(request: ImageRequest, options: ImageCallOptions = {}): Promise<GeneratedImage> {
     this.requests.push(request);
+    this.signals.push(options.signal);
     return { bytes: pngOfSize(request.size.width, request.size.height), mime: 'image/png' };
   }
 

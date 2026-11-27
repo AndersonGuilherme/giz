@@ -4,6 +4,8 @@ const APPLICATION = '^src/application/';
 const INFRASTRUCTURE = '^src/infrastructure/';
 const PRESENTATION = '^src/presentation/';
 const COMPOSITION = '^src/presentation/cli/composition(\\.ts|/[^/]+\\.ts)$';
+// Every Node built-in, as depcruise names them (fs, node:fs, fs/promises, node:test...).
+const NODE_BUILT_INS = `^(node:)?(${require('node:module').builtinModules.map((name) => name.replace(/^node:/, '')).join('|')})(/|$)`;
 
 module.exports = {
   forbidden: [
@@ -39,7 +41,14 @@ module.exports = {
       comment: 'src/presentation/studio is drawn in the Studio window (a web page): nothing it reaches may need Node.',
       severity: 'error',
       from: { path: '^src/presentation/studio/' },
-      to: { reachable: true, path: '^(node:)?(fs|path|os|crypto|child_process|url|module|worker_threads|stream|util|zlib|http|https|net)(/|$)|^src/infrastructure/' },
+      to: { dependencyTypes: ['core'] },
+    },
+    {
+      name: 'studio-drawing-reaches-no-node',
+      comment: 'Nor anything it reaches (reachable rules take no dependencyTypes, so every Node built-in is named) and no adapter.',
+      severity: 'error',
+      from: { path: '^src/presentation/studio/' },
+      to: { reachable: true, path: [NODE_BUILT_INS, '^src/infrastructure/'] },
     },
   ],
   options: {

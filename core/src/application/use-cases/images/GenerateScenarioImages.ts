@@ -5,7 +5,7 @@ import { imageJobs, type ImageDependencies, type ImageJob, type ImageSelection, 
 /** `status` of the scene once done: `pending` became a generated image, `current` was kept, `own` left alone. */
 export type ImageProgress = Readonly<{ done: number; total: number; lineId: string; status: ImageStatus }>;
 export type ImageReport = { generated: string[]; kept: string[]; own: string[] };
-/** The scenes to make, and a `signal` checked before each scene and before saving: a cancel saves and links nothing more. */
+/** The scenes to make, and a `signal` that aborts the image call in flight and is checked before each scene and before saving: a cancel saves and links nothing more. */
 export type ImageRun = ImageSelection & Readonly<{ signal?: AbortSignal }>;
 /** Before any paid call: how many images would be made, how many are current or the person's own, and the most it can cost. */
 export type ImageEstimate = Readonly<{ pending: number; current: number; own: number; cost: CostEstimate }>;
@@ -54,10 +54,10 @@ export class GenerateScenarioImages {
     await store.link([job.lineId]);
   }
 
-  // An answer that arrives after a cancel is thrown away (it was paid, but nothing changes on disk).
+  // The signal aborts the paid call itself; an answer that still arrives after a cancel is thrown away.
   async #generate(job: ImageJob, signal: AbortSignal | undefined): Promise<void> {
     const { images, store } = this.#dependencies;
-    const image = await images.generate(job.request);
+    const image = await images.generate(job.request, signal ? { signal } : {});
     signal?.throwIfAborted();
     await store.save({ lineId: job.lineId, image, hash: job.hash, madeBy: images.identity() });
   }
