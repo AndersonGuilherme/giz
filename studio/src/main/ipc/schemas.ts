@@ -3,6 +3,7 @@ import { onInterfaceLanguage, translate } from '../text.ts';
 import { ASPECTS, KEY_PROVIDERS, type ChannelName, type RequestOf } from '../../shared/contract.ts';
 import { DEVICES, IMAGE_PROVIDERS, INTERFACE_LANGUAGES, REMOTION_LICENSES, TEXT_PROVIDERS, VOICE_MODELS, VOICE_PROVIDERS } from '../../shared/settings.ts';
 import { SETUP_TASKS } from '../../shared/setup.ts';
+import { IDEA_REQUEST, SCENE_REQUEST, SCRIPT_REQUEST } from './scriptSchemas.ts';
 
 // zod's own messages (wrong type, unknown key, invalid option) in the interface language, following its changes.
 const ZOD_LOCALES = { 'pt-BR': z.locales.ptBR, en: z.locales.en } as const;
@@ -44,4 +45,19 @@ export const REQUEST_SCHEMAS: { readonly [Name in ChannelName]: z.ZodType<Reques
   'models.status': nothing,
   'setup.run': task,
   'setup.stop': task,
+  'projects.list': nothing,
+  'projects.create': IDEA_REQUEST,
+  'projects.duplicate': z.object({ folder }).strict(),
+  'projects.trash': z.object({ folder }).strict(),
+  'projects.stages': z.object({ folder }).strict(),
+  'ideas.presets': nothing,
+  'ideas.portraits': nothing,
+  'script.estimate': IDEA_REQUEST,
+  'script.generate': IDEA_REQUEST,
+  'script.cancel': nothing,
+  'script.read': z.object({ folder }).strict(),
+  'script.save': z.object({ folder, script: SCRIPT_REQUEST }).strict(),
+  'script.check': z.object({ folder }).strict(),
+  'script.vocabulary': nothing,
+  'script.checkScene': SCENE_REQUEST,
 };

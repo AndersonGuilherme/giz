@@ -3,6 +3,8 @@
 import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
 import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask } from './setup.ts';
+import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, StageBrief } from './projects.ts';
+import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
 export { KEY_PROVIDERS, type KeyProvider } from './accounts.ts';
 
@@ -10,9 +12,12 @@ export const ASPECTS = ['9:16', '16:9'] as const;
 export type Aspect = (typeof ASPECTS)[number];
 
 
-/** `details`: one readable line per problem (for example, each invalid field of a project). */
+/**
+ * `details`: one readable line per problem (for example, each invalid field of a project); `path`: a file or folder
+ * the failure left for the person (the draft of a script generation that never became valid).
+ */
 export type FailureCode = 'invalid-request' | 'invalid-project' | 'busy' | 'cancelled' | 'unavailable' | 'failed';
-export type Failure = Readonly<{ code: FailureCode; message: string; details: readonly string[] }>;
+export type Failure = Readonly<{ code: FailureCode; message: string; details: readonly string[]; path?: string }>;
 export type Result<T> = Readonly<{ ok: true; value: T }> | Readonly<{ ok: false; failure: Failure }>;
 
 export type ProjectSummary = Readonly<{
@@ -40,6 +45,7 @@ type FolderRequest = Readonly<{ folder: string }>;
 type ProviderRequest = Readonly<{ provider: KeyProvider }>;
 type SourceRequest = Readonly<{ source: FolderSource }>;
 type TaskRequest = Readonly<{ task: SetupTask }>;
+type IdeaRequest = Readonly<{ idea: IdeaFields }>;
 
 /** Every channel the window may invoke: what it sends and what it gets back (always wrapped in a `Result`). */
 export type Channels = Readonly<{
@@ -68,6 +74,28 @@ export type Channels = Readonly<{
   /** Runs a setup task to the end (progress on `setup.progress`); a stopped task answers `cancelled`. */
   'setup.run': Channel<TaskRequest, true>;
   'setup.stop': Channel<TaskRequest, boolean>;
+  /** The projects of the projects folder plus the folders opened from elsewhere, newest first. */
+  'projects.list': Channel<Nothing, readonly ProjectListing[]>;
+  /** A new project to write by hand, in the projects folder: answers its folder. */
+  'projects.create': Channel<IdeaRequest, string>;
+  /** A copy next to the project (without its rendered output): answers the copy's folder. */
+  'projects.duplicate': Channel<FolderRequest, string>;
+  /** Moves the project folder to the system trash. */
+  'projects.trash': Channel<FolderRequest, true>;
+  'projects.stages': Channel<FolderRequest, readonly StageBrief[]>;
+  'ideas.presets': Channel<Nothing, Presets>;
+  /** The ready characters' portraits (drawn once, then kept); null when they cannot be drawn. */
+  'ideas.portraits': Channel<Nothing, Portraits | null>;
+  'script.estimate': Channel<IdeaRequest, ScriptEstimate>;
+  /** Writes a new project with the text AI chosen in Settings (progress on `script.progress`); cancellable. */
+  'script.generate': Channel<IdeaRequest, GeneratedScript>;
+  'script.cancel': Channel<Nothing, boolean>;
+  'script.read': Channel<FolderRequest, ScriptDocument>;
+  /** Writes script.json (atomically) and answers the check and the stages. */
+  'script.save': Channel<FolderRequest & Readonly<{ script: ScriptJson }>, EditorReport>;
+  'script.check': Channel<FolderRequest, EditorReport>;
+  'script.vocabulary': Channel<Nothing, Vocabulary>;
+  'script.checkScene': Channel<Readonly<{ scene: unknown }>, readonly SceneProblem[]>;
 }>;
 
 export type ChannelName = keyof Channels;

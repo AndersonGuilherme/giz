@@ -1,18 +1,17 @@
 import { useTranslate } from '../i18n.ts';
 import { Brand } from './Brand.tsx';
 
-type Props = Readonly<{ opening: boolean; onOpen: () => void; onSettings: () => void }>;
+type Props = Readonly<{ atHome: boolean; onHome: () => void; onSettings: () => void }>;
 
-export function Header({ opening, onOpen, onSettings }: Props) {
+/** The giz mark, the way back to the projects and Settings. */
+export function Header({ atHome, onHome, onSettings }: Props) {
   const translate = useTranslate();
   return (
     <header className="header">
       <Brand />
       <div className="row">
+        {!atHome && <button type="button" className="chalk-button quiet" data-testid="go-home" onClick={onHome}>← {translate('home.title')}</button>}
         <button type="button" className="chalk-button quiet" data-testid="open-settings" onClick={onSettings}>⚙ {translate('app.settings')}</button>
-        <button type="button" className="chalk-button" onClick={onOpen} disabled={opening}>
-          {opening ? translate('project.opening') : translate('project.open')}
-        </button>
       </div>
     </header>
   );

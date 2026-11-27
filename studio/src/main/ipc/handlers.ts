@@ -1,17 +1,30 @@
+import type { IdeaService } from '../services/IdeaService.ts';
 import type { KeyService } from '../services/KeyService.ts';
 import type { ProjectService } from '../services/ProjectService.ts';
+import type { ProjectsService } from '../services/ProjectsService.ts';
+import type { ScriptService } from '../services/ScriptService.ts';
 import type { RenderService } from '../services/RenderService.ts';
 import type { SettingsService } from '../services/SettingsService.ts';
 import type { SetupService } from '../services/SetupService.ts';
+import { projectHandlers, scriptHandlers } from './projectHandlers.ts';
 import type { Handlers } from './registry.ts';
 
-export type Services = Readonly<{ projects: ProjectService; video: RenderService; keys: KeyService; settings: SettingsService; setup: SetupService }>;
+export type Services = Readonly<{
+  projects: ProjectService;
+  listing: ProjectsService;
+  ideas: IdeaService;
+  script: ScriptService;
+  video: RenderService;
+  keys: KeyService;
+  settings: SettingsService;
+  setup: SetupService;
+}>;
 
 /** The channel map: each channel name to the service call that answers it. */
-export function handlersOf({ projects, video, keys, settings, setup }: Services): Handlers {
+export function handlersOf({ projects, listing, ideas, script, video, keys, settings, setup }: Services): Handlers {
   return {
-    'projects.pick': () => projects.pick(),
-    'projects.launched': async () => projects.launched(),
+    ...projectHandlers(projects, listing),
+    ...scriptHandlers(ideas, script),
     'projects.open': ({ folder }) => projects.open(folder),
     'projects.check': ({ folder }) => projects.check(folder),
     'video.render': (request) => video.render(request),

@@ -4,6 +4,7 @@ import { ErrorBoundary } from './components/ErrorBoundary.tsx';
 import { Root } from './components/Root.tsx';
 import { giz } from './giz.ts';
 import './styles.css';
+import './screens.css';
 
 const root = document.getElementById('root');
 // The boundary's title is fixed text: when it shows, the translations may be what broke.

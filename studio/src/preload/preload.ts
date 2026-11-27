@@ -1,6 +1,7 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 import { RENDER_PROGRESS_EVENT, type ChannelName, type RequestOf, type ResponseOf, type Result } from '../shared/contract.ts';
 import type { GizApi } from '../shared/GizApi.ts';
+import { SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
 
 // Only invokes the named channels; the main process validates every payload with zod before using it.
@@ -21,6 +22,26 @@ const giz: GizApi = {
     launched: () => call('projects.launched', {}),
     open: (folder) => call('projects.open', { folder }),
     check: (folder) => call('projects.check', { folder }),
+    list: () => call('projects.list', {}),
+    create: (idea) => call('projects.create', { idea }),
+    duplicate: (folder) => call('projects.duplicate', { folder }),
+    trash: (folder) => call('projects.trash', { folder }),
+    stages: (folder) => call('projects.stages', { folder }),
+  },
+  ideas: {
+    presets: () => call('ideas.presets', {}),
+    portraits: () => call('ideas.portraits', {}),
+  },
+  script: {
+    estimate: (idea) => call('script.estimate', { idea }),
+    generate: (idea) => call('script.generate', { idea }),
+    cancel: () => call('script.cancel', {}),
+    onProgress: listen(SCRIPT_PROGRESS_EVENT),
+    read: (folder) => call('script.read', { folder }),
+    save: (folder, script) => call('script.save', { folder, script }),
+    check: (folder) => call('script.check', { folder }),
+    vocabulary: () => call('script.vocabulary', {}),
+    checkScene: (scene) => call('script.checkScene', { scene }),
   },
   video: {
     render: (folder, aspect) => call('video.render', { folder, aspect }),

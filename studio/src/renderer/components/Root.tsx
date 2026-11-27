@@ -8,16 +8,18 @@ import { SetupContext } from '../state/SetupContext.ts';
 import { useAccounts } from '../state/useAccounts.ts';
 import { useSettings } from '../state/useSettings.ts';
 import { useSetupJobs } from '../state/useSetupJobs.ts';
-import { App } from './App.tsx';
 import { FailurePanel } from './FailurePanel.tsx';
 import { SettingsScreen } from './settings/SettingsScreen.tsx';
+import { Studio, type View } from './Studio.tsx';
 import { FirstRunWizard } from './wizard/FirstRunWizard.tsx';
 
+// The Studio's own screen survives a visit to Settings: closing it goes back where the person was.
 function Screen({ api, settings }: Readonly<{ api: GizApi; settings: Settings }>) {
-  const [view, setView] = useState<'studio' | 'settings'>('studio');
+  const [inSettings, setInSettings] = useState(false);
+  const [view, setView] = useState<View>({ name: 'home' });
   if (settings.firstRun) return <FirstRunWizard />;
-  if (view === 'settings') return <SettingsScreen onClose={() => setView('studio')} />;
-  return <App api={api} onSettings={() => setView('settings')} />;
+  if (inSettings) return <SettingsScreen onClose={() => setInSettings(false)} />;
+  return <Studio api={api} view={view} go={setView} onSettings={() => setInSettings(true)} />;
 }
 
 function Loading({ failure }: Readonly<{ failure: Failure | null }>) {

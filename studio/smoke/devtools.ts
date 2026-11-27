@@ -56,10 +56,12 @@ export function devtools(url: string) {
     await send('Input.insertText', { text });
   };
   // The whole page in the picture: the viewport grows to the content height (at least the window's 1100×760).
-  const screenshot = async (file: string) => {
+  // `view`: only the window (at that size), as the person sees it; without it the whole page.
+  const screenshot = async (file: string, view?: Readonly<{ width: number; height: number }>) => {
     await pause(250);
     const height = Number(await evaluate('document.documentElement.scrollHeight'));
-    await send('Emulation.setDeviceMetricsOverride', { width: 1100, height: Math.max(760, height), deviceScaleFactor: 1, mobile: false });
+    const size = view ?? { width: 1100, height: Math.max(760, height) };
+    await send('Emulation.setDeviceMetricsOverride', { ...size, deviceScaleFactor: 1, mobile: false });
     await pause(250);
     const { data } = (await send('Page.captureScreenshot', { format: 'png' })) as { data: string };
     await send('Emulation.clearDeviceMetricsOverride');

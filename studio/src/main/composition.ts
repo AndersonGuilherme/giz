@@ -4,23 +4,32 @@ import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { app, type BrowserWindow } from 'electron';
 import { RENDER_PROGRESS_EVENT } from '../shared/contract.ts';
+import { SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
 import { ConfigFolderKeyFiles } from './adapters/ConfigFolderKeyFiles.ts';
 import { CoreKeyChecker } from './adapters/CoreKeyChecker.ts';
 import { CoreSetupTools } from './adapters/CoreSetupTools.ts';
 import { DialogFolderPicker } from './adapters/DialogFolderPicker.ts';
+import { DiskProjects } from './adapters/DiskProjects.ts';
 import { GizConfigStore } from './adapters/GizConfigStore.ts';
 import { GizCore } from './adapters/GizCore.ts';
+import { GizScriptCore } from './adapters/GizScriptCore.ts';
 import { JsonAppConfig } from './adapters/JsonAppConfig.ts';
 import { JsonKeyVault } from './adapters/JsonKeyVault.ts';
+import { JsonOpenedFolders } from './adapters/JsonOpenedFolders.ts';
 import { RehearsalKeyChecker } from './adapters/rehearsal/RehearsalKeyChecker.ts';
 import { RehearsalSetupTools } from './adapters/rehearsal/RehearsalSetupTools.ts';
+import { RehearsalTrash } from './adapters/rehearsal/RehearsalTrash.ts';
 import { SafeStorageCipher } from './adapters/SafeStorageCipher.ts';
+import { ShellTrash } from './adapters/ShellTrash.ts';
 import type { Services } from './ipc/handlers.ts';
 import { launchFolderOf } from './launchFolder.ts';
 import { FolderGrants } from './services/FolderGrants.ts';
+import { IdeaService } from './services/IdeaService.ts';
 import { KeyService } from './services/KeyService.ts';
 import { ProjectService } from './services/ProjectService.ts';
+import { ProjectsService } from './services/ProjectsService.ts';
+import { ScriptService } from './services/ScriptService.ts';
 import { RenderService } from './services/RenderService.ts';
 import { SettingsService } from './services/SettingsService.ts';
 import { SetupService } from './services/SetupService.ts';
@@ -65,6 +74,26 @@ function keysOf(): KeyService {
   return new KeyService({ cipher: new SafeStorageCipher(), vault, files, checker });
 }
 
+// Rehearsal mode moves a deleted project into the isolated home, never into the system trash.
+const trashOf = () => (STUDIO_PATHS.rehearsal ? new RehearsalTrash(join(STUDIO_PATHS.home, '.lixeira')) : new ShellTrash());
+
+type ScriptParts = Readonly<{ grants: FolderGrants; settings: SettingsService; keys: KeyService; slot: WindowSlot<BrowserWindow> }>;
+
+/** The home screen, the Idea and the Script stages, on core's script use cases. */
+function scriptServicesOf({ grants, settings, keys, slot }: ScriptParts): Pick<Services, 'listing' | 'ideas' | 'script'> {
+  const core = new GizScriptCore({ rehearsal: STUDIO_PATHS.rehearsal });
+  const disk = new DiskProjects();
+  const userData = app.getPath('userData');
+  const projectsFolder = async () => (await settings.get()).projectsFolder;
+  const opened = new JsonOpenedFolders(join(userData, 'projects.json'));
+  const listing = new ProjectsService({ core, disk, trash: trashOf(), grants, opened, projectsFolder });
+  const provider = async () => (await settings.get()).providers.text;
+  const progress = sendTo(slot, SCRIPT_PROGRESS_EVENT);
+  const newFolder = (theme: string) => listing.newFolder(theme);
+  const ideas = new IdeaService({ core, provider, keyOf: (name) => keys.keyOf(name), needsKey: !STUDIO_PATHS.rehearsal, newFolder, portraitsFolder: join(userData, 'portraits'), progress });
+  return { listing, ideas, script: new ScriptService({ core, disk, grants }) };
+}
+
 /** The services the IPC channels call, wired to core and to Electron; they reach the window through the slot. */
 export function createServices(slot: WindowSlot<BrowserWindow>): Services {
   const core = new GizCore();
@@ -72,11 +101,14 @@ export function createServices(slot: WindowSlot<BrowserWindow>): Services {
   const picker = new DialogFolderPicker(() => slot.current());
   const shared = new GizConfigStore(STUDIO_PATHS.gizConfig);
   const tools = STUDIO_PATHS.rehearsal ? new RehearsalSetupTools() : new CoreSetupTools();
+  const keys = keysOf();
+  const settings = settingsOf(grants, picker, shared);
   return {
     projects: new ProjectService({ core, picker, grants, launchFolder: launchFolderIn(grants) }),
+    ...scriptServicesOf({ grants, settings, keys, slot }),
     video: new RenderService({ core, grants, progress: sendTo(slot, RENDER_PROGRESS_EVENT) }),
-    keys: keysOf(),
-    settings: settingsOf(grants, picker, shared),
+    keys,
+    settings,
     setup: new SetupService({ tools, shared, progress: sendTo(slot, SETUP_PROGRESS_EVENT) }),
   };
 }

@@ -1,5 +1,11 @@
-import portuguese from './pt-BR.json' with { type: 'json' };
-import english from './en.json' with { type: 'json' };
+import portugueseBase from './pt-BR.json' with { type: 'json' };
+import englishBase from './en.json' with { type: 'json' };
+import portugueseScript from './script.pt-BR.json' with { type: 'json' };
+import englishScript from './script.en.json' with { type: 'json' };
+
+// One file per area (the first run and Settings; the projects, the idea and the script), merged per language.
+const portuguese = { ...portugueseBase, ...portugueseScript };
+const english = { ...englishBase, ...englishScript };
 
 /** The interface languages; pt-BR is the default until Settings (S2) lets the person choose. */
 export type InterfaceLanguage = 'pt-BR' | 'en';
@@ -15,4 +21,9 @@ export const DEFAULT_LANGUAGE: InterfaceLanguage = 'pt-BR';
 export function translator(language: InterfaceLanguage = DEFAULT_LANGUAGE): Translate {
   const messages = MESSAGES[language];
   return (key, values = {}) => messages[key].replace(/\{(\w+)\}/g, (whole, name: string) => String(values[name] ?? whole));
+}
+
+/** Whether a key exists (a value from core's lists may have no label yet: then the value itself is shown). */
+export function hasMessage(key: string): key is MessageKey {
+  return Object.hasOwn(MESSAGES[DEFAULT_LANGUAGE], key);
 }

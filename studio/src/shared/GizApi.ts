@@ -2,6 +2,8 @@ import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.t
 import type { Aspect, CheckReport, ProjectSummary, RenderedFiles, RenderProgress, Result } from './contract.ts';
 import type { FolderSource, Settings, SettingsPatch } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from './setup.ts';
+import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, ScriptProgress, StageBrief } from './projects.ts';
+import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
 type Reply<T> = Promise<Result<T>>;
 
@@ -12,6 +14,27 @@ export type GizApi = Readonly<{
     launched(): Reply<string | null>;
     open(folder: string): Reply<ProjectSummary>;
     check(folder: string): Reply<CheckReport>;
+    list(): Reply<readonly ProjectListing[]>;
+    create(idea: IdeaFields): Reply<string>;
+    duplicate(folder: string): Reply<string>;
+    trash(folder: string): Reply<true>;
+    stages(folder: string): Reply<readonly StageBrief[]>;
+  }>;
+  ideas: Readonly<{
+    presets(): Reply<Presets>;
+    portraits(): Reply<Portraits | null>;
+  }>;
+  script: Readonly<{
+    estimate(idea: IdeaFields): Reply<ScriptEstimate>;
+    generate(idea: IdeaFields): Reply<GeneratedScript>;
+    cancel(): Reply<boolean>;
+    /** Calls `listener` before each call of the running generation; returns the function that stops listening. */
+    onProgress(listener: (progress: ScriptProgress) => void): () => void;
+    read(folder: string): Reply<ScriptDocument>;
+    save(folder: string, script: ScriptJson): Reply<EditorReport>;
+    check(folder: string): Reply<EditorReport>;
+    vocabulary(): Reply<Vocabulary>;
+    checkScene(scene: unknown): Reply<readonly SceneProblem[]>;
   }>;
   video: Readonly<{
     render(folder: string, aspect: Aspect): Reply<RenderedFiles>;

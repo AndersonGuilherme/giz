@@ -11,3 +11,9 @@ export function formatBytes(bytes: number, language: InterfaceLanguage): string 
   const number = new Intl.NumberFormat(language, { minimumFractionDigits: digits, maximumFractionDigits: digits }).format(value);
   return `${number} ${big ? 'GB' : 'MB'}`;
 }
+
+/** "US$ 0,13" / "$0.13": two decimals, or four below a cent (an estimate that small still says something). */
+export function formatDollars(dollars: number, language: InterfaceLanguage): string {
+  const digits = dollars > 0 && dollars < 0.01 ? 4 : 2;
+  return new Intl.NumberFormat(language, { style: 'currency', currency: 'USD', minimumFractionDigits: digits, maximumFractionDigits: digits }).format(dollars);
+}

@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { devtools, poll, type Page } from './devtools.ts';
+import { duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
 const FOLDER = resolve(STUDIO, '../core/examples/coupon-lesson/pt-BR');
@@ -38,9 +39,12 @@ async function pageTarget(): Promise<Target | undefined> {
 const json = async (file: string) => JSON.parse(await readFile(file, 'utf8'));
 const shots: string[] = [];
 
+// The S3 screens are shown as the window shows them (a long script is taller than any screen).
+const S3_VIEW = { width: 1280, height: 860 };
+
 async function shoot(page: Page, name: string): Promise<void> {
   const file = join(SHOTS, `${name}.png`);
-  await page.screenshot(file);
+  await page.screenshot(file, name.startsWith('s3-') ? S3_VIEW : undefined);
   shots.push(file);
 }
 
@@ -186,6 +190,19 @@ async function settings(page: Page): Promise<void> {
   await page.until('[data-testid="check-report"]');
 }
 
+// S3: the projects, the new-project wizard and the script editor (in pt-BR; Settings then switches to English).
+async function scriptStage(page: Page): Promise<void> {
+  const context = { page, shoot, home: HOME };
+  await shoot(page, 's3-00-editor-aula');
+  await projectsList(context);
+  await writeByHand(context);
+  const folder = await editLines(context);
+  await undoMoveAndScene(context, folder);
+  await duplicateAndTrash(context);
+  await generateWithAi(context);
+  await failAndCancel(context);
+}
+
 let lastPage: Page | undefined;
 
 async function smoke(): Promise<void> {
@@ -195,7 +212,9 @@ async function smoke(): Promise<void> {
   await mkdir(SHOTS, { recursive: true });
   for (const step of [languageStep, projectsStep, gpuStep, modelsStep, accountsStep, licenseStep]) await step(page);
   const bridge = await studio(page);
+  await scriptStage(page);
   await settings(page);
+  await inEnglish({ page, shoot, home: HOME });
   page.close();
   console.log(JSON.stringify({ window: target.url, ...bridge, screenshots: shots }, null, 1));
 }
