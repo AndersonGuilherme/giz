@@ -7,6 +7,7 @@ import { Frame } from '../../domain/values/Time.ts';
 import { CaptionView } from '../captions/captionRegistry.tsx';
 import { sceneRegistry } from '../scenes/scenes.ts';
 import type { ScenePreviewProps } from './previewScene.ts';
+import { useBundledFonts } from './bundledFonts.ts';
 import { previewState } from './previewState.ts';
 
 /** Size and length come from the props: `aspect` picks 1080×1920 or 1920×1080, `frames` the duration. */
@@ -23,6 +24,7 @@ const PreviewCaption: FC<Readonly<{ caption: NonNullable<ScenePreviewProps['capt
 
 /** One scene JSON alone, for N frames, with fixed character states (no audio): for checking a scene by eye. */
 export const ScenePreview: FC<ScenePreviewProps> = ({ scene, aspect, language = 'pt-BR', frames, cast, states, caption }) => {
+  useBundledFonts();
   const frame = useCurrentFrame();
   const { Component } = sceneRegistry.get(scene.type);
   const stateOf = (characterId: string) => previewState(characterId, states[characterId] ?? {}, Frame.of(frame));

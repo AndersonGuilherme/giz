@@ -11,11 +11,17 @@ type Dependencies = Readonly<{ build: Timelines; renderer: Renderer; captions: C
 
 const nothingToDo = () => undefined;
 
+/** The video and captions of a variant, relative to the project folder: the one naming rule (the Studio lists them too). */
+export function outputFilesOf(variant: string | undefined): VideoFiles {
+  const suffix = variant === undefined ? '' : `-${variant}`;
+  return { video: `output/video${suffix}.mp4`, captions: `output/captions${suffix}.srt` };
+}
+
 // Plain text paths: the application does not import node:path; `/` works on every system Node runs on.
 function filesOf(folder: string, variant: string | undefined): VideoFiles {
-  const output = `${folder.replace(/[/\\]+$/, '')}/output`;
-  const suffix = variant === undefined ? '' : `-${variant}`;
-  return { video: `${output}/video${suffix}.mp4`, captions: `${output}/captions${suffix}.srt` };
+  const project = folder.replace(/[/\\]+$/, '');
+  const { video, captions } = outputFilesOf(variant);
+  return { video: `${project}/${video}`, captions: `${project}/${captions}` };
 }
 
 /** Builds the timeline of a loaded project (its voices already saved), renders the video and writes the captions. */

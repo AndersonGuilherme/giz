@@ -40,13 +40,14 @@ test('a project can be seen in the other aspect: the props have its size, the pr
   });
 });
 
-test('the preview lists every file the video asks for, each on disk: the voices and the sound effects', async () => {
+test('the preview lists every file the video asks for, each on disk: the voices, the sound effects and the bundled fonts', async () => {
   await withVoicedCopy(async (folder) => {
     const { props, files } = await videoPreview(folder, await projectInAspect(folder));
     const voices = props.segments.map(({ audio }) => audio);
     for (const voice of voices) assert.ok(files.some(({ at }) => at === voice), `${voice} is listed`);
     assert.equal(props.soundEffects.length, 1);
     for (const sound of props.soundEffects) assert.ok(files.some(({ at }) => at === `sounds/${sound.sound}.wav`));
+    for (const font of ['fonts/Nunito.ttf', 'fonts/JetBrainsMono.ttf']) assert.ok(files.some(({ at }) => at === font), `${font} is listed`);
     for (const { from } of files) assert.ok(existsSync(from), `${from} exists`);
   });
 });
@@ -54,4 +55,9 @@ test('the preview lists every file the video asks for, each on disk: the voices 
 test('renderVideo takes the Studio output options (the variant names the files) without changing the CLI default', () => {
   assert.ok(renderVideo('/projects/coupon'));
   assert.ok(renderVideo('/projects/coupon', undefined, { variant: '9x16', frames: 30 }));
+});
+
+test("the Studio names the outputs with core's own rule", async () => {
+  const { outputFilesOf } = await import('../../../src/presentation/cli/composition/video.ts');
+  assert.equal(outputFilesOf('16x9').video, 'output/video-16x9.mp4');
 });

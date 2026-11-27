@@ -10,6 +10,7 @@ import { sceneRegistry } from '../scenes/scenes.ts';
 import { Overlay } from './Overlay.tsx';
 import { Segment } from './Segment.tsx';
 import { Sounds } from './Sounds.tsx';
+import { useBundledFonts } from './bundledFonts.ts';
 import { videoPlan, type VideoPlan } from './videoPlan.ts';
 
 /** Size, fps and length come from the props: the timeline plus the lead-in and the tail of `VideoClock`. */
@@ -34,6 +35,7 @@ const SceneOnScreenView: FC<Readonly<{ run: SceneRun; plan: VideoPlan }>> = ({ r
 
 /** The whole video: the scenes one after the other, the frame, each line caption, the voices and the sound effects. */
 export const Video: FC<VideoProps> = (props) => {
+  useBundledFonts();
   const plan = useMemo(() => videoPlan(props), [props]);
   return (
     <AbsoluteFill style={{ background: '#000' }}>

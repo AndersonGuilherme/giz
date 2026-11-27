@@ -1,9 +1,12 @@
-import { loadFont } from '@remotion/google-fonts/Nunito';
-import { loadFont as loadMono } from '@remotion/google-fonts/JetBrainsMono';
+/** A font file of the package public folder (`fonts/`, each with its OFL license beside it) and the weights it holds. */
+export type BundledFont = Readonly<{ family: string; file: string; weight: string }>;
 
-// Nunito and JetBrains Mono (OFL), the same families as the old motor; `TextFit` estimates their widths.
-const nunito = loadFont('normal', { weights: ['600', '700', '800', '900'], subsets: ['latin', 'latin-ext'] });
-const jetBrainsMono = loadMono('normal', { weights: ['500', '600', '800'], subsets: ['latin', 'latin-ext'] });
+// Nunito and JetBrains Mono (OFL), the same families as the old motor; `TextFit` estimates their widths. Variable
+// fonts: one file holds every weight. They are bundled, never fetched, so the render and the preview work offline.
+export const BUNDLED_FONTS: readonly BundledFont[] = [
+  { family: 'Nunito', file: 'fonts/Nunito.ttf', weight: '200 1000' },
+  { family: 'JetBrains Mono', file: 'fonts/JetBrainsMono.ttf', weight: '100 800' },
+];
 
-export const TEXT_FONT = `${nunito.fontFamily}, sans-serif`;
-export const MONO_FONT = `${jetBrainsMono.fontFamily}, monospace`;
+export const TEXT_FONT = '"Nunito", sans-serif';
+export const MONO_FONT = '"JetBrains Mono", monospace';

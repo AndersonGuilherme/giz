@@ -5,6 +5,7 @@ import { Language } from '../../domain/values/Language.ts';
 import { Frame } from '../../domain/values/Time.ts';
 import { sceneRegistry } from '../scenes/scenes.ts';
 import { CATALOG_CAST, CATALOG_SAMPLES, type CatalogSample } from './catalogSamples.ts';
+import { useBundledFonts } from './bundledFonts.ts';
 import { previewState } from './previewState.ts';
 
 export type SceneCatalogProps = Readonly<{ aspect: AspectRatioText; language: 'pt-BR' | 'en' }>;
@@ -26,12 +27,15 @@ const Sample: FC<Readonly<{ sample: CatalogSample; props: SceneCatalogProps }>> 
 };
 
 /** Every lesson scene with sample data, one after the other, for checking them by eye in 9:16 and 16:9. */
-export const SceneCatalog: FC<SceneCatalogProps> = (props) => (
-  <>
-    {CATALOG_SAMPLES.map((sample, index) => (
-      <Sequence key={index} from={index * FRAMES_PER_SCENE} durationInFrames={FRAMES_PER_SCENE}>
-        <Sample sample={sample} props={props} />
-      </Sequence>
-    ))}
-  </>
-);
+export const SceneCatalog: FC<SceneCatalogProps> = (props) => {
+  useBundledFonts();
+  return (
+    <>
+      {CATALOG_SAMPLES.map((sample, index) => (
+        <Sequence key={index} from={index * FRAMES_PER_SCENE} durationInFrames={FRAMES_PER_SCENE}>
+          <Sample sample={sample} props={props} />
+        </Sequence>
+      ))}
+    </>
+  );
+};

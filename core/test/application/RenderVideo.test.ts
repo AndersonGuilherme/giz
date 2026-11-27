@@ -28,3 +28,9 @@ test('a variant (the other aspect) gets its own files, so the video of the proje
   assert.deepEqual(files, { video: '/projects/coupon/output/video-9x16.mp4', captions: '/projects/coupon/output/captions-9x16.srt' });
   assert.deepEqual(written, [files.video, files.captions]);
 });
+
+test('the output names of a variant come from one place (the Studio lists them before any render)', async () => {
+  const { outputFilesOf } = await import('../../src/application/use-cases/RenderVideo.ts');
+  assert.deepEqual(outputFilesOf(undefined), { video: 'output/video.mp4', captions: 'output/captions.srt' });
+  assert.deepEqual(outputFilesOf('9x16'), { video: 'output/video-9x16.mp4', captions: 'output/captions-9x16.srt' });
+});
