@@ -292,3 +292,12 @@ test('an answer that arrives after the abort is not saved', async () => {
     assert.equal(await exists(folder), false);
   });
 });
+
+test('the signal goes down to the text provider with each call (it can stop the call in flight)', async () => {
+  await withFolder(async (folder) => {
+    const { text, generate } = generator([INVALID, VALID]);
+    const controller = new AbortController();
+    await generate.run(Idea.fromJson(IDEA), { folder, signal: controller.signal });
+    assert.deepEqual(text.signals, [controller.signal, controller.signal]);
+  });
+});

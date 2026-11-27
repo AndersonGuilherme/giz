@@ -1,9 +1,10 @@
-import type { TextAnswer, TextProvider, TextRequest } from '../../src/application/ports/TextProvider.ts';
+import type { TextAnswer, TextCallOptions, TextProvider, TextRequest } from '../../src/application/ports/TextProvider.ts';
 import { CostEstimate } from '../../src/domain/ai/CostEstimate.ts';
 
 /** Answers with fixed texts, one per call (the last one repeats), and keeps every request; never calls a service. */
 export class FakeTextProvider implements TextProvider {
   readonly requests: TextRequest[] = [];
+  readonly signals: Array<AbortSignal | undefined> = [];
   readonly #answers: string[];
   readonly #cut: readonly number[];
 
@@ -13,8 +14,9 @@ export class FakeTextProvider implements TextProvider {
     this.#cut = cut;
   }
 
-  async generate(request: TextRequest): Promise<TextAnswer> {
+  async generate(request: TextRequest, options: TextCallOptions = {}): Promise<TextAnswer> {
     const call = this.requests.length;
+    this.signals.push(options.signal);
     const text = this.#answers[Math.min(call, this.#answers.length - 1)]!;
     this.requests.push(request);
     return { text, usage: { inputTokens: 1000, outputTokens: 200 }, truncated: this.#cut.includes(call) };

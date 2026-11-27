@@ -104,7 +104,7 @@ export class GenerateScript {
   async #called(target: ScriptTarget, attempt: Attempt): Promise<TextAnswer> {
     target.onCall?.(attempt.repairs + 1, MAX_REPAIRS + 1);
     target.signal?.throwIfAborted();
-    const answer = await this.#dependencies.text.generate(attempt.request);
+    const answer = await this.#dependencies.text.generate(attempt.request, { signal: target.signal });
     target.signal?.throwIfAborted();
     return answer;
   }

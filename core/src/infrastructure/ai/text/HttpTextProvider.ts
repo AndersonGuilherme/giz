@@ -1,5 +1,5 @@
 import type { KeyStore } from '../../../application/ports/KeyStore.ts';
-import type { TextAnswer, TextProvider, TextRequest } from '../../../application/ports/TextProvider.ts';
+import type { TextAnswer, TextCallOptions, TextProvider, TextRequest } from '../../../application/ports/TextProvider.ts';
 import type { CostEstimate } from '../../../domain/ai/CostEstimate.ts';
 import { textCostEstimate } from '../../../domain/ai/textPrices.ts';
 import { sendWithRetries, type SendPolicy, type Wait } from '../../http/serviceRequest.ts';
@@ -47,12 +47,15 @@ export class HttpTextProvider implements TextProvider {
     return textCostEstimate(this.#api.provider, this.#model, sendable(this.#api, request));
   }
 
-  async generate(request: TextRequest): Promise<TextAnswer> {
+  async generate(request: TextRequest, { signal }: TextCallOptions = {}): Promise<TextAnswer> {
     const { fetch, keys, wait, send = sendWithRetries } = this.#dependencies;
     const key = requiredKey(keys, this.#api.provider); // before sending: a missing key is not a failure to retry
+    signal?.throwIfAborted();
     const { url, init } = this.#api.call(this.#model, sendable(this.#api, request), key);
     const context: FailureContext = { label: this.#api.label, model: this.#model, key };
-    const response = await send(this.#api.label, () => fetch(url, init), wait).catch((error: unknown) => {
+    const sent = signal ? { ...init, signal } : init;
+    const response = await send(this.#api.label, () => fetch(url, sent), wait).catch((error: unknown) => {
+      signal?.throwIfAborted();
       throw readableFailure(error, context);
     });
     return parsed(response, this.#api);

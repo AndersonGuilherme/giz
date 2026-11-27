@@ -11,8 +11,11 @@ export type TokenUsage = Readonly<{ inputTokens: number; outputTokens: number }>
 /** `truncated`: the answer stopped at the output limit (it may be cut in the middle). */
 export type TextAnswer = Readonly<{ text: string; usage: TokenUsage; truncated?: boolean }>;
 
+/** `signal`: aborting it stops the call in flight (and any retry); the call then rejects with an AbortError. */
+export type TextCallOptions = Readonly<{ signal?: AbortSignal }>;
+
 /** A text AI (Claude, GPT, Gemini...): the answer to a request and, before calling, what it can cost. */
 export interface TextProvider {
-  generate(request: TextRequest): Promise<TextAnswer>;
+  generate(request: TextRequest, options?: TextCallOptions): Promise<TextAnswer>;
   estimate(request: TextRequest): CostEstimate;
 }

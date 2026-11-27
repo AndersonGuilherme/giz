@@ -236,3 +236,28 @@ test('the APIs without cache markers never get the hint, and their estimate is u
   assert.equal(ANTHROPIC_API.promptCaching, true);
   assert.equal(OPENAI_API.promptCaching || GEMINI_API.promptCaching, false);
 });
+
+test('an abort stops the call in flight: the signal reaches fetch, the abort is not retried as a network failure', async () => {
+  const controller = new AbortController();
+  const calls: RequestInit[] = [];
+  const waits: number[] = [];
+  const hanging = (_url: string | URL | Request, init?: RequestInit) => {
+    calls.push(init ?? {});
+    return new Promise<Response>((_done, fail) => init?.signal?.addEventListener('abort', () => fail(init.signal?.reason), { once: true }));
+  };
+  const text = new HttpTextProvider(ANTHROPIC_API, { fetch: hanging as typeof fetch, keys: keys(true), wait: async (milliseconds) => void waits.push(milliseconds) });
+  const answer = text.generate(request, { signal: controller.signal });
+  await new Promise((done) => setImmediate(done));
+  controller.abort();
+  await assert.rejects(answer, { name: 'AbortError' });
+  assert.equal(calls.length, 1);
+  assert.equal(calls[0]!.signal, controller.signal);
+  assert.deepEqual(waits, []);
+});
+
+test('an already aborted signal sends nothing', async () => {
+  const fake = fakeFetch([json(ANTHROPIC_OK)]);
+  const text = new HttpTextProvider(ANTHROPIC_API, { fetch: fake.fetch, keys: keys(true), wait: async () => {} });
+  await assert.rejects(text.generate(request, { signal: AbortSignal.abort() }), { name: 'AbortError' });
+  assert.equal(fake.calls.length, 0);
+});

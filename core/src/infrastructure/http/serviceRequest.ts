@@ -11,6 +11,7 @@ const HTTP_ATTEMPTS = 3;
 const MAXIMUM_BODY = 300;
 
 const retryable = (status: number) => status >= 500 || status === 429;
+const isAbort = (error: unknown) => (error as { name?: string } | null)?.name === 'AbortError';
 
 /**
  * The service answered an error status (after the retries, for 429 and 5xx). `body` is the whole answer, so a caller
@@ -37,8 +38,10 @@ function reasonOf(error: unknown): string {
   return detail ? `${message}: ${detail}` : message;
 }
 
-// A dropped connection (network, server closed the socket): `undefined`, so the caller tries again.
+// A dropped connection (network, server closed the socket): `undefined`, so the caller tries again. An abort (the
+// person cancelled) is not one: it is never tried again.
 function networkFailure(service: string, error: unknown, number: number): undefined {
+  if (isAbort(error)) throw error;
   if (number >= NETWORK_ATTEMPTS) throw new Error(`${service}: falha de rede (${reasonOf(error)})`);
   return undefined;
 }
