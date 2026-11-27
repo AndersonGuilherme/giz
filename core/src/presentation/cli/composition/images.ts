@@ -1,5 +1,6 @@
 // Part of the composition point (see composition.ts): the image AI providers and the scenario images.
 import type { ImageProvider } from '../../../application/ports/ImageProvider.ts';
+import type { ScenarioImageStore } from '../../../application/ports/ScenarioImageStore.ts';
 import { GenerateScenarioImages } from '../../../application/use-cases/images/GenerateScenarioImages.ts';
 import { IMAGE_PROVIDERS, type ImageProviderName } from '../../../domain/ai/ImageProviderName.ts';
 import type { Project } from '../../../domain/project/Project.ts';
@@ -34,9 +35,15 @@ export function scenarioImages(folder: string, name: ImageProviderName, override
   return { generate: new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) }), model: images.identity().model };
 }
 
-/** The scenario images made with any image provider (the Studio's rehearsal painter): the same store and rules. */
-export function scenarioImagesWith(folder: string, images: ImageProvider): GenerateScenarioImages {
-  return new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) });
+/** The project's store of scenario images (scenes/<id>.png and .json, and their link in script.json). */
+export const scenarioImageStore = (folder: string): ScenarioImageStore => new DiskScenarioImageStore(folder);
+
+/**
+ * The scenario images made with any image provider (the Studio's: its keys, or its rehearsal painter): the same rules;
+ * `store`: the project's store wrapped (the Studio writes the script link in its folder queue).
+ */
+export function scenarioImagesWith(folder: string, images: ImageProvider, store: ScenarioImageStore = scenarioImageStore(folder)): GenerateScenarioImages {
+  return new GenerateScenarioImages({ images, store });
 }
 
 /** The project's `imageProvider`; without it, the first one with a key (OpenAI when none has, whose error says where to put it). */

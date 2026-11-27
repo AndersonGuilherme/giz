@@ -5,6 +5,7 @@ import { BackdropLayout } from '../../../domain/scenario/BackdropLayout.ts';
 import { BackgroundPalette } from '../../../domain/scenario/BackgroundPalette.ts';
 import type { BackgroundChoice } from '../../../domain/scenario/BackgroundSource.ts';
 import { Parallax, type Layer } from '../../../domain/scenario/Parallax.ts';
+import type { ImageCropJson } from '../../../domain/scenario/ImageCrop.ts';
 import { IMAGE_BLEED } from '../../../domain/scenario/ScenarioImageFrame.ts';
 import type { AspectRatio } from '../../../domain/values/AspectRatio.ts';
 import { useMediaSource } from '../../remotion/mediaSource.ts';
@@ -12,6 +13,7 @@ import { backgroundRegistry } from './backgrounds/backgroundRegistry.ts';
 import { LayerCanvas } from './backgrounds/LayerCanvas.tsx';
 import type { LayerProps, VectorBackgroundModel } from './backgrounds/VectorBackgroundModel.ts';
 import { CameraPlane } from './CameraPlane.tsx';
+import { cropStyle } from './cropStyle.ts';
 
 /** `behind` draws the back and middle layers (before the characters); `front`, the foreground over them. */
 export type BackgroundPart = 'behind' | 'front';
@@ -22,15 +24,16 @@ type ViewProps = Readonly<{ choice: BackgroundChoice; camera: Framing; aspect: A
 // The image is 12% larger than the frame (6% each side), so the camera can move without showing its edge.
 const [BLEED, COVER] = [`-${IMAGE_BLEED * 100}%`, `${100 + 2 * IMAGE_BLEED * 100}%`];
 
-const ImageBackground: FC<Readonly<{ image: string; camera: Framing; onImageError: () => void }>> = ({ image, camera, onImageError }) => {
+type ImageProps = Readonly<{ image: string; crop?: ImageCropJson; camera: Framing; onImageError: () => void }>;
+
+// The box is the frame plus the margin; the picture (the part the person cropped, or all of it) covers the box.
+const ImageBackground: FC<ImageProps> = ({ image, crop, camera, onImageError }) => {
   const source = useMediaSource();
   return (
     <CameraPlane framing={camera}>
-      <Img
-        src={source(image)}
-        onError={onImageError}
-        style={{ position: 'absolute', left: BLEED, top: BLEED, width: COVER, height: COVER, objectFit: 'cover' }}
-      />
+      <div style={{ position: 'absolute', left: BLEED, top: BLEED, width: COVER, height: COVER, overflow: 'hidden' }}>
+        <Img src={source(image)} onError={onImageError} style={cropStyle(crop)} />
+      </div>
     </CameraPlane>
   );
 };
@@ -44,7 +47,7 @@ function layerPropsFor(choice: Extract<BackgroundChoice, { kind: 'vector' }>, as
 
 /** The scenario background: an image (behind only) or the layers of a vector background, each with its parallax. */
 export const BackgroundView: FC<ViewProps> = ({ choice, camera, aspect, part, onImageError }) => {
-  if (choice.kind === 'image') return part === 'behind' ? <ImageBackground image={choice.image} camera={camera} onImageError={onImageError} /> : null;
+  if (choice.kind === 'image') return part === 'behind' ? <ImageBackground image={choice.image} crop={choice.crop} camera={camera} onImageError={onImageError} /> : null;
   // The layers get the full palette of this same background (`BackgroundPalette.with`), so they may be widened to any palette.
   const model = backgroundRegistry[choice.vector] as VectorBackgroundModel;
   const props = layerPropsFor(choice, aspect);

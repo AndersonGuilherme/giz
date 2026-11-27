@@ -1,5 +1,6 @@
 import type { LessonScene } from './LessonScenes.ts';
 import type { ImageStyle } from '../scenario/ImageStyle.ts';
+import type { ImageCropJson } from '../scenario/ImageCrop.ts';
 import type { Effect, Hud, CameraMoveJson, Point, BigText } from './SceneElements.ts';
 
 export const NAMED_POSITIONS = ['left', 'center', 'right'] as const;
@@ -21,6 +22,8 @@ export type Background = Readonly<{
   colors?: Readonly<Record<string, string>>;
   /** Only on a scene (not on a beat): `giz images` makes the image and points `image` to it. */
   generate?: BackgroundRequest;
+  /** The part of the image shown (the Studio's "recortar enquadramento"); the file itself is never changed. */
+  crop?: ImageCropJson;
 }>;
 
 export type ScenarioScene = Readonly<{
