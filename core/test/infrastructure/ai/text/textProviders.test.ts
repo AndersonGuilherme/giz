@@ -176,3 +176,25 @@ test('a null OpenAI content or a Gemini answer without candidates gives empty te
   const blocked = provider(GEMINI_API, [json({ promptFeedback: { blockReason: 'SAFETY' }, usageMetadata: { promptTokenCount: 4 } })]);
   assert.deepEqual(await blocked.text.generate(request), { text: '', usage: { inputTokens: 4, outputTokens: 0 } });
 });
+
+test('a key that straddles the 300-character cut of the body is blanked whole: no prefix survives', async () => {
+  const padding = 'x'.repeat(300 - 'Bad key: '.length - 5); // the cut falls 5 characters into the key
+  const echoed = `{"error":{"message":"Bad key: ${padding}${KEY} end"}}`;
+  for (const body of [echoed, `Bad key: ${padding}${KEY} end`]) {
+    const { text } = provider(OPENAI_API, [new Response(body, { status: 400 })]);
+    const error = String(await text.generate(request).catch((caught: Error) => caught));
+    assert.match(error, /pedido recusado \(400\)/);
+    assert.doesNotMatch(error, new RegExp(KEY.slice(0, 5)));
+  }
+});
+
+test('the single-attempt policy sends once: no retry on 429 or a network failure', async () => {
+  const { sendOnce } = await import('../../../../src/infrastructure/http/serviceRequest.ts');
+  for (const outcome of [json({ error: { message: 'rate' } }, 429), new Error('socket hang up')]) {
+    const fake = fakeFetch([outcome]);
+    const delays: number[] = [];
+    const text = new HttpTextProvider(OPENAI_API, { fetch: fake.fetch, keys: keys(true), wait: async (ms) => void delays.push(ms), send: sendOnce });
+    await assert.rejects(text.generate(request), /OpenAI: (limite de uso atingido \(429\)|falha de rede \(socket hang up\))/);
+    assert.deepEqual([fake.calls.length, delays.length], [1, 0]);
+  }
+});

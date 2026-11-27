@@ -4,6 +4,8 @@ import { ServiceHttpError } from '../../http/serviceRequest.ts';
 export type FailureContext = Readonly<{ label: string; model: string; key: string }>;
 type Describe = (detail: string, model: string) => string;
 
+const MAXIMUM_DETAIL = 300;
+
 // One readable pt-BR message per status; 401 leaves the service body out (some services echo part of the key).
 const BY_STATUS: Readonly<Record<number, Describe>> = {
   400: (detail) => `pedido recusado (400): ${detail}`,
@@ -22,18 +24,20 @@ const ERROR_BODY = (body: string): string | undefined => {
   }
 };
 
-function describe(error: ServiceHttpError, model: string): string {
-  const detail = ERROR_BODY(error.body) ?? error.body;
+const blanked = (text: string, key: string): string => text.split(key).join('***');
+
+// The key is blanked in the whole body before it is cut: a cut inside the key would leave a prefix of it.
+function describe(error: ServiceHttpError, { model, key }: FailureContext): string {
+  const detail = blanked(ERROR_BODY(error.body) ?? error.body, key).slice(0, MAXIMUM_DETAIL);
   const known = BY_STATUS[error.status];
   if (known) return known(detail, model);
   if (error.status >= 500) return `serviço indisponível (${error.status}): tente de novo mais tarde`;
   return `erro ${error.status}: ${detail}`;
 }
 
-const blanked = (text: string, key: string): string => text.split(key).join('***');
-
 /** The error to show: readable, in pt-BR, named after the service, and never with the key in it. */
-export function readableFailure(error: unknown, { label, model, key }: FailureContext): Error {
-  if (error instanceof ServiceHttpError) return new Error(blanked(`${label}: ${describe(error, model)}`, key));
+export function readableFailure(error: unknown, context: FailureContext): Error {
+  const { label, key } = context;
+  if (error instanceof ServiceHttpError) return new Error(blanked(`${label}: ${describe(error, context)}`, key));
   return new Error(blanked(error instanceof Error ? error.message : String(error), key));
 }

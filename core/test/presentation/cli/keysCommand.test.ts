@@ -43,3 +43,31 @@ test('keys with a wrong action or provider prints the usage and exits with 2', (
     assert.match(run.stderr, /uso: giz keys list \| test <anthropic\|openai\|gemini>/);
   }
 });
+
+test('keys test: one call with the key, then "ok" with the model and the tokens (injected fetch, no network)', async () => {
+  const { keysCommand } = await import('../../../src/presentation/cli/commands/keysCommand.ts');
+  const calls: string[] = [];
+  const fetch = (async (url: string | URL | Request) => {
+    calls.push(String(url));
+    return new Response(JSON.stringify({ content: [{ type: 'text', text: 'ok' }], usage: { input_tokens: 11, output_tokens: 2 } }));
+  }) as typeof globalThis.fetch;
+  const keys = { get: () => 'sk-teste', hint: () => 'defina' };
+  const printed: string[] = [];
+  const log = console.log;
+  console.log = (message: string) => void printed.push(message);
+  try {
+    await keysCommand(['test', 'anthropic'], { fetch, keys });
+  } finally {
+    console.log = log;
+  }
+  assert.deepEqual(calls, ['https://api.anthropic.com/v1/messages']);
+  assert.match(printed.join('\n'), /^anthropic: ok \(modelo claude-sonnet-5-5, 11 tokens de entrada, 2 de saída\)$/);
+});
+
+test('keys test makes a single attempt: a 503 is not retried', async () => {
+  const { keysCommand } = await import('../../../src/presentation/cli/commands/keysCommand.ts');
+  let count = 0;
+  const fetch = (async () => { count++; return new Response('{}', { status: 503 }); }) as typeof globalThis.fetch;
+  await assert.rejects(keysCommand(['test', 'gemini'], { fetch, keys: { get: () => 'k', hint: () => '' } }), /Google Gemini: serviço indisponível \(503\)/);
+  assert.equal(count, 1);
+});

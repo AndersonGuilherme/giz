@@ -1,6 +1,8 @@
 /** Waits the given milliseconds (injected, so tests do not wait). */
 export type Wait = (milliseconds: number) => Promise<void>;
 type Send = () => Promise<Response>;
+/** How a request is sent: with the retries (`sendWithRetries`) or a single attempt (`sendOnce`). */
+export type SendPolicy = (service: string, send: Send, wait: Wait) => Promise<Response>;
 
 const NETWORK_ATTEMPTS = 4;
 const HTTP_ATTEMPTS = 3;
@@ -8,13 +10,16 @@ const MAXIMUM_BODY = 300;
 
 const retryable = (status: number) => status >= 500 || status === 429;
 
-/** The service answered an error status (after the retries, for 429 and 5xx). */
+/**
+ * The service answered an error status (after the retries, for 429 and 5xx). `body` is the whole answer, so a caller
+ * that knows the key can blank it before cutting; the message holds only its first 300 characters.
+ */
 export class ServiceHttpError extends Error {
   readonly status: number;
   readonly body: string;
 
   constructor(service: string, status: number, body: string) {
-    super(`${service} ${status}: ${body}`);
+    super(`${service} ${status}: ${body.slice(0, MAXIMUM_BODY)}`);
     this.status = status;
     this.body = body;
   }
@@ -46,7 +51,7 @@ async function attempt(service: string, send: Send, number: number): Promise<Res
 
 // Network failures wait 3 s, 6 s, 9 s (4 attempts); 429 and 5xx wait 2 s, 4 s (3 attempts); other errors fail now.
 async function failedOrRetry(service: string, response: Response, number: number): Promise<number> {
-  const body = (await response.text()).slice(0, MAXIMUM_BODY);
+  const body = await response.text();
   if (number >= HTTP_ATTEMPTS || !retryable(response.status)) throw new ServiceHttpError(service, response.status, body);
   return 2000 * number;
 }
@@ -66,4 +71,13 @@ export async function sendWithRetries(service: string, send: Send, wait: Wait): 
     result = await outcome(service, send, number);
   }
   return result;
+}
+
+/** One attempt, no retry (for a check the person runs by hand, such as `giz keys test`). */
+export async function sendOnce(service: string, send: Send): Promise<Response> {
+  const response = await send().catch((error: unknown) => {
+    throw new Error(`${service}: falha de rede (${reasonOf(error)})`);
+  });
+  if (!response.ok) throw new ServiceHttpError(service, response.status, await response.text());
+  return response;
 }
