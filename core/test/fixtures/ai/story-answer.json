@@ -1,0 +1,79 @@
+{
+  "project": {
+    "title": "E se os gatos falassem?"
+  },
+  "cast": [
+    {
+      "id": "narrator",
+      "name": "Narrador",
+      "voice": {
+        "id": "ryan",
+        "style": "Fale em português do Brasil, com sotaque brasileiro, como um narrador curioso"
+      },
+      "defaultExpression": "neutral"
+    },
+    "bia",
+    "caio"
+  ],
+  "script": {
+    "chapters": [
+      "O começo",
+      "O fim"
+    ],
+    "lines": [
+      {
+        "id": "01",
+        "chapter": 1,
+        "speaker": "narrator",
+        "text": "Imagine: todos os gatos acordam falando.",
+        "scene": {
+          "type": "scenario",
+          "background": {
+            "vector": "room"
+          },
+          "characters": [],
+          "camera": {
+            "type": "zoom-in"
+          },
+          "highlight": {
+            "text": "GATOS FALANTES"
+          }
+        }
+      },
+      {
+        "id": "02",
+        "chapter": 1,
+        "speaker": "bia",
+        "text": "Meu gato pediu ração gourmet!",
+        "pose": "hand-on-head",
+        "expression": "surprised",
+        "scene": {
+          "type": "scenario",
+          "background": {
+            "vector": "street"
+          },
+          "characters": [
+            {
+              "character": "bia",
+              "position": "left"
+            },
+            {
+              "character": "caio",
+              "position": "right"
+            }
+          ]
+        }
+      },
+      {
+        "id": "03",
+        "chapter": 2,
+        "speaker": "caio",
+        "text": "O meu pediu um advogado.",
+        "expression": "worried",
+        "reaction": {
+          "expression": "surprised"
+        }
+      }
+    ]
+  }
+}

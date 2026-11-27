@@ -92,12 +92,29 @@ ou `node src/presentation/cli/giz.ts <comando> ...`).
 | `qa voices [saída] [voz1,voz2] [estilo]` | Gera as mesmas frases com cada voz Qwen e mede quanto o Whisper entende. |
 | `qa lexicon [testes.json] [voz]` | Testa grafias para o dicionário de pronúncia: `[{"word":"deploy","frame":"Fiz o X ontem.","candidates":["deploy","diplói"]}]`. |
 | `sounds [pasta]` | Sintetiza os efeitos sonoros (`pop`, `whoosh`, `ding`...) em `public/sounds/`, iguais byte a byte aos versionados. |
+| `new --idea <ideia.json> <pasta>` | Cria um projeto com o roteiro escrito por uma IA de texto a partir da ideia (veja abaixo). Mostra antes o custo estimado. `--provider anthropic\|openai\|gemini` escolhe a IA (sem ele, a primeira com chave); `--estimate` só mostra o custo. |
+| `script <pasta>` | Escreve de novo o roteiro de um projeto a partir do `idea.json` dele, mantendo a voz do `project.json`. Aceita as mesmas opções. |
 | `keys list` | Mostra quais serviços pagos têm chave (`anthropic`, `openai`, `gemini`, `elevenlabs`, `fish`) e onde pôr as que faltam. Nunca mostra a chave. |
 | `keys test <anthropic\|openai\|gemini>` | Faz **uma** chamada real e mínima (frações de centavo) para conferir a chave e responde `ok` ou o erro. |
 
 As chaves das IAs de texto vêm de `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` e `GEMINI_API_KEY`, ou de
 `~/.config/giz/<serviço>.key`. O modelo de cada uma muda com `GIZ_ANTHROPIC_MODEL`, `GIZ_OPENAI_MODEL` e
 `GIZ_GEMINI_MODEL` (padrões: `claude-sonnet-5-5`, `gpt-6.2-astra` e `gemini-3.8-flash`).
+
+**Roteiro com IA.** O `idea.json` descreve o vídeo:
+
+```json
+{ "format": "story", "aspect": "9:16", "targetSeconds": 30, "theme": "E se os gatos acordassem falando?",
+  "audience": "jovens nas redes sociais", "tone": "engraçado", "language": "pt-BR",
+  "cast": ["bia", "caio"], "scenes": ["street", "castle-rain"] }
+```
+
+`targetSeconds` vai de 10 a 900. `cast` (ids de `casts/presets/` e `casts/example/`) e `scenes` (fundos vetoriais ou
+cenas de `presets/scenes/`) são opcionais: sem eles, a IA escolhe. A IA segue o guia do formato
+(`formats/<story|lesson>/guide.<pt-BR|en>.md`) e o esquema do roteiro (gerado dos próprios esquemas de validação).
+A resposta passa pela mesma validação do `check`; se houver erro, a lista volta para a IA corrigir, até 3 vezes. A
+pasta só é escrita com um projeto válido: `idea.json`, `project.json`, `script.json` e `cast/` (cópias dos
+personagens prontos). Nenhum vídeo, canal ou personagem existente é imitado: o guia proíbe.
 
 Exemplos:
 

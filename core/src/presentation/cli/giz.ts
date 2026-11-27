@@ -8,6 +8,7 @@ import { buildTimeline, characterSheet, checkProject, generateVoices, produceVid
 import { convertCommand } from './commands/convertCommand.ts';
 import { keysCommand } from './commands/keysCommand.ts';
 import { qaCommand } from './commands/qaCommands.ts';
+import { newCommand, scriptCommand } from './commands/scriptCommands.ts';
 import { gpuCommand, modelsCommand, soundsCommand } from './commands/toolCommands.ts';
 import { setupCommand } from './setup/setupCommand.ts';
 import { UsageError } from './usage.ts';
@@ -89,7 +90,7 @@ async function sheet([rig, character]: readonly string[]): Promise<void> {
 const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = {
   voice, check, build, render, produce, sheet,
   setup: (args) => setupCommand(args), models: modelsCommand, gpu: gpuCommand, qa: qaCommand, sounds: soundsCommand,
-  convert: convertCommand, keys: keysCommand,
+  convert: convertCommand, keys: keysCommand, new: (args) => newCommand(args), script: (args) => scriptCommand(args),
 };
 
 async function main([name = '', ...args]: readonly string[]): Promise<void> {

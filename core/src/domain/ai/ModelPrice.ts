@@ -3,7 +3,7 @@ import { CostEstimate } from './CostEstimate.ts';
 
 const TOKENS_PER_MILLION = 1_000_000;
 /** The usual rule of thumb of the providers for text: about 4 characters per token. */
-const CHARACTERS_PER_TOKEN = 4;
+export const CHARACTERS_PER_TOKEN = 4;
 
 /** How many tokens a text is expected to take (rounded up), before the provider counts them. */
 export function estimatedTokens(text: string): number {
