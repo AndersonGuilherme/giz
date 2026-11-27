@@ -10,8 +10,15 @@ export type MadeFacts = Readonly<{ voices: StageItems; scenarios: StageItems; vi
 /** What a project folder has; `made` only when the project loads (without it, nothing after the script is known). */
 export type StageFacts = Readonly<{ idea: boolean; script: ScriptFacts; made?: MadeFacts }>;
 
-/** One stage: its state, the items out of date or not made yet, and the problems (the script's errors). */
-export type StageReport = Readonly<{ stage: StageName; state: StageState; stale: readonly string[]; missing: readonly string[]; problems: readonly string[] }>;
+/** One stage: its state, the items out of date, not made yet or blocked, and the problems (script errors, blocked items). */
+export type StageReport = Readonly<{
+  stage: StageName;
+  state: StageState;
+  stale: readonly string[];
+  missing: readonly string[];
+  blocked: readonly string[];
+  problems: readonly string[];
+}>;
 
 type Summary = Readonly<{ state: StageState; items?: StageItems; problems?: readonly string[] }>;
 type Rule = (facts: StageFacts) => Summary;
@@ -26,7 +33,7 @@ function scriptSummary({ idea, script }: StageFacts): Summary {
 const itemsSummary = (pick: (made: MadeFacts) => StageItems): Rule => ({ made }) => {
   if (!made) return EMPTY;
   const items = pick(made);
-  return { state: items.state(), items };
+  return { state: items.state(), items, problems: items.problems() };
 };
 
 // A video rendered before a project file changed, or while a voice or an image is still pending, is out of date.
@@ -48,7 +55,7 @@ const RULES: Readonly<Record<StageName, Rule>> = {
 };
 
 function reportOf(stage: StageName, { state, items = StageItems.NONE, problems = [] }: Summary): StageReport {
-  return { stage, state, stale: items.stale(), missing: items.missing(), problems };
+  return { stage, state, stale: items.stale(), missing: items.missing(), blocked: items.blocked(), problems };
 }
 
 /** The state of every stage of a project, derived from what its folder has (nothing is stored about the stages). */

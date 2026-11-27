@@ -100,3 +100,13 @@ test('giz status: a wrong option or no folder exits with 2', () => {
     assert.match(run.stderr, /uso: giz status <pasta> \[--regenerate-script\]/);
   }
 });
+
+test('giz status: a scenes/<id>.png that giz images did not make is shown to be resolved, with the reason, and never crashes', async () => {
+  const folder = await projectFolder();
+  await mkdir(join(folder, 'scenes'));
+  await writeFile(join(folder, 'scenes', '1.png'), 'not made by giz');
+  const run = giz(['status', folder]);
+  assert.equal(run.status, 0, run.stderr);
+  assert.match(run.stdout, /^! cenários: desatualizado — a resolver: cenas das falas 1\n {4}- cena da fala 1: scenes\/1\.png já existe/m);
+  assert.match(run.stdout, /^ {2}cenários \([^)]+\): nada pendente$/m);
+});

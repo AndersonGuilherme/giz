@@ -19,9 +19,9 @@ const MAX_PROBLEMS = 10;
 
 const stateText = ({ stage, state }: StageReport): string => STAGE_STATES[stage]?.[state] ?? STATES[state];
 
-function itemsText({ stage, stale, missing }: StageReport): string {
+function itemsText({ stage, stale, missing, blocked }: StageReport): string {
   const items = ITEMS[stage];
-  const parts = [{ label: 'desatualizadas', ids: stale }, { label: 'a gerar', ids: missing }].filter(({ ids }) => items && ids.length > 0);
+  const parts = [{ label: 'desatualizadas', ids: stale }, { label: 'a gerar', ids: missing }, { label: 'a resolver', ids: blocked }].filter(({ ids }) => items && ids.length > 0);
   return parts.map(({ label, ids }) => ` — ${label}: ${items} ${ids.join(', ')}`).join('');
 }
 

@@ -89,3 +89,10 @@ test('only the item whose hash changed goes stale', () => {
   assert.deepEqual(items.missing(), []);
   assert.equal(items.state(), 'stale');
 });
+
+test('a blocked item makes the stage stale, is listed apart and brings its problem', () => {
+  const items = StageItems.of([current('1'), { id: '2', freshness: 'blocked', problem: 'cena da fala 2: arquivo no caminho' }, { id: '3', freshness: 'missing' }]);
+  const report = ProjectStages.from({ ...DONE, made: { ...DONE.made!, scenarios: items } }).of('scenarios');
+  assert.deepEqual([report.state, report.blocked, report.missing, report.problems], ['stale', ['2'], ['3'], ['cena da fala 2: arquivo no caminho']]);
+  assert.equal(ProjectStages.from({ ...DONE, made: { ...DONE.made!, scenarios: items } }).of('video').state, 'stale');
+});

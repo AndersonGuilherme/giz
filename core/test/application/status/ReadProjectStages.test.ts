@@ -29,17 +29,18 @@ import { FakeVoice } from '../../doubles/FakeVoice.ts';
 import { InMemoryScenarioImageStore } from '../../doubles/InMemoryScenarioImageStore.ts';
 import { InMemoryVoiceStore } from '../../doubles/InMemoryVoiceStore.ts';
 
-type Options = { texts?: string[]; prompts?: Array<string | undefined>; provider?: 'qwen' | 'elevenlabs' };
+type Options = { texts?: string[]; prompts?: Array<string | undefined>; provider?: 'qwen' | 'elevenlabs'; ownImage?: string };
 
 const TEXTS = ['Oi, eu sou a Ana.', 'Hoje vamos aprender.', 'Até logo.'];
 const PROMPTS = ['uma praça', undefined, 'um laboratório'];
 
-function project({ texts = TEXTS, prompts = PROMPTS, provider = 'qwen' }: Options = {}): Project {
+function project({ texts = TEXTS, prompts = PROMPTS, provider = 'qwen', ownImage }: Options = {}): Project {
   const ana = CharacterId.of('ana');
   const character = Character.of(ana, { name: 'Ana', rig: 'test', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' });
   const lines = texts.map((text, i) => {
     const prompt = prompts[i];
-    const background: Background = prompt ? { generate: { prompt } } : { vector: 'room' };
+    const image = i === 0 ? ownImage : undefined;
+    const background: Background = prompt ? { generate: { prompt }, image } : { vector: 'room' };
     const scene = { type: 'scenario' as const, background, characters: [] };
     return Line.of(ana, { id: String(i + 1), chapter: Chapter.of(1), text, scene });
   });
@@ -70,7 +71,7 @@ function build(voice = new FakeVoice()) {
   const generateVoices = new GenerateVoices({ voice, phonemizer: new FakePhonemizer(), store: voices, aligner: new FakeAligner() });
   const generateImages = new GenerateScenarioImages({ images, store: scenarioImages });
   const makeAll = async () => { await generateVoices.run(state.project); await generateImages.run(state.project); };
-  return { state, reader, stages, makeAll, voice };
+  return { state, reader, stages, makeAll, voice, scenarioImages };
 }
 
 const summary = (status: Awaited<ReturnType<ReadProjectStages['run']>>) =>
@@ -97,7 +98,7 @@ test('changing one line text marks only that line voice stale (and the video sta
   reader.rendered = { made: true, olderThanInputs: false };
   state.project = project({ texts: ['Oi, eu sou a Ana.', 'Hoje vamos aprender juntos.', 'Até logo.'] });
   const status = await stages.run('/p');
-  assert.deepEqual(status.stages.of('voices'), { stage: 'voices', state: 'stale', stale: ['2'], missing: [], problems: [] });
+  assert.deepEqual(status.stages.of('voices'), { stage: 'voices', state: 'stale', stale: ['2'], missing: [], blocked: [], problems: [] });
   assert.equal(status.stages.of('scenarios').state, 'done');
   assert.equal(status.stages.of('video').state, 'stale');
 });
@@ -186,4 +187,23 @@ test('EstimateCosts: without a valid idea.json the text cost is unknown, with th
   assert.equal(missing.text?.problem, 'idea.json: arquivo não encontrado');
   const invalid = await costs(undefined, { format: 'podcast' }).estimate.run('/p', await stages.run('/p'));
   assert.match(invalid.text?.problem ?? '', /ideia inválida/);
+});
+
+test('a scene pointing to the person own image counts as done, not pending, and costs nothing', async () => {
+  const { state, stages } = build();
+  state.project = project({ ownImage: 'fotos/praca.png' });
+  const status = await stages.run('/p');
+  assert.deepEqual(status.stages.of('scenarios').missing, ['3']);
+  assert.equal(status.pending?.images.length, 1);
+});
+
+test('a scenes/<id>.png that giz images did not make blocks only that scene, with the readable reason; status does not fail', async () => {
+  const { stages, scenarioImages } = build();
+  scenarioImages.foreign.add('3');
+  const status = await stages.run('/p');
+  const scenarios = status.stages.of('scenarios');
+  assert.deepEqual([scenarios.state, scenarios.blocked, scenarios.missing], ['stale', ['3'], ['1']]);
+  assert.match(scenarios.problems[0]!, /^cena da fala 3: scenes\/3\.png já existe\(m\) e não foi\(ram\) feito\(s\) pelo giz images/);
+  assert.equal(status.pending?.images.length, 1, 'the blocked scene is not priced: giz images will not make it as it is');
+  assert.equal(status.stages.of('voices').state, 'ready');
 });
