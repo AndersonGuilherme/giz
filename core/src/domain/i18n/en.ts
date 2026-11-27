@@ -14,4 +14,8 @@ export const ENGLISH: FixedTexts = {
   healthy: 'healthy',
   rotten: 'rotten',
   readTheCode: 'Read the code',
+  inbox: 'Inbox',
+  inboxSender: 'store@example.com · now',
+  houseWall: 'change the light bulb\n= break the wall',
+  houseTv: 'turned on the shower\n= TV goes off',
 };

@@ -3,6 +3,7 @@ export const CARD_VARIANTS = ['objective', 'summary', 'challenge', 'next', 'tick
 export const CHART_CURVES = ['healthy', 'rotten'] as const;
 export const TERMINAL_TONES = ['fail', 'ok', 'dim'] as const;
 export const NODE_TONES = ['core', 'infrastructure', 'interface', 'soft'] as const;
+export const HOUSE_MARKS = ['wall', 'tv', 'sink'] as const;
 
 type Side = Readonly<{ title: string; text: string }>;
 
@@ -59,6 +60,10 @@ export type TableScene = Readonly<{
   highlightedRow?: number;
 }>;
 export type TalkScene = Readonly<{ type: 'talk' }>;
+/** The house analogy: each mark is a far-off breakage the change caused (the newest pops in). */
+export type HouseScene = Readonly<{ type: 'house'; marks: readonly (typeof HOUSE_MARKS)[number][] }>;
+/** An inbox whose counter climbs to `count` messages with the same `subject`; `note` is a small tag above it. */
+export type InboxScene = Readonly<{ type: 'inbox'; count: number; subject: string; note?: string }>;
 
 export type LessonScene =
   | TitleScene
@@ -71,4 +76,6 @@ export type LessonScene =
   | GraphScene
   | VersusScene
   | TableScene
-  | TalkScene;
+  | TalkScene
+  | HouseScene
+  | InboxScene;

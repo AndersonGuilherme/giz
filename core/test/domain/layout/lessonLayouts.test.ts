@@ -12,7 +12,7 @@ import { AspectRatio } from '../../../src/domain/values/AspectRatio.ts';
 import { Language } from '../../../src/domain/values/Language.ts';
 
 const ASPECTS = [AspectRatio.VERTICAL, AspectRatio.HORIZONTAL];
-const LESSON_TYPES = ['title', 'card', 'quote', 'chart', 'symptoms', 'code', 'terminal', 'graph', 'versus', 'table', 'talk'] as const;
+const LESSON_TYPES = ['title', 'card', 'quote', 'chart', 'symptoms', 'code', 'terminal', 'graph', 'versus', 'table', 'talk', 'house', 'inbox'] as const;
 
 const EXAMPLES: Readonly<Record<(typeof LESSON_TYPES)[number], LessonScene>> = {
   title: { type: 'title', overline: 'Aula 3', title: 'Por que trocar o e-mail quebrou o teste do frete', subtitle: 'Dependências: quem conhece quem' },
@@ -59,6 +59,8 @@ const EXAMPLES: Readonly<Record<(typeof LESSON_TYPES)[number], LessonScene>> = {
     rows: [{ label: 'Trocar SMTP', cells: ['✕', '✓', '●'] }, { label: 'Nova regra de frete', cells: ['✓', '●', '✓'] }],
   },
   talk: { type: 'talk' },
+  house: { type: 'house', marks: ['wall', 'tv'] },
+  inbox: { type: 'inbox', count: 1, subject: 'Financeiro: total dos pedidos VIP não bate desde terça', note: 'Cenário simulado para fins didáticos' },
 };
 
 const CASES = LESSON_TYPES.flatMap((type) => ASPECTS.map((aspect) => ({ type, aspect })));

@@ -1,6 +1,8 @@
 import { CardLayout } from '../lesson/CardLayout.ts';
 import { ChartLayout } from '../lesson/ChartLayout.ts';
 import { CodeLayout } from '../lesson/CodeLayout.ts';
+import { HouseLayout } from '../lesson/HouseLayout.ts';
+import { InboxLayout } from '../lesson/InboxLayout.ts';
 import { LessonStage } from '../lesson/LessonStage.ts';
 import { QuoteLayout } from '../lesson/QuoteLayout.ts';
 import { SymptomsLayout } from '../lesson/SymptomsLayout.ts';
@@ -33,5 +35,7 @@ export function registerLessonLayouts(registry: LayoutRegistry): LayoutRegistry 
     .register('graph', graphBoxes)
     .register('versus', (scene, aspect) => VersusLayout.for(scene, aspect).boxes())
     .register('table', (scene, aspect) => TableLayout.for(scene, aspect).boxes())
-    .register('talk', () => Boxes.empty());
+    .register('talk', () => Boxes.empty())
+    .register('house', (scene, aspect, language) => HouseLayout.for(scene, aspect, language).boxes())
+    .register('inbox', (scene, aspect, language) => InboxLayout.for(scene, aspect, language).boxes());
 }

@@ -14,4 +14,8 @@ export const PORTUGUESE: FixedTexts = {
   healthy: 'saudável',
   rotten: 'apodrecido',
   readTheCode: 'Leia o código',
+  inbox: 'Caixa de entrada',
+  inboxSender: 'loja@exemplo.com · agora',
+  houseWall: 'trocar a lâmpada\n= quebrar a parede',
+  houseTv: 'abriu o chuveiro\n= TV desliga',
 };

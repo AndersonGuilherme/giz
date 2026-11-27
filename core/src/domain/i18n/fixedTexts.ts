@@ -17,6 +17,10 @@ export type FixedTexts = Readonly<{
   healthy: string;
   rotten: string;
   readTheCode: string;
+  inbox: string;
+  inboxSender: string;
+  houseWall: string;
+  houseTv: string;
 }>;
 
 const TEXTS: Readonly<Record<ReturnType<Language['code']>, FixedTexts>> = { 'pt-BR': PORTUGUESE, en: ENGLISH };

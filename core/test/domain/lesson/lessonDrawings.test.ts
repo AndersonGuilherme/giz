@@ -3,6 +3,8 @@ import assert from 'node:assert/strict';
 import { CardLayout } from '../../../src/domain/lesson/CardLayout.ts';
 import { LessonStage } from '../../../src/domain/lesson/LessonStage.ts';
 import { ChartLayout } from '../../../src/domain/lesson/ChartLayout.ts';
+import { HouseLayout } from '../../../src/domain/lesson/HouseLayout.ts';
+import { InboxLayout } from '../../../src/domain/lesson/InboxLayout.ts';
 import { QuoteLayout } from '../../../src/domain/lesson/QuoteLayout.ts';
 import { SymptomsLayout } from '../../../src/domain/lesson/SymptomsLayout.ts';
 import { TableLayout, toneOf } from '../../../src/domain/lesson/TableLayout.ts';
@@ -136,4 +138,50 @@ test('terminal and table panels are as tall as what they hold, centered in the c
   const row = table.rows[0].rectangle;
   assert.ok(row.y + row.height < table.panel.y + table.panel.height);
   assert.ok(Math.abs(table.panel.y - content.y - (content.y + content.height - table.panel.y - table.panel.height)) < 1e-6);
+});
+
+test('house: only the marks present show their label; the newest pops in, the TV blinks every 4 frames', () => {
+  const fps = Fps.DEFAULT;
+  const both = { type: 'house', marks: ['wall', 'tv'] } as const;
+  const drawing = HouseLayout.for(both, HORIZONTAL, Language.PORTUGUESE);
+  assert.deepEqual(drawing.wall.fit.lines, ['trocar a lâmpada', '= quebrar a parede']);
+  assert.equal(HouseLayout.for(both, HORIZONTAL, Language.ENGLISH).tv.fit.lines[0], 'turned on the shower');
+  assert.equal(drawing.boxes().overflowingTexts().length, 0);
+  assert.equal(HouseLayout.for({ type: 'house', marks: [] }, HORIZONTAL, Language.PORTUGUESE).boxes().overlappingPairs().length, 0);
+  assert.equal(HouseLayout.markProgress(both, 'wall', { age: 0, fps }), 1, 'an older mark is settled');
+  assert.equal(HouseLayout.markProgress(both, 'tv', { age: 0, fps }), 0, 'the newest one starts hidden');
+  assert.ok(HouseLayout.markProgress(both, 'tv', { age: 30, fps }) > 0.95);
+  assert.equal(HouseLayout.markProgress({ type: 'house', marks: ['wall'] }, 'tv', { age: 30, fps }), 0);
+  assert.deepEqual([0, 3, 4, 8].map((age) => HouseLayout.screenOff(both, age)), [true, true, false, true]);
+  assert.equal(HouseLayout.screenOff({ type: 'house', marks: ['wall'] }, 0), false);
+  assert.ok(drawing.art.width <= drawing.panel.width && drawing.art.height <= drawing.panel.height);
+  assert.ok(Math.abs(drawing.art.width / drawing.art.height - 1000 / 680) < 1e-9, 'the drawing keeps its proportion');
+});
+
+test('inbox: the counter climbs to the count in 2.2 s, accelerating; every 600 messages fill a row, up to 5', () => {
+  const fps = Fps.DEFAULT;
+  const scene = { type: 'inbox', count: 3000, subject: 'Pedido confirmado!', note: 'Cenário simulado' } as const;
+  assert.deepEqual([0, 33, 66, 200].map((age) => InboxLayout.countAt(scene, age, fps)), [0, 750, 3000, 3000]);
+  assert.equal(InboxLayout.countAt({ ...scene, count: 0 }, 66, fps), 0);
+  assert.deepEqual([0, 1, 600, 601, 3000, 9000].map((shown) => InboxLayout.filledRows(shown)), [0, 1, 1, 2, 5, 5]);
+  assert.equal(InboxLayout.badgeScale(scene, 3000, 7), 1, 'still once the counter arrived');
+  assert.notEqual(InboxLayout.badgeScale(scene, 750, 7), 1);
+  assert.equal(InboxLayout.countText(3000, Language.PORTUGUESE), '3.000');
+  assert.equal(InboxLayout.countText(3000, Language.ENGLISH), '3,000');
+  const drawing = InboxLayout.for(scene, HORIZONTAL, Language.PORTUGUESE);
+  assert.equal(drawing.title.fit.lines[0], 'Caixa de entrada');
+  assert.equal(drawing.rows.length, 5);
+  assert.ok(drawing.note && drawing.note.rectangle.y >= LessonStage.for(HORIZONTAL).content().y, 'the note pill stays in the content area');
+  for (let i = 1; i < 5; i++) assert.ok(drawing.rows[i].rectangle.y >= drawing.rows[i - 1].sender.bottom());
+  assert.equal(InboxLayout.for({ ...scene, note: undefined }, VERTICAL, Language.ENGLISH).note, undefined);
+});
+
+test('inbox: a long subject takes two lines and only its filled rows grow', () => {
+  const subject = 'Financeiro: total dos pedidos VIP não bate desde terça';
+  const { rows, boxes } = InboxLayout.for({ type: 'inbox', count: 1, subject }, VERTICAL, Language.PORTUGUESE);
+  assert.equal(rows[0].subject.fit.lines.length, 2);
+  assert.ok(rows[0].rectangle.height > rows[1].rectangle.height);
+  assert.equal(rows[1].rectangle.height, rows[4].rectangle.height);
+  assert.deepEqual(boxes().overflowingTexts(), []);
+  assert.equal(boxes().overlappingPairs().length, 0);
 });

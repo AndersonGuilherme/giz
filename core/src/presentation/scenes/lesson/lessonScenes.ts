@@ -7,6 +7,8 @@ import { CardView } from './CardView.tsx';
 import { ChartView } from './ChartView.tsx';
 import { CodeView } from './CodeView.tsx';
 import { GraphView } from './GraphView.tsx';
+import { HouseView } from './HouseView.tsx';
+import { InboxView } from './InboxView.tsx';
 import { QuoteView } from './QuoteView.tsx';
 import { SymptomsView } from './SymptomsView.tsx';
 import { TableView } from './TableView.tsx';
@@ -32,5 +34,7 @@ export function registerLessonScenes(registry: SceneRegistry): SceneRegistry {
     .register('graph', { Component: GraphView, boxes })
     .register('versus', { Component: VersusView, boxes })
     .register('table', { Component: TableView, boxes })
-    .register('talk', { Component: TalkView, boxes });
+    .register('talk', { Component: TalkView, boxes })
+    .register('house', { Component: HouseView, boxes })
+    .register('inbox', { Component: InboxView, boxes });
 }

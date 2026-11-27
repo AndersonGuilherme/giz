@@ -4,6 +4,7 @@ import {
   NODE_TONES,
   TERMINAL_TONES,
   CARD_VARIANTS,
+  HOUSE_MARKS,
 } from '../../domain/script/LessonScenes.ts';
 import { nonEmptyText } from './refinements.ts';
 
@@ -75,7 +76,11 @@ const table = z
   })
   .strict();
 const talk = z.object({ type: z.literal('talk') }).strict();
+const house = z.object({ type: z.literal('house'), marks: z.array(z.enum(HOUSE_MARKS)) }).strict();
+const inbox = z
+  .object({ type: z.literal('inbox'), count: index, subject: z.string(), note: nonEmptyText.optional() })
+  .strict();
 
 export const lessonSceneSchemas = [
-  title, card, quote, chart, symptoms, code, terminal, graph, versus, table, talk,
+  title, card, quote, chart, symptoms, code, terminal, graph, versus, table, talk, house, inbox,
 ] as const;

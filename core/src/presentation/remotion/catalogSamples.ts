@@ -105,4 +105,6 @@ export const CATALOG_SAMPLES: readonly CatalogSample[] = [
     states: EXPLAINING,
   },
   { scene: { type: 'talk' }, states: { lia: { pose: 'wave', expression: 'happy', look: 'other' }, teo: { pose: 'shrug', expression: 'confused', look: 'other' } } },
+  { scene: { type: 'house', marks: ['wall', 'tv'] }, states: POINTING },
+  { scene: { type: 'inbox', count: 3000, subject: 'Pedido confirmado!', note: 'Cenário simulado para fins didáticos' }, states: POINTING },
 ];

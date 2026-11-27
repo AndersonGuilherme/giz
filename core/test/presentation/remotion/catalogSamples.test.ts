@@ -9,7 +9,7 @@ import { CATALOG_SAMPLES } from '../../../src/presentation/remotion/catalogSampl
 
 test('the scene catalog shows every lesson scene once', () => {
   const types = CATALOG_SAMPLES.map((sample) => sample.scene.type);
-  assert.deepEqual(types, ['title', 'card', 'quote', 'chart', 'symptoms', 'code', 'terminal', 'graph', 'versus', 'table', 'talk']);
+  assert.deepEqual(types, ['title', 'card', 'quote', 'chart', 'symptoms', 'code', 'terminal', 'graph', 'versus', 'table', 'talk', 'house', 'inbox']);
 });
 
 test('every catalog sample passes the layout check in both aspect ratios and both languages', () => {
