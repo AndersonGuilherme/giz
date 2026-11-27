@@ -143,3 +143,19 @@ test('a failed or cancelled render leaves the old video as it was and no part fi
     await rm(folder, { recursive: true, force: true });
   }
 });
+
+test("a new render first removes the part files an earlier one left (a crash or a killed app), only that output's", async () => {
+  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const output = join(folder, 'output', 'video.mp4');
+  const { mkdir } = await import('node:fs/promises');
+  await mkdir(join(folder, 'output'));
+  const stale = '.video.0b6c1f8e-3d2a-4c55-9f1e-2a7d9c0b1e44.part.mp4';
+  const otherVariant = '.video-9x16.0b6c1f8e-3d2a-4c55-9f1e-2a7d9c0b1e44.part.mp4';
+  for (const name of [stale, otherVariant, 'notes.txt']) await writeFile(join(folder, 'output', name), 'x');
+  try {
+    await new RemotionRenderer(SOURCES, folder, { calls: writingCalls('new video').calls }).render(PROPS, output, () => undefined);
+    assert.deepEqual((await readdir(join(folder, 'output'))).sort(), [otherVariant, 'notes.txt', 'video.mp4'].sort());
+  } finally {
+    await rm(folder, { recursive: true, force: true });
+  }
+});

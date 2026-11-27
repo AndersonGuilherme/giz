@@ -43,3 +43,27 @@ test('no source file loads a font from the network (no @remotion/google-fonts, n
   assert.deepEqual(offenders, []);
   assert.equal(existsSync(join(PUBLIC, 'fonts')), true);
 });
+
+test('the render waits for the fonts: one hold per load, released once when they load, or when the view goes first', async () => {
+  const { holdWhileLoading } = await import('../../../src/presentation/remotion/bundledFonts.ts');
+  const events: string[] = [];
+  let handles = 0;
+  const hold = { delay: () => `h${(handles += 1)}`, release: (handle: string) => void events.push(`release ${handle}`) };
+  let finish: () => void = () => undefined;
+  const loading = new Promise<void>((resolve) => (finish = resolve));
+  const stop = holdWhileLoading(() => loading, hold);
+  assert.deepEqual(events, []);
+  finish();
+  await loading;
+  await new Promise((resolve) => setImmediate(resolve));
+  stop();
+  assert.deepEqual(events, ['release h1']);
+  // StrictMode mounts, unmounts and mounts again: the first hold is released by its cleanup, never left behind.
+  const pending = new Promise<void>(() => undefined);
+  const first = holdWhileLoading(() => pending, hold);
+  first();
+  const second = holdWhileLoading(() => Promise.reject(new Error('404')), hold);
+  await new Promise((resolve) => setImmediate(resolve));
+  second();
+  assert.deepEqual(events, ['release h1', 'release h2', 'release h3']);
+});

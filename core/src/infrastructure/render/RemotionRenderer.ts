@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { mkdir, rename, rm } from 'node:fs/promises';
+import { mkdir, readdir, rename, rm } from 'node:fs/promises';
 import { basename, dirname, extname, join } from 'node:path';
 import { makeCancelSignal, renderMedia, selectComposition } from '@remotion/renderer';
 import type { Renderer } from '../../application/ports/Renderer.ts';
@@ -26,6 +26,15 @@ const frameRangeOf = (frames: number | undefined, duration: number) => (frames =
 export function partFileOf(output: string): string {
   const extension = extname(output);
   return join(dirname(output), `.${basename(output, extension)}.${randomUUID()}.part${extension}`);
+}
+
+// The part files an earlier render of the same output left behind (the app killed mid-render): `.video.<uuid>.part.mp4`.
+async function removeStaleParts(output: string): Promise<void> {
+  const extension = extname(output);
+  const prefix = `.${basename(output, extension)}.`;
+  const isPart = (name: string) => name.startsWith(prefix) && /^[0-9a-f-]{36}\.part/.test(name.slice(prefix.length)) && name.endsWith(`.part${extension}`);
+  const names = await readdir(dirname(output));
+  await Promise.all(names.filter(isPart).map((name) => rm(join(dirname(output), name), { force: true })));
 }
 
 // The video appears only whole: `write` fills a part file, renamed over `output` once done and removed if it fails
@@ -71,6 +80,7 @@ export class RemotionRenderer implements Renderer {
   async render(props: VideoProps, output: string, onProgress: (fraction: number) => void): Promise<void> {
     this.#signal?.throwIfAborted();
     await mkdir(dirname(output), { recursive: true });
+    await removeStaleParts(output);
     const { withBundle: bundled, selectComposition: select, renderMedia: renderWith } = this.#calls;
     await bundled(this.#sources, projectFiles(props, this.#folder), async (serveUrl) => {
       this.#signal?.throwIfAborted();
