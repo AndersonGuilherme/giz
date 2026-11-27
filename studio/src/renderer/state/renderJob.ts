@@ -36,8 +36,10 @@ type Reducers = { readonly [Type in RenderEvent['type']]: (state: RenderJobState
 
 const running = (state: RenderJobState, { folder, aspect }: Named, fraction: number | null): RenderJobState => ({ ...state, job: { status: 'running', folder, aspect, fraction } });
 const ended = (state: RenderJobState, job: Exclude<RenderJob, { status: 'none' | 'running' }>): RenderJobState => ({ job, ended: { folder: job.folder, count: state.ended.count + 1 } });
-// Progress of the running render, or of one this window did not start (after a reload); a late step of an ended render is dropped.
-const progressed = (state: RenderJobState, event: EventOf<'progress'>) => (state.job.status === 'running' || state.job.status === 'none' ? running(state, event, event.fraction) : state);
+// A late step of the render that ended last (it may arrive after its end, or after it vanished) changes nothing.
+const isLate = ({ job, ended }: RenderJobState, { folder }: Named) => job.status !== 'running' && ended.count > 0 && ended.folder === folder;
+// Progress of the running render, or of one this window did not start (after a reload).
+const progressed = (state: RenderJobState, event: EventOf<'progress'>) => (isLate(state, event) ? state : running(state, event, event.fraction));
 
 function vanished(state: RenderJobState): RenderJobState {
   if (state.job.status !== 'running') return state;

@@ -15,14 +15,24 @@ export class FolderJobs {
   readonly #running: Array<Readonly<{ folder: string; job: FolderJob }>> = [];
 
   async run<T>(folder: string, job: FolderJob, work: () => Promise<T>): Promise<T> {
+    const release = this.claim(folder, job);
+    try {
+      return await work();
+    } finally {
+      release();
+    }
+  }
+
+  /** Takes the folder for `job` (refused as `busy` when it clashes with one running there); answers its release. */
+  claim(folder: string, job: FolderJob): () => void {
     const entry = { folder: resolve(folder), job };
     const clash = this.#running.find((other) => other.folder === entry.folder && CLASHES[job].includes(other.job));
     if (clash) throw new StudioError('busy', translate(BUSY[clash.job]));
     this.#running.push(entry);
-    try {
-      return await work();
-    } finally {
-      this.#running.splice(this.#running.indexOf(entry), 1);
-    }
+    // Released once: a second call finds nothing to remove.
+    return () => {
+      const index = this.#running.indexOf(entry);
+      if (index >= 0) this.#running.splice(index, 1);
+    };
   }
 }

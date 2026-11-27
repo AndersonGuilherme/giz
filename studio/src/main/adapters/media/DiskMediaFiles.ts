@@ -33,6 +33,10 @@ export class DiskMediaFiles implements MediaFiles {
     return quietly(async () => (await access(inside(folder, file)), true), false);
   }
 
+  isFolder(folder: string, file: string): Promise<boolean> {
+    return quietly(async () => (await stat(inside(folder, file))).isDirectory(), false);
+  }
+
   modified(folder: string, file: string): Promise<number | undefined> {
     return quietly(async () => {
       const found = await stat(inside(folder, file));

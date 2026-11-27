@@ -97,6 +97,11 @@ export class MemoryMediaFiles implements MediaFiles {
     return this.files.has(path) || [...this.files.keys()].some((known) => known.startsWith(`${path}/`));
   }
 
+  async isFolder(folder: string, file: string) {
+    const path = join(folder, file);
+    return [...this.files.keys()].some((known) => known.startsWith(`${path}/`));
+  }
+
   async modified(folder: string, file: string) {
     return this.#times.get(join(folder, file));
   }

@@ -56,17 +56,34 @@ test('the channels of a render and of voice and scenario generation go through t
   assert.deepEqual(calls, ['read', 'voices']);
 });
 
-test("a voice job keeps its folder until the voice worker really ended it, even after the cancel answered", async () => {
+test("a cancelled voice job answers at once but keeps its folder until the voice worker really ended it", async () => {
   const worker = held();
   const handlers = {
     'video.render': async () => ({ video: 'v', captions: 'c' }),
     'voices.generate': async () => Promise.reject(Object.assign(new Error('cancelado'), { code: 'cancelled' })),
   } as unknown as Handlers;
   const guarded = folderJobsGuard(handlers, new FolderJobs(), { voices: () => worker.done }) as unknown as Record<string, (request: unknown) => Promise<unknown>>;
-  const voices = guarded['voices.generate']!({ folder: '/p' }).catch(() => 'cancelled');
-  await new Promise((resolve) => setImmediate(resolve));
+  await assert.rejects(guarded['voices.generate']!({ folder: '/p' }), { code: 'cancelled' });
   await assert.rejects(guarded['video.render']!({ folder: '/p', aspect: '16:9' }), { code: 'busy' });
+  assert.deepEqual(await guarded['video.render']!({ folder: '/q', aspect: '16:9' }), { video: 'v', captions: 'c' });
   worker.finish();
-  assert.equal(await voices, 'cancelled');
+  await worker.done;
+  await new Promise((resolve) => setImmediate(resolve));
   assert.deepEqual(await guarded['video.render']!({ folder: '/p', aspect: '16:9' }), { video: 'v', captions: 'c' });
+});
+
+test("a voice call refused at once (another folder's job is busy, an unknown line) never waits for that job nor keeps its folder", async () => {
+  const otherJob = held();
+  let ask = 0;
+  const handlers = {
+    'video.render': async () => ({ video: 'v', captions: 'c' }),
+    'voices.generate': async () => Promise.reject(Object.assign(new Error('ocupado'), { code: 'busy' })),
+    'voices.record': async () => Promise.reject(Object.assign(new Error('fala desconhecida'), { code: 'invalid-request' })),
+  } as unknown as Handlers;
+  const guarded = folderJobsGuard(handlers, new FolderJobs(), { voices: () => ((ask += 1), otherJob.done) }) as unknown as Record<string, (request: unknown) => Promise<unknown>>;
+  await assert.rejects(guarded['voices.generate']!({ folder: '/b' }), { code: 'busy', message: 'ocupado' });
+  await assert.rejects(guarded['voices.record']!({ folder: '/b', lineId: 'x', wav: new Uint8Array() }), { code: 'invalid-request' });
+  assert.equal(ask, 0, 'the global voice job is never waited for');
+  assert.deepEqual(await guarded['video.render']!({ folder: '/b', aspect: '16:9' }), { video: 'v', captions: 'c' });
+  otherJob.finish();
 });

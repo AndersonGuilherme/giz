@@ -58,3 +58,11 @@ test("a bundled font is served as font/ttf and readable by the page (the scheme 
   assert.equal(response.headers.get('content-type'), 'font/ttf');
   assert.equal(response.headers.get('access-control-allow-origin'), '*');
 });
+
+test('only a font says any origin may read it: pictures, audio and videos stay without CORS', async () => {
+  const { answer } = responder(() => true);
+  for (const file of ['/p/voice/1.wav', '/p/scenes/1.png', '/p/output/video.mp4']) {
+    const response = await answer(new Request(mediaUrlOf(file, 5)));
+    assert.equal(response.headers.get('access-control-allow-origin'), null, file);
+  }
+});

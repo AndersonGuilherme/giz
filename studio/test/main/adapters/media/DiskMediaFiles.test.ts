@@ -57,3 +57,18 @@ test('entries: the files right inside a folder with their last change (not its s
   assert.equal(typeof entries[0]!.modified, 'number');
   assert.deepEqual(await files.entries(join(folder, 'nowhere')), []);
 });
+
+test('isFolder: a folder inside the project; never a file, a missing name nor a link leading out', async () => {
+  const { mkdir, symlink, writeFile } = await import('node:fs/promises');
+  const root = await mkdtemp(join(tmpdir(), 'giz-media-folders-'));
+  const [folder, outside] = [join(root, 'project'), join(root, 'outside')];
+  await Promise.all([mkdir(join(folder, 'output'), { recursive: true }), mkdir(outside)]);
+  await writeFile(join(folder, 'script.json'), '{}');
+  await symlink(outside, join(folder, 'elsewhere'));
+  const files = new DiskMediaFiles();
+  assert.equal(await files.isFolder(folder, 'output'), true);
+  assert.equal(await files.isFolder(folder, 'script.json'), false);
+  assert.equal(await files.isFolder(folder, 'missing'), false);
+  assert.equal(await files.isFolder(folder, 'elsewhere'), false);
+  assert.equal(await files.isFolder(folder, '..'), false);
+});

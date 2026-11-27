@@ -50,3 +50,10 @@ test('an old event of a finished render does not bring it back', () => {
   const done = run([{ type: 'started', folder: '/p', aspect: '16:9' }, { type: 'rendered', folder: '/p', aspect: '16:9', files: FILES }]);
   assert.equal(reduceRender(done, { type: 'progress', folder: '/p', aspect: '16:9', fraction: 1 }), done);
 });
+
+test('a late progress step of a render that just vanished does not bring it back (no second reload)', () => {
+  const gone = run([{ type: 'attached', status: { folder: '/p', aspect: '16:9', fraction: 0.9 } }, { type: 'vanished' }]);
+  assert.equal(reduceRender(gone, { type: 'progress', folder: '/p', aspect: '16:9', fraction: 1 }), gone);
+  const other = reduceRender(gone, { type: 'progress', folder: '/q', aspect: '9:16', fraction: 0.2 });
+  assert.deepEqual(renderOf(other, '/q'), { status: 'running', aspect: '9:16', fraction: 0.2 });
+});

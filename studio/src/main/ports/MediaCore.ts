@@ -56,6 +56,8 @@ export interface MediaFiles {
   write(folder: string, file: string, bytes: Uint8Array): Promise<void>;
   read(folder: string, file: string): Promise<Uint8Array | undefined>;
   exists(folder: string, file: string): Promise<boolean>;
+  /** Whether that name is a folder inside the project (a link leading out of it is not). */
+  isFolder(folder: string, file: string): Promise<boolean>;
   /** Last change in milliseconds (the version of a giz-media URL), or undefined when there is no such file. */
   modified(folder: string, file: string): Promise<number | undefined>;
   remove(folder: string, file: string): Promise<void>;

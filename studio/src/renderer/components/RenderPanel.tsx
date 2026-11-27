@@ -15,10 +15,11 @@ const STATUS_TEXT: { readonly [Status in RenderView['status']]: (render: Extract
 const statusText = (render: RenderView, translate: Translate) => (STATUS_TEXT[render.status] as (render: RenderView, translate: Translate) => string)(render, translate);
 const fractionOf = (render: RenderView) => (render.status === 'running' ? (render.fraction ?? 0) : Number(render.status === 'done'));
 
-/** Render and cancel, the bar (only once a render started) and the line saying how it goes. */
+/** Render and cancel, then (only once a render started) the bar and the line saying how it goes. */
 export function RenderPanel({ render, blocked, onRender, onCancel }: Props) {
   const translate = useTranslate();
   const running = render.status === 'running';
+  const status = statusText(render, translate);
   return (
     <section className="card render">
       <div className="render-actions">
@@ -26,7 +27,7 @@ export function RenderPanel({ render, blocked, onRender, onCancel }: Props) {
         {running && <button type="button" className="chalk-button" onClick={onCancel}>{translate('render.cancel')}</button>}
       </div>
       {render.status !== 'idle' && <progress className="chalk-progress" max={1} value={fractionOf(render)} />}
-      <p className="status" aria-live="polite">{statusText(render, translate)}</p>
+      {status && <p className="status" aria-live="polite">{status}</p>}
     </section>
   );
 }

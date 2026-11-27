@@ -41,9 +41,8 @@ export class VideoService {
   async openFolder(folder: string): Promise<true> {
     const { grants, files, shell } = this.#dependencies;
     const path = grants.require(folder);
-    // Inside the project (no link out of it) and there, but not a file: a folder.
-    const isFolder = (await files.exists(path, 'output')) && (await files.modified(path, 'output')) === undefined;
-    await shell.openFolder(isFolder ? join(path, 'output') : path);
+    const output = (await files.isFolder(path, 'output')) ? join(path, 'output') : path;
+    await shell.openFolder(output);
     return true;
   }
 
