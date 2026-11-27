@@ -8,6 +8,8 @@ import { DiskMediaFiles } from '../adapters/media/DiskMediaFiles.ts';
 import { GizMediaCore } from '../adapters/media/GizMediaCore.ts';
 import { RehearsalPainter } from '../adapters/media/rehearsal/RehearsalPainter.ts';
 import { RehearsalVoice } from '../adapters/media/rehearsal/RehearsalVoice.ts';
+import { voiceWorkerChannel } from '../adapters/media/voiceWorkerChannel.ts';
+import { WorkerVoiceWork } from '../adapters/media/WorkerVoiceWork.ts';
 import { DiskProjects } from '../adapters/DiskProjects.ts';
 import type { FolderGrants } from '../services/FolderGrants.ts';
 import type { FolderQueue } from '../services/FolderQueue.ts';
@@ -34,10 +36,10 @@ const standInsOf = (rehearsal: boolean) => (rehearsal ? { painter: (real: Constr
 
 /**
  * The Cast, Scenarios and Voices services, and what the media scheme serves: the samples folder is served, never
- * granted (no channel can open or write it as a project).
+ * granted (no channel can open or write it as a project). The lines and samples are made in the voice worker.
  */
 export function mediaServicesOf({ grants, settings, keys, slot, saves, rehearsal }: Parts) {
-  const core = new GizMediaCore(standInsOf(rehearsal));
+  const core = new GizMediaCore(standInsOf(rehearsal), new WorkerVoiceWork(voiceWorkerChannel(rehearsal)));
   const [disk, files] = [new DiskProjects(), new DiskMediaFiles()];
   const served = new ServedFolders(grants);
   const samples = served.serve(join(app.getPath('userData'), 'samples'));

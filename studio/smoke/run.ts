@@ -213,6 +213,8 @@ async function mediaStages(page: Page): Promise<void> {
   await castStage(context, folder);
   await scenariosStage(context, folder);
   await voicesStage(context, folder);
+  // The sample and every voice job (all pending, one line again, a take) ran in one long-lived voice worker.
+  assert.equal(output.match(/giz voices: worker ready/g)?.length, 1, 'one voice worker, kept for every job');
   await page.click('[data-testid="tab-script"]');
   await page.until('[data-testid="check-report"]');
   await page.click('[data-testid="go-home"]');

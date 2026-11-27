@@ -11,6 +11,8 @@ const SERVICES = '^src/main/(services|ports|ipc)/';
 const ADAPTERS = '^src/main/adapters/';
 const CORE_DRAWINGS = '^(\\.\\./core|node_modules/giz-core)/src/presentation/studio/index\\.ts$';
 const COMPOSITION = '^src/main/composition(\\.ts|/[^/]+\\.ts)$';
+// A worker process's entry is that process's own composition point (it wires the adapters it runs).
+const WORKER_ENTRY = '^src/main/worker/[a-zA-Z]+Worker\\.ts$';
 
 module.exports = {
   forbidden: [
@@ -48,7 +50,7 @@ module.exports = {
     {
       name: 'adapters-only-composition',
       severity: 'error',
-      from: { path: MAIN, pathNot: [COMPOSITION, ADAPTERS] },
+      from: { path: MAIN, pathNot: [COMPOSITION, ADAPTERS, WORKER_ENTRY] },
       to: { path: ADAPTERS },
     },
   ],

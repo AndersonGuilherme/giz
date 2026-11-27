@@ -38,6 +38,12 @@ const config: ForgeConfig = {
           target: 'main',
         },
         {
+          // The voice worker (the local voice and Whisper, kept loaded) runs in its own utility process too.
+          entry: 'src/main/worker/voiceWorker.ts',
+          config: 'vite.main.config.mts',
+          target: 'main',
+        },
+        {
           entry: 'src/preload/preload.ts',
           config: 'vite.preload.config.mts',
           target: 'preload',

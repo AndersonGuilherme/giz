@@ -255,5 +255,8 @@
   "voices.unrecord": "Usar a voz do projeto",
   "voices.recordingNow": "gravando…",
   "voices.stopAndSave": "Parar e usar",
-  "voices.micFailed": "Não deu para usar o microfone: {reason}"
+  "voices.micFailed": "Não deu para usar o microfone: {reason}",
+  "media.voiceWorkerRefused": "O trabalho de voz recusou um pedido fora do formato.",
+  "media.voiceWorkerStopped": "O processo das vozes parou de repente ({code}). Tente de novo: ele abre outra vez.",
+  "media.voiceWorkerAnswer": "O processo das vozes respondeu algo fora do formato e foi fechado. Tente de novo."
 }

@@ -9,6 +9,7 @@ export type CoreImageFiles = typeof import('giz-core/src/infrastructure/disk/ima
 export type CoreWav = typeof import('giz-core/src/infrastructure/voice/wav.ts');
 export type CoreCost = typeof import('giz-core/src/domain/ai/CostEstimate.ts');
 export type CoreScriptMaterials = typeof import('giz-core/src/presentation/cli/composition/script.ts');
+export type CoreWorkshop = typeof import('giz-core/src/presentation/cli/composition/voiceWorkshop.ts');
 
 export const coreCasting = (): Promise<CoreCasting> => import('giz-core/src/presentation/cli/composition/casting.ts');
 export const coreImages = (): Promise<CoreImages> => import('giz-core/src/presentation/cli/composition/images.ts');
@@ -20,3 +21,4 @@ export const coreImageFiles = (): Promise<CoreImageFiles> => import('giz-core/sr
 export const coreWav = (): Promise<CoreWav> => import('giz-core/src/infrastructure/voice/wav.ts');
 export const coreCostEstimate = (): Promise<CoreCost> => import('giz-core/src/domain/ai/CostEstimate.ts');
 export const coreScriptMaterials = (): Promise<CoreScriptMaterials> => import('giz-core/src/presentation/cli/composition/script.ts');
+export const coreWorkshop = (): Promise<CoreWorkshop> => import('giz-core/src/presentation/cli/composition/voiceWorkshop.ts');

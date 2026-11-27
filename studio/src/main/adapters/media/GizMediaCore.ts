@@ -1,20 +1,22 @@
-import type { CastCatalog, CharacterProblem, CharacterVoice } from '../../../shared/cast.ts';
+import type { CastCatalog, CharacterProblem } from '../../../shared/cast.ts';
 import type { ImageCost, ImageJob, MediaCore, SampleVoice, SpokenSample, StageItems, VoiceJob } from '../../ports/MediaCore.ts';
-import { generateImageIn, generateVoicesIn, imageCostOf, stageItemsOf, voiceKeys, type StandIns } from './coreJobs.ts';
-import { coreAspect, coreCasting, coreImageFiles, coreLanguage, coreScriptMaterials, coreWav } from './mediaModules.ts';
-
-type Sampler = Awaited<ReturnType<Awaited<ReturnType<typeof coreCasting>>['voiceSampler']>>;
-type SampleRequest = CharacterVoice & Readonly<{ text: string; language: 'pt-BR' | 'en' }>;
+import type { SampleRequest, VoiceWork } from '../../ports/VoiceWork.ts';
+import { generateImageIn, imageCostOf, stageItemsOf, type StandIns } from './coreJobs.ts';
+import { CoreVoiceWork } from './CoreVoiceWork.ts';
+import { coreAspect, coreCasting, coreImageFiles, coreScriptMaterials, coreWav } from './mediaModules.ts';
 
 /** Core's cast, scenarios and voices stages, through core's composition point (loaded on first use). */
 export class GizMediaCore implements MediaCore {
   readonly #standIns: StandIns | undefined;
-  // One sampler per voice service and model: the local voice loads its model once, then says every sample.
-  readonly #samplers = new Map<string, Sampler>();
+  readonly #voices: VoiceWork;
 
-  /** `standIns`: the rehearsal voice and painter (rehearsal mode); none: the real services. */
-  constructor(standIns?: StandIns) {
+  /**
+   * `standIns`: the rehearsal voice and painter (rehearsal mode); none: the real services. `voices`: where the voice
+   * work runs (the Studio's voice worker); by default in this process.
+   */
+  constructor(standIns?: StandIns, voices: VoiceWork = new CoreVoiceWork(standIns?.voice)) {
     this.#standIns = standIns;
+    this.#voices = voices;
   }
 
   async catalog(): Promise<CastCatalog> {
@@ -32,11 +34,8 @@ export class GizMediaCore implements MediaCore {
     return presets.map(({ id, name, personality, json }) => ({ id, name, personality, json }));
   }
 
-  async sample(voice: SampleVoice, request: SampleRequest): Promise<SpokenSample> {
-    const { Language } = await coreLanguage();
-    const sampler = await this.#samplerOf(voice);
-    const { wav, seconds, envelope, visemes } = await sampler({ text: request.text, voice: request.id, style: request.style, language: Language.of(request.language) });
-    return { wav: new Uint8Array(wav), seconds, envelope, visemes };
+  sample(voice: SampleVoice, request: SampleRequest): Promise<SpokenSample> {
+    return this.#voices.sample(voice, request);
   }
 
   items(folder: string): Promise<StageItems> {
@@ -52,7 +51,7 @@ export class GizMediaCore implements MediaCore {
   }
 
   generateVoices(folder: string, job: VoiceJob): Promise<void> {
-    return generateVoicesIn(folder, job, this.#standIns);
+    return this.#voices.generate(folder, job);
   }
 
   async imageFormat(bytes: Uint8Array): Promise<'png' | 'jpeg' | 'webp' | undefined> {
@@ -67,15 +66,5 @@ export class GizMediaCore implements MediaCore {
 
   async checkWav(bytes: Uint8Array): Promise<void> {
     (await coreWav()).fromWav(Buffer.from(bytes));
-  }
-
-  async #samplerOf(voice: SampleVoice): Promise<Sampler> {
-    const name = `${voice.provider}:${voice.model ?? ''}`;
-    const known = this.#samplers.get(name);
-    if (known && voice.provider === 'qwen') return known;
-    const casting = await coreCasting();
-    const made = this.#standIns ? casting.voiceSamplerWith(this.#standIns.voice) : casting.voiceSampler({ ...voice, keys: voiceKeys(voice.key) });
-    this.#samplers.set(name, made);
-    return made;
   }
 }

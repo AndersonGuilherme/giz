@@ -255,5 +255,8 @@
   "voices.unrecord": "Use the project voice",
   "voices.recordingNow": "recording…",
   "voices.stopAndSave": "Stop and use",
-  "voices.micFailed": "The microphone could not be used: {reason}"
+  "voices.micFailed": "The microphone could not be used: {reason}",
+  "media.voiceWorkerRefused": "The voice work refused a request of another shape.",
+  "media.voiceWorkerStopped": "The voice process stopped suddenly ({code}). Try again: it opens once more.",
+  "media.voiceWorkerAnswer": "The voice process answered something of another shape and was closed. Try again."
 }

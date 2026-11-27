@@ -1,4 +1,4 @@
-import type { ImageCost, ImageJob, StageItems, VoiceJob } from '../../ports/MediaCore.ts';
+import type { ImageCost, ImageJob, StageItems } from '../../ports/MediaCore.ts';
 import { translate } from '../../text.ts';
 import { coreCostEstimate, coreImages, coreMain, coreStages } from './mediaModules.ts';
 
@@ -72,12 +72,3 @@ export const voiceKeys = (key: string | undefined) => (service: string): string 
   if (key) return key;
   throw new Error(translate('media.noVoiceKey', { service }));
 };
-
-export async function generateVoicesIn(folder: string, job: VoiceJob, standIns: StandIns | undefined): Promise<void> {
-  const main = await coreMain();
-  const project = await loaded(folder);
-  const options = standIns ? { voice: standIns.voice, whisper: false } : { keys: voiceKeys(job.key) };
-  const generate = main.generateVoicesWith(folder, project, options);
-  const onProgress = ({ done, total, lineId }: Readonly<{ done: number; total: number; lineId: string }>) => job.onLine?.(done, total, lineId);
-  await generate.run(project, onProgress, { only: job.only ? [job.only] : undefined, force: job.only !== undefined, signal: job.signal });
-}
