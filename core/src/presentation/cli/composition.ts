@@ -52,8 +52,10 @@ const REMOTION = {
   browserExecutable: headlessShellIn(PACKAGE_FOLDER),
 };
 
-export function renderVideo(folder: string): RenderVideo {
-  return new RenderVideo({ build: buildTimeline(folder), renderer: new RemotionRenderer(REMOTION, folder), captions: new SrtCaptionWriter() });
+/** `signal` (optional): aborting it cancels the render, as the Studio's cancel button does. */
+export function renderVideo(folder: string, signal?: AbortSignal): RenderVideo {
+  const renderer = new RemotionRenderer(REMOTION, folder, { signal });
+  return new RenderVideo({ build: buildTimeline(folder), renderer, captions: new SrtCaptionWriter() });
 }
 
 export function produceVideo(folder: string): ProduceVideo {
