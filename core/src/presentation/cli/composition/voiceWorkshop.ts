@@ -10,24 +10,29 @@ import { generateVoicesWith, type StudioVoices } from '../composition.ts';
 import { voiceSampler, voiceSamplerWith, type SampleVoice } from './casting.ts';
 import { installConfig } from './install.ts';
 
-/** `qwen` and `listener`: other makers (tests); by default the real local voice and Whisper, each loaded on first use. */
-export type WorkshopParts = Readonly<{ qwen?: (model: QwenModel | undefined) => VoiceProvider; listener?: Listener }>;
+/**
+ * `qwen`, `listener` and `configured`: other makers (tests); by default the real local voice and Whisper, each loaded
+ * on first use, and the model size of giz.config.json.
+ */
+export type WorkshopParts = Readonly<{ qwen?: (model: QwenModel) => VoiceProvider; listener?: Listener; configured?: () => QwenModel }>;
 
-async function qwenVoice(model: QwenModel | undefined): Promise<VoiceProvider> {
+async function qwenVoice(model: QwenModel): Promise<VoiceProvider> {
   const { QwenVoice } = await import('../../../infrastructure/voice/QwenVoice.ts');
   return new QwenVoice(installConfig(), model);
 }
 
-const realQwen = (model: QwenModel | undefined): VoiceProvider => new LazyVoice(() => qwenVoice(model));
+// A load that fails (a model not downloaded yet) is tried again on the next line: LazyVoice keeps only a load that worked.
+const realQwen = (model: QwenModel): VoiceProvider => new LazyVoice(() => qwenVoice(model));
+const configuredModel = (): QwenModel => installConfig().model;
 
 /** Lines (`lines`, as generateVoicesWith) and samples (`sampler`, as voiceSampler) sharing the loaded models. */
-export function voiceWorkshop({ qwen = realQwen, listener = new WhisperListener() }: WorkshopParts = {}) {
-  const local = new Map<string, VoiceProvider>();
-  // No model named: the one in giz.config.json (read once per process, like the CLI).
-  const localVoice = (model: QwenModel | undefined): VoiceProvider => {
-    const name = model ?? 'configured';
-    const voice = local.get(name) ?? qwen(model);
-    local.set(name, voice);
+export function voiceWorkshop({ qwen = realQwen, listener = new WhisperListener(), configured = configuredModel }: WorkshopParts = {}) {
+  const local = new Map<QwenModel, VoiceProvider>();
+  // One voice per real size: no model named is the size giz.config.json names (read once per process, like the CLI).
+  const localVoice = (named: QwenModel | undefined): VoiceProvider => {
+    const model = named ?? configured();
+    const voice = local.get(model) ?? qwen(model);
+    local.set(model, voice);
     return voice;
   };
   return {

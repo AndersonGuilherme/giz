@@ -88,3 +88,11 @@ test('an image path naming a folder is a readable warning, not a raw EISDIR', as
   await assert.rejects(imageSize(join(folder, 'scenarios')), /scenarios não é um arquivo/);
   await rm(folder, { recursive: true, force: true });
 });
+
+test('a picture the person framed (background.crop) gives no aspect warning: what the render shows was chosen', async () => {
+  const folder = await folderWith({ 'square.png': png(800, 800) });
+  const script = scriptWith(['square.png']);
+  (script.lines[0]!.scene as { background: Record<string, unknown> }).background.crop = { zoom: 1.2, x: 0.3, y: 0.5 };
+  assert.deepEqual(await imageWarnings(folder, script, AspectRatio.VERTICAL), []);
+  await rm(folder, { recursive: true, force: true });
+});

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { DomainError } from '../../../src/domain/DomainError.ts';
-import { ImageCrop } from '../../../src/domain/scenario/ImageCrop.ts';
+import { CROP_LIMITS, ImageCrop } from '../../../src/domain/scenario/ImageCrop.ts';
 import { BackgroundSource } from '../../../src/domain/scenario/BackgroundSource.ts';
 
 test('no crop: the picture covers the image box as it is, centered', () => {
@@ -34,4 +34,9 @@ test('an image background carries its crop to the renderer; a vector one has non
   const crop = { zoom: 2, x: 0, y: 0 };
   assert.deepEqual(BackgroundSource.for({ image: 'scenes/own/1.png', crop }, { imageFailed: false }), { kind: 'image', image: 'scenes/own/1.png', crop });
   assert.equal(BackgroundSource.for({ image: 'scenes/own/1.png', crop }, { imageFailed: true }).kind, 'vector');
+});
+
+test('the limits are one constant (the Studio checks its channel and its editor with it)', () => {
+  assert.deepEqual(CROP_LIMITS, { zoom: { least: 1, most: 4 }, focus: { least: 0, most: 1 } });
+  assert.doesNotThrow(() => ImageCrop.of({ zoom: CROP_LIMITS.zoom.most, x: CROP_LIMITS.focus.least, y: CROP_LIMITS.focus.most }));
 });

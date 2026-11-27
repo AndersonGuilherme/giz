@@ -25,16 +25,16 @@ class CountingListener {
 }
 
 function workshopWithFakes() {
-  const made: (string | undefined)[] = [];
+  const made: string[] = [];
   const voices = new Map<string, FakeVoice>();
-  const qwen = (model: string | undefined) => {
+  const qwen = (model: '0.6b' | '1.7b') => {
     made.push(model);
     const voice = new FakeVoice();
-    voices.set(model ?? 'default', voice);
+    voices.set(model, voice);
     return voice;
   };
   const listener = new CountingListener();
-  return { workshop: voiceWorkshop({ qwen, listener }), made, voices, listener };
+  return { workshop: voiceWorkshop({ qwen, listener, configured: () => '1.7b' }), made, voices, listener };
 }
 
 test('the voice workshop keeps one local voice per model size for every run, and one Whisper', async () => {
@@ -68,4 +68,13 @@ test('another voice (the Studio rehearsal) replaces the project voice; no local 
   await workshop.lines(folder, project, { voice, whisper: false }).run(project);
   assert.equal(voice.calls, 2);
   assert.deepEqual(made, []);
+});
+
+test('no model named is the configured size: it shares the one voice of that size, never a second one', async () => {
+  const { workshop, made, voices } = workshopWithFakes();
+  const request = { text: 'Olá!', voice: 'vivian', language: Language.PORTUGUESE };
+  await workshop.sampler({ provider: 'qwen', keys: () => '' })(request);
+  await workshop.sampler({ provider: 'qwen', model: '1.7b', keys: () => '' })(request);
+  assert.deepEqual(made, ['1.7b']);
+  assert.equal(voices.get('1.7b')!.calls, 2);
 });

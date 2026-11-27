@@ -10,7 +10,10 @@ type Focus = Readonly<{ x: number; y: number }>;
  */
 export type CropPlacement = Readonly<{ size: number; left: number; top: number; focusX: number; focusY: number }>;
 
-const [LEAST_ZOOM, MOST_ZOOM, HUNDRED] = [1, 4, 100];
+/** The crop's ranges (zoom; focus x and y), shared with the Studio's channel check and its crop editor. */
+export const CROP_LIMITS = { zoom: { least: 1, most: 4 }, focus: { least: 0, most: 1 } } as const;
+const HUNDRED = 100;
+const rangeOf = ({ least, most }: Readonly<{ least: number; most: number }>): readonly [number, number] => [least, most];
 
 function checked(name: string, value: number, [least, most]: readonly [number, number]): number {
   if (!Number.isFinite(value) || value < least || value > most) throw new DomainError(`recorte: ${name} deve ir de ${least} a ${most} (veio ${value})`);
@@ -31,8 +34,8 @@ export class ImageCrop {
   }
 
   static of(json: ImageCropJson): ImageCrop {
-    const focus = { x: checked('x', json.x, [0, 1]), y: checked('y', json.y, [0, 1]) };
-    return new ImageCrop(checked('zoom', json.zoom, [LEAST_ZOOM, MOST_ZOOM]), focus);
+    const focus = { x: checked('x', json.x, rangeOf(CROP_LIMITS.focus)), y: checked('y', json.y, rangeOf(CROP_LIMITS.focus)) };
+    return new ImageCrop(checked('zoom', json.zoom, rangeOf(CROP_LIMITS.zoom)), focus);
   }
 
   static none(): ImageCrop {

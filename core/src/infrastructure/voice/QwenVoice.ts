@@ -11,6 +11,8 @@ const QWEN_LANGUAGES: Readonly<Record<string, string>> = { 'pt-BR': 'portuguese'
 const TEMPERATURE = 0.7;
 
 type Install = Pick<GizConfig, 'model' | 'device' | 'threads' | 'modelsDir'>;
+type Speaker = Pick<Qwen3Tts, 'generate'>;
+type Load = (install: Install, model?: QwenModel) => Promise<Speaker>;
 
 // Fixed seed per line: the same id and text always generate the same audio.
 function seedOf(request: VoiceRequest): number {
@@ -28,16 +30,18 @@ export async function loadQwen(install: Install, model: QwenModel = install.mode
 export class QwenVoice implements VoiceProvider {
   readonly #install: Install;
   readonly #model: QwenModel | undefined;
-  #tts: Promise<Qwen3Tts> | undefined;
+  readonly #load: Load;
+  #tts: Promise<Speaker> | undefined;
 
-  constructor(install: Install, model?: QwenModel) {
+  /** `load`: another loader (tests); by default the model is downloaded if needed and opened. */
+  constructor(install: Install, model?: QwenModel, load: Load = loadQwen) {
     this.#install = install;
     this.#model = model;
+    this.#load = load;
   }
 
   async generate(request: VoiceRequest): Promise<Audio> {
-    this.#tts ??= loadQwen(this.#install, this.#model);
-    const tts = await this.#tts;
+    const tts = await this.#loaded();
     const samples = await tts.generate(request.text, {
       speaker: request.voice,
       language: QWEN_LANGUAGES[request.language.code()],
@@ -46,5 +50,14 @@ export class QwenVoice implements VoiceProvider {
       seed: seedOf(request),
     });
     return Audio.of(samples, QWEN_RATE);
+  }
+
+  // A failed load (no model, no GPU library) is not kept: the next line loads again.
+  #loaded(): Promise<Speaker> {
+    this.#tts ??= this.#load(this.#install, this.#model).catch((error: unknown) => {
+      this.#tts = undefined;
+      throw error;
+    });
+    return this.#tts;
   }
 }

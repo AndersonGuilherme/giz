@@ -8,3 +8,4 @@ export { VideoPreview, type VideoPreviewProps } from './VideoPreview.tsx';
 export { videoMarks, type ChapterMark, type LineMark, type VideoMarks } from './videoMarks.ts';
 export { cropStyle } from '../scenes/scenario/cropStyle.ts';
 export { IMAGE_BLEED } from '../../domain/scenario/ScenarioImageFrame.ts';
+export { CROP_LIMITS, type ImageCropJson } from '../../domain/scenario/ImageCrop.ts';
