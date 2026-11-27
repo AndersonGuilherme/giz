@@ -49,6 +49,7 @@ export const REQUEST_SCHEMAS: { readonly [Name in ChannelName]: z.ZodType<Reques
   'projects.create': IDEA_REQUEST,
   'projects.duplicate': z.object({ folder }).strict(),
   'projects.trash': z.object({ folder }).strict(),
+  'projects.forget': z.object({ folder }).strict(),
   'projects.stages': z.object({ folder }).strict(),
   'ideas.presets': nothing,
   'ideas.portraits': nothing,

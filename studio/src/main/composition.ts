@@ -89,8 +89,8 @@ function scriptServicesOf({ grants, settings, keys, slot }: ScriptParts): Pick<S
   const listing = new ProjectsService({ core, disk, trash: trashOf(), grants, opened, projectsFolder });
   const provider = async () => (await settings.get()).providers.text;
   const progress = sendTo(slot, SCRIPT_PROGRESS_EVENT);
-  const newFolder = (theme: string) => listing.newFolder(theme);
-  const ideas = new IdeaService({ core, provider, keyOf: (name) => keys.keyOf(name), needsKey: !STUDIO_PATHS.rehearsal, newFolder, portraitsFolder: join(userData, 'portraits'), progress });
+  const folders = { newFolder: (theme: string) => listing.newFolder(theme), release: (folder: string) => listing.release(folder) };
+  const ideas = new IdeaService({ core, provider, keyOf: (name) => keys.keyOf(name), needsKey: !STUDIO_PATHS.rehearsal, ...folders, portraitsFolder: join(userData, 'portraits'), progress });
   return { listing, ideas, script: new ScriptService({ core, disk, grants }) };
 }
 

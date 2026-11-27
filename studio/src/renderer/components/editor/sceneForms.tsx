@@ -27,7 +27,7 @@ function CardForm({ index, scene, change }: SceneFormProps) {
   const { cardVariants } = useVocabulary();
   return (
     <div className="form-grid">
-      <Picker label={translate('scene.variant')} value={text(scene.variant)} options={cardVariants} onChange={(variant) => change({ variant })} testId={`scene-variant-${index}`} />
+      <Picker label={translate('scene.variant')} value={text(scene.variant)} options={cardVariants} group="cardVariant" onChange={(variant) => change({ variant })} testId={`scene-variant-${index}`} />
       <TextField label={translate('scene.title')} value={text(scene.title)} onChange={(title) => change({ title })} />
       <TextField label={translate('scene.items')} value={linesText(scene.items)} multiline onChange={(items) => change({ items: textLines(items) })} hint={translate('scene.oneByLine')} />
       <label className="field"><span className="field-label">{translate('scene.shown')}</span><input type="number" min={0} className="chalk-input" value={Number(scene.shown ?? 0)} onChange={(event) => change({ shown: event.target.valueAsNumber || 0 })} /></label>

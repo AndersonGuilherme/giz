@@ -14,6 +14,8 @@ type Dependencies = Readonly<{
   keyOf: (provider: TextProviderName) => Promise<string | undefined>;
   needsKey: boolean;
   newFolder: (theme: string) => Promise<string>;
+  /** Removes a reserved folder that stayed empty (the run was cancelled or failed). */
+  release: (folder: string) => Promise<void>;
   portraitsFolder: string;
   progress: (progress: ScriptProgress) => void;
 }>;
@@ -50,17 +52,20 @@ export class IdeaService {
     return core.estimate(idea, await provider());
   }
 
-  /** One generation at a time; `cancel` stops it before its next call and nothing is saved. */
+  /**
+   * One generation at a time, until core has settled (a cancelled one too); `cancel` aborts the call in flight and
+   * answers at once, and nothing is saved.
+   */
   async generate(idea: IdeaFields): Promise<GeneratedScript> {
     if (this.#running) throw new StudioError('busy', translate('errors.generationBusy'));
     const controller = new AbortController();
     this.#running = controller;
+    const work = this.#generate(idea, controller.signal);
+    void work.catch(() => undefined).then(() => (this.#running === controller ? (this.#running = undefined) : undefined));
     try {
-      return await this.#generate(idea, controller.signal);
+      return await untilAborted(work, controller.signal);
     } catch (error) {
       throw failureOfGeneration(error, controller.signal);
-    } finally {
-      this.#running = undefined;
     }
   }
 
@@ -75,7 +80,10 @@ export class IdeaService {
     const key = await this.#key(provider);
     const folder = await newFolder(idea.theme);
     const onCall = (call: number, most: number) => progress({ call, most });
-    const { repairs, calls } = await untilAborted(core.generate(idea, { folder, provider, key, signal, onCall }), signal);
+    const { repairs, calls } = await core.generate(idea, { folder, provider, key, signal, onCall }).catch(async (error: unknown) => {
+      await this.#dependencies.release(folder);
+      throw error;
+    });
     return { folder, repairs, calls };
   }
 

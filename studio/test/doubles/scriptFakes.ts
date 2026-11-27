@@ -14,6 +14,9 @@ export class MemoryDisk implements ProjectDisk {
   readonly files = new Map<string, string>();
   readonly times = new Map<string, number>();
   readonly writes: string[] = [];
+  readonly made = new Set<string>();
+  /** Milliseconds each write takes, by the order of the writes (the overlapping-saves test). */
+  writeDelays: number[] = [];
 
   put(folder: string, file: string, json: unknown): void {
     this.files.set(join(folder, file), JSON.stringify(json));
@@ -25,7 +28,7 @@ export class MemoryDisk implements ProjectDisk {
   }
 
   async exists(path: string): Promise<boolean> {
-    return this.files.has(path) || [...this.files.keys()].some((file) => file.startsWith(`${path}/`));
+    return this.made.has(path) || this.files.has(path) || [...this.files.keys()].some((file) => file.startsWith(`${path}/`));
   }
 
   async readJson(folder: string, file: string): Promise<unknown> {
@@ -35,8 +38,27 @@ export class MemoryDisk implements ProjectDisk {
   }
 
   async writeJson(folder: string, file: string, json: unknown): Promise<void> {
+    const delay = this.writeDelays[this.writes.length] ?? 0;
     this.writes.push(join(folder, file));
+    await new Promise((done) => setTimeout(done, delay));
     this.files.set(join(folder, file), JSON.stringify(json));
+  }
+
+  async readText(folder: string, file: string): Promise<string | undefined> {
+    return this.files.get(join(folder, file));
+  }
+
+  async makeFolder(folder: string): Promise<void> {
+    this.made.add(folder);
+  }
+
+  async removeEmptyFolder(folder: string): Promise<void> {
+    if (!(await this.folders(folder)).length && ![...this.files.keys()].some((path) => path.startsWith(`${folder}/`))) this.made.delete(folder);
+  }
+
+  async backup(folder: string, file: string): Promise<void> {
+    const text = this.files.get(join(folder, file));
+    if (text !== undefined) this.files.set(join(folder, `${file}.bak`), text);
   }
 
   async modified(folder: string): Promise<number> {
@@ -116,7 +138,7 @@ export class FakeScriptCore implements ScriptCore {
 
   async estimate(_idea: IdeaFields, provider: TextProviderName): Promise<ScriptEstimate> {
     this.estimates.push(provider);
-    return { provider, model: 'modelo', firstCall: 0.1, maximum: 1.07, calls: 4 };
+    return { provider, model: 'modelo', firstCall: 0.1, maximum: 1.07, calls: 4, repairs: 3 };
   }
 
   generate(idea: IdeaFields, job: GenerationJob): Promise<Generation> {

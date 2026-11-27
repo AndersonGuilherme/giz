@@ -16,10 +16,11 @@ export function useProjects(api: GizApi, onOpen: (folder: string) => void) {
   }, [reload]);
   const duplicate = useCallback((folder: string) => void after(api.projects.duplicate(folder)), [api, after]);
   const trash = useCallback((folder: string) => void after(api.projects.trash(folder)), [api, after]);
+  const forget = useCallback((folder: string) => void after(api.projects.forget(folder)), [api, after]);
   const pick = useCallback(async () => {
     const picked = await api.projects.pick();
     if (!picked.ok) return setFailure(picked.failure);
     if (picked.value !== null) onOpen(picked.value);
   }, [api, onOpen]);
-  return { projects, failure, duplicate, trash, pick: () => void pick() };
+  return { projects, failure, duplicate, trash, forget, pick: () => void pick() };
 }

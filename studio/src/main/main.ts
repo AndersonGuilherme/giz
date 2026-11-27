@@ -7,6 +7,7 @@ import { registerChannels } from './ipc/registry.ts';
 import { REQUEST_SCHEMAS } from './ipc/schemas.ts';
 import { isTrustedSender } from './ipc/senderTrust.ts';
 import { launcher } from './launcher.ts';
+import { quitAfterSaves } from './quitGuard.ts';
 import { denyAllPermissions } from './security/permissions.ts';
 import { translate } from './text.ts';
 import { appOrigin, createMainWindow } from './window.ts';
@@ -27,6 +28,7 @@ function register(): void {
   const restored = services.settings.restore().catch((error: unknown) => console.error('giz: the saved settings could not be restored:', error));
   const handlers = afterReady(handlersOf(services), restored);
   registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers, trusts: (event) => isTrustedSender(event, rules) });
+  quitAfterSaves(app, () => services.script.settled());
 }
 
 function openWindow(): void {

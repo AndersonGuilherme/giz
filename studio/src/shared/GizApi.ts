@@ -18,6 +18,7 @@ export type GizApi = Readonly<{
     create(idea: IdeaFields): Reply<string>;
     duplicate(folder: string): Reply<string>;
     trash(folder: string): Reply<true>;
+    forget(folder: string): Reply<true>;
     stages(folder: string): Reply<readonly StageBrief[]>;
   }>;
   ideas: Readonly<{

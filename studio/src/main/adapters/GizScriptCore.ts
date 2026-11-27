@@ -2,7 +2,7 @@ import type { IdeaFields, Presets, ScriptEstimate, StageBrief } from '../../shar
 import type { SceneProblem, Vocabulary } from '../../shared/script.ts';
 import { GenerationFailure, type Generation, type GenerationJob, type ScriptCore, type TextProviderName, type Validation } from '../ports/ScriptCore.ts';
 import { translate } from '../text.ts';
-import { coreComposition, coreCost, coreEditing, coreIdea, coreScript, coreStatus } from './coreModules.ts';
+import { coreComposition, coreCost, coreEditing, coreGeneration, coreIdea, coreScript, coreStatus } from './coreModules.ts';
 import { drawnPortraits } from './portraitsFile.ts';
 import { RehearsalTextProvider } from './rehearsal/RehearsalTextProvider.ts';
 import { validationOf } from './validation.ts';
@@ -68,7 +68,8 @@ export class GizScriptCore implements ScriptCore {
     const { Idea } = await coreIdea();
     const { generate, model } = await generatorOf(idea, provider, { rehearsal: this.#rehearsal });
     const { firstCall, maximum } = await generate.estimate(Idea.fromJson(idea));
-    return { provider, model, firstCall: firstCall.dollars() ?? null, maximum: maximum.dollars() ?? null, calls: 4 };
+    const repairs = (await coreGeneration()).MAX_REPAIRS;
+    return { provider, model, firstCall: firstCall.dollars() ?? null, maximum: maximum.dollars() ?? null, calls: repairs + 1, repairs };
   }
 
   async generate(idea: IdeaFields, job: GenerationJob): Promise<Generation> {

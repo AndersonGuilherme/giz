@@ -34,17 +34,24 @@ function useGeneration(api: GizApi, draft: IdeaDraft, onCreated: (folder: string
   return { generation, estimate: () => void estimate(), generate: () => void generate(), cancel: () => void api.script.cancel(), close: () => dispatch({ type: 'close' }) };
 }
 
+const IDLE_STATES: readonly string[] = ['idle', 'failed', 'cancelled'];
+
 /** The new-project wizard: the draft, the presets, "write it myself" and "generate with AI". */
 export function useIdeaWizard(api: GizApi, language: IdeaDraft['language'], onCreated: (folder: string) => void) {
   const [draft, setDraft] = useState(() => emptyDraft(language));
   const [failure, setFailure] = useState<Failure | null>(null);
   const change = useCallback((patch: Partial<IdeaDraft>) => setDraft((current) => ({ ...current, ...patch })), []);
+  const [creating, setCreating] = useState(false);
   const writeMyself = useCallback(async () => {
+    setCreating(true);
     const created = await api.projects.create(ideaOf(draft));
+    setCreating(false);
     return created.ok ? onCreated(created.value) : setFailure(created.failure);
   }, [api, draft, onCreated]);
   const ai = useGeneration(api, draft, onCreated);
-  return { draft, change, failure, ...usePresets(api), writeMyself: () => void writeMyself(), ai };
+  // While a project is being made, neither way can start another one.
+  const busy = creating || !IDLE_STATES.includes(ai.generation.status);
+  return { draft, change, failure, busy, ...usePresets(api), writeMyself: () => void (busy || writeMyself()), ai };
 }
 
 export type IdeaWizard = ReturnType<typeof useIdeaWizard>;

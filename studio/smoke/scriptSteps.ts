@@ -1,6 +1,6 @@
 // The S3 part of the smoke test: the projects list, the new-project wizard (by hand and with the rehearsal text AI)
 // and the script editor (lines, a validation error that appears and clears, undo, a scene as JSON, duplicate, trash).
-import { readdir, readFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import assert from 'node:assert/strict';
 import type { Page } from './devtools.ts';
@@ -120,9 +120,14 @@ export async function undoMoveAndScene({ page, shoot }: Context, folder: string)
   await savedAndChecked(page);
 }
 
-/** Back home: the new project is listed; a copy is made, then sent to the (rehearsal) trash after the confirmation. */
-export async function duplicateAndTrash({ page, shoot, home }: Context): Promise<void> {
+/** Back home: an edit made just before leaving is on disk; a copy is made and trashed; the outside project is only forgotten. */
+export async function duplicateAndTrash({ page, shoot, home }: Context, folder: string): Promise<void> {
+  await replace(page, '[data-testid="text-2"]', 'Saiu sem esperar o salvamento.');
   await page.click('[data-testid="go-home"]');
+  await page.until('[data-testid="projects-screen"]');
+  assert.equal((await scriptOf(folder)).lines[2].text, 'Saiu sem esperar o salvamento.', 'leaving the editor saves the last edit');
+  assert.equal(await count(page, '[data-testid="project-pt-BR"] [data-testid="project-trash"]'), 0, 'a folder opened from elsewhere is never trashed');
+  await page.until('[data-testid="project-pt-BR"] [data-testid="project-forget"]');
   const tile = '[data-testid="project-e-se-os-gatos-acordassem-falando"]';
   await page.click(`${tile} [data-testid="project-duplicate"]`);
   const copy = '[data-testid="project-e-se-os-gatos-acordassem-falando-copia"]';
@@ -138,12 +143,28 @@ export async function duplicateAndTrash({ page, shoot, home }: Context): Promise
   await shoot(page, 's3-08-projetos');
 }
 
+/** A script.json that is not JSON opens as a readable failure, and the file is left as it was. */
+export async function brokenScript({ page, shoot, home }: Context): Promise<void> {
+  const folder = join(PROJECTS(home), 'roteiro-quebrado');
+  await mkdir(folder, { recursive: true });
+  await writeFile(join(folder, 'project.json'), JSON.stringify({ version: 2, title: 'Roteiro quebrado', format: 'story', language: 'pt-BR', aspect: '9:16', cast: [], voice: { provider: 'qwen' } }));
+  await writeFile(join(folder, 'script.json'), '{ "chapters": ["Um"], "lines": [');
+  await page.click('[data-testid="new-project"]');
+  await page.click('[data-testid="idea-cancel"]');
+  await page.click('[data-testid="project-roteiro-quebrado"] [data-testid="project-open"]');
+  await page.untilText('.failure', /não pôde ser lido[\s\S]*script\.json: JSON inválido na linha 1/);
+  await shoot(page, 's3-15-roteiro-quebrado');
+  assert.equal(await readFile(join(folder, 'script.json'), 'utf8'), '{ "chapters": ["Um"], "lines": [');
+}
+
 /** "Gerar com IA" with the rehearsal text AI: the estimate, the confirmation, call 2 of 4 (a repair), the editor. */
 export async function generateWithAi({ page, shoot }: Context): Promise<void> {
+  await page.click('[data-testid="go-home"]');
   await fillIdea(page, 'Um robô aprende a cozinhar');
   await page.click('[data-testid="generate-ai"]');
   await page.until('[data-testid="generate-estimate"] [data-testid="worst-case"]');
-  await page.untilText('[data-testid="generate-estimate"]', /anthropic, modelo modelo de ensaio/);
+  await page.untilText('[data-testid="generate-estimate"]', /Anthropic \(Claude\), modelo modelo de ensaio/);
+  await page.untilText('[data-testid="generate-estimate"]', /4 chamadas, com 3 correções/);
   await shoot(page, 's3-09-estimativa');
   await page.click('[data-testid="generate-confirm"]');
   await page.untilText('[data-testid="generate-progress"]', /Chamada 2 de 4/);
@@ -180,4 +201,6 @@ export async function inEnglish({ page, shoot }: Context): Promise<void> {
   await page.click('[data-testid="go-home"]');
   await page.untilText('[data-testid="projects-screen"] h2', /Projects/);
   await shoot(page, 's3-14-projects-en');
+  await page.click('[data-testid="project-pt-BR"] [data-testid="project-forget"]');
+  await until(async () => (await count(page, '[data-testid="project-pt-BR"]')) === 0, 'the outside project to leave the list');
 }

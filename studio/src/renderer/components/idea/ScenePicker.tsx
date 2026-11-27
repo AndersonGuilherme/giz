@@ -1,6 +1,7 @@
 import type { Presets } from '../../../shared/projects.ts';
 import { useTranslate } from '../../i18n.ts';
 import { toggled, type IdeaDraft } from '../../idea/ideaDraft.ts';
+import { labelOf } from '../../labels.ts';
 
 type Props = Readonly<{ draft: IdeaDraft; change: (patch: Partial<IdeaDraft>) => void; presets: Presets | null }>;
 type Choice = Readonly<{ id: string; name: string; title?: string }>;
@@ -21,7 +22,7 @@ export function ScenePicker({ draft, change, presets }: Props) {
   if (!presets || draft.format === 'lesson') return null;
   const toggle = (id: string) => change({ scenes: toggled(draft.scenes, id) });
   const scenes = presets.scenes.map(({ id, name, description }) => ({ id, name, title: description }));
-  const backgrounds = presets.backgrounds.map((id) => ({ id, name: id }));
+  const backgrounds = presets.backgrounds.map((id) => ({ id, name: labelOf(translate, 'background', id) }));
   return (
     <section className="card form-card">
       <h3>{translate('idea.scenes')} <span className="muted small">{translate('common.optional')}</span></h3>

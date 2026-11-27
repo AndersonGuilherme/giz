@@ -41,7 +41,7 @@ export function ScenarioForm(props: SceneFormProps) {
   const highlight = objectOf(scene.highlight);
   return (
     <div className="form-grid">
-      <Picker label={translate('scene.background')} value={typeof background.vector === 'string' ? background.vector : undefined} options={vocabulary.backgrounds} empty={translate('editor.unset')} onChange={(vector) => change({ background: { ...background, vector } })} testId={`scene-background-${index}`} />
+      <Picker label={translate('scene.background')} value={typeof background.vector === 'string' ? background.vector : undefined} options={vocabulary.backgrounds} group="background" empty={translate('editor.unset')} onChange={(vector) => change({ background: { ...background, vector } })} testId={`scene-background-${index}`} />
       <Picker label={translate('scene.camera')} value={typeof camera.type === 'string' ? camera.type : undefined} options={vocabulary.cameraMoves} group="camera" empty={translate('scene.cameraNone')} onChange={(type) => change({ camera: type ? { ...camera, type } : undefined })} />
       <StageFields {...props} />
       <TextField label={translate('scene.highlight')} value={typeof highlight.text === 'string' ? highlight.text : ''} onChange={(text) => change({ highlight: text ? { ...highlight, text } : undefined })} hint={translate('scene.highlightHint')} />

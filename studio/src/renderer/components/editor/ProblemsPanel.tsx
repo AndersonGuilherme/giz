@@ -27,6 +27,8 @@ function ProblemList({ title, problems, tone }: ListProps) {
 
 function SaveLine({ saving, saveFailure }: Readonly<{ saving: SaveStatus; saveFailure: Failure | null }>) {
   const translate = useTranslate();
+  const { unsaved } = useEditorTools();
+  if (unsaved) return <p className="save-status failed" data-testid="save-status" data-status="unsaved" aria-live="polite">{translate('editor.save.unsaved')}</p>;
   const text = saving === 'failed' ? translate('editor.saveFailed', { message: saveFailure?.message ?? '' }) : translate(`editor.save.${saving}`);
   return <p className={`save-status ${saving}`} data-testid="save-status" data-status={saving} aria-live="polite">{text}</p>;
 }

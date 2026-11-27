@@ -1,5 +1,5 @@
 import { randomUUID } from 'node:crypto';
-import { access, cp, readdir, readFile, rename, stat, writeFile } from 'node:fs/promises';
+import { access, copyFile, cp, mkdir, readdir, readFile, rename, rm, rmdir, stat, writeFile } from 'node:fs/promises';
 import { basename, join, relative, sep } from 'node:path';
 import type { ProjectDisk } from '../ports/ProjectDisk.ts';
 import { translate } from '../text.ts';
@@ -37,8 +37,34 @@ export class DiskProjects implements ProjectDisk {
   async writeJson(folder: string, file: string, json: unknown): Promise<void> {
     const target = join(folder, file);
     const draft = `${target}.${randomUUID()}.tmp`;
-    await writeFile(draft, `${JSON.stringify(json, null, 2)}\n`);
-    await rename(draft, target);
+    try {
+      await writeFile(draft, `${JSON.stringify(json, null, 2)}\n`);
+      await rename(draft, target);
+    } catch (error) {
+      await rm(draft, { force: true });
+      throw error;
+    }
+  }
+
+  async readText(folder: string, file: string): Promise<string | undefined> {
+    return readFile(join(folder, file), 'utf8').catch((error: NodeJS.ErrnoException) => {
+      if (error.code === 'ENOENT') return undefined;
+      throw error;
+    });
+  }
+
+  async makeFolder(folder: string): Promise<void> {
+    await mkdir(folder, { recursive: true });
+  }
+
+  async removeEmptyFolder(folder: string): Promise<void> {
+    await rmdir(folder).catch(() => undefined);
+  }
+
+  async backup(folder: string, file: string): Promise<void> {
+    await copyFile(join(folder, file), join(folder, `${file}.bak`)).catch((error: NodeJS.ErrnoException) => {
+      if (error.code !== 'ENOENT') throw error;
+    });
   }
 
   async modified(folder: string): Promise<number> {

@@ -19,7 +19,7 @@ function BeatRow({ index, beat, at, change }: Readonly<{ index: number; beat: Be
       <Picker label={translate('editor.expression')} value={textOf(beat.expression)} options={vocabulary.expressions} group="expression" empty={unset} onChange={field('expression')} />
       <Picker label={translate('editor.pose')} value={textOf(beat.pose)} options={vocabulary.poses} group="pose" empty={unset} onChange={field('pose')} />
       <Picker label={translate('editor.sfx')} value={textOf(beat.sfx)} options={vocabulary.sounds} group="sfx" empty={unset} onChange={field('sfx')} />
-      <BeatScene beat={beat} change={change} />
+      <BeatScene beat={beat} change={change} draftKey={`beat-${index}-${at}`} />
     </li>
   );
 }

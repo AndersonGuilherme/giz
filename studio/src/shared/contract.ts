@@ -80,8 +80,10 @@ export type Channels = Readonly<{
   'projects.create': Channel<IdeaRequest, string>;
   /** A copy next to the project (without its rendered output): answers the copy's folder. */
   'projects.duplicate': Channel<FolderRequest, string>;
-  /** Moves the project folder to the system trash. */
+  /** Moves a project of the projects folder to the system trash (never a folder opened from elsewhere). */
   'projects.trash': Channel<FolderRequest, true>;
+  /** "Remover da lista": a folder opened from elsewhere leaves the list; nothing is deleted. */
+  'projects.forget': Channel<FolderRequest, true>;
   'projects.stages': Channel<FolderRequest, readonly StageBrief[]>;
   'ideas.presets': Channel<Nothing, Presets>;
   /** The ready characters' portraits (drawn once, then kept); null when they cannot be drawn. */

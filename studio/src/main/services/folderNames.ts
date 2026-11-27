@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { isAbsolute, join, relative, resolve, sep } from 'node:path';
 import type { ProjectDisk } from '../ports/ProjectDisk.ts';
 
 const LONGEST = 48;
@@ -23,4 +23,10 @@ async function firstFree(disk: ProjectDisk, { parent, name }: Place, attempt: nu
 /** `<parent>/<name>`, or `<name>-2`, `<name>-3`... when that folder already exists: a new project never lands on another. */
 export function freeFolder(disk: ProjectDisk, parent: string, name: string): Promise<string> {
   return firstFree(disk, { parent, name }, 1);
+}
+
+/** Whether `path` is inside `root` and is not `root` itself. */
+export function isStrictlyInside(root: string, path: string): boolean {
+  const way = relative(resolve(root), resolve(path));
+  return way !== '' && way.split(sep)[0] !== '..' && !isAbsolute(way);
 }

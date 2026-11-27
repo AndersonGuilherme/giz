@@ -7,19 +7,20 @@ import { FakeScriptCore, IDEA } from '../../doubles/scriptFakes.ts';
 
 function setup(options: Readonly<{ key?: string; needsKey?: boolean }> = { key: 'sk-1' }) {
   const core = new FakeScriptCore();
+  const released: string[] = [];
   const progress: ScriptProgress[] = [];
   const keysAsked: TextProviderName[] = [];
   const keyOf = async (provider: TextProviderName) => (keysAsked.push(provider), options.key);
   const service = new IdeaService({
     core, provider: async () => 'gemini', keyOf, needsKey: options.needsKey ?? true,
-    newFolder: async (theme) => `/projetos/${theme.length}`, portraitsFolder: '/user/portraits', progress: (step) => progress.push(step),
+    newFolder: async (theme) => `/projetos/${theme.length}`, release: async (folder) => void released.push(folder), portraitsFolder: '/user/portraits', progress: (step) => progress.push(step),
   });
-  return { core, service, progress, keysAsked };
+  return { core, service, progress, keysAsked, released };
 }
 
 test('the estimate uses the text provider chosen in Settings', async () => {
   const { core, service } = setup();
-  assert.deepEqual(await service.estimate(IDEA), { provider: 'gemini', model: 'modelo', firstCall: 0.1, maximum: 1.07, calls: 4 });
+  assert.deepEqual(await service.estimate(IDEA), { provider: 'gemini', model: 'modelo', firstCall: 0.1, maximum: 1.07, calls: 4, repairs: 3 });
   assert.deepEqual(core.estimates, ['gemini']);
 });
 
@@ -48,20 +49,26 @@ test('without a key nothing is called (outside rehearsal mode)', async () => {
   assert.equal((await rehearsal.service.generate(IDEA)).calls, 1);
 });
 
-test('one generation at a time; cancel answers "cancelled" at once, even while a call is still running', async () => {
-  const { core, service } = setup();
+test('one generation at a time, until core has settled; cancel answers at once and the reserved folder is released', async () => {
+  const { core, service, released } = setup();
   let seen: AbortSignal | undefined;
+  let settle: () => void = () => undefined;
   core.generator = (_idea, job) => {
     seen = job.signal;
-    return new Promise(() => undefined);
+    return new Promise((_done, fail) => (settle = () => fail(new Error('aborted'))));
   };
   const running = service.generate(IDEA);
   await new Promise((done) => setImmediate(done));
   await assert.rejects(service.generate(IDEA), { code: 'busy' });
   assert.equal(service.cancel(), true);
   await assert.rejects(running, { code: 'cancelled' });
-  assert.equal(seen?.aborted, true, 'core sees the abort: it saves nothing after it');
-  assert.equal(service.cancel(), false);
+  assert.equal(seen?.aborted, true, 'core sees the abort: the call in flight stops and nothing is saved');
+  await assert.rejects(service.generate(IDEA), { code: 'busy' }, 'still busy while core has not settled');
+  settle();
+  await new Promise((done) => setImmediate(done));
+  assert.deepEqual(released, ['/projetos/23'], 'the reserved folder that stayed empty is removed');
+  core.generator = async () => ({ repairs: 0, calls: 1 });
+  assert.equal((await service.generate(IDEA)).calls, 1, 'a new run starts once core settled');
 });
 
 test('a script that never became valid is a readable failure with its problems and the draft folder', async () => {

@@ -9,6 +9,14 @@ export interface ProjectDisk {
   writeJson(folder: string, file: string, json: unknown): Promise<void>;
   /** The newest change of the folder's own files (not its rendered output), in milliseconds. */
   modified(folder: string): Promise<number>;
+  /** Makes the folder (and its parents). */
+  makeFolder(folder: string): Promise<void>;
+  /** Removes the folder only when it is empty (a reserved folder nothing was written to). */
+  removeEmptyFolder(folder: string): Promise<void>;
+  /** Keeps a copy of the file next to it, as `<file>.bak` (nothing when there is no file). */
+  backup(folder: string, file: string): Promise<void>;
+  /** The file as text, or undefined when it does not exist. */
+  readText(folder: string, file: string): Promise<string | undefined>;
   /** Copies the folder, without the top-level entries named in `skip`. */
   copy(from: string, to: string, skip: readonly string[]): Promise<void>;
 }

@@ -54,9 +54,9 @@ function ProjectList({ projects, actions, onNew }: Readonly<{ projects: readonly
 
 /** The home screen: every project with its stages, and the way to a new one. */
 export function ProjectsScreen({ api, onOpen, onNew }: Props) {
-  const { projects, failure, duplicate, trash, pick } = useProjects(api, onOpen);
+  const { projects, failure, duplicate, trash, forget, pick } = useProjects(api, onOpen);
   const [trashing, setTrashing] = useState<ProjectListing | null>(null);
-  const actions = { onOpen, onDuplicate: duplicate, onTrash: setTrashing };
+  const actions = { onOpen, onDuplicate: duplicate, onTrash: setTrashing, onForget: forget };
   return (
     <main className="board wide" data-testid="projects-screen">
       <Toolbar count={projects?.length ?? null} onNew={onNew} onPick={pick} />

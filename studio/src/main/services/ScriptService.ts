@@ -2,26 +2,23 @@ import type { EditorCastMember, EditorReport, SceneProblem, ScriptDocument, Scri
 import type { ProjectDisk } from '../ports/ProjectDisk.ts';
 import type { ScriptCore } from '../ports/ScriptCore.ts';
 import { editorProblemOf } from './editorProblems.ts';
+import { SCRIPT_FILE, scriptIn } from './scriptFile.ts';
 import type { FolderGrants } from './FolderGrants.ts';
 
 type Dependencies = Readonly<{ core: ScriptCore; disk: ProjectDisk; grants: FolderGrants }>;
 type Json = Readonly<Record<string, unknown>>;
 
-const EMPTY_SCRIPT: ScriptJson = { chapters: [], lines: [] };
 // A cast id names a file (cast/<id>.json): only a plain name is read, never a path.
 const PLAIN_ID = /^[a-z0-9][a-z0-9_-]*$/i;
 const textOf = (value: unknown): string => (typeof value === 'string' ? value : '');
 const isObject = (value: unknown): value is Json => typeof value === 'object' && value !== null && !Array.isArray(value);
 
-function scriptOf(json: unknown): ScriptJson {
-  if (!isObject(json) || !Array.isArray(json.lines)) return EMPTY_SCRIPT;
-  const chapters = Array.isArray(json.chapters) ? json.chapters.map(textOf) : [];
-  return { chapters, lines: json.lines.filter(isObject) as unknown as ScriptJson["lines"] };
-}
-
 /** The script editor's files: it reads a project as JSON (a broken one still opens), saves the script and checks it. */
 export class ScriptService {
   readonly #dependencies: Dependencies;
+  readonly #queues = new Map<string, Promise<unknown>>();
+  // The folders whose script.json was already kept as .bak in this run.
+  readonly #backedUp = new Set<string>();
 
   constructor(dependencies: Dependencies) {
     this.#dependencies = dependencies;
@@ -31,22 +28,33 @@ export class ScriptService {
     const { disk, grants } = this.#dependencies;
     const path = grants.require(folder);
     const project = (await disk.readJson(path, 'project.json')) as Json;
-    const script = scriptOf(await disk.readJson(path, 'script.json').catch(() => null));
+    const script = await scriptIn(disk, path);
     const profile = { title: textOf(project.title), format: textOf(project.format), aspect: textOf(project.aspect), language: textOf(project.language) };
     return { folder: path, ...profile, cast: await this.#cast(path, project.cast), script };
   }
 
-  /** script.json is replaced atomically, then the project is checked as it is now on disk. */
+  /**
+   * script.json is replaced atomically, then the project is checked as it is now on disk. The saves of a folder run one
+   * after the other (the newest always lands last); the first save of a run keeps the file as script.json.bak, and a
+   * file that is not a script is never saved over.
+   */
   async save(folder: string, script: ScriptJson): Promise<EditorReport> {
     const path = this.#dependencies.grants.require(folder);
-    await this.#dependencies.disk.writeJson(path, 'script.json', script);
-    return this.#report(path, script);
+    const run = (this.#queues.get(path) ?? Promise.resolve()).then(() => this.#save(path, script));
+    const settled = run.catch(() => undefined);
+    this.#queues.set(path, settled);
+    void settled.then(() => (this.#queues.get(path) === settled ? this.#queues.delete(path) : undefined));
+    return run;
+  }
+
+  /** Waits for every save in flight (the app waits for them before it quits). */
+  async settled(): Promise<void> {
+    await Promise.all([...this.#queues.values()]);
   }
 
   async check(folder: string): Promise<EditorReport> {
     const path = this.#dependencies.grants.require(folder);
-    const script = scriptOf(await this.#dependencies.disk.readJson(path, 'script.json').catch(() => null));
-    return this.#report(path, script);
+    return this.#report(path, await scriptIn(this.#dependencies.disk, path));
   }
 
   vocabulary(): Promise<Vocabulary> {
@@ -55,6 +63,17 @@ export class ScriptService {
 
   checkScene(scene: unknown): Promise<readonly SceneProblem[]> {
     return this.#dependencies.core.checkScene(scene);
+  }
+
+  async #save(folder: string, script: ScriptJson): Promise<EditorReport> {
+    const { disk } = this.#dependencies;
+    if (!this.#backedUp.has(folder)) {
+      await scriptIn(disk, folder);
+      await disk.backup(folder, SCRIPT_FILE);
+      this.#backedUp.add(folder);
+    }
+    await disk.writeJson(folder, SCRIPT_FILE, script);
+    return this.#report(folder, script);
   }
 
   async #report(folder: string, script: ScriptJson): Promise<EditorReport> {

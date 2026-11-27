@@ -1,4 +1,4 @@
-import type { TextAnswer, TextProvider, TextRequest } from 'giz-core/src/application/ports/TextProvider.ts';
+import type { TextAnswer, TextCallOptions, TextProvider, TextRequest } from 'giz-core/src/application/ports/TextProvider.ts';
 import type { CoreCost } from '../coreModules.ts';
 import type { IdeaFields } from '../../../shared/projects.ts';
 import { rehearsalAnswer } from './rehearsalAnswer.ts';
@@ -6,7 +6,14 @@ import { rehearsalAnswer } from './rehearsalAnswer.ts';
 /** A theme with this mark never gets a valid answer: the rehearsal of a generation that fails. */
 export const REHEARSAL_FAILURE = 'ensaio-falha';
 const PAUSE = 900;
-const later = (milliseconds: number) => new Promise((done) => setTimeout(done, milliseconds));
+// A pause the signal cuts short, like a real call that is aborted.
+function later(milliseconds: number, signal?: AbortSignal): Promise<void> {
+  return new Promise((done, fail) => {
+    signal?.throwIfAborted();
+    const timer = setTimeout(done, milliseconds);
+    signal?.addEventListener('abort', () => [clearTimeout(timer), fail(signal.reason)], { once: true });
+  });
+}
 
 /**
  * The pretend text AI of rehearsal mode: no network, no key. Its first answer has an invalid pose (core repairs it on
@@ -22,8 +29,8 @@ export class RehearsalTextProvider implements TextProvider {
     this.#cost = cost;
   }
 
-  async generate(): Promise<TextAnswer> {
-    await later(PAUSE);
+  async generate(_request: TextRequest, options: TextCallOptions = {}): Promise<TextAnswer> {
+    await later(PAUSE, options.signal);
     this.#calls += 1;
     const broken = this.#calls === 1 || this.#idea.theme.includes(REHEARSAL_FAILURE);
     return { text: JSON.stringify(rehearsalAnswer(this.#idea, broken)), usage: { inputTokens: 9000, outputTokens: 1200 } };

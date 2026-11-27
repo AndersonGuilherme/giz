@@ -28,10 +28,42 @@ test('read gives the profile, the cast (who has a body) and the script; an id th
   });
 });
 
-test('a broken script.json opens as an empty script (the project.json is what is required)', async () => {
+test('no script.json yet opens as an empty script', async () => {
   const { service, disk } = setup();
-  disk.files.set(`${FOLDER}/script.json`, '"nada"');
+  disk.files.delete(`${FOLDER}/script.json`);
   assert.deepEqual((await service.read(FOLDER)).script, { chapters: [], lines: [] });
+});
+
+test('a script.json that is not a script is a readable failure, and is never saved over', async () => {
+  const { service, disk } = setup();
+  disk.files.set(`${FOLDER}/script.json`, '{ "chapters": [');
+  await assert.rejects(service.read(FOLDER), (error: { code: string; details: string[] }) => {
+    assert.equal(error.code, 'invalid-project');
+    assert.equal(error.details[0], 'script.json: JSON inválido na linha 1, coluna 16');
+    return true;
+  });
+  await assert.rejects(service.save(FOLDER, SCRIPT), { code: 'invalid-project' });
+  assert.equal(disk.files.get(`${FOLDER}/script.json`), '{ "chapters": [');
+  disk.files.set(`${FOLDER}/script.json`, '"nada"');
+  await assert.rejects(service.read(FOLDER), { code: 'invalid-project' });
+});
+
+test('the first save of a run keeps script.json.bak; later saves do not replace it', async () => {
+  const { service, disk } = setup();
+  const first = { ...SCRIPT, chapters: ['Primeiro'] };
+  await service.save(FOLDER, first);
+  assert.deepEqual(JSON.parse(disk.files.get(`${FOLDER}/script.json.bak`) ?? 'null'), SCRIPT);
+  await service.save(FOLDER, { ...SCRIPT, chapters: ['Segundo'] });
+  assert.deepEqual(JSON.parse(disk.files.get(`${FOLDER}/script.json.bak`) ?? 'null'), SCRIPT);
+});
+
+test('two overlapping saves of a folder run one after the other: the newer one ends on disk', async () => {
+  const { service, disk } = setup();
+  disk.writeDelays = [40, 0];
+  const older = service.save(FOLDER, { ...SCRIPT, chapters: ['Antiga'] });
+  const newer = service.save(FOLDER, { ...SCRIPT, chapters: ['Nova'] });
+  await Promise.all([older, newer, service.settled()]);
+  assert.deepEqual(JSON.parse(disk.files.get(`${FOLDER}/script.json`) ?? 'null').chapters, ['Nova']);
 });
 
 test('save writes script.json, then answers the check placed on its lines and the stages', async () => {

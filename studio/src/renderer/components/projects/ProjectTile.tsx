@@ -9,6 +9,7 @@ type Props = Readonly<{
   onOpen: (folder: string) => void;
   onDuplicate: (folder: string) => void;
   onTrash: (project: ProjectListing) => void;
+  onForget: (folder: string) => void;
 }>;
 
 const folderName = (folder: string) => folder.split(/[\\/]/).filter(Boolean).at(-1) ?? folder;
@@ -28,7 +29,14 @@ function Facts({ project }: Readonly<{ project: ProjectListing }>) {
 }
 
 /** One project of the list: title, profile, stages and its actions. */
-export function ProjectTile({ project, onOpen, onDuplicate, onTrash }: Props) {
+// A project of the projects folder can go to the trash; a folder opened from elsewhere only leaves the list (ruling S3-I4).
+function Removal({ project, onTrash, onForget }: Pick<Props, 'project' | 'onTrash' | 'onForget'>) {
+  const translate = useTranslate();
+  if (project.inProjectsFolder) return <button type="button" className="chalk-button small quiet danger-text" data-testid="project-trash" onClick={() => onTrash(project)}>{translate('home.trash')}</button>;
+  return <button type="button" className="chalk-button small quiet" data-testid="project-forget" title={translate('home.forgetHint')} onClick={() => onForget(project.folder)}>{translate('home.forget')}</button>;
+}
+
+export function ProjectTile({ project, onOpen, onDuplicate, onTrash, onForget }: Props) {
   const translate = useTranslate();
   const name = folderName(project.folder);
   return (
@@ -42,7 +50,7 @@ export function ProjectTile({ project, onOpen, onDuplicate, onTrash }: Props) {
       <div className="tile-actions">
         <button type="button" className="chalk-button small" data-testid="project-open" onClick={() => onOpen(project.folder)}>{translate('home.open')}</button>
         <button type="button" className="chalk-button small quiet" data-testid="project-duplicate" onClick={() => onDuplicate(project.folder)}>{translate('home.duplicate')}</button>
-        <button type="button" className="chalk-button small quiet danger-text" data-testid="project-trash" onClick={() => onTrash(project)}>{translate('home.trash')}</button>
+        <Removal project={project} onTrash={onTrash} onForget={onForget} />
       </div>
     </li>
   );

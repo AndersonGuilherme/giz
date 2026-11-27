@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useEditor, type Editor } from '../../state/useEditor.ts';
@@ -13,11 +13,22 @@ import { useUndoKeys } from './useUndoKeys.ts';
 
 type Props = Readonly<{ api: GizApi; folder: string }>;
 
-type Selection = Readonly<{ selected: number | null; select: (line: number | null) => void }>;
+type Local = Pick<EditorTools, 'selected' | 'select' | 'unsaved' | 'markDraft'>;
+
+/** What only the window knows: the selected line, and the JSON boxes holding text that does not parse (not saved). */
+function useLocal(): Local {
+  const [selected, select] = useState<number | null>(null);
+  const [drafts, setDrafts] = useState<ReadonlySet<string>>(new Set());
+  const markDraft = useCallback((key: string, invalid: boolean) => setDrafts((current) => {
+    if (current.has(key) === invalid) return current;
+    return new Set(invalid ? [...current, key] : [...current].filter((known) => known !== key));
+  }), []);
+  return useMemo(() => ({ selected, select, unsaved: drafts.size > 0, markDraft }), [selected, drafts, markDraft]);
+}
 
 const NO_PROBLEMS = { errors: [], warnings: [] } as const;
 
-function useTools(api: GizApi, editor: Editor, selection: Selection): EditorTools | null {
+function useTools(api: GizApi, editor: Editor, selection: Local): EditorTools | null {
   const { loaded, history, report, edit } = editor;
   return useMemo(() => {
     if (!loaded || !history) return null;
@@ -49,9 +60,7 @@ function Title({ tools }: Readonly<{ tools: EditorTools }>) {
 export function EditorScreen({ api, folder }: Props) {
   const translate = useTranslate();
   const editor = useEditor(api, folder);
-  const [selected, select] = useState<number | null>(null);
-  const selection = useMemo(() => ({ selected, select }), [selected]);
-  const tools = useTools(api, editor, selection);
+  const tools = useTools(api, editor, useLocal());
   useUndoKeys(editor.undo, editor.redo);
   if (editor.failure) return <main className="board"><FailurePanel failure={editor.failure} /></main>;
   if (!tools) return <p className="hint">{translate('editor.loading')}</p>;

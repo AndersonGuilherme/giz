@@ -20,6 +20,8 @@ export type ProjectListing = Readonly<{
   stages: readonly StageBrief[];
   /** Last change of any file in the folder, in milliseconds since 1970. */
   modified: number;
+  /** Strictly inside the projects folder: it can go to the trash; a folder opened from elsewhere is only forgotten. */
+  inProjectsFolder: boolean;
   problem?: string;
 }>;
 
@@ -53,7 +55,8 @@ export type Presets = Readonly<{ cast: readonly CastPresetBrief[]; scenes: reado
 export type Portraits = Readonly<{ image: string; cell: number; columns: number; ids: readonly string[] }>;
 
 /** Before generating: the provider and model chosen in Settings and the cost in dollars (null when unknown). */
-export type ScriptEstimate = Readonly<{ provider: string; model: string; firstCall: number | null; maximum: number | null; calls: number }>;
+/** `calls`: the most calls a run makes (the first plus `repairs`, core's MAX_REPAIRS). */
+export type ScriptEstimate = Readonly<{ provider: string; model: string; firstCall: number | null; maximum: number | null; calls: number; repairs: number }>;
 /** Before each call to the text AI: call 1 of 4, then 2 of 4 for a repair... */
 export type ScriptProgress = Readonly<{ call: number; most: number }>;
 export type GeneratedScript = Readonly<{ folder: string; repairs: number; calls: number }>;

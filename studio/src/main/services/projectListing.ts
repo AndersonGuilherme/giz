@@ -1,8 +1,10 @@
+import { resolve } from 'node:path';
 import type { ProjectListing } from '../../shared/projects.ts';
 import type { ProjectDisk } from '../ports/ProjectDisk.ts';
 import type { ScriptCore } from '../ports/ScriptCore.ts';
+import { isStrictlyInside } from './folderNames.ts';
 
-type Sources = Readonly<{ disk: ProjectDisk; core: ScriptCore }>;
+type Sources = Readonly<{ disk: ProjectDisk; core: ScriptCore; root: string | null }>;
 type Profile = Readonly<Record<string, unknown>>;
 
 const textOf = (value: unknown): string => (typeof value === 'string' ? value : '');
@@ -23,8 +25,14 @@ async function ideaProfile(folder: string, disk: ProjectDisk, error: unknown): P
 }
 
 /** One project on the home screen: its profile, the state of each stage and when it last changed. */
-export async function listingOf(folder: string, { disk, core }: Sources): Promise<ProjectListing> {
+export async function listingOf(folder: string, { disk, core, root }: Sources): Promise<ProjectListing> {
+  const inProjectsFolder = root !== null && isStrictlyInside(root, folder);
   const [{ profile, problem }, stages, modified] = await Promise.all([profileOf(folder, disk), core.stages(folder).catch(() => []), disk.modified(folder)]);
   const facts = { title: textOf(profile.title), format: textOf(profile.format), aspect: textOf(profile.aspect), language: textOf(profile.language) };
-  return { folder, ...facts, stages, modified, ...(problem ? { problem } : {}) };
+  return { folder, ...facts, stages, modified, inProjectsFolder, ...(problem ? { problem } : {}) };
+}
+
+/** A project folder has a project.json, or at least the idea.json it starts from. */
+export async function isProjectFolder(disk: ProjectDisk, folder: string): Promise<boolean> {
+  return (await disk.exists(resolve(folder, 'project.json'))) || (await disk.exists(resolve(folder, 'idea.json')));
 }

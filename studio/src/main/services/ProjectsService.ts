@@ -1,11 +1,11 @@
-import { basename, resolve } from 'node:path';
+import { basename } from 'node:path';
 import type { IdeaFields, ProjectListing } from '../../shared/projects.ts';
 import type { OpenedFolders, ProjectDisk, Trash } from '../ports/ProjectDisk.ts';
 import type { ScriptCore } from '../ports/ScriptCore.ts';
 import { translate } from '../text.ts';
 import type { FolderGrants } from './FolderGrants.ts';
-import { freeFolder, slugOf } from './folderNames.ts';
-import { listingOf } from './projectListing.ts';
+import { freeFolder, isStrictlyInside, slugOf } from './folderNames.ts';
+import { isProjectFolder, listingOf } from './projectListing.ts';
 import { StudioError } from './StudioError.ts';
 
 /** `projectsFolder`: the folder chosen in Settings (null before the first run ends). */
@@ -18,10 +18,12 @@ type Dependencies = Readonly<{
   projectsFolder: () => Promise<string | null>;
 }>;
 
-// What a copy leaves behind: the rendered video is made again from the copy.
-const NOT_COPIED = ['output'];
+// What a copy leaves behind: what is made again from the project (the rendered video, the generated voices).
+export const NOT_COPIED: readonly string[] = ['output', 'voice'];
 
-/** The home screen's projects: the projects folder and the folders opened from elsewhere; new, copy, trash. */
+const titleOf = (project: Readonly<Record<string, unknown>>, folder: string) => (typeof project.title === 'string' && project.title.trim() ? project.title : basename(folder));
+
+/** The home screen's projects: the projects folder and the folders opened from elsewhere; new, copy, trash, forget. */
 export class ProjectsService {
   readonly #dependencies: Dependencies;
 
@@ -30,9 +32,10 @@ export class ProjectsService {
   }
 
   async list(): Promise<readonly ProjectListing[]> {
-    const { disk, core } = this.#dependencies;
-    const folders = await this.#projectFolders();
-    const listings = await Promise.all(folders.map((folder) => listingOf(folder, { disk, core })));
+    const { disk, core, projectsFolder } = this.#dependencies;
+    const root = await projectsFolder();
+    const folders = await this.#projectFolders(root);
+    const listings = await Promise.all(folders.map((folder) => listingOf(folder, { disk, core, root })));
     return listings.sort((first, second) => second.modified - first.modified);
   }
 
@@ -44,15 +47,34 @@ export class ProjectsService {
     if (!known.includes(path)) await opened.write([...known, path]);
   }
 
+  /** "Remover da lista": a folder opened from elsewhere leaves the list; nothing on disk is touched. */
+  async forget(folder: string): Promise<true> {
+    const { opened, grants } = this.#dependencies;
+    const path = grants.require(folder);
+    await opened.write((await opened.read()).filter((known) => known !== path));
+    return true;
+  }
+
   async create(idea: IdeaFields): Promise<string> {
     const folder = await this.newFolder(idea.theme);
-    await this.#dependencies.core.start(idea, folder);
+    await this.#dependencies.core.start(idea, folder).catch(async (error: unknown) => {
+      await this.release(folder);
+      throw error;
+    });
     return folder;
   }
 
-  /** A free folder for a new project in the projects folder, named after the theme. */
+  /** A new project's folder in the projects folder, named after the theme and made at once (no other run takes it). */
   async newFolder(theme: string): Promise<string> {
-    return freeFolder(this.#dependencies.disk, await this.#root(), slugOf(theme));
+    const { disk } = this.#dependencies;
+    const folder = await freeFolder(disk, await this.#root(), slugOf(theme));
+    await disk.makeFolder(folder);
+    return folder;
+  }
+
+  /** A reserved folder that stayed empty (a cancelled or failed run) is removed. */
+  release(folder: string): Promise<void> {
+    return this.#dependencies.disk.removeEmptyFolder(folder);
   }
 
   /** The copy goes into the projects folder, with "(cópia)" after its title. */
@@ -61,18 +83,19 @@ export class ProjectsService {
     const source = grants.require(folder);
     const target = await freeFolder(disk, await this.#root(), `${basename(source)}-${translate('home.copyFolder')}`);
     await disk.copy(source, target, NOT_COPIED);
-    const project = (await disk.readJson(target, 'project.json').catch(() => null)) as Record<string, unknown> | null;
-    if (project) await disk.writeJson(target, 'project.json', { ...project, title: `${String(project.title)} (${translate('home.copyTitle')})` });
+    const project = (await disk.readJson(target, 'project.json').catch(() => null)) as Readonly<Record<string, unknown>> | null;
+    if (project) await disk.writeJson(target, 'project.json', { ...project, title: `${titleOf(project, source)} (${translate('home.copyTitle')})` });
     return target;
   }
 
-  /** Only a project folder goes to the trash, never the projects folder itself. */
+  /** Only a project strictly inside the projects folder goes to the trash (ruling S3-I4); the others are only forgotten. */
   async trash(folder: string): Promise<true> {
-    const { disk, grants, trash, opened } = this.#dependencies;
+    const { disk, grants, trash, projectsFolder } = this.#dependencies;
     const path = grants.require(folder);
-    if (!(await isProjectFolder(disk, path)) || path === (await this.#dependencies.projectsFolder())) throw new StudioError('invalid-request', translate('errors.notAProject', { folder: path }));
+    const root = await projectsFolder();
+    const deletable = root !== null && isStrictlyInside(root, path) && (await isProjectFolder(disk, path));
+    if (!deletable) throw new StudioError('invalid-request', translate('errors.notDeletable', { folder: path }));
     await trash.trash(path);
-    await opened.write((await opened.read()).filter((known) => known !== path));
     return true;
   }
 
@@ -87,9 +110,8 @@ export class ProjectsService {
   }
 
   // The project folders of the projects folder, then the ones opened from elsewhere that still exist (granted again).
-  async #projectFolders(): Promise<readonly string[]> {
+  async #projectFolders(root: string | null): Promise<readonly string[]> {
     const { disk, opened, grants } = this.#dependencies;
-    const root = await this.#dependencies.projectsFolder();
     const inside = root === null ? [] : await disk.folders(root);
     const remembered = (await opened.read()).filter((folder) => !inside.includes(folder));
     const existing = await Promise.all(remembered.map(async (folder) => ((await disk.exists(folder)) ? [grants.grant(folder)] : [])));
@@ -97,8 +119,4 @@ export class ProjectsService {
     const projects = await Promise.all(all.map(async (folder) => ((await isProjectFolder(disk, folder)) ? [folder] : [])));
     return projects.flat();
   }
-}
-
-async function isProjectFolder(disk: ProjectDisk, folder: string): Promise<boolean> {
-  return (await disk.exists(resolve(folder, 'project.json'))) || (await disk.exists(resolve(folder, 'idea.json')));
 }

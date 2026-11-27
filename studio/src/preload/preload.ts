@@ -26,6 +26,7 @@ const giz: GizApi = {
     create: (idea) => call('projects.create', { idea }),
     duplicate: (folder) => call('projects.duplicate', { folder }),
     trash: (folder) => call('projects.trash', { folder }),
+    forget: (folder) => call('projects.forget', { folder }),
     stages: (folder) => call('projects.stages', { folder }),
   },
   ideas: {

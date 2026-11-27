@@ -1,4 +1,5 @@
 import { useTranslate } from '../../i18n.ts';
+import { serviceName } from '../../labels.ts';
 
 type Props = Readonly<{ ready: boolean; provider: string; onWrite: () => void; onGenerate: () => void }>;
 
@@ -13,7 +14,7 @@ export function IdeaActions({ ready, provider, onWrite, onGenerate }: Props) {
       </button>
       <button type="button" className="way ai" data-testid="generate-ai" disabled={!ready} onClick={onGenerate}>
         <strong>✦ {translate('idea.generate')}</strong>
-        <span>{translate('idea.generateDetail', { provider })}</span>
+        <span>{translate('idea.generateDetail', { provider: serviceName(provider) })}</span>
       </button>
       {!ready && <p className="muted small">{translate('idea.fillFirst')}</p>}
     </section>

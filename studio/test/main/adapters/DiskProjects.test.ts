@@ -78,3 +78,32 @@ test('the rehearsal trash moves the folder into its own folder', async () => {
     assert.match(moved ?? '', /^gatos-\d+$/);
   });
 });
+
+test('a write that fails leaves no draft file; backup keeps <file>.bak; readText says when there is no file', async () => {
+  await withFolder(async (folder) => {
+    await assert.rejects(disk.writeJson(folder, 'nada/script.json', {}));
+    assert.deepEqual(await readdir(folder), []);
+    await mkdir(join(folder, 'destino.json'));
+    await assert.rejects(disk.writeJson(folder, 'destino.json', {}), 'a rename over a folder fails');
+    assert.deepEqual(await readdir(folder), ['destino.json'], 'its draft was removed');
+    await writeFile(join(folder, 'script.json'), 'velho');
+    await disk.backup(folder, 'script.json');
+    await disk.backup(folder, 'sumiu.json');
+    assert.equal(await readFile(join(folder, 'script.json.bak'), 'utf8'), 'velho');
+    assert.equal(await disk.readText(folder, 'sumiu.json'), undefined);
+    assert.equal(await disk.readText(folder, 'script.json'), 'velho');
+  });
+});
+
+test('a reserved folder is made, and removed only while it is empty', async () => {
+  await withFolder(async (folder) => {
+    const reserved = join(folder, 'novo');
+    await disk.makeFolder(reserved);
+    await disk.removeEmptyFolder(reserved);
+    assert.deepEqual(await readdir(folder), []);
+    await disk.makeFolder(reserved);
+    await writeFile(join(reserved, 'project.json'), '{}');
+    await disk.removeEmptyFolder(reserved);
+    assert.deepEqual(await readdir(reserved), ['project.json']);
+  });
+});

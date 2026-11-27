@@ -19,3 +19,5 @@ export const coreStatus = (): Promise<CoreStatus> => import('giz-core/src/presen
 export const coreEditing = (): Promise<CoreEditing> => import('giz-core/src/presentation/cli/composition/editing.ts');
 export const coreIdea = (): Promise<CoreIdea> => import('giz-core/src/domain/idea/Idea.ts');
 export const coreCost = (): Promise<CoreCost> => import('giz-core/src/domain/ai/CostEstimate.ts');
+export type CoreGeneration = typeof import('giz-core/src/application/use-cases/script/GenerateScript.ts');
+export const coreGeneration = (): Promise<CoreGeneration> => import('giz-core/src/application/use-cases/script/GenerateScript.ts');

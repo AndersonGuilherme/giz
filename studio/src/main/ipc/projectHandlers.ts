@@ -4,7 +4,8 @@ import type { ProjectsService } from '../services/ProjectsService.ts';
 import type { ScriptService } from '../services/ScriptService.ts';
 import type { Handlers } from './registry.ts';
 
-type ProjectChannels = 'projects.pick' | 'projects.launched' | 'projects.list' | 'projects.create' | 'projects.duplicate' | 'projects.trash' | 'projects.stages';
+type ProjectChannels =
+  | 'projects.pick' | 'projects.launched' | 'projects.list' | 'projects.create' | 'projects.duplicate' | 'projects.trash' | 'projects.forget' | 'projects.stages';
 
 // A folder the person opens (the picker, or the command line) joins the home screen's list.
 async function remembered(folder: string | null, listing: ProjectsService): Promise<string | null> {
@@ -21,6 +22,7 @@ export function projectHandlers(projects: ProjectService, listing: ProjectsServi
     'projects.create': ({ idea }) => listing.create(idea),
     'projects.duplicate': ({ folder }) => listing.duplicate(folder),
     'projects.trash': ({ folder }) => listing.trash(folder),
+    'projects.forget': ({ folder }) => listing.forget(folder),
     'projects.stages': ({ folder }) => listing.stages(folder),
   };
 }

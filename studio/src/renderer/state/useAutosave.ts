@@ -1,10 +1,11 @@
-import { useEffect, useRef, useState } from 'react';
-import type { Failure, Result } from '../../shared/contract.ts';
+import { useEffect, useMemo, useState } from 'react';
+import type { Failure } from '../../shared/contract.ts';
 import type { GizApi } from '../../shared/GizApi.ts';
 import type { EditorReport, ScriptJson } from '../../shared/script.ts';
+import { ScriptSaver, type SaveAnswer, type SaveStatus } from '../editor/scriptSaver.ts';
+import { onLeaving } from './leaving.ts';
 
-/** `saved`: what is on disk is what is shown; `pending`: a change waits for the typing to stop; `saving`: on its way. */
-export type SaveStatus = 'saved' | 'pending' | 'saving' | 'failed';
+export type { SaveStatus };
 
 // How long after the last change the script is saved and checked.
 export const SAVE_DELAY = 600;
@@ -15,30 +16,40 @@ type Shown = Readonly<{ script: ScriptJson | null; opened: ScriptJson | null }>;
 
 const SAVED: Answer = { status: 'saved', report: null, failure: null };
 
-const answerOf = (result: Result<EditorReport>, current: Answer): Answer =>
-  (result.ok ? { status: 'saved', report: result.value, failure: null } : { ...current, status: 'failed', failure: result.failure });
+function next(current: Answer, { status, result }: SaveAnswer): Answer {
+  if (!result) return { ...current, status };
+  return result.ok ? { status, report: result.value, failure: null } : { ...current, status, failure: result.failure };
+}
 
-/**
- * Saves the script a moment after it stops changing (script.json is replaced atomically by the main process) and
- * keeps the check that comes back; an answer to an older save is dropped when a newer one was sent.
- */
+// Closing the window with a change on its way: the close waits for the save, then the window closes itself.
+function guardClose(saver: ScriptSaver): () => void {
+  const listener = (event: BeforeUnloadEvent) => {
+    if (!saver.hasPending()) return;
+    event.preventDefault();
+    event.returnValue = '';
+    void saver.flush().then(() => window.close());
+  };
+  window.addEventListener('beforeunload', listener);
+  return () => window.removeEventListener('beforeunload', listener);
+}
+
+/** The script saved a moment after it stops changing, and flushed when the editor goes away or the window closes. */
 export function useAutosave(api: GizApi, folder: string, { script, opened }: Shown): Answer {
   const [answer, setAnswer] = useState<Answer>(SAVED);
-  const sent = useRef(0);
-  const saved = useRef(opened);
-  saved.current ??= opened;
+  const saver = useMemo(() => {
+    if (opened === null) return null;
+    return new ScriptSaver({ send: (json) => api.script.save(folder, json), saved: opened, delay: SAVE_DELAY, onAnswer: (given) => setAnswer((current) => next(current, given)) });
+  }, [api, folder, opened]);
+  useEffect(() => void (saver && script && saver.change(script)), [saver, script]);
   useEffect(() => {
-    if (script === null || script === saved.current) return;
-    setAnswer((current) => ({ ...current, status: 'pending' }));
-    const save = async () => {
-      const number = ++sent.current;
-      saved.current = script;
-      setAnswer((current) => ({ ...current, status: 'saving' }));
-      const result = await api.script.save(folder, script);
-      if (number === sent.current) setAnswer((current) => answerOf(result, current));
+    if (!saver) return;
+    const stopLeaving = onLeaving(() => saver.flush());
+    const stopClose = guardClose(saver);
+    return () => {
+      stopLeaving();
+      stopClose();
+      void saver.flush();
     };
-    const timer = setTimeout(() => void save(), SAVE_DELAY);
-    return () => clearTimeout(timer);
-  }, [api, folder, script]);
+  }, [saver]);
   return answer;
 }

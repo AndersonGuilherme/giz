@@ -85,3 +85,15 @@ test('presets, estimate, vocabulary and the scene check come from core', async (
   assert.deepEqual(await core.checkScene({ type: 'talk' }), []);
   assert.equal((await core.checkScene({ type: 'quote', text: '' }))[0]?.path, 'text');
 });
+
+test('a cancel stops the rehearsal call in flight at once: nothing is saved', async () => {
+  await withFolder(async (folder) => {
+    const controller = new AbortController();
+    const started = Date.now();
+    const running = core.generate(IDEA, job(folder, [], controller.signal));
+    setTimeout(() => controller.abort(), 100);
+    await assert.rejects(running, { name: 'AbortError' });
+    assert.ok(Date.now() - started < 800, 'the 0.9 s call was cut short');
+    await assert.rejects(access(folder));
+  });
+});

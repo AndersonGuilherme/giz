@@ -10,7 +10,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { devtools, poll, type Page } from './devtools.ts';
-import { duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
+import { brokenScript, duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
 const FOLDER = resolve(STUDIO, '../core/examples/coupon-lesson/pt-BR');
@@ -198,7 +198,8 @@ async function scriptStage(page: Page): Promise<void> {
   await writeByHand(context);
   const folder = await editLines(context);
   await undoMoveAndScene(context, folder);
-  await duplicateAndTrash(context);
+  await duplicateAndTrash(context, folder);
+  await brokenScript(context);
   await generateWithAi(context);
   await failAndCancel(context);
 }

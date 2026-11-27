@@ -3,6 +3,7 @@ import type { ScriptEstimate } from '../../../shared/projects.ts';
 import type { GenerationState } from '../../idea/generation.ts';
 import { formatDollars } from '../../format.ts';
 import { useTranslate } from '../../i18n.ts';
+import { serviceName } from '../../labels.ts';
 import { useSetup } from '../../state/SetupContext.ts';
 import type { IdeaWizard } from '../../state/useIdeaWizard.ts';
 import { Modal } from '../common/Modal.tsx';
@@ -16,12 +17,12 @@ function Estimate({ estimate, ai }: Readonly<{ estimate: ScriptEstimate; ai: Ai 
   const cost = (dollars: number | null) => (dollars === null ? translate('idea.costUnknown') : formatDollars(dollars, language));
   return (
     <div data-testid="generate-estimate">
-      <p>{translate('idea.estimateService', { provider: estimate.provider, model: estimate.model })}</p>
+      <p>{translate('idea.estimateService', { provider: serviceName(estimate.provider), model: estimate.model })}</p>
       <dl className="facts costs">
         <div><dt>{translate('idea.firstCall')}</dt><dd>{translate('idea.upTo', { cost: cost(estimate.firstCall) })}</dd></div>
-        <div><dt>{translate('idea.worstCase', { calls: estimate.calls })}</dt><dd data-testid="worst-case">{translate('idea.upTo', { cost: cost(estimate.maximum) })}</dd></div>
+        <div><dt>{translate('idea.worstCase', { calls: estimate.calls, repairs: estimate.repairs })}</dt><dd data-testid="worst-case">{translate('idea.upTo', { cost: cost(estimate.maximum) })}</dd></div>
       </dl>
-      <p className="muted small">{translate('idea.estimateNote', { provider: estimate.provider })}</p>
+      <p className="muted small">{translate('idea.estimateNote', { provider: serviceName(estimate.provider) })}</p>
       <div className="dialog-actions">
         <button type="button" className="chalk-button quiet" onClick={ai.close}>{translate('common.cancel')}</button>
         <button type="button" className="chalk-button primary" data-testid="generate-confirm" onClick={ai.generate}>{translate('idea.confirmGenerate')}</button>

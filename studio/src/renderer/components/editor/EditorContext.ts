@@ -13,6 +13,9 @@ export type EditorTools = Readonly<{
   edit: (change: (script: ScriptJson) => ScriptJson, key?: string) => void;
   selected: number | null;
   select: (line: number | null) => void;
+  /** Some JSON box holds text that does not parse: that text is not saved. */
+  unsaved: boolean;
+  markDraft: (key: string, invalid: boolean) => void;
 }>;
 
 export const EditorContext = createContext<EditorTools | null>(null);
