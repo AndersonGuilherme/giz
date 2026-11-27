@@ -29,8 +29,20 @@ test('a count picks the plural form of the language (one, other, and an explicit
   assert.equal(english('cast.stillSpeaks', { id: 'ana', count: 1 }), '"ana" still says 1 line: change the speaker in the script before removing them.');
 });
 
-test('no S4 text says "(s)": every count has its plural forms', async () => {
-  const media = (await import('../../src/shared/i18n/media.pt-BR.json', { with: { type: 'json' } })).default as Record<string, string>;
-  const mediaEnglish = (await import('../../src/shared/i18n/media.en.json', { with: { type: 'json' } })).default as Record<string, string>;
-  for (const [key, text] of [...Object.entries(media), ...Object.entries(mediaEnglish)]) assert.doesNotMatch(text, /\(s\)/, key);
+test('no text of any area says "(s)": every count has its plural forms', async () => {
+  const { readdir, readFile } = await import('node:fs/promises');
+  const folder = new URL('../../src/shared/i18n/', import.meta.url);
+  const files = (await readdir(folder)).filter((name) => name.endsWith('.json'));
+  assert.equal(files.length, 8);
+  const texts = await Promise.all(files.map(async (name) => [name, JSON.parse(await readFile(new URL(name, folder), 'utf8')) as Record<string, string>] as const));
+  const entries = texts.flatMap(([name, each]) => Object.entries(each).map(([key, text]) => [`${name}: ${key}`, text] as const));
+  for (const [key, text] of entries) assert.doesNotMatch(text, /\(s\)/, key);
+});
+
+test('the S2, S3 and S5 counts have their plural forms too', () => {
+  const [portuguese, english] = [translator(), translator('en')];
+  assert.equal(portuguese('video.missingVoiceLines', { count: 1, lines: '3' }), 'Sem voz: 1 fala (3)');
+  assert.equal(english('video.checkErrors', { count: 2, aspect: '9:16' }), 'The check in 9:16 found 2 errors. Fix them in the script before rendering.');
+  assert.equal(portuguese('idea.moreProblems', { count: 1 }), 'e mais 1 problema');
+  assert.equal(portuguese('check.summary', { errors: 1, warnings: 2 }), 'Erros: 1 · avisos: 2');
 });

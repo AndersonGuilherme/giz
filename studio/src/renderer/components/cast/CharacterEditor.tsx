@@ -19,6 +19,7 @@ type Props = Readonly<{
   gestures: Gestures;
   voice: ProjectVoice;
   onSaved: (document: CastDocument) => void;
+  onRemove: () => void;
 }>;
 
 const rigOf = (catalog: CastCatalog, file: CharacterFile): RigInfo | undefined => catalog.rigs.find(({ id }) => id === file.rig);
@@ -31,14 +32,17 @@ function Preview({ file, catalog, gestures, sentence, sample }: Readonly<{ file:
 }
 
 /** One character: who it is, its body (rig and parameters), its voice, and the live preview beside them. */
-export function CharacterEditor({ api, folder, member, catalog, gestures, voice, onSaved }: Props) {
+export function CharacterEditor({ api, folder, member, catalog, gestures, voice, onSaved, onRemove }: Props) {
   const translate = useTranslate();
-  const { draft, setDraft, state, problems, sample, listen } = useCharacterDraft({ api, folder, onSaved }, member.file);
+  const { draft, setDraft, state, problems, failure, sample, listen } = useCharacterDraft({ api, folder, onSaved }, member.file);
   const [sentence, setSentence] = useState(translate('cast.defaultSentence', { name: member.file.name }));
   return (
     <div className="character-editor" data-testid={`character-${member.file.id}`}>
       <div className="character-fields">
-        <SaveStatus state={state} problems={problems} />
+        <div className="character-head">
+          <SaveStatus state={state} problems={problems} failure={failure} />
+          <button type="button" className="chalk-button quiet small" data-testid="member-remove" onClick={onRemove}>{translate('cast.remove')}</button>
+        </div>
         <IdentityFields file={draft} gestures={gestures} onChange={setDraft} />
         <BodyFields file={draft} catalog={catalog} onChange={setDraft} />
         <VoiceFields voice={draft.voice} project={voice} catalog={catalog} sentence={sentence} sampling={sample.busy} onVoice={(next) => setDraft({ ...draft, voice: next })} onSentence={setSentence} onSample={() => listen(draft.voice, sentence)} />

@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { CastCatalog, CastDocument } from '../../../shared/cast.ts';
+import type { CastCatalog, CastDocument, CastMember } from '../../../shared/cast.ts';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useStageDocument } from '../../state/useStageDocument.ts';
@@ -10,6 +10,7 @@ import { CastList } from './CastList.tsx';
 import { CharacterEditor } from './CharacterEditor.tsx';
 import type { Gestures } from './LivePreview.tsx';
 import { ProjectVoicePanel } from './ProjectVoicePanel.tsx';
+import { RemoveMemberDialog } from './RemoveMemberDialog.tsx';
 
 type Props = Readonly<{ api: GizApi; folder: string }>;
 type Tools = Readonly<{ catalog: CastCatalog; gestures: Gestures }>;
@@ -23,13 +24,35 @@ function useTools(api: GizApi): Tools | null {
   return tools;
 }
 
-function Body({ api, document, tools, selected, select, set }: Readonly<{ api: GizApi; document: CastDocument; tools: Tools; selected: string; select: (id: string) => void; set: (document: CastDocument) => void }>) {
+type BodyProps = Readonly<{ api: GizApi; document: CastDocument; tools: Tools; selected: string; select: (id: string) => void; set: (document: CastDocument) => void; remove: (member: CastMember) => void }>;
+
+function Body({ api, document, tools, selected, select, set, remove }: BodyProps) {
   const member = document.members.find(({ file }) => file.id === selected) ?? document.members[0];
   return (
     <div className="cast-body">
       <CastList document={document} catalog={tools.catalog} selected={member?.file.id ?? ''} select={select} />
-      {member && <CharacterEditor key={member.file.id} api={api} folder={document.folder} member={member} catalog={tools.catalog} gestures={tools.gestures} voice={document.voice} onSaved={set} />}
+      {member && <CharacterEditor key={member.file.id} api={api} folder={document.folder} member={member} catalog={tools.catalog} gestures={tools.gestures} voice={document.voice} onSaved={set} onRemove={() => remove(member)} />}
     </div>
+  );
+}
+
+type Loaded = Readonly<{ api: GizApi; folder: string; document: CastDocument; tools: Tools; failure: ReturnType<typeof useStageDocument>['failure']; apply: ReturnType<typeof useStageDocument<CastDocument>>['apply'] }>;
+
+function CastBoard({ api, folder, document, tools, failure, apply }: Loaded) {
+  const translate = useTranslate();
+  const [selected, select] = useState('');
+  const [adding, setAdding] = useState(false);
+  const [removing, setRemoving] = useState<CastMember | null>(null);
+  const set = (next: CastDocument) => void apply(Promise.resolve({ ok: true, value: next }));
+  return (
+    <main className="board wide stage-screen" data-testid="cast-screen">
+      <ScreenHead title={translate('cast.title')} hint={translate('cast.hint')} stages={document.stages}><button type="button" className="chalk-button primary" data-testid="cast-add" onClick={() => setAdding(true)}>{translate('cast.add')}</button></ScreenHead>
+      <ProjectVoicePanel voice={document.voice} onChange={(voice) => void apply(api.cast.voice(folder, voice))} />
+      {failure && <FailurePanel failure={failure} />}
+      <Body api={api} document={document} tools={tools} selected={selected} select={select} set={set} remove={setRemoving} />
+      {adding && <AddCharacterDialog document={document} catalog={tools.catalog} onClose={() => setAdding(false)} onAdd={(choice) => void apply(api.cast.add(folder, choice)).then((ok) => ok && [setAdding(false), select(choice.preset ?? choice.id ?? '')])} />}
+      {removing && <RemoveMemberDialog member={removing} onCancel={() => setRemoving(null)} onConfirm={() => void apply(api.cast.remove(folder, removing.file.id)).then(() => setRemoving(null))} />}
+    </main>
   );
 }
 
@@ -39,17 +62,6 @@ export function CastScreen({ api, folder }: Props) {
   const load = useCallback(() => api.cast.read(folder), [api, folder]);
   const { document, failure, apply } = useStageDocument(load);
   const tools = useTools(api);
-  const [selected, select] = useState('');
-  const [adding, setAdding] = useState(false);
   if (!document || !tools) return failure ? <main className="board"><FailurePanel failure={failure} /></main> : <p className="hint">{translate('editor.loading')}</p>;
-  const set = (next: CastDocument) => void apply(Promise.resolve({ ok: true, value: next }));
-  return (
-    <main className="board wide stage-screen" data-testid="cast-screen">
-      <ScreenHead title={translate('cast.title')} hint={translate('cast.hint')} stages={document.stages}><button type="button" className="chalk-button primary" data-testid="cast-add" onClick={() => setAdding(true)}>{translate('cast.add')}</button></ScreenHead>
-      <ProjectVoicePanel voice={document.voice} onChange={(voice) => void apply(api.cast.voice(folder, voice))} />
-      {failure && <FailurePanel failure={failure} />}
-      <Body api={api} document={document} tools={tools} selected={selected} select={select} set={set} />
-      {adding && <AddCharacterDialog document={document} catalog={tools.catalog} onClose={() => setAdding(false)} onAdd={(choice) => void apply(api.cast.add(folder, choice)).then((ok) => ok && [setAdding(false), select(choice.preset ?? choice.id ?? '')])} />}
-    </main>
-  );
+  return <CastBoard api={api} folder={folder} document={document} tools={tools} failure={failure} apply={apply} />;
 }

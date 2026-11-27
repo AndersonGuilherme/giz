@@ -189,6 +189,7 @@
   "cast.save.saved": "✓ Saved",
   "cast.save.waiting": "Saving…",
   "cast.save.problems": "Not saved: giz found problems",
+  "cast.save.failed": "Not saved: the write failed (the next change tries again)",
   "voiceProvider.qwen": "local voice (Qwen)",
   "voiceProvider.recording": "my recording",
   "voiceProvider.elevenlabs": "ElevenLabs",
@@ -258,5 +259,17 @@
   "voices.micFailed": "The microphone could not be used: {reason}",
   "media.voiceWorkerRefused": "The voice work refused a request of another shape.",
   "media.voiceWorkerStopped": "The voice process stopped suddenly ({code}). Try again: it opens once more.",
-  "media.voiceWorkerAnswer": "The voice process answered something of another shape and was closed. Try again."
+  "media.voiceWorkerAnswer": "The voice process answered something of another shape and was closed. Try again.",
+  "cast.remove": "Remove from cast",
+  "cast.removeTitle": "Remove {name} from the cast?",
+  "cast.removeConfirm": "Remove from cast",
+  "cast.removeHint": "The file {file} stays in the project folder: it only stops being part of the cast.",
+  "scenarios.cropNeedsPicture": "Only a scene with a picture can be cropped.",
+  "scenarios.crop": "Crop framing",
+  "scenarios.cropTitle": "Framing of scene {number}",
+  "scenarios.cropHint": "Drag the picture to choose what shows and use the zoom. The light band around it is the camera margin: it shows only when the camera moves.",
+  "scenarios.cropZoom": "Zoom",
+  "scenarios.cropSave": "Use this framing",
+  "scenarios.cropReset": "Whole picture",
+  "scenarios.cropped": "cropped"
 }

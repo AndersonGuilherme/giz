@@ -15,7 +15,7 @@
   "format.story": "story",
   "check.title": "Check",
   "check.ok": "All good: no errors, no warnings.",
-  "check.summary": "{errors} error(s), {warnings} warning(s)",
+  "check.summary": "Errors: {errors} · warnings: {warnings}",
   "check.errors": "Errors",
   "check.warnings": "Warnings",
   "check.wholeProject": "project",

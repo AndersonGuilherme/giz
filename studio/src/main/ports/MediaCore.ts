@@ -15,8 +15,19 @@ export type StageItems = Readonly<{
 export type SampleVoice = Readonly<{ provider: 'qwen' | 'elevenlabs' | 'fish'; model?: QwenModel; key?: string }>;
 export type SpokenSample = Readonly<{ wav: Uint8Array; seconds: number; envelope: readonly number[]; visemes: string }>;
 
-/** One image job: the scene, the image AI and its key (read by main), cancel and the moment the call starts. */
-export type ImageJob = Readonly<{ lineId: string; force: boolean; provider: SceneImageProvider; key?: string; signal?: AbortSignal; onCall?: () => void }>;
+/**
+ * One image job: the scene, the image AI and its key (read by main), cancel and the moment the call starts; `queued`
+ * runs core's link of the made image (its write to script.json) in the folder's write queue.
+ */
+export type ImageJob = Readonly<{
+  lineId: string;
+  force: boolean;
+  provider: SceneImageProvider;
+  key?: string;
+  signal?: AbortSignal;
+  onCall?: () => void;
+  queued?: (write: () => Promise<void>) => Promise<void>;
+}>;
 export type ImageCost = Readonly<{ model: string; pending: number; dollars: number | null }>;
 /** The lines to make (`only` one, made again; or every pending one), the paid voice's key, cancel and progress. */
 export type VoiceJob = Readonly<{ only?: string; key?: string; signal?: AbortSignal; onLine?: (done: number, total: number, lineId: string) => void }>;

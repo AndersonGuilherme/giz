@@ -38,6 +38,7 @@ function scenarioHandlers(scenarios: ScenarioService): Pick<Handlers, ScenarioCh
     'scenarios.generate': ({ folder, lineId, force }) => scenarios.generate(folder, lineId, force),
     'scenarios.cancel': async () => scenarios.cancel(),
     'scenarios.useGenerated': ({ folder, lineId }) => scenarios.useGenerated(folder, lineId),
+    'scenarios.crop': ({ folder, lineId, crop }) => scenarios.crop(folder, lineId, crop),
     'scenarios.settings': ({ folder, ...settings }) => scenarios.settings(folder, settings),
   };
 }

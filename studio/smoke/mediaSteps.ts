@@ -8,6 +8,7 @@ import { deflateSync } from 'node:zlib';
 import assert from 'node:assert/strict';
 import type { Page } from './devtools.ts';
 import type { Context } from './scriptSteps.ts';
+import { answersDuringJob, cropPicture, removeMember } from './s4bSteps.ts';
 
 const jsonOf = async (folder: string, file: string) => JSON.parse(await readFile(join(folder, file), 'utf8'));
 const call = async <T>(page: Page, expression: string): Promise<T> => {
@@ -107,6 +108,7 @@ export async function castStage({ page, shoot }: Context, folder: string): Promi
   await page.click('[data-testid="member-narrator"]');
   await page.untilText('[data-testid="live-preview"]', /só voz/);
   await lastEditKept(page, folder);
+  await removeMember({ page, shoot } as Context, folder);
 }
 
 // The headwear options are framed from above their top: a chef hat is drawn whole (s4fix).
@@ -155,6 +157,7 @@ export async function scenariosStage({ page, shoot, home }: Context, folder: str
   await setFile(page, '[data-testid="scene-file-1"]', picture);
   await page.untilText('[data-testid="scene-warning-1"]', /800×800, outra proporção/);
   assert.equal((await jsonOf(folder, 'script.json')).lines[0].scene.background.image, 'scenes/own/1.png');
+  await cropPicture({ page, shoot } as Context, folder);
   await page.click('[data-testid="scene-generate-2"]');
   await replace(page, '[data-testid="image-prompt"]', 'um sótão cheio de caixas antigas, luz quente de fim de tarde');
   await page.click('[data-testid="image-price"]');
@@ -177,6 +180,7 @@ export async function scenariosStage({ page, shoot, home }: Context, folder: str
 async function busyAfterComingBack(page: Page, shoot: Context['shoot']): Promise<void> {
   await page.click('[data-testid="voices-generate-all"]');
   await page.until('[data-testid="voices-progress"]');
+  await answersDuringJob({ page, shoot } as Context);
   await page.click('[data-testid="tab-script"]');
   await page.click('[data-testid="tab-voices"]');
   await page.until('[data-testid="voices-screen"]');

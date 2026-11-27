@@ -10,10 +10,26 @@ export type SceneActions = Readonly<{
   upload: (card: SceneCard, file: File) => void;
   useGenerated: (card: SceneCard) => void;
   generate: (card: SceneCard) => void;
+  crop: (card: SceneCard) => void;
 }>;
 type Props = Readonly<{ card: SceneCard; document: ScenariosDocument; actions: SceneActions }>;
 
 const THUMB = { '9:16': 168, '16:9': 300 } as const;
+
+// The person's own picture, shown: the one that can be cropped.
+const ownPicture = (card: SceneCard) => (card.background.kind === 'image' && card.background.own && card.background.url ? card.background : undefined);
+
+function CropBadge({ card }: Readonly<{ card: SceneCard }>) {
+  const translate = useTranslate();
+  if (card.background.kind !== 'image' || !card.background.crop) return null;
+  return <span className="badge quiet" data-testid={`scene-cropped-${card.lineId}`}>{translate('scenarios.cropped')}</span>;
+}
+
+function CropButton({ card, actions }: Readonly<{ card: SceneCard; actions: SceneActions }>) {
+  const translate = useTranslate();
+  if (!ownPicture(card)) return null;
+  return <button type="button" className="chalk-button small" data-testid={`scene-crop-${card.lineId}`} onClick={() => actions.crop(card)}>{translate('scenarios.crop')}</button>;
+}
 
 function Badges({ card }: Readonly<{ card: SceneCard }>) {
   const translate = useTranslate();
@@ -21,6 +37,7 @@ function Badges({ card }: Readonly<{ card: SceneCard }>) {
   return (
     <div className="scene-badges">
       <span className="badge quiet">{translate(`scenarios.kind.${own ? 'own' : card.background.kind === 'image' ? 'generated' : 'vector'}`)}</span>
+      <CropBadge card={card} />
       {card.state && <span className={`badge state-${card.state}`} data-testid={`scene-state-${card.lineId}`} data-state={card.state}>{translate(`scenarios.state.${card.state}`)}</span>}
     </div>
   );
@@ -46,6 +63,7 @@ function Actions({ card, document, actions }: Props) {
       <div className="scene-buttons">
         <Upload card={card} actions={actions} />
         <button type="button" className="chalk-button small primary" data-testid={`scene-generate-${card.lineId}`} onClick={() => actions.generate(card)}>{translate(card.generated ? 'scenarios.regenerate' : 'scenarios.generate')}</button>
+        <CropButton card={card} actions={actions} />
         {own && card.generate && <button type="button" className="chalk-button small quiet" data-testid={`scene-use-generated-${card.lineId}`} onClick={() => actions.useGenerated(card)}>{translate('scenarios.useGenerated')}</button>}
       </div>
     </div>

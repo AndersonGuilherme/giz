@@ -46,7 +46,7 @@ const S3_VIEW = { width: 1280, height: 860 };
 
 async function shoot(page: Page, name: string): Promise<void> {
   const file = join(SHOTS, `${name}.png`);
-  await page.screenshot(file, /^s[345]-/.test(name) ? S3_VIEW : undefined);
+  await page.screenshot(file, /^s[345]b?-/.test(name) ? S3_VIEW : undefined);
   shots.push(file);
 }
 

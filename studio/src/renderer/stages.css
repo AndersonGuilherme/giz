@@ -105,3 +105,17 @@
 .voice-buttons.recording { color: var(--chalk-red); font-weight: 700; }
 .rec-dot { width: 10px; height: 10px; border-radius: 50%; background: var(--chalk-red); animation: pulse 1s ease-in-out infinite; }
 @keyframes pulse { 50% { opacity: 0.3; } }
+
+/* The save status and "Tirar do elenco" side by side over the character's fields. */
+.character-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; }
+.character-head .character-status { flex: 1; }
+
+/* A scenario picture as the render draws it: its box (the frame plus the camera margin), the frame shown inside. */
+.picture-box { position: absolute; inset: 0; overflow: hidden; }
+.picture-box img { user-select: none; pointer-events: none; }
+.framed-picture { position: absolute; inset: 0; overflow: hidden; }
+.scene-thumb { position: relative; }
+.crop-stage { position: relative; margin: 12px auto; border-radius: 6px; overflow: hidden; cursor: grab; touch-action: none; background: var(--slate-deep); }
+.crop-stage:active { cursor: grabbing; }
+.crop-frame { position: absolute; border: 2px solid var(--chalk-yellow); box-shadow: 0 0 0 999px rgba(241, 236, 222, 0.28); pointer-events: none; }
+.crop-zoom input { width: 100%; }

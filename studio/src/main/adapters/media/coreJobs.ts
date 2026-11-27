@@ -45,11 +45,25 @@ export async function stageItemsOf(folder: string): Promise<StageItems> {
   };
 }
 
+type Store = ReturnType<Awaited<ReturnType<typeof coreImages>>['scenarioImageStore']>;
+
+// The project's image store, with its script link (the one write to script.json) in the folder's queue, when given one.
+function queuedStore(store: Store, queued: ImageJob['queued']): Store {
+  if (!queued) return store;
+  return {
+    savedHash: (lineId) => store.savedHash(lineId),
+    foreignFile: (lineId) => store.foreignFile(lineId),
+    save: (saved) => store.save(saved),
+    link: (lineIds) => queued(() => store.link(lineIds)),
+  };
+}
+
 async function imagesFor(folder: string, job: ImageJob, standIns: StandIns | undefined) {
   const images = await coreImages();
-  if (!standIns) return images.scenarioImages(folder, job.provider, { keys: keysWith(job.provider, job.key) });
-  const painter = standIns.painter(images.imageProviderOf(job.provider));
-  return { generate: images.scenarioImagesWith(folder, painter), model: painter.identity().model };
+  const real = images.imageProviderOf(job.provider, { keys: keysWith(job.provider, job.key) });
+  const painter = standIns ? standIns.painter(real) : real;
+  const store = queuedStore(images.scenarioImageStore(folder), job.queued);
+  return { generate: images.scenarioImagesWith(folder, painter, store), model: painter.identity().model };
 }
 
 const selectionOf = (job: ImageJob) => (job.force ? { force: job.lineId } : { only: job.lineId });

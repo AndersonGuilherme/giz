@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FolderGrants } from '../../../../src/main/services/FolderGrants.ts';
 import { FolderQueue } from '../../../../src/main/services/FolderQueue.ts';
+import type { ImageJob } from '../../../../src/main/ports/MediaCore.ts';
 import { ScenarioService } from '../../../../src/main/services/media/ScenarioService.ts';
 import type { ImageProgress } from '../../../../src/shared/scenarios.ts';
 import { FakeMediaCore, MemoryMediaFiles } from '../../../doubles/mediaFakes.ts';
@@ -75,6 +76,34 @@ test('upload: checked by its first bytes, copied as scenes/own/<id>.<ext>; it wi
   await assert.rejects(service.upload(FOLDER, '9', PNG), { code: 'invalid-request' });
 });
 
+test('an upload in another format replaces the old own picture: no scenes/own/<id>.* of the line is left behind', async () => {
+  const { service, disk, files } = build();
+  await service.upload(FOLDER, '1', PNG);
+  await files.write(FOLDER, 'scenes/own/12.png', PNG);
+  await service.upload(FOLDER, '1', new Uint8Array([0xff, 0xd8, 0xff]));
+  assert.equal(files.files.has(`${FOLDER}/scenes/own/1.png`), false);
+  assert.ok(files.files.has(`${FOLDER}/scenes/own/1.jpg`));
+  assert.ok(files.files.has(`${FOLDER}/scenes/own/12.png`), 'another line keeps its own');
+  assert.equal((await lineOf(disk, '1')).scene.background.image, 'scenes/own/1.jpg');
+});
+
+test('crop: the chosen part of the picture is kept in background.crop (never the file); null shows all of it; a new upload starts uncropped', async () => {
+  const { service, disk, files } = build();
+  await service.upload(FOLDER, '1', PNG);
+  const document = await service.crop(FOLDER, '1', { zoom: 1.5, x: 0.2, y: 0.6 });
+  assert.deepEqual((await lineOf(disk, '1')).scene.background.crop, { zoom: 1.5, x: 0.2, y: 0.6 });
+  const card = document.cards[0]!;
+  assert.deepEqual(card.background.kind === 'image' && card.background.crop, { zoom: 1.5, x: 0.2, y: 0.6 });
+  assert.deepEqual(files.files.get(`${FOLDER}/scenes/own/1.png`), PNG);
+  await service.crop(FOLDER, '1', null);
+  assert.equal('crop' in (await lineOf(disk, '1')).scene.background, false);
+  await service.crop(FOLDER, '1', { zoom: 2, x: 0, y: 0 });
+  await service.upload(FOLDER, '1', PNG);
+  assert.equal('crop' in (await lineOf(disk, '1')).scene.background, false);
+  await service.vector(FOLDER, '1', 'street');
+  await assert.rejects(service.crop(FOLDER, '1', { zoom: 2, x: 0, y: 0 }), /tem imagem/);
+});
+
 test('upload to a line without its own scenario scene is refused before anything is written', async () => {
   const { service, files } = build();
   await assert.rejects(service.upload(FOLDER, '2', PNG), /não tem uma cena de cenário/);
@@ -123,6 +152,22 @@ test('generate: the key is read in main, the project keeps the image AI, progres
   const without = build();
   await assert.rejects(without.service.generate(FOLDER, '3', false), /Falta a chave de gemini/);
   assert.equal(without.core.imageJobs.length, 0);
+});
+
+test("generate: core's link of the made image (script.json) is written in the folder's queue, after the editor's save in flight", async () => {
+  const { service, core, saves } = build({ key: 'k' });
+  const order: string[] = [];
+  core.during = async (job) => {
+    let release: () => void = () => undefined;
+    const editorSave = saves.run(FOLDER, () => new Promise<void>((done) => (release = () => (order.push('editor'), done()))));
+    const link = (job as ImageJob).queued!(async () => void order.push('link'));
+    await new Promise((done) => setImmediate(done));
+    assert.deepEqual(order, []);
+    release();
+    await Promise.all([editorSave, link]);
+  };
+  await service.generate(FOLDER, '3', false);
+  assert.deepEqual(order, ['editor', 'link']);
 });
 
 test('one image at a time; cancel answers cancelled at once', async () => {

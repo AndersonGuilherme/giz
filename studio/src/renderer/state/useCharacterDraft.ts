@@ -1,28 +1,22 @@
 import { useEffect, useMemo, useState } from 'react';
-import type { CastDocument, CharacterFile, CharacterProblem, CharacterSaved, CharacterVoice, VoiceSample } from '../../shared/cast.ts';
+import type { CastDocument, CharacterFile, CharacterSaved, CharacterVoice, VoiceSample } from '../../shared/cast.ts';
 import type { Failure } from '../../shared/contract.ts';
 import type { GizApi } from '../../shared/GizApi.ts';
-import { DraftSaver, type DraftAnswer } from '../editor/draftSaver.ts';
+import { shownAfter, type Shown } from '../cast/characterSaves.ts';
+import { DraftSaver } from '../editor/draftSaver.ts';
 import { onLeaving } from './leaving.ts';
 import { guardClose } from './useAutosave.ts';
 
 const DELAY = 500;
-/** `saved`: on disk as shown; `waiting`: a change not saved yet; `problems`: core refused it (nothing written). */
-export type SaveState = 'saved' | 'waiting' | 'problems';
+export type { SaveState } from '../cast/characterSaves.ts';
 
 type Editing = Readonly<{ api: GizApi; folder: string; onSaved: (document: CastDocument) => void }>;
-type Shown = Readonly<{ state: SaveState; problems: readonly CharacterProblem[] }>;
-
-function shownAfter(current: Shown, { status, result }: DraftAnswer<CharacterSaved>): Shown {
-  if (!result?.ok) return { ...current, state: status === 'saved' ? current.state : 'waiting' };
-  return { state: result.value.saved ? 'saved' : 'problems', problems: result.value.problems };
-}
 
 // Each change is saved half a second after the last one (only when core finds no problem); the pending one is sent
 // when the editor goes away (another character, another tab, Settings) or the window closes, so none is lost.
 // `opened`: the file as the editor opened it (kept for the editor's life: a reloaded document must not restart the saver).
 function useCharacterSaves({ api, folder, onSaved }: Editing, opened: CharacterFile, draft: CharacterFile): Shown {
-  const [shown, setShown] = useState<Shown>({ state: 'saved', problems: [] });
+  const [shown, setShown] = useState<Shown>({ state: 'saved', problems: [], failure: null });
   const saver = useMemo(() => new DraftSaver<CharacterFile, CharacterSaved>({
     send: (file) => api.cast.save(folder, file),
     saved: opened,
@@ -33,6 +27,10 @@ function useCharacterSaves({ api, folder, onSaved }: Editing, opened: CharacterF
     },
   }), [api, folder, opened]); // onSaved is the screen's setter: stable
   useEffect(() => saver.change(draft), [saver, draft]);
+  // A file written by hand may already be wrong: core's check says so when it opens, before any change.
+  useEffect(() => void api.cast.check(opened).then((checked) => {
+    if (checked.ok && checked.value.length > 0) setShown({ state: 'problems', problems: checked.value, failure: null });
+  }), [api, opened]);
   useEffect(() => flushedOnLeaving(saver), [saver]);
   return shown;
 }

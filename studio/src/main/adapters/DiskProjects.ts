@@ -2,6 +2,7 @@ import { randomUUID } from 'node:crypto';
 import { access, copyFile, cp, mkdir, readdir, readFile, rename, rm, rmdir, stat, writeFile } from 'node:fs/promises';
 import { basename, join, relative, sep } from 'node:path';
 import type { ProjectDisk } from '../ports/ProjectDisk.ts';
+import { realPathOf, reallyWithin } from '../realPaths.ts';
 import { translate } from '../text.ts';
 
 // What tells when a project last changed: its own files and its cast (not the voices or video made from them).
@@ -34,8 +35,10 @@ export class DiskProjects implements ProjectDisk {
     }
   }
 
+  // Written at its real path, and only inside the project: a link (cast/<id>.json, project.json) never leads out.
   async writeJson(folder: string, file: string, json: unknown): Promise<void> {
-    const target = join(folder, file);
+    if (!reallyWithin(folder, join(folder, file))) throw new Error(translate('media.outsideProject', { file }));
+    const target = realPathOf(join(folder, file));
     const draft = `${target}.${randomUUID()}.tmp`;
     try {
       await writeFile(draft, `${JSON.stringify(json, null, 2)}\n`);

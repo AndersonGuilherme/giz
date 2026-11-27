@@ -37,7 +37,7 @@ test('a line without voice: nothing is montaged, and the failure names the lines
   assert.equal(montage.build, null);
   assert.deepEqual(core.built, []);
   assert.deepEqual(montage.failure?.voices, ['a2', 'a3']);
-  assert.match(montage.failure?.message ?? '', /Faltam as vozes de 2 fala\(s\): 2, 3/);
+  assert.match(montage.failure?.message ?? '', /Faltam as vozes de 2 falas: 2, 3/);
 });
 
 test("core's montage error becomes a readable failure, its text in the details", async () => {
@@ -53,7 +53,7 @@ test('ready (for the render) refuses missing voices and check errors in that asp
   await assert.rejects(service.ready('/p', '9:16'), { code: 'invalid-project', details: ['fala 2: texto grande demais', 'sem título'] });
   assert.equal((await service.ready('/p', '16:9')).build.seconds, 62.5);
   core.items_ = { ...NO_ITEMS, voices: { stale: [], missing: ['a1'] } };
-  await assert.rejects(service.ready('/p', '16:9'), { code: 'invalid-project', message: /fala\(s\): 1/ });
+  await assert.rejects(service.ready('/p', '16:9'), { code: 'invalid-project', message: /de 1 fala: 1/ });
 });
 
 test('a folder the person did not give is refused before core sees it', async () => {

@@ -43,8 +43,8 @@ async function openVideoStage(page: Page): Promise<void> {
 
 /** A missing voice: no montage, the reason by line number, and the button to Voices that makes it. */
 async function missingVoice({ page, shoot }: Context): Promise<void> {
-  await page.untilText('[data-testid="montage-failure"]', /Faltam as vozes de 1 fala\(s\): 10/);
-  await page.untilText('[data-testid="video-missing"]', /Sem voz: 1 fala\(s\) \(10\)/);
+  await page.untilText('[data-testid="montage-failure"]', /Falta a voz de 1 fala: 10/);
+  await page.untilText('[data-testid="video-missing"]', /Sem voz: 1 fala \(10\)/);
   await shoot(page, 's5-01-falta-voz');
   await page.click('[data-testid="montage-voices"]');
   await page.until('[data-testid="voices-screen"]');

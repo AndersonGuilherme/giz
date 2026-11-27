@@ -189,6 +189,7 @@
   "cast.save.saved": "✓ Salvo",
   "cast.save.waiting": "Salvando…",
   "cast.save.problems": "Não salvo: o giz encontrou problemas",
+  "cast.save.failed": "Não salvo: a gravação falhou (a próxima mudança tenta de novo)",
   "voiceProvider.qwen": "voz local (Qwen)",
   "voiceProvider.recording": "minha gravação",
   "voiceProvider.elevenlabs": "ElevenLabs",
@@ -258,5 +259,17 @@
   "voices.micFailed": "Não deu para usar o microfone: {reason}",
   "media.voiceWorkerRefused": "O trabalho de voz recusou um pedido fora do formato.",
   "media.voiceWorkerStopped": "O processo das vozes parou de repente ({code}). Tente de novo: ele abre outra vez.",
-  "media.voiceWorkerAnswer": "O processo das vozes respondeu algo fora do formato e foi fechado. Tente de novo."
+  "media.voiceWorkerAnswer": "O processo das vozes respondeu algo fora do formato e foi fechado. Tente de novo.",
+  "cast.remove": "Tirar do elenco",
+  "cast.removeTitle": "Tirar {name} do elenco?",
+  "cast.removeConfirm": "Tirar do elenco",
+  "cast.removeHint": "O arquivo {file} continua na pasta do projeto: só deixa de fazer parte do elenco.",
+  "scenarios.cropNeedsPicture": "Só dá para recortar uma cena que tem imagem.",
+  "scenarios.crop": "Recortar enquadramento",
+  "scenarios.cropTitle": "Enquadramento da cena {number}",
+  "scenarios.cropHint": "Arraste a imagem para escolher o que aparece e use o zoom. A faixa clara em volta é a margem da câmera: aparece só quando a câmera se move.",
+  "scenarios.cropZoom": "Zoom",
+  "scenarios.cropSave": "Usar este enquadramento",
+  "scenarios.cropReset": "Imagem inteira",
+  "scenarios.cropped": "recortada"
 }

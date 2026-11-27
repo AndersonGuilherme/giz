@@ -3,6 +3,7 @@ import type { Failure } from '../../shared/contract.ts';
 import type { GizApi } from '../../shared/GizApi.ts';
 import type { EditorReport, ScriptDocument, ScriptJson, Vocabulary } from '../../shared/script.ts';
 import { edited, historyOf, redone, undone, type History } from '../editor/editorHistory.ts';
+import { withImageOnDisk } from '../editor/linkedImages.ts';
 import { useAutosave } from './useAutosave.ts';
 
 type Loaded = Readonly<{ document: ScriptDocument; vocabulary: Vocabulary; report: EditorReport }>;
@@ -38,10 +39,22 @@ const shownOf = (history: History | null, loaded: Loaded | null) => ({ script: h
 // The check of the last save; before any save, the one made when the project opened.
 const latestReport = (saved: EditorReport | null, loaded: Loaded | null) => saved ?? loaded?.report ?? null;
 
+type Edit = ReturnType<typeof useHistory>['edit'];
+
+// A scenario image made while the script is open is linked on disk by core: the script is read again and that link
+// enters the edited one, so the next save keeps it instead of writing the old background back.
+function useImageLinks(api: GizApi, folder: string, edit: Edit): void {
+  useEffect(() => api.scenarios.onProgress(({ lineId, phase }) => {
+    if (phase !== 'done') return;
+    void api.script.read(folder).then((read) => (read.ok ? edit((script) => withImageOnDisk(script, read.value.script, lineId)) : undefined));
+  }), [api, folder, edit]);
+}
+
 /** The script being edited, saved (and checked) a moment after the typing stops. */
 export function useEditor(api: GizApi, folder: string) {
   const { loaded, failure } = useLoaded(api, folder);
   const { history, ...changes } = useHistory(loaded);
+  useImageLinks(api, folder, changes.edit);
   const save = useAutosave(api, folder, shownOf(history, loaded));
   return { loaded, failure, history, ...changes, report: latestReport(save.report, loaded), saving: save.status, saveFailure: save.failure };
 }

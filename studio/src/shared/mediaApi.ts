@@ -1,7 +1,7 @@
 // The part of `window.giz` for the Cast, Scenarios and Voices stages (see GizApi.ts).
 import type { CastCatalog, CastDocument, CharacterFile, CharacterProblem, CharacterSaved, CharacterVoice, ProjectVoice, VoiceSample } from './cast.ts';
 import type { Result } from './contract.ts';
-import type { ImageEstimate, ImageProgress, ImageStyle, ScenariosDocument, SceneImageProvider } from './scenarios.ts';
+import type { ImageCrop, ImageEstimate, ImageProgress, ImageStyle, ScenariosDocument, SceneImageProvider } from './scenarios.ts';
 import type { VoiceProgress, VoicesDocument } from './voices.ts';
 
 type Reply<T> = Promise<Result<T>>;
@@ -27,6 +27,7 @@ export type MediaApi = Readonly<{
     generate(folder: string, lineId: string, force: boolean): Reply<ScenariosDocument>;
     cancel(): Reply<boolean>;
     useGenerated(folder: string, lineId: string): Reply<ScenariosDocument>;
+    crop(folder: string, lineId: string, crop: ImageCrop | null): Reply<ScenariosDocument>;
     settings(folder: string, settings: Readonly<{ style?: ImageStyle; provider?: SceneImageProvider }>): Reply<ScenariosDocument>;
     onProgress(listener: (progress: ImageProgress) => void): Unsubscribe;
   }>;

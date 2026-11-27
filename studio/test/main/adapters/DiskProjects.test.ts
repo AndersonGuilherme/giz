@@ -107,3 +107,18 @@ test('a reserved folder is made, and removed only while it is empty', async () =
     assert.deepEqual(await readdir(reserved), ['project.json']);
   });
 });
+
+test('writeJson never writes through a link that leads out of the project (cast/<id>.json, project.json)', async () => {
+  await withFolder(async (folder) => {
+    const { symlink } = await import('node:fs/promises');
+    const project = join(folder, 'project');
+    const outside = join(folder, 'outside.json');
+    await mkdir(join(project, 'cast'), { recursive: true });
+    await writeFile(outside, 'fora');
+    await symlink(outside, join(project, 'cast', 'bia.json'));
+    await assert.rejects(disk.writeJson(project, 'cast/bia.json', { id: 'bia' }), /fora da pasta|outside/);
+    assert.equal(await readFile(outside, 'utf8'), 'fora');
+    await disk.writeJson(project, 'project.json', { title: 'ok' });
+    assert.deepEqual(JSON.parse(await readFile(join(project, 'project.json'), 'utf8')), { title: 'ok' });
+  });
+});

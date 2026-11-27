@@ -12,7 +12,10 @@ export type SceneImageProvider = (typeof SCENE_IMAGE_PROVIDERS)[number];
  */
 export type SceneBackground =
   | Readonly<{ kind: 'vector'; vector: string; colors: Readonly<Record<string, string>> }>
-  | Readonly<{ kind: 'image'; image: string; url: string | null; own: boolean; aspectWarning?: string }>;
+  | Readonly<{ kind: 'image'; image: string; url: string | null; own: boolean; aspectWarning?: string; crop?: ImageCrop }>;
+
+/** The part of a picture the scene shows (core's `background.crop`): zoom 1 to 4, the focus x and y from 0 to 1. */
+export type ImageCrop = Readonly<{ zoom: number; x: number; y: number }>;
 
 /** The image AI's part: `done`, `missing`, `stale` (the prompt changed) or `blocked` (`problem` says why); none without a prompt. */
 export type GeneratedState = 'done' | 'missing' | 'stale' | 'blocked';
@@ -64,5 +67,7 @@ export type ScenarioChannels = Readonly<{
   'scenarios.cancel': Channel<Readonly<Record<string, never>>, boolean>;
   /** "Usar a gerada": the scene points back to scenes/<id>.png (or to nothing, so the image AI makes it). */
   'scenarios.useGenerated': Channel<SceneRequest, ScenariosDocument>;
+  /** "Recortar enquadramento": the part of the scene's picture shown (null: all of it); the file is never changed. */
+  'scenarios.crop': Channel<SceneRequest & Readonly<{ crop: ImageCrop | null }>, ScenariosDocument>;
   'scenarios.settings': Channel<Readonly<{ folder: string; style?: ImageStyle; provider?: SceneImageProvider }>, ScenariosDocument>;
 }>;

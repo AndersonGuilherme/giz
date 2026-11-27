@@ -78,7 +78,7 @@ export async function editLines({ page, shoot, home }: Context): Promise<string>
   await page.until('[data-testid="line-2"]');
   await replace(page, '[data-testid="text-1"]', 'Ela disse [oi] e saiu correndo.');
   await page.until('[data-testid="line-problems-1"]');
-  await page.untilText('[data-testid="check-summary"]', /1 erro/);
+  await page.untilText('[data-testid="check-summary"]', /Erros: 1 /);
   await page.until('[data-testid="line-1"].has-error');
   await page.evaluate(`document.querySelector('[data-testid="line-1"]').scrollIntoView({ block: 'center' })`);
   await shoot(page, 's3-04-erro');

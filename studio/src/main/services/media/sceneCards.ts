@@ -1,5 +1,5 @@
 import { join } from 'node:path';
-import type { GeneratedState, ImageStyle, SceneBackground, SceneCard } from '../../../shared/scenarios.ts';
+import type { GeneratedState, ImageCrop, ImageStyle, SceneBackground, SceneCard } from '../../../shared/scenarios.ts';
 import { IMAGE_STYLES } from '../../../shared/scenarios.ts';
 import type { MediaCore, MediaFiles, StageItems } from '../../ports/MediaCore.ts';
 import { translate } from '../../text.ts';
@@ -53,12 +53,20 @@ export function generateOf(background: Json): SceneCard['generate'] {
   return { prompt: textOf(background.generate.prompt), ...style };
 }
 
+// The crop as the script keeps it (core checks its ranges); anything else is no crop.
+function cropOf(value: unknown): ImageCrop | undefined {
+  if (!isObject(value)) return undefined;
+  const [zoom, x, y] = [value.zoom, value.x, value.y];
+  return typeof zoom === 'number' && typeof x === 'number' && typeof y === 'number' ? { zoom, x, y } : undefined;
+}
+
 async function backgroundOf(scene: ScenarioLine, view: FileView): Promise<SceneBackground> {
   const image = textOf(scene.background.image);
   if (!image) return { kind: 'vector', vector: textOf(scene.background.vector) || 'room', colors: (isObject(scene.background.colors) ? scene.background.colors : {}) as Record<string, string> };
   const own = image !== generatedFile(scene.line.id);
   const warning = await view.aspectWarning(image);
-  return { kind: 'image', image, url: await view.url(image), own, ...(warning ? { aspectWarning: warning } : {}) };
+  const crop = cropOf(scene.background.crop);
+  return { kind: 'image', image, url: await view.url(image), own, ...(warning ? { aspectWarning: warning } : {}), ...(crop ? { crop } : {}) };
 }
 
 /** One card: what the scene shows, its prompt, the image giz made for it and that image's state (stages, item by item). */
@@ -97,4 +105,10 @@ export function fileViewOf(parts: Readonly<{ files: MediaFiles; core: MediaCore 
     return shape && !shape.matches ? translate('scenarios.otherShape', { width: shape.width, height: shape.height, aspect: shown.aspect }) : undefined;
   };
   return { url, aspectWarning, kept: (lineId) => shown.kept.get(lineId) };
+}
+
+/** The background showing `crop` of its picture (null: all of it); a background without a picture is refused. */
+export function croppedBackground(background: Json, crop: ImageCrop | null): Json {
+  if (!background.image) throw new StudioError('invalid-request', translate('scenarios.cropNeedsPicture'));
+  return crop ? { ...background, crop } : without(background, 'crop');
 }

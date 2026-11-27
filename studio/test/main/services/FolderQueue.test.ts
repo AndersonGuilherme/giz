@@ -1,5 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, rm, symlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { FolderQueue } from '../../../src/main/services/FolderQueue.ts';
 
 const later = () => new Promise((done) => setImmediate(done));
@@ -43,4 +46,37 @@ test('settled waits for every write in flight, of every folder (the app waits fo
   await waiting;
   assert.deepEqual(done.sort(), ['a', 'b']);
   await queue.settled();
+});
+
+test('settled also waits for a write asked while it was waiting (it ends only when the queue is really empty)', async () => {
+  const queue = new FolderQueue();
+  const done: string[] = [];
+  void queue.run('/a', async () => {
+    await later();
+    void queue.run('/b', async () => {
+      await later();
+      done.push('b');
+    });
+    done.push('a');
+  });
+  await queue.settled();
+  assert.deepEqual(done, ['a', 'b']);
+});
+
+test('a folder reached through a link shares the queue of its real folder', async () => {
+  const real = await mkdtemp(join(tmpdir(), 'giz-queue-'));
+  const alias = `${real}-alias`;
+  await symlink(real, alias);
+  const queue = new FolderQueue();
+  const order: string[] = [];
+  let release: () => void = () => undefined;
+  const first = queue.run(real, () => new Promise<void>((finish) => (release = () => (order.push('real'), finish()))));
+  const through = queue.run(alias, async () => void order.push('alias'));
+  await later();
+  assert.deepEqual(order, [], 'the write through the link waits');
+  release();
+  await Promise.all([first, through]);
+  assert.deepEqual(order, ['real', 'alias']);
+  await rm(alias);
+  await rm(real, { recursive: true });
 });

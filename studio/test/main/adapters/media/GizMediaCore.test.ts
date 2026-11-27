@@ -43,8 +43,12 @@ test('a scene image: estimate, then made by the painter, saved and linked; the s
     assert.equal(cost.pending, 1);
     assert.ok(cost.dollars! > 0);
     let called = false;
-    await core.generateImage(folder, { ...job, onCall: () => void (called = true) });
+    const queued: string[] = [];
+    const queue = async (write: () => Promise<void>) => (queued.push('link'), write());
+    await core.generateImage(folder, { ...job, onCall: () => void (called = true), queued: queue });
     assert.ok(called);
+    assert.deepEqual(queued, ['link'], "core's link of the image went through the folder's queue");
+    assert.equal(JSON.parse(await readFile(join(folder, 'script.json'), 'utf8')).lines[0].scene.background.image, 'scenes/1.png');
     await access(join(folder, 'scenes', '1.png'));
     const shape = await core.imageShape(join(folder, 'scenes', '1.png'), '9:16');
     assert.deepEqual(shape, { width: 1216, height: 2160, matches: true });

@@ -44,6 +44,7 @@ export const MEDIA_SCHEMAS: { readonly [Name in MediaChannel]: z.ZodType<Request
   'scenarios.generate': z.object({ ...line, force: z.boolean() }).strict(),
   'scenarios.cancel': nothing,
   'scenarios.useGenerated': z.object(line).strict(),
+  'scenarios.crop': z.object({ ...line, crop: z.object({ zoom: z.number().min(1).max(4), x: z.number().min(0).max(1), y: z.number().min(0).max(1) }).strict().nullable() }).strict(),
   'scenarios.settings': z.object({ folder, style: z.enum(IMAGE_STYLES).optional(), provider: z.enum(SCENE_IMAGE_PROVIDERS).optional() }).strict(),
   'voices.read': z.object({ folder }).strict(),
   'voices.generate': z.object({ folder, lineId: plainId.optional() }).strict(),

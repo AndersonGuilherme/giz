@@ -15,7 +15,7 @@
   "format.story": "história",
   "check.title": "Verificação",
   "check.ok": "Tudo certo: nenhum erro, nenhum aviso.",
-  "check.summary": "{errors} erro(s), {warnings} aviso(s)",
+  "check.summary": "Erros: {errors} · avisos: {warnings}",
   "check.errors": "Erros",
   "check.warnings": "Avisos",
   "check.wholeProject": "projeto",

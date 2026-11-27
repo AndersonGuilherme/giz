@@ -1,4 +1,4 @@
-import { IMAGE_STYLES, MAXIMUM_IMAGE_BYTES, SCENE_IMAGE_PROVIDERS, type ImageEstimate, type ImageProgress, type ImageStyle, type ScenariosDocument, type SceneImageProvider } from '../../../shared/scenarios.ts';
+import { IMAGE_STYLES, SCENE_IMAGE_PROVIDERS, type ImageCrop, type ImageEstimate, type ImageProgress, type ImageStyle, type ScenariosDocument, type SceneImageProvider } from '../../../shared/scenarios.ts';
 import type { MediaCore, MediaFiles } from '../../ports/MediaCore.ts';
 import type { ProjectDisk } from '../../ports/ProjectDisk.ts';
 import { translate } from '../../text.ts';
@@ -7,8 +7,9 @@ import type { FolderQueue } from '../FolderQueue.ts';
 import { StudioError } from '../StudioError.ts';
 import { keepPrompt, keptPromptsOf } from './keptPrompts.ts';
 import { OneJob } from './OneJob.ts';
+import { savedOwnPicture } from './ownPictures.ts';
 import { projectOf, scriptOf, type Json } from './projectJson.ts';
-import { cardOf, fileViewOf, generatedFile, ownFile, scenarioLines, scenarioOf, withBackground, without, type ScenarioLine } from './sceneCards.ts';
+import { cardOf, croppedBackground, fileViewOf, generatedFile, scenarioLines, scenarioOf, withBackground, without, type ScenarioLine } from './sceneCards.ts';
 
 /** `saves`: each folder's writes in turn (shared with the script editor); `provider`: the Settings image AI; `keyOf` reads its key in main. */
 type Dependencies = Readonly<{
@@ -52,18 +53,15 @@ export class ScenarioService {
     if (!(await this.#dependencies.vectors()).includes(vector)) throw new StudioError('invalid-request', translate('scenarios.noSuchVector', { vector }));
     return this.#change(folder, lineId, async (path, scene) => {
       await keepPrompt(this.#dependencies.disk, path, { lineId, background: scene.background });
-      return { ...without(scene.background, 'image', 'generate', 'vector'), vector };
+      return { ...without(scene.background, 'image', 'generate', 'vector', 'crop'), vector };
     });
   }
 
   /** The picture is copied into scenes/own/ (checked by its first bytes, never by its name) and wins over a generated one. */
   upload(folder: string, lineId: string, bytes: Uint8Array): Promise<ScenariosDocument> {
     return this.#change(folder, lineId, async (path, scene) => {
-      if (bytes.byteLength > MAXIMUM_IMAGE_BYTES) throw new StudioError('invalid-request', translate('scenarios.tooBig', { most: MAXIMUM_IMAGE_BYTES / 1024 / 1024 }));
-      const format = await this.#dependencies.core.imageFormat(bytes);
-      if (!format) throw new StudioError('invalid-request', translate('scenarios.notAPicture'));
-      await this.#dependencies.files.write(path, ownFile(lineId, format), bytes);
-      return { ...scene.background, image: ownFile(lineId, format) };
+      const image = await savedOwnPicture(this.#dependencies, { folder: path, lineId, bytes });
+      return { ...without(scene.background, 'crop'), image };
     });
   }
 
@@ -86,7 +84,8 @@ export class ScenarioService {
       const provider = await this.#dependencies.saves.run(path, () => this.#keepProvider(path));
       const key = await this.#key(provider);
       const onCall = () => this.#dependencies.progress({ lineId, phase: 'calling' });
-      await this.#dependencies.core.generateImage(path, { lineId, force, provider, key, signal, onCall });
+      const queued = (write: () => Promise<void>) => this.#dependencies.saves.run(path, write);
+      await this.#dependencies.core.generateImage(path, { lineId, force, provider, key, signal, onCall, queued });
       this.#dependencies.progress({ lineId, phase: 'done' });
       return this.read(path);
     });
@@ -102,6 +101,11 @@ export class ScenarioService {
       const made = await this.#dependencies.files.exists(path, generatedFile(lineId));
       return made ? { ...background, image: generatedFile(lineId) } : without(background, 'image');
     });
+  }
+
+  /** The part of the scene's picture shown (null: all of it); only a scene with a picture can be cropped. */
+  crop(folder: string, lineId: string, crop: ImageCrop | null): Promise<ScenariosDocument> {
+    return this.#change(folder, lineId, async (_path, { background }) => croppedBackground(background, crop));
   }
 
   settings(folder: string, settings: Readonly<{ style?: ImageStyle; provider?: SceneImageProvider }>): Promise<ScenariosDocument> {

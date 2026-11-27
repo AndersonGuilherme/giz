@@ -34,6 +34,7 @@ function scenarioBridge(call: Call, listen: Listen): MediaApi['scenarios'] {
     generate: (folder, lineId, force) => call('scenarios.generate', { folder, lineId, force }),
     cancel: () => call('scenarios.cancel', {}),
     useGenerated: (folder, lineId) => call('scenarios.useGenerated', { folder, lineId }),
+    crop: (folder, lineId, crop) => call('scenarios.crop', { folder, lineId, crop }),
     settings: (folder, settings) => call('scenarios.settings', { folder, ...settings }),
     onProgress: listen(SCENARIOS_PROGRESS_EVENT),
   };
