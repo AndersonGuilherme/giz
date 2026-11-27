@@ -1,0 +1,75 @@
+/* giz identity: a slate board with chalk lines and one yellow chalk accent. */
+:root {
+  --slate: #26302d;
+  --slate-deep: #1d2523;
+  --slate-raised: #2f3b37;
+  --chalk: #f3efe2;
+  --chalk-dim: #a9c2b8;
+  --chalk-yellow: #f2c14e;
+  --chalk-red: #e8735a;
+  --line: rgba(243, 239, 226, 0.18);
+  color-scheme: dark;
+  font-family: 'Nunito', 'Segoe UI', 'Ubuntu', system-ui, sans-serif;
+  color: var(--chalk);
+  background: var(--slate);
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(ellipse at 20% 0%, rgba(243, 239, 226, 0.05), transparent 60%),
+    radial-gradient(ellipse at 90% 100%, rgba(169, 194, 184, 0.06), transparent 55%),
+    var(--slate);
+}
+
+.studio { display: flex; flex-direction: column; min-height: 100vh; }
+
+.header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 18px 28px; border-bottom: 2px dashed var(--line); background: var(--slate-deep);
+}
+.brand { display: flex; align-items: center; gap: 14px; }
+.brand h1 { margin: 0; font-size: 22px; letter-spacing: 0.5px; }
+.tagline { margin: 2px 0 0; color: var(--chalk-dim); font-size: 13px; }
+.logo {
+  width: 34px; height: 12px; border-radius: 3px; transform: rotate(-12deg);
+  background: linear-gradient(90deg, var(--chalk) 70%, var(--chalk-yellow) 70%);
+  box-shadow: 0 2px 0 rgba(0, 0, 0, 0.35);
+}
+
+.board { flex: 1; padding: 24px 28px; display: grid; gap: 18px; align-content: start; max-width: 980px; width: 100%; margin: 0 auto; }
+.hint { color: var(--chalk-dim); font-size: 16px; text-align: center; margin-top: 18vh; }
+
+.card { background: var(--slate-raised); border: 1px solid var(--line); border-radius: 14px; padding: 18px 22px; }
+.card h2 { margin: 0 0 6px; font-size: 18px; }
+.card h3 { margin: 14px 0 6px; font-size: 14px; color: var(--chalk-dim); text-transform: uppercase; letter-spacing: 1px; }
+.folder { margin: 0 0 12px; color: var(--chalk-dim); font-size: 12px; font-family: ui-monospace, monospace; word-break: break-all; }
+.facts { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; margin: 0; }
+.facts dt { color: var(--chalk-dim); font-size: 12px; }
+.facts dd { margin: 2px 0 0; font-weight: 700; }
+
+.ok { color: var(--chalk-yellow); font-weight: 700; }
+.summary { font-weight: 700; }
+.problems ul { margin: 0; padding-left: 18px; }
+.problems li { margin: 4px 0; }
+.problems code { color: var(--chalk-dim); margin-right: 6px; }
+.problems.error h3, .failure h2 { color: var(--chalk-red); }
+.problems.warning h3 { color: var(--chalk-yellow); }
+.failure { border-color: var(--chalk-red); }
+
+.chalk-button {
+  font: inherit; font-weight: 700; color: var(--chalk); background: transparent; cursor: pointer;
+  border: 2px solid var(--chalk); border-radius: 10px; padding: 8px 18px;
+}
+.chalk-button:hover:not(:disabled) { background: rgba(243, 239, 226, 0.08); }
+.chalk-button:disabled { opacity: 0.45; cursor: default; }
+.chalk-button.primary { color: var(--slate-deep); background: var(--chalk-yellow); border-color: var(--chalk-yellow); }
+
+.render-actions { display: flex; gap: 10px; }
+.chalk-progress { width: 100%; height: 14px; margin-top: 14px; appearance: none; border: none; border-radius: 7px; overflow: hidden; background: var(--slate-deep); }
+.chalk-progress::-webkit-progress-bar { background: var(--slate-deep); }
+.chalk-progress::-webkit-progress-value { background: var(--chalk-yellow); transition: width 0.2s; }
+.status { margin: 8px 0 0; color: var(--chalk-dim); min-height: 1.2em; word-break: break-all; }

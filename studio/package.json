@@ -1,0 +1,51 @@
+{
+  "name": "giz-studio",
+  "productName": "giz Estúdio",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "giz Estúdio: the desktop app that makes animated videos with the giz core",
+  "license": "MIT",
+  "main": ".vite/build/main.cjs",
+  "scripts": {
+    "start": "electron-forge start",
+    "package": "electron-forge package",
+    "make": "electron-forge make",
+    "test": "node --test \"test/**/*.test.ts\"",
+    "smoke": "node smoke/run.ts",
+    "typecheck": "tsc --noEmit",
+    "lint": "eslint . && depcruise src",
+    "verify": "npm run typecheck && npm run lint && npm test"
+  },
+  "engines": {
+    "node": ">=22.18"
+  },
+  "dependencies": {
+    "electron-squirrel-startup": "^1.0.1",
+    "giz-core": "file:../core",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "zod": "^4.6.7"
+  },
+  "devDependencies": {
+    "@electron-forge/cli": "^8.0.1",
+    "@electron-forge/maker-deb": "^8.0.1",
+    "@electron-forge/maker-rpm": "^8.0.1",
+    "@electron-forge/maker-squirrel": "^8.0.1",
+    "@electron-forge/maker-zip": "^8.0.1",
+    "@electron-forge/plugin-auto-unpack-natives": "^8.0.1",
+    "@electron-forge/plugin-fuses": "^8.0.1",
+    "@electron-forge/plugin-vite": "^8.0.1",
+    "@electron/fuses": "^2.1.3",
+    "@types/electron-squirrel-startup": "^1.0.2",
+    "@types/node": "^22.20.7",
+    "@types/react": "^18.3.32",
+    "@types/react-dom": "^18.3.7",
+    "dependency-cruiser": "^16.10.4",
+    "electron": "45.5.0",
+    "eslint": "^9.39.5",
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.74.0",
+    "vite": "^8.4.0"
+  }
+}
