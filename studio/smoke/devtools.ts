@@ -15,14 +15,21 @@ export async function poll<T>(attempt: () => Promise<T | undefined>, what: strin
 
 export type Page = ReturnType<typeof devtools>;
 
+const noteViolation = (violations: string[], entry: { source: string; text: string }) => {
+  if (entry.source === 'security') violations.push(String(entry.text).slice(0, 400));
+};
+
 export function devtools(url: string) {
   const socket = new WebSocket(url);
   const pending = new Map<number, (message: { result?: unknown; error?: unknown }) => void>();
   let next = 0;
   // The page's console errors and uncaught exceptions, shown when the smoke test fails.
   const problems: string[] = [];
+  // What the page's Content-Security-Policy refused (Chromium logs it as a security entry).
+  const violations: string[] = [];
   socket.addEventListener('message', (event) => {
     const message = JSON.parse(String(event.data));
+    if (message.method === 'Log.entryAdded') noteViolation(violations, message.params.entry);
     if (message.method === 'Runtime.exceptionThrown') problems.push(JSON.stringify(message.params.exceptionDetails).slice(0, 800));
     if (message.method === 'Runtime.consoleAPICalled' && ['error', 'warning'].includes(message.params.type)) problems.push(JSON.stringify(message.params.args).slice(0, 800));
     pending.get(message.id)?.(message);
@@ -68,5 +75,6 @@ export function devtools(url: string) {
     await writeFile(file, Buffer.from(data, 'base64'));
   };
   void send('Runtime.enable');
-  return { send, evaluate, until, untilText, click, type, screenshot, problems, close: () => socket.close() };
+  void send('Log.enable');
+  return { send, evaluate, until, untilText, click, type, screenshot, problems, violations, close: () => socket.close() };
 }

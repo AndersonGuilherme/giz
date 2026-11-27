@@ -3,6 +3,8 @@
 // wizard through Chrome DevTools Protocol taking a screenshot of every step, then checks the bridge on core's coupon
 // lesson (and that a folder never granted is refused) and opens Settings.
 // Run: npm run smoke   (SMOKE_HEADLESS=1 for no display: Chromium's headless Ozone platform).
+// SMOKE_APP=<program>: the same walk on the packaged app (npm run package, out/<name>-<platform>-<arch>/giz-estudio)
+// instead of the dev server: `npm run smoke:packaged` packages and runs it.
 import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
@@ -17,7 +19,8 @@ import { brokenScript, duplicateAndTrash, editLines, failAndCancel, generateWith
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
 const FOLDER = resolve(STUDIO, '../core/examples/coupon-lesson/pt-BR');
-const SHOTS = join(STUDIO, 'out', 'smoke');
+const PACKAGED = process.env.SMOKE_APP;
+const SHOTS = join(STUDIO, 'out', PACKAGED ? 'smoke-packaged' : 'smoke');
 const PORT = 9400 + Math.floor(Math.random() * 400);
 const HOME = await mkdtemp(join(tmpdir(), 'giz-smoke-home-'));
 // A giz.config.json the CLI already made: the Studio must keep its other keys (brand) and use its models folder.
@@ -25,7 +28,9 @@ await writeFile(join(HOME, 'giz.config.json'), JSON.stringify({ brand: 'canal-de
 
 const headless = process.env.SMOKE_HEADLESS === '1' ? ['--ozone-platform=headless'] : [];
 const env = { ...process.env, GIZ_STUDIO_HOME: HOME, GIZ_STUDIO_REHEARSAL: '1', GIZ_QUIET: '1' };
-const app = spawn('npx', ['electron-forge', 'start', '--', `--remote-debugging-port=${PORT}`, `--project=${FOLDER}`, '--lang=en-US', '--use-fake-device-for-media-stream', ...headless], {
+const appArgs = [`--remote-debugging-port=${PORT}`, `--project=${FOLDER}`, '--lang=en-US', '--use-fake-device-for-media-stream', ...headless];
+const [command, args] = PACKAGED ? [PACKAGED, appArgs] : ['npx', ['electron-forge', 'start', '--', ...appArgs]];
+const app = spawn(command, args, {
   cwd: STUDIO, stdio: ['ignore', 'pipe', 'pipe'], detached: true, env,
 });
 let output = '';
@@ -245,6 +250,8 @@ async function smoke(): Promise<void> {
   await settings(page);
   await tourInEnglish(context);
   await inEnglish({ page, shoot, home: HOME });
+  // The packaged page has the strict policy (no inline style or script): nothing it shows may need what it refuses.
+  if (PACKAGED) assert.deepEqual(page.violations, [], 'the packaged page breaks none of its Content-Security-Policy');
   page.close();
   console.log(JSON.stringify({ window: target.url, ...bridge, screenshots: shots }, null, 1));
 }

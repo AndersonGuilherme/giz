@@ -28,3 +28,18 @@ export const keyFolderIn = (home: string): string => join(home, '.config', 'giz'
 
 /** The first-run interface language: Portuguese for a Portuguese system, English otherwise. */
 export const systemLanguageOf = (locale: string): 'pt-BR' | 'en' => (locale.toLowerCase().startsWith('pt') ? 'pt-BR' : 'en');
+
+type Environment = Readonly<Record<string, string | undefined>>;
+/** `packaged`: the installed app (its core folder is read-only); `userData`: Electron's, after preparePaths. */
+export type RunKind = Readonly<{ packaged: boolean; userData: string; env: Environment }>;
+
+/**
+ * The variables that tell core (here and in the workers, which inherit them) where its writable files go: the
+ * installed app keeps giz.config.json in ~/.config/giz (beside the CLI's keys) and Whisper in userData; an isolated
+ * home has its own giz.config.json. A checkout keeps core's own places. What is already set is left as it is.
+ */
+export function coreEnvironmentOf(paths: StudioPaths, { packaged, userData, env }: RunKind): Record<string, string> {
+  const config = paths.gizConfig ?? (packaged ? join(keyFolderIn(paths.home), 'giz.config.json') : undefined);
+  const wanted = { GIZ_CONFIG: config, GIZ_WHISPER_CACHE: packaged ? join(userData, 'whisper') : undefined };
+  return Object.fromEntries(Object.entries(wanted).filter((entry): entry is [string, string] => entry[1] !== undefined && !env[entry[0]]));
+}

@@ -14,7 +14,8 @@ function voiceModel(model: '0.6b' | '1.7b'): Run {
   return (tools, modelsDir, report) => tools.downloadVoiceModelWithProgress({ model, modelsDir }, (receivedBytes, totalBytes) => report({ label, receivedBytes, totalBytes }));
 }
 
-// The GPU install starts with the ONNX Runtime CUDA provider, which reports no bytes; then each NVIDIA library does.
+// The GPU install starts with the ONNX Runtime CUDA provider (shown at once, before its download reports bytes); then
+// each NVIDIA library.
 const gpu: Run = (tools, modelsDir, report) => {
   report({ label: 'ONNX Runtime CUDA', receivedBytes: 0, totalBytes: 0 });
   return tools.gpu.install(modelsDir, quiet, report);

@@ -10,7 +10,7 @@ const WORKER = () => join(__dirname, 'setupWorker.cjs');
 
 type Settle = Readonly<{ resolve: () => void; reject: (error: Error) => void }>;
 
-// The worker and everything it started (the GPU install runs the ONNX Runtime installer and tar as child processes).
+// The worker and everything it started (the GPU install unpacks the NVIDIA archives with tar).
 async function stop(child: Electron.UtilityProcess): Promise<void> {
   if (child.pid !== undefined) await killDescendants(child.pid);
   child.kill();

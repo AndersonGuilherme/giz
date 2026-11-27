@@ -31,6 +31,77 @@ e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela
 - **Você não precisa do Claude** nem de nenhuma IA paga. O roteiro é um arquivo TypeScript que você pode
   escrever à mão a partir do modelo. Uma IA de texto só acelera essa etapa (veja a dica no passo 4).
 
+## Instalar
+
+O **giz Estúdio** é o aplicativo de computador do giz: você instala, abre e faz tudo pela janela (configuração,
+contas de IA, roteiro, elenco, cenários, vozes, prévia e vídeo final), sem repositório, sem Node e sem terminal.
+O resto deste README (a partir de *Requisitos*) é para quem prefere usar o giz pela linha de comando.
+
+### Baixar
+
+Na página de **Releases** do repositório, baixe o arquivo do seu sistema:
+
+| Sistema | Arquivo | Como instalar |
+|---|---|---|
+| **Windows** 10/11 (64 bits) | `giz_estudio-<versão> Setup.exe` | dê dois cliques; o app abre sozinho no fim e ganha atalho no menu Iniciar |
+| **macOS** (Apple Silicon) | `giz Estúdio-<versão>-arm64.dmg` | abra o `.dmg` e arraste o **giz Estúdio** para **Aplicativos** |
+| **Linux** Ubuntu/Debian | `giz-estudio_<versão>_amd64.deb` | `sudo apt install ./giz-estudio_<versão>_amd64.deb` |
+| **Linux** Fedora/openSUSE | `giz-estudio-<versão>-1.x86_64.rpm` | `sudo dnf install ./giz-estudio-<versão>-1.x86_64.rpm` |
+| **Linux** qualquer distribuição | `giz Estúdio-<versão>-x64.AppImage` | `chmod +x` no arquivo e abra com dois cliques |
+
+Também há um `.zip` de cada sistema, que roda sem instalar (descompacte numa pasta sua e abra o programa
+`giz-estudio`).
+
+### "Aplicativo não verificado": é esperado
+
+Os instaladores **não são assinados** (assinatura de código custa uma conta paga da Apple e um certificado para o
+Windows). Por isso o sistema avisa na primeira vez:
+
+- **Windows (SmartScreen):** na tela azul "O Windows protegeu o computador", clique em **Mais informações** e depois
+  em **Executar assim mesmo**.
+- **macOS (Gatekeeper):** na primeira vez, **não** dê dois cliques. Em **Aplicativos**, clique com o botão direito
+  (ou Control+clique) no **giz Estúdio**, escolha **Abrir** e confirme **Abrir** no aviso. Nas próximas vezes ele abre
+  normalmente. Se o macOS disser que o app "está danificado" ou bloquear o render, rode uma vez no Terminal:
+  `xattr -dr com.apple.quarantine "/Applications/giz Estúdio.app"`.
+- **Linux:** não há aviso. O AppImage precisa de FUSE (no Ubuntu 22.04 ou mais novo: `sudo apt install libfuse2`);
+  sem FUSE, abra com `./giz-Estúdio-*.AppImage --appimage-extract-and-run`.
+
+### Primeira vez que abre
+
+Um assistente prepara o Estúdio em poucos passos:
+
+1. **Idioma** (português ou inglês) e **pasta dos projetos** (sugestão: `~/giz/projetos`).
+2. **Placa de vídeo (opcional):** com uma NVIDIA no Linux, o botão **Instalar** baixa o suporte à GPU
+   (~245 MB do ONNX Runtime CUDA e ~1,8 GB de bibliotecas da NVIDIA) e a voz fica bem mais rápida. Sem GPU, tudo
+   funciona na CPU. No `.deb`, no `.rpm` e no AppImage a pasta do app é só de leitura: para usar a GPU, use o `.zip`
+   descompactado numa pasta sua.
+3. **Modelos de voz:** baixe o Qwen3-TTS 0.6B (5,9 GB) ou 1.7B (13,4 GB) e, se quiser alinhar as falas com
+   precisão, o Whisper (~250 MB). Os downloads podem ser pausados e continuam de onde pararam.
+4. **Contas de IA (opcional):** cole as chaves dos serviços que quiser usar (texto, imagem, voz) e teste cada uma.
+5. **Licença do Remotion:** grátis para pessoa física e empresas de até 3 pessoas.
+
+Depois disso o Estúdio funciona **sem internet** (o render de vídeo também), exceto as chamadas às IAs pagas que você
+escolher.
+
+### Onde ficam as coisas
+
+| O quê | Onde |
+|---|---|
+| Projetos | a pasta escolhida no assistente (sugestão: `~/giz/projetos`) |
+| Modelos de voz e GPU | `~/.cache/giz` (dá para mudar em Configurações) |
+| Configuração compartilhada com a linha de comando | `~/.config/giz/giz.config.json` |
+| Chaves de API | no chaveiro do sistema (cifradas, no arquivo `keys.json` dos dados do app); sem chaveiro, em `~/.config/giz/<serviço>.key` (só você lê) |
+| Dados do app (preferências, Whisper, retratos) | Linux: `~/.config/giz Estúdio` · Windows: `%APPDATA%\giz Estúdio` · macOS: `~/Library/Application Support/giz Estúdio` |
+
+### Desinstalar
+
+- **Windows:** Configurações → Aplicativos → **giz Estúdio** → Desinstalar.
+- **macOS:** arraste o **giz Estúdio** de **Aplicativos** para o Lixo.
+- **Linux:** `sudo apt remove giz-estudio` (deb), `sudo dnf remove giz-estudio` (rpm) ou apague o AppImage.
+
+Desinstalar não apaga seus projetos nem os modelos. Para liberar o espaço, apague também `~/.cache/giz`,
+`~/.config/giz` e a pasta de dados do app (tabela acima).
+
 ## Requisitos
 
 - **Node.js 22.18 ou mais novo** (roda TypeScript direto, sem build)

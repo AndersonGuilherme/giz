@@ -1,12 +1,13 @@
 import { app, BrowserWindow, ipcMain, session } from 'electron';
 import started from 'electron-squirrel-startup';
-import { createServices, preparePaths } from './composition.ts';
+import { createServices, preparePaths, STUDIO_PATHS } from './composition.ts';
 import { afterReady } from './ipc/afterReady.ts';
 import { handlersOf } from './ipc/handlers.ts';
 import { registerChannels } from './ipc/registry.ts';
 import { REQUEST_SCHEMAS } from './ipc/schemas.ts';
 import { isAppUrl, isTrustedSender } from './ipc/senderTrust.ts';
 import { launcher } from './launcher.ts';
+import { coreEnvironmentOf } from './studioPaths.ts';
 import { quitAfterSaves } from './quitGuard.ts';
 import { registerMediaScheme, serveMedia } from './security/mediaProtocol.ts';
 import { allowOnlyOurMicrophone } from './security/permissions.ts';
@@ -21,6 +22,8 @@ const slot = new WindowSlot<BrowserWindow>();
 // How long a quit waits for a cancelled render to end before it quits anyway.
 const RENDER_STOP_WAIT = 5000;
 preparePaths();
+// Before core is first loaded (and before any worker starts): where its writable files go in this run.
+Object.assign(process.env, coreEnvironmentOf(STUDIO_PATHS, { packaged: app.isPackaged, userData: app.getPath('userData'), env: process.env }));
 registerMediaScheme();
 
 // Once per app run: the permission policy and the IPC channels (only our window's top frame may call them).

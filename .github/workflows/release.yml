@@ -1,0 +1,89 @@
+# Builds the giz Estúdio installers on each OS (the packages are not signed: see the README, "Instalar") and puts them
+# in a draft GitHub release. Runs on a v* tag or by hand (then it only keeps the files as workflow artifacts).
+name: release
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        # The oldest supported Ubuntu: the Linux packages then run on older glibc too. macOS 14 is Apple Silicon.
+        os: [ubuntu-22.04, windows-2022, macos-14]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 90
+    env:
+      # The CUDA provider is downloaded by the app's GPU setup, never packaged.
+      ONNXRUNTIME_NODE_INSTALL_CUDA: skip
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: |
+            core/package-lock.json
+            studio/package-lock.json
+
+      - name: Linux packaging tools (rpm, AppImage)
+        if: runner.os == 'Linux'
+        run: sudo apt-get update && sudo apt-get install -y rpm squashfs-tools fakeroot
+
+      - name: Install core
+        working-directory: core
+        run: npm ci
+
+      - name: Install studio
+        working-directory: studio
+        run: npm ci
+
+      - name: Verify core
+        working-directory: core
+        run: npm run verify
+
+      - name: Verify studio
+        working-directory: studio
+        run: npm run verify
+
+      - name: Make the installers
+        working-directory: studio
+        run: npm run make
+
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: giz-estudio-${{ runner.os }}
+          path: |
+            studio/out/make/**/*.deb
+            studio/out/make/**/*.rpm
+            studio/out/make/**/*.AppImage
+            studio/out/make/**/*.zip
+            studio/out/make/**/*.dmg
+            studio/out/make/**/*.exe
+            studio/out/make/**/*.nupkg
+            studio/out/make/**/RELEASES
+          if-no-files-found: error
+
+  release:
+    if: startsWith(github.ref, 'refs/tags/v')
+    needs: build
+    runs-on: ubuntu-22.04
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          path: installers
+          merge-multiple: true
+
+      - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
+        with:
+          draft: true
+          files: installers/**/*

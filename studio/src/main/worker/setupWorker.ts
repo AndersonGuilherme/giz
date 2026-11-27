@@ -1,5 +1,5 @@
 // The setup worker: an Electron utility process (plain Node) that runs one long setup task of core — installing the
-// GPU support (which runs the ONNX Runtime installer and unpacks archives synchronously) or downloading a model — so
+// GPU support (which downloads the CUDA provider and unpacks big archives synchronously) or downloading a model — so
 // the main process stays free. Stopping the task is killing this process; the downloads resume from their .part files.
 import { JOB_VARIABLE, type WorkerJob, type WorkerMessage } from './messages.ts';
 import { SETUP_TASK_RUNS } from './setupTasks.ts';
