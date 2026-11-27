@@ -92,6 +92,12 @@ ou `node src/presentation/cli/giz.ts <comando> ...`).
 | `qa voices [saída] [voz1,voz2] [estilo]` | Gera as mesmas frases com cada voz Qwen e mede quanto o Whisper entende. |
 | `qa lexicon [testes.json] [voz]` | Testa grafias para o dicionário de pronúncia: `[{"word":"deploy","frame":"Fiz o X ontem.","candidates":["deploy","diplói"]}]`. |
 | `sounds [pasta]` | Sintetiza os efeitos sonoros (`pop`, `whoosh`, `ding`...) em `public/sounds/`, iguais byte a byte aos versionados. |
+| `keys list` | Mostra quais serviços pagos têm chave (`anthropic`, `openai`, `gemini`, `elevenlabs`, `fish`) e onde pôr as que faltam. Nunca mostra a chave. |
+| `keys test <anthropic\|openai\|gemini>` | Faz **uma** chamada real e mínima (frações de centavo) para conferir a chave e responde `ok` ou o erro. |
+
+As chaves das IAs de texto vêm de `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` e `GEMINI_API_KEY`, ou de
+`~/.config/giz/<serviço>.key`. O modelo de cada uma muda com `GIZ_ANTHROPIC_MODEL`, `GIZ_OPENAI_MODEL` e
+`GIZ_GEMINI_MODEL` (padrões: `claude-sonnet-5-5`, `gpt-6.2-astra` e `gemini-3.8-flash`).
 
 Exemplos:
 

@@ -6,6 +6,7 @@ import type { Progress } from '../../application/use-cases/GenerateVoices.ts';
 import type { Problem } from '../../application/use-cases/CheckProject.ts';
 import { buildTimeline, characterSheet, checkProject, generateVoices, produceVideo, projectRepository, renderVideo } from './composition.ts';
 import { convertCommand } from './commands/convertCommand.ts';
+import { keysCommand } from './commands/keysCommand.ts';
 import { qaCommand } from './commands/qaCommands.ts';
 import { gpuCommand, modelsCommand, soundsCommand } from './commands/toolCommands.ts';
 import { setupCommand } from './setup/setupCommand.ts';
@@ -88,7 +89,7 @@ async function sheet([rig, character]: readonly string[]): Promise<void> {
 const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = {
   voice, check, build, render, produce, sheet,
   setup: (args) => setupCommand(args), models: modelsCommand, gpu: gpuCommand, qa: qaCommand, sounds: soundsCommand,
-  convert: convertCommand,
+  convert: convertCommand, keys: keysCommand,
 };
 
 async function main([name = '', ...args]: readonly string[]): Promise<void> {
