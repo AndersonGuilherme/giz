@@ -11,6 +11,8 @@ export type TextApi = Readonly<{
   /** The name people know, for the messages. */
   label: string;
   defaultModel: string;
+  /** Whether the API takes cache markers: only then a request's `stablePrefix` goes into the call. */
+  promptCaching: boolean;
   call(model: string, request: TextRequest, key: string): HttpCall;
   /** Reads the parsed JSON answer; throws when it is not the expected shape. */
   answer(body: unknown): TextAnswer;

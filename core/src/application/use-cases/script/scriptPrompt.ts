@@ -81,20 +81,31 @@ function librarySection(idea: Idea, materials: PromptMaterials): string {
   ].join('\n');
 }
 
-/** The request for a script: the rules (system), then the idea, the format guide, the answer schema and the presets. */
-export function scriptRequest(idea: Idea, materials: PromptMaterials): TextRequest {
-  const sections = [ideaSection(idea), `# Format guide\n${materials.guide}`, answerSection(materials.reference), librarySection(idea, materials)];
-  return { system: system(idea), prompt: sections.join('\n\n'), maxTokens: scriptOutputTokens(idea.targetSeconds()), json: true };
+// The guide is data: wrapped in tags and with its headings pushed two levels down, so they never read as sections
+// of the prompt itself.
+function guideSection(guide: string): string {
+  return `# Format guide\n<format-guide>\n${guide.replace(/^#/gm, '###')}\n</format-guide>`;
 }
 
+/** The request for a script: the rules (system), then the idea, the format guide, the answer schema and the presets. */
+export function scriptRequest(idea: Idea, materials: PromptMaterials): TextRequest {
+  const sections = [ideaSection(idea), guideSection(materials.guide), answerSection(materials.reference), librarySection(idea, materials)];
+  const prompt = sections.join('\n\n');
+  // The whole first prompt is resent by every repair: providers that cache read it back.
+  return { system: system(idea), prompt, maxTokens: scriptOutputTokens(idea.targetSeconds()), json: true, stablePrefix: prompt.length };
+}
+
+/** The answer a repair corrects and the output limit of the repair. */
+export type PreviousAnswer = Readonly<{ answer: string; maxTokens: number }>;
+
 /** The same request with the previous answer and its problems: the AI answers again with the whole corrected JSON. */
-export function repairRequest(base: TextRequest, answer: string, problems: readonly string[]): TextRequest {
+export function repairRequest(base: TextRequest, previous: PreviousAnswer, problems: readonly string[]): TextRequest {
   const repair = [
     '# Your previous answer',
-    answer,
+    `<previous-answer>\n${previous.answer}\n</previous-answer>`,
     '# Problems found by the validation (fix every one and keep what was right)',
     ...problems.map((problem) => `- ${problem}`),
     'Answer again with the whole corrected JSON object.',
   ];
-  return { ...base, prompt: `${base.prompt}\n\n${repair.join('\n')}` };
+  return { ...base, prompt: `${base.prompt}\n\n${repair.join('\n')}`, maxTokens: previous.maxTokens };
 }

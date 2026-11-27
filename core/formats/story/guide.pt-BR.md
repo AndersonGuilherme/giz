@@ -22,16 +22,23 @@ Divida a duração-alvo nestas partes (os tempos são proporcionais):
 
 - Concreto e visual em até 3 s: "Imagine: a internet do mundo inteiro desliga por um dia."
 - Cria uma pergunta que só o fim responde. Nunca comece com "Olá, hoje vamos falar de…".
-- A primeira fala tem uma `scene` e, de preferência, um `highlight` curto (até 4 palavras, em MAIÚSCULAS) e uma
-  câmera em `zoom-in`.
+- A primeira fala, com até 6 palavras, entrega o gancho; o `highlight` (até 4 palavras, em MAIÚSCULAS) e a câmera
+  `zoom-in` da `scene` dela o tornam visual na hora.
 
 ## Ritmo
 
 - A voz Qwen em pt-BR fala cerca de **1,8 palavras por segundo**, pausas incluídas: 30 s ≈ 54 palavras,
   60 s ≈ 108 palavras. Some as palavras de todas as falas e fique a até 10% do alvo.
-- Falas curtas: de 4 a 14 palavras, no máximo 2 frases. Na tela 9:16 cabem poucas palavras por linha de legenda.
+- Falas curtas: até ~10 palavras. Uma fala mais longa precisa de um `beat` ou de uma mudança de câmera no meio.
+- O `text` é legenda: curto. O que a voz diz por extenso (números, siglas, nomes) vai em `pronunciation`.
 - Uma cena nova a cada 5 a 10 s (a cada 1 a 3 falas). A tela nunca fica parada mais de ~6 s sem uma mudança
   (cena, câmera, reação, HUD, texto grande).
+
+## Ofício
+
+- Cada personagem quer alguma coisa, e algo está em jogo: diga isso cedo ("se o gato não comer, ele processa a gente").
+- Plante e colha: um detalhe do começo volta no fim (callback) e paga a espera.
+- Feche com uma virada ou um arremate: uma última fala curta e inesperada depois da resolução.
 
 ## Tom e diálogo
 

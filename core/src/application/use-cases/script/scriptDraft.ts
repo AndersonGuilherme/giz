@@ -1,4 +1,7 @@
+import { defaultVoiceStyle } from '../../../domain/cast/voiceStyles.ts';
+import { DomainError } from '../../../domain/DomainError.ts';
 import type { Idea } from '../../../domain/idea/Idea.ts';
+import { CharacterId } from '../../../domain/values/CharacterId.ts';
 import type { ProjectVoice } from '../../../domain/project/Project.ts';
 import type { CastFile, ProjectFiles } from '../../ports/ProjectFolder.ts';
 import type { CastPreset } from '../../ports/ScriptMaterials.ts';
@@ -14,12 +17,17 @@ type CastEntry = Readonly<{ file?: CastFile; problem?: string }>;
 const isObject = (value: unknown): value is Readonly<Record<string, unknown>> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-// Models sometimes wrap the JSON in a ```json fence even when asked not to.
-const unfenced = (text: string) => text.trim().replace(/^```(?:json)?\s*/i, '').replace(/\s*```$/, '');
+// Models sometimes wrap the JSON in a ```json fence or in a sentence even when asked not to: the object is what goes
+// from the first "{" to the last "}".
+export function jsonText(text: string): string {
+  const start = text.indexOf('{');
+  const end = text.lastIndexOf('}');
+  return start >= 0 && end > start ? text.slice(start, end + 1) : text.trim();
+}
 
 function parsed(text: string): unknown {
   try {
-    return JSON.parse(unfenced(text));
+    return JSON.parse(jsonText(text));
   } catch (error) {
     return new Error(`a resposta não é um JSON válido (${(error as Error).message})`);
   }
@@ -32,11 +40,39 @@ function answerProblems(json: unknown): string[] {
   return missing.filter(Boolean).map((field) => `a resposta precisa do campo ${field}`);
 }
 
-function castEntry(entry: unknown, index: number, presets: readonly CastPreset[]): CastEntry {
-  const preset = presets.find((candidate) => candidate.id === entry);
-  if (preset) return { file: { ...preset.json, id: preset.id } };
+// The id names the file cast/<id>.json: it must be a valid character id before it gets near a path.
+function refusal(error: unknown): string {
+  if (error instanceof DomainError) return error.message;
+  throw error;
+}
+
+function idProblem(id: string): string | undefined {
+  try {
+    CharacterId.of(id);
+    return undefined;
+  } catch (error) {
+    return refusal(error);
+  }
+}
+
+// A preset without a voice style gets the project language's default (the presets are written for any language).
+function presetFile(preset: CastPreset, context: DraftContext): CastFile {
+  const voice = (isObject(preset.json.voice) ? preset.json.voice : {}) as Readonly<Record<string, unknown>>;
+  const style = voice.style ?? defaultVoiceStyle(context.idea.language());
+  return { ...preset.json, id: preset.id, voice: { ...voice, style } };
+}
+
+function newCharacter(entry: Readonly<Record<string, unknown>>, index: number): CastEntry {
+  if (typeof entry.id !== 'string') return { problem: `cast[${index}].id: obrigatório (um texto)` };
+  const problem = idProblem(entry.id);
+  return problem ? { problem: `cast[${index}].id: ${problem}` } : { file: entry as CastFile };
+}
+
+function castEntry(entry: unknown, index: number, context: DraftContext): CastEntry {
+  const preset = context.presets.find((candidate) => candidate.id === entry);
+  if (preset) return { file: presetFile(preset, context) };
   if (typeof entry === 'string') return { problem: `cast[${index}]: personagem pronto "${entry}" não existe (use um id da lista de personagens prontos ou defina o personagem inteiro)` };
-  if (isObject(entry) && typeof entry.id === 'string') return { file: entry as CastFile };
+  if (isObject(entry)) return newCharacter(entry, index);
   return { problem: `cast[${index}]: use o id de um personagem pronto ou um personagem completo com "id"` };
 }
 
@@ -61,7 +97,7 @@ export function draftOf(text: string, context: DraftContext): Draft {
   const problems = answerProblems(json);
   if (problems.length > 0) return { problems };
   const answer = json as Answer;
-  const entries = answer.cast.map((entry, index) => castEntry(entry, index, context.presets));
+  const entries = answer.cast.map((entry, index) => castEntry(entry, index, context));
   const cast = entries.flatMap(({ file }) => (file ? [file] : []));
   const all = [...entries.flatMap(({ problem }) => (problem ? [problem] : [])), ...castProblems(cast, context.idea)];
   if (all.length > 0) return { problems: all };

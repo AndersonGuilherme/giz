@@ -27,16 +27,27 @@ const TEXT_PRICES: Readonly<Record<TextProviderName, PriceList>> = {
   },
 };
 
-export type TextCall = Readonly<{ system: string; prompt: string; maxTokens?: number }>;
+export type TextCall = Readonly<{ system: string; prompt: string; maxTokens?: number; stablePrefix?: number }>;
+
+// Writing a prompt cache entry costs more than plain input (Anthropic: 1.25× for the 5-minute entry); a later read
+// costs less, but the estimate is an upper bound, so the cached part is counted as a write every time.
+const CACHE_WRITE_FACTOR: Readonly<Partial<Record<TextProviderName, number>>> = { anthropic: 1.25 };
+
+function inputTokens(provider: TextProviderName, call: TextCall): number {
+  const plain = estimatedTokens(call.system + call.prompt);
+  const factor = CACHE_WRITE_FACTOR[provider];
+  if (!factor || !call.stablePrefix) return plain;
+  return plain + (factor - 1) * estimatedTokens(call.system + call.prompt.slice(0, call.stablePrefix));
+}
 
 function priceOf(provider: TextProviderName, model: string): ModelPrice | undefined {
   const prices = TEXT_PRICES[provider];
   return Object.hasOwn(prices, model) ? prices[model] : undefined;
 }
 
-/** The most a call can cost: its system and prompt tokens in, and the whole output limit out. */
+/** The most a call can cost: its system and prompt tokens in (a cached prefix as a cache write), and the whole output limit out. */
 export function textCostEstimate(provider: TextProviderName, model: string, call: TextCall): CostEstimate {
   const price = priceOf(provider, model);
   if (!price) return CostEstimate.UNKNOWN;
-  return price.costOf(estimatedTokens(call.system + call.prompt), call.maxTokens ?? DEFAULT_MAX_OUTPUT_TOKENS);
+  return price.costOf(inputTokens(provider, call), call.maxTokens ?? DEFAULT_MAX_OUTPUT_TOKENS);
 }

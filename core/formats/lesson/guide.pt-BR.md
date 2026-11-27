@@ -34,11 +34,21 @@ Os tempos abaixo valem para ~5 min; numa aula mais curta, use menos pistas (no m
 ## Ritmo
 
 - A voz Qwen em pt-BR fala cerca de **1,8 palavras por segundo**, pausas incluídas: 60 s ≈ 108 palavras,
-  5 min ≈ 540 palavras. Some as palavras de todas as falas e fique a até 10% do alvo. As pausas de leitura do código
-  e os `holdAfter` contam à parte.
-- Falas curtas, até 2 frases. Uma fala longa de quem explica é seguida de uma reação curta do outro.
+  5 min ≈ 540 palavras. Some as palavras de todas as falas e fique a até 10% do alvo.
+- Cada bloco de código novo (a pausa de leitura) e cada `holdAfter` tomam ~6 s: desconte ~11 palavras do alvo para
+  cada um.
+- Falas curtas: até ~10 palavras. Uma fala mais longa precisa de um `beat` (um destaque, uma revelação) no meio, e é
+  seguida de uma reação curta do outro.
+- O `text` é legenda: curto, com o nome técnico. O que a voz diz por extenso vai em `pronunciation`.
 - Código novo na tela ganha uma pausa de leitura automática (4 a 9 s). Não narre por cima: a fala seguinte traz a
   consequência. Código com até ~20 linhas curtas.
+
+## Ofício
+
+- Algo está em jogo desde o gancho: um cliente perdido, um prazo, uma conta errada. Diga o que se perde se ninguém
+  resolver.
+- Plante e colha: o detalhe estranho do começo (o número, o e-mail, o teste verde) é a chave da solução.
+- Feche com um arremate: depois do desafio, uma última fala curta e bem-humorada de quem perguntou.
 
 ## Diálogo
 

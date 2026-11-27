@@ -34,10 +34,19 @@ The times below are for ~5 min; in a shorter lesson, use fewer clues (at least o
 ## Pacing
 
 - The voice speaks about **2.2 words per second** in English, pauses included: 60 s ≈ 132 words, 5 min ≈ 660 words.
-  Add up the words of all lines and stay within 10% of the target. Code reading pauses and `holdAfter` come on top.
-- Short lines, at most 2 sentences. A long line from the explainer is followed by a short reaction from the other.
+  Add up the words of all lines and stay within 10% of the target.
+- Each new code block (its reading pause) and each `holdAfter` take ~6 s: subtract ~13 words from the target for each.
+- Short lines: about 10 words at most. A longer line needs a `beat` (a highlight, a reveal) in the middle, and is
+  followed by a short reaction from the other.
+- `text` is a caption: short, with the technical name. What the voice spells out goes in `pronunciation`.
 - New code on screen gets an automatic reading pause (4 to 9 s). Do not talk over it: the next line brings the
   consequence. Code of up to ~20 short lines.
+
+## Craft
+
+- Something is at stake from the hook: a lost customer, a deadline, a wrong bill. Say what is lost if nobody fixes it.
+- Plant and pay off: the odd detail from the start (the number, the e-mail, the green test) is the key to the answer.
+- Close with a button: after the challenge, one last short, light line from the one who asked.
 
 ## Dialogue
 

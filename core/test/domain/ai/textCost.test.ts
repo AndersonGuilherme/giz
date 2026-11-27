@@ -61,3 +61,12 @@ test('the text providers are anthropic, openai and gemini', () => {
   assert.equal(isTextProvider('fish'), false);
   assert.equal(isTextProvider(undefined), false);
 });
+
+test('a cached prefix is priced as an Anthropic cache write (1.25×), an upper bound; other providers are unchanged', () => {
+  const call = { system: 'a'.repeat(400), prompt: 'b'.repeat(800), maxTokens: 0 };
+  const plain = textCostEstimate('anthropic', 'claude-sonnet-5-5', call).dollars() ?? 0;
+  const cached = textCostEstimate('anthropic', 'claude-sonnet-5-5', { ...call, stablePrefix: 400 }).dollars() ?? 0;
+  // 300 tokens plain; the system and the first 400 prompt characters (200 tokens) cost a quarter more.
+  close(cached, plain + 0.25 * 200 * 2 / 1_000_000);
+  assert.equal(textCostEstimate('openai', 'gpt-5.5', { ...call, stablePrefix: 400 }).dollars(), textCostEstimate('openai', 'gpt-5.5', call).dollars());
+});

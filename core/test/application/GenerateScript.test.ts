@@ -35,8 +35,8 @@ const INVALID = structuredClone(VALID);
 INVALID.script.lines[2]!.speaker = 'zeca';
 (INVALID.script.lines[1] as Record<string, unknown>).pose = 'dance';
 
-function generator(answers: readonly unknown[]) {
-  const text = new FakeTextProvider(answers);
+function generator(answers: readonly unknown[], cut: readonly number[] = []) {
+  const text = new FakeTextProvider(answers, cut);
   const generate = new GenerateScript({ text, materials, rigs, folder: new DiskProjectFolder(), repository, check });
   return { text, generate };
 }
@@ -66,7 +66,9 @@ test('a valid first answer becomes a project folder that passes the check, after
     });
     assert.deepEqual(await readJson(folder, 'script.json'), VALID.script);
     assert.deepEqual(await readJson(folder, 'idea.json'), IDEA);
-    assert.deepEqual(await readJson(folder, 'cast/bia.json'), JSON.parse(await readFile(join(CORE, 'casts/presets/present/bia.json'), 'utf8')));
+    // The preset is copied whole; it has no voice style, so it gets the language's default.
+    const preset = JSON.parse(await readFile(join(CORE, 'casts/presets/present/bia.json'), 'utf8'));
+    assert.deepEqual(await readJson(folder, 'cast/bia.json'), { ...preset, voice: { ...preset.voice, style: 'Fale em português do Brasil, com sotaque brasileiro, de forma natural' } });
     assert.deepEqual(await readJson(folder, 'cast/narrator.json'), NARRATOR);
     assert.deepEqual(check.run(await repository.load(folder)).errors, []);
   });
@@ -81,7 +83,9 @@ test('an invalid first answer gets its readable errors back and the corrected on
     assert.deepEqual(result.usage, { calls: 2, inputTokens: 2000, outputTokens: 400 });
     const repair = text.requests[1]!;
     assert.ok(repair.prompt.startsWith(text.requests[0]!.prompt), 'the repair keeps the whole first prompt');
-    assert.ok(repair.prompt.includes(`# Your previous answer\n${JSON.stringify(INVALID)}`));
+    assert.ok(repair.prompt.includes(`# Your previous answer\n<previous-answer>\n${JSON.stringify(INVALID)}\n</previous-answer>`));
+    assert.equal(repair.stablePrefix, text.requests[0]!.prompt.length, 'the first prompt is the cached prefix of the repair');
+    assert.equal(repair.maxTokens, 11_000, 'an answer that was not cut keeps the limit');
     assert.match(repair.prompt, /- script\.json › lines\[1\]\.pose: "dance" inválido \(use neutral, explain/);
     assert.match(repair.prompt, /Answer again with the whole corrected JSON object\.$/);
     assert.equal(repair.system, text.requests[0]!.system);
@@ -100,13 +104,14 @@ test('the cast and speaker problems found after the schema also go back to the A
   });
 });
 
-test('still invalid after 3 repair rounds: a readable pt-BR error, 4 calls, and nothing written', async () => {
+test('still invalid after 3 repair rounds: a readable pt-BR error, 4 calls, the last answer kept beside the folder, the folder untouched', async () => {
   await withFolder(async (folder) => {
     const { text, generate } = generator(['isto não é JSON', { project: {}, cast: ['ninguem'], script: {} }, INVALID]);
     await assert.rejects(generate.run(Idea.fromJson(IDEA), { folder }), (error: Error) => {
       assert.equal(error.name, 'ScriptGenerationError');
       assert.match(error.message, /^a IA não chegou a um roteiro válido depois de 3 rodada\(s\) de correção\. Problemas da última resposta:\n- /);
       assert.match(error.message, /lines\[1\]\.pose: "dance" inválido/);
+      assert.ok(error.message.endsWith(`a última resposta e a lista de problemas ficaram em ${folder}.draft; a pasta do projeto não foi alterada`), error.message);
       assert.doesNotMatch(error.message, /at .*\.ts:\d+/);
       return true;
     });
@@ -115,6 +120,9 @@ test('still invalid after 3 repair rounds: a readable pt-BR error, 4 calls, and 
     assert.match(text.requests[2]!.prompt, /- cast\[0\]: personagem pronto "ninguem" não existe/);
     assert.match(text.requests[2]!.prompt, /- cast: a ideia pede o personagem "bia", que ficou de fora/);
     assert.equal(await exists(folder), false);
+    assert.deepEqual(await readJson(`${folder}.draft`, 'answer.json'), INVALID);
+    const problems = await readFile(join(`${folder}.draft`, 'problems.txt'), 'utf8');
+    assert.match(problems, /^script\.json › lines\[1\]\.pose: "dance" inválido/m);
   });
 });
 
@@ -136,7 +144,13 @@ test('the prompt carries the rules, the idea, the format guide, the answer schem
     assert.match(prompt, /- theme: E se os gatos acordassem falando\?/);
     assert.match(prompt, /- cast: use these cast presets: bia, caio/);
     assert.match(prompt, /- scenes: choose the backgrounds and scene presets that fit/);
-    assert.ok(prompt.includes(await readFile(join(CORE, 'formats/story/guide.pt-BR.md'), 'utf8').then((guide) => guide.trim())));
+    const guide = (await readFile(join(CORE, 'formats/story/guide.pt-BR.md'), 'utf8')).trim();
+    // The guide goes between tags, its headings two levels down: they never read as the prompt's own sections.
+    assert.ok(prompt.includes(`# Format guide\n<format-guide>\n${guide.replace(/^#/gm, '###')}\n</format-guide>`));
+    assert.match(prompt, /^### Guia do formato história \(pt-BR\)$/m);
+    assert.match(prompt, /^#### Estrutura$/m);
+    assert.doesNotMatch(prompt, /^#{1,2} (Estrutura|Ritmo|Originalidade)/m);
+    assert.equal(text.requests[0]!.stablePrefix, prompt.length);
     assert.match(prompt, /1,8 palavras por segundo/);
     assert.match(prompt, /\{"type":"object","properties":\{"project":/);
     assert.match(prompt, /"defaultExpression":\{"type":"string","enum":\["neutral","happy"/);
@@ -173,15 +187,70 @@ test('an idea that asks for a preset that does not exist fails before any paid c
   assert.equal(text.requests.length, 0);
 });
 
-test('the estimate before the call: the first call, and the most with 3 repairs that resend the whole answer', async () => {
+test('the estimate before the call: the first call, and the most with 3 repairs, each cut at a limit that grows', async () => {
   const { text, generate } = generator([VALID]);
   const { firstCall, maximum } = await generate.estimate(Idea.fromJson(IDEA));
   assert.equal(text.requests.length, 0, 'estimating calls nothing');
-  const promptSize = (firstCall.dollars() ?? 0) * 1_000_000 - 11_000;
-  // Each repair: the same request plus the previous answer (up to 11 000 tokens × 4 characters) and the repair text.
-  const repair = ((maximum.dollars() ?? 0) * 1_000_000 - promptSize - 11_000) / 3;
-  assert.ok(repair > promptSize + 11_000 + 44_000, `${repair}`);
-  assert.ok(repair < promptSize + 11_000 + 44_000 + 300, `${repair}`);
+  // The fake prices one dollar per million characters of request and per million output tokens.
+  const base = (firstCall.dollars() ?? 0) * 1_000_000 - 11_000;
+  // Repair k resends the base plus the previous answer at its whole limit (4 characters per token), with a grown limit.
+  const limits = [11_000, 16_500, 24_750, 37_125];
+  const repairs = [1, 2, 3].map((round) => base + limits[round - 1]! * 4 + limits[round]!);
+  const extra = (maximum.dollars() ?? 0) * 1_000_000 - base - 11_000 - repairs.reduce((sum, cost) => sum + cost, 0);
+  assert.ok(extra > 0 && extra < 3 * 400, `the repair text: ${extra}`);
+});
+
+test('a cut answer is a problem of its own and the repair gets 1.5 times the room', async () => {
+  await withFolder(async (folder) => {
+    const cut = JSON.stringify(VALID).slice(0, 200);
+    const { text, generate } = generator([cut, VALID], [0]);
+    await generate.run(Idea.fromJson(IDEA), { folder });
+    const repair = text.requests[1]!;
+    assert.equal(repair.maxTokens, 16_500);
+    assert.match(repair.prompt, /- a resposta foi cortada no limite de 11000 tokens de saída: responda com o JSON inteiro, mais enxuto\n- a resposta não é um JSON válido/);
+  });
+});
+
+test('a character id that is not a valid id never becomes a path: it is a problem sent back', async () => {
+  await withFolder(async (folder) => {
+    const escape = structuredClone(VALID);
+    escape.cast[0] = { ...NARRATOR, id: '../../fora' };
+    const { text, generate } = generator([escape, VALID]);
+    await generate.run(Idea.fromJson(IDEA), { folder });
+    assert.match(text.requests[1]!.prompt, /- cast\[0\]\.id: id de personagem "\.\.\/\.\.\/fora" inválido/);
+    assert.equal(await exists(join(folder, '..', 'fora.json')), false);
+  });
+});
+
+test('a new rigged character with a parameter the rig does not have is a readable problem from the real loader', async () => {
+  await withFolder(async (folder) => {
+    const zeca = { id: 'zeca', name: 'Zeca', rig: 'giz', parameters: { outfit: 'pijama', skin: 'roxo' }, voice: { id: 'eric' }, defaultExpression: 'happy' };
+    const answer = structuredClone(VALID);
+    answer.cast.push(zeca);
+    const { text, generate } = generator([answer, VALID]);
+    await generate.run(Idea.fromJson(IDEA), { folder });
+    assert.match(text.requests[1]!.prompt, /- cast\/zeca\.json › parameters\.outfit: .*pijama/);
+    assert.match(text.requests[1]!.prompt, /- cast\/zeca\.json › parameters\.skin: .*roxo/);
+  });
+});
+
+test('the JSON is found inside prose or a fence in the middle of the text', async () => {
+  for (const answer of [`Claro! Aqui está o roteiro:\n${JSON.stringify(VALID)}\nEspero que goste.`, `Segue:\n\n\`\`\`json\n${JSON.stringify(VALID, null, 2)}\n\`\`\`\nQualquer coisa, me avise.`]) {
+    await withFolder(async (folder) => {
+      const { text, generate } = generator([answer]);
+      await generate.run(Idea.fromJson(IDEA), { folder });
+      assert.equal(text.requests.length, 1, answer.slice(0, 20));
+    });
+  }
+});
+
+test('an English project gets the English default style on presets without one', async () => {
+  await withFolder(async (folder) => {
+    const { generate } = generator([VALID]);
+    await generate.run(Idea.fromJson({ ...IDEA, language: 'en' }), { folder });
+    assert.equal((await readJson(folder, 'cast/caio.json')).voice.style, 'Speak in natural American English');
+    assert.equal((await readJson(folder, 'cast/narrator.json')).voice.style, NARRATOR.voice.style, 'a character written by the AI is kept as it came');
+  });
 });
 
 test('regenerating keeps the voice the project already had', async () => {

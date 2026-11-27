@@ -1,7 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { Idea } from '../../../src/domain/idea/Idea.ts';
-import { scriptOutputTokens, targetWords } from '../../../src/domain/idea/speechPace.ts';
+import { defaultVoiceStyle } from '../../../src/domain/cast/voiceStyles.ts';
+import { grownOutputTokens, scriptOutputTokens, targetWords } from '../../../src/domain/idea/speechPace.ts';
 import { Language } from '../../../src/domain/values/Language.ts';
 
 const STORY = {
@@ -74,4 +75,15 @@ test('the output budget of a script grows with the duration, within the limits',
   assert.equal(scriptOutputTokens(30), 11_000);
   assert.equal(scriptOutputTokens(60), 14_000);
   assert.equal(scriptOutputTokens(600), 32_000);
+});
+
+test('a repair after a cut answer gets 1.5 times the room, up to 48 000 tokens', () => {
+  assert.equal(grownOutputTokens(11_000), 16_500);
+  assert.equal(grownOutputTokens(37_125), 48_000);
+  assert.equal(grownOutputTokens(48_000), 48_000);
+});
+
+test('the default voice style of each language starts as the examples do', () => {
+  assert.equal(defaultVoiceStyle(Language.ENGLISH), 'Speak in natural American English');
+  assert.match(defaultVoiceStyle(Language.PORTUGUESE), /^Fale em português do Brasil, com sotaque brasileiro/);
 });

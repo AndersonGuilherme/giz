@@ -22,15 +22,23 @@ Split the target duration into these parts (the times are proportional):
 
 - Concrete and visual within 3 s: "Imagine: the whole world's internet shuts down for a day."
 - It opens a question only the ending answers. Never start with "Hi, today we're going to talk about…".
-- The first line has a `scene` and, ideally, a short `highlight` (up to 4 words, in CAPITALS) and a `zoom-in` camera.
+- The first line, 6 words at most, lands the hook; its `scene`'s `highlight` (up to 4 words, in CAPITALS) and `zoom-in`
+  camera make it visual at once.
 
 ## Pacing
 
 - The voice speaks about **2.2 words per second** in English, pauses included: 30 s ≈ 66 words, 60 s ≈ 132 words.
   Add up the words of all lines and stay within 10% of the target.
-- Short lines: 4 to 14 words, at most 2 sentences. Few words fit on a caption line in 9:16.
+- Short lines: about 10 words at most. A longer line needs a `beat` or a camera change in the middle.
+- `text` is a caption: keep it short. What the voice spells out (numbers, acronyms, names) goes in `pronunciation`.
 - A new scene every 5 to 10 s (every 1 to 3 lines). The screen never stays still for more than ~6 s without a
   change (scene, camera, reaction, HUD, big text).
+
+## Craft
+
+- Every character wants something, and something is at stake: say it early ("if the cat skips dinner, it sues us").
+- Plant and pay off: a detail from the start comes back at the end (a callback) and rewards the wait.
+- Close with a twist or a button: one last short, unexpected line after the resolution.
 
 ## Tone and dialogue
 

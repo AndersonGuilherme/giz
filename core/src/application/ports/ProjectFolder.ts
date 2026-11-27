@@ -12,6 +12,9 @@ export type ProjectFiles = Readonly<{
   cast: readonly CastFile[];
 }>;
 
+/** The last answer of a generation that never became valid, and its problems. */
+export type FailedDraft = Readonly<{ answer: string; problems: readonly string[] }>;
+
 /** Reads and writes the project folders the AI creates. */
 export interface ProjectFolder {
   /** The stored `idea.json`, as JSON (the Idea validates it); a readable error when it is missing or not JSON. */
@@ -22,4 +25,6 @@ export interface ProjectFolder {
   staged<T>(files: ProjectFiles, use: (folder: string) => Promise<T>): Promise<T>;
   /** Writes the files into the project folder (creating it), replacing the ones with the same name. */
   save(folder: string, files: ProjectFiles): Promise<void>;
+  /** Keeps a failed draft next to the project folder, never inside it, and returns where it went. */
+  keepFailed(folder: string, draft: FailedDraft): Promise<string>;
 }

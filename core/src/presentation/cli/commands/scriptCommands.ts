@@ -51,9 +51,23 @@ function parsedJson(text: string, file: string): unknown {
   }
 }
 
+// Why the idea file could not be read, by the system's error code.
+const READ_FAILURES: Readonly<Record<string, string>> = {
+  ENOENT: 'arquivo não encontrado',
+  EISDIR: 'é uma pasta, não um arquivo',
+  EACCES: 'sem permissão para ler o arquivo',
+  EPERM: 'sem permissão para ler o arquivo',
+};
+
+function readFailure(file: string, error: unknown): Error {
+  const code = String((error as NodeJS.ErrnoException).code);
+  const reason = Object.hasOwn(READ_FAILURES, code) ? READ_FAILURES[code] : `não foi possível ler (${(error as Error).message})`;
+  return new Error(`${file}: ${reason}`);
+}
+
 async function ideaFile(file: string): Promise<Idea> {
-  const text = await readFile(file, 'utf8').catch(() => {
-    throw new Error(`${file}: arquivo não encontrado`);
+  const text = await readFile(file, 'utf8').catch((error: unknown) => {
+    throw readFailure(file, error);
   });
   return ideaOf(parsedJson(text, file), file);
 }

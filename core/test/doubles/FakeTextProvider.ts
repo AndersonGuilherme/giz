@@ -5,15 +5,19 @@ import { CostEstimate } from '../../src/domain/ai/CostEstimate.ts';
 export class FakeTextProvider implements TextProvider {
   readonly requests: TextRequest[] = [];
   readonly #answers: string[];
+  readonly #cut: readonly number[];
 
-  constructor(answers: readonly unknown[]) {
+  /** `cut`: the calls (counted from 0) whose answer stops at the output limit. */
+  constructor(answers: readonly unknown[], cut: readonly number[] = []) {
     this.#answers = answers.map((answer) => (typeof answer === 'string' ? answer : JSON.stringify(answer)));
+    this.#cut = cut;
   }
 
   async generate(request: TextRequest): Promise<TextAnswer> {
-    const text = this.#answers[Math.min(this.requests.length, this.#answers.length - 1)]!;
+    const call = this.requests.length;
+    const text = this.#answers[Math.min(call, this.#answers.length - 1)]!;
     this.requests.push(request);
-    return { text, usage: { inputTokens: 1000, outputTokens: 200 } };
+    return { text, usage: { inputTokens: 1000, outputTokens: 200 }, truncated: this.#cut.includes(call) };
   }
 
   /** One dollar per million characters of request plus one per million output tokens: easy to check. */

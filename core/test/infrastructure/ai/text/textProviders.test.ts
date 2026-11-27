@@ -56,7 +56,7 @@ test('Anthropic: Messages API, the key in x-api-key, the API version, system apa
   assert.deepEqual(bodyOf(calls[0]), {
     model: 'claude-sonnet-5-5', max_tokens: 300, system: 'Você escreve roteiros.', messages: [{ role: 'user', content: 'Uma fala sobre gatos.' }],
   });
-  assert.deepEqual(answer, { text: 'Olá, gatos!', usage: { inputTokens: 12, outputTokens: 5 } });
+  assert.deepEqual(answer, { text: 'Olá, gatos!', usage: { inputTokens: 12, outputTokens: 5 }, truncated: false });
 });
 
 test('OpenAI: Chat Completions, Bearer key, system as developer message, max_completion_tokens', async () => {
@@ -68,7 +68,7 @@ test('OpenAI: Chat Completions, Bearer key, system as developer message, max_com
     model: 'gpt-6.2-astra', max_completion_tokens: 300,
     messages: [{ role: 'developer', content: 'Você escreve roteiros.' }, { role: 'user', content: 'Uma fala sobre gatos.' }],
   });
-  assert.deepEqual(answer, { text: 'Olá, gatos!', usage: { inputTokens: 12, outputTokens: 5 } });
+  assert.deepEqual(answer, { text: 'Olá, gatos!', usage: { inputTokens: 12, outputTokens: 5 }, truncated: false });
 });
 
 test('Gemini: generateContent with the model in the URL, the key in a header (never in the URL), thoughts left out of the text', async () => {
@@ -83,7 +83,7 @@ test('Gemini: generateContent with the model in the URL, the key in a header (ne
     generationConfig: { maxOutputTokens: 300 },
   });
   // Thinking tokens are billed as output.
-  assert.deepEqual(answer, { text: 'Olá, gatos!', usage: { inputTokens: 12, outputTokens: 5 } });
+  assert.deepEqual(answer, { text: 'Olá, gatos!', usage: { inputTokens: 12, outputTokens: 5 }, truncated: false });
 });
 
 test('JSON mode: OpenAI response_format json_object, Gemini responseMimeType, Anthropic an instruction; all ask for JSON in the system', async () => {
@@ -172,9 +172,9 @@ test('an answer that is not the expected shape is a readable error', async () =>
 
 test('a null OpenAI content or a Gemini answer without candidates gives empty text, not a crash', async () => {
   const refusal = provider(OPENAI_API, [json({ choices: [{ message: { content: null, refusal: 'não' } }], usage: { prompt_tokens: 3, completion_tokens: 1 } })]);
-  assert.deepEqual(await refusal.text.generate(request), { text: '', usage: { inputTokens: 3, outputTokens: 1 } });
+  assert.deepEqual(await refusal.text.generate(request), { text: '', usage: { inputTokens: 3, outputTokens: 1 }, truncated: false });
   const blocked = provider(GEMINI_API, [json({ promptFeedback: { blockReason: 'SAFETY' }, usageMetadata: { promptTokenCount: 4 } })]);
-  assert.deepEqual(await blocked.text.generate(request), { text: '', usage: { inputTokens: 4, outputTokens: 0 } });
+  assert.deepEqual(await blocked.text.generate(request), { text: '', usage: { inputTokens: 4, outputTokens: 0 }, truncated: false });
 });
 
 test('a key that straddles the 300-character cut of the body is blanked whole: no prefix survives', async () => {
@@ -197,4 +197,42 @@ test('the single-attempt policy sends once: no retry on 429 or a network failure
     await assert.rejects(text.generate(request), /OpenAI: (limite de uso atingido \(429\)|falha de rede \(socket hang up\))/);
     assert.deepEqual([fake.calls.length, delays.length], [1, 0]);
   }
+});
+
+test('an answer cut at the output limit says so, on every API', async () => {
+  const anthropic = provider(ANTHROPIC_API, [json({ ...ANTHROPIC_OK, stop_reason: 'max_tokens' })]);
+  const openai = provider(OPENAI_API, [json({ ...OPENAI_OK, choices: [{ ...OPENAI_OK.choices[0], finish_reason: 'length' }] })]);
+  const gemini = provider(GEMINI_API, [json({ ...GEMINI_OK, candidates: [{ ...GEMINI_OK.candidates[0], finishReason: 'MAX_TOKENS' }] })]);
+  for (const { text } of [anthropic, openai, gemini]) assert.equal((await text.generate(request)).truncated, true);
+});
+
+test('Anthropic caches the stable prefix with a marker; the cache tokens count as input; the estimate prices it as a write', async () => {
+  const cached = { ...request, prompt: 'PREFIXO estável. E o resto.', stablePrefix: 17 };
+  const usage = { input_tokens: 10, output_tokens: 5, cache_creation_input_tokens: 2000, cache_read_input_tokens: 300 };
+  const { calls, text } = provider(ANTHROPIC_API, [json({ ...ANTHROPIC_OK, usage })]);
+  const answer = await text.generate(cached);
+  assert.deepEqual(bodyOf(calls[0]).messages, [{ role: 'user', content: [
+    { type: 'text', text: 'PREFIXO estável. ', cache_control: { type: 'ephemeral' } },
+    { type: 'text', text: 'E o resto.' },
+  ] }]);
+  assert.equal(answer.usage.inputTokens, 2310);
+  const whole = provider(ANTHROPIC_API, [json(ANTHROPIC_OK)]);
+  await whole.text.generate({ ...request, stablePrefix: request.prompt.length });
+  assert.deepEqual(bodyOf(whole.calls[0]).messages[0].content, [{ type: 'text', text: request.prompt, cache_control: { type: 'ephemeral' } }]);
+  const big = { system: 's'.repeat(4000), prompt: 'p'.repeat(4000), maxTokens: 0 };
+  const plainCost = text.estimate(big).dollars() ?? 0;
+  const cachedCost = text.estimate({ ...big, stablePrefix: 4000 }).dollars() ?? 0;
+  assert.ok(Math.abs(cachedCost - plainCost * 1.25) < 1e-12, `${cachedCost} vs ${plainCost}`);
+});
+
+test('the APIs without cache markers never get the hint, and their estimate is unchanged', async () => {
+  const openai = provider(OPENAI_API, [json(OPENAI_OK)]);
+  await openai.text.generate({ ...request, stablePrefix: 5 });
+  assert.equal(bodyOf(openai.calls[0]).messages[1].content, request.prompt);
+  const gemini = provider(GEMINI_API, [json(GEMINI_OK)]);
+  await gemini.text.generate({ ...request, stablePrefix: 5 });
+  assert.deepEqual(bodyOf(gemini.calls[0]).contents, [{ role: 'user', parts: [{ text: request.prompt }] }]);
+  assert.equal(openai.text.estimate({ ...request, stablePrefix: 5 }).dollars(), openai.text.estimate(request).dollars());
+  assert.equal(ANTHROPIC_API.promptCaching, true);
+  assert.equal(OPENAI_API.promptCaching || GEMINI_API.promptCaching, false);
 });

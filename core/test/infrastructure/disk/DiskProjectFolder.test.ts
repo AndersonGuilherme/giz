@@ -56,3 +56,34 @@ test('reading the idea of a folder without one, or with broken JSON, is a readab
     await rm(empty, { recursive: true, force: true });
   }
 });
+
+test('a cast id that is not a valid character id is refused before anything is written (no path escapes)', async () => {
+  const parent = await mkdtemp(join(tmpdir(), 'giz-folder-'));
+  try {
+    const target = join(parent, 'novo');
+    const escaping = { ...FILES, cast: [{ id: '../../fora', name: 'Fora' }] };
+    await assert.rejects(folder.save(target, escaping), { name: 'DomainError', message: /id de personagem "\.\.\/\.\.\/fora" inválido/ });
+    await assert.rejects(folder.staged(escaping, async () => 'nunca'), { name: 'DomainError' });
+    assert.equal(await exists(target), false);
+    assert.equal(await exists(join(parent, 'fora.json')), false);
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});
+
+test('a failed draft goes beside the folder: the JSON answer indented, or the text as it came, and the problems', async () => {
+  const parent = await mkdtemp(join(tmpdir(), 'giz-folder-'));
+  try {
+    const target = join(parent, 'projeto');
+    const path = await folder.keepFailed(`${target}/`, { answer: '{"a":1}', problems: ['p1', 'p2'] });
+    assert.equal(path, `${target}.draft`);
+    assert.equal(await readFile(join(path, 'answer.json'), 'utf8'), '{\n  "a": 1\n}\n');
+    assert.equal(await readFile(join(path, 'problems.txt'), 'utf8'), 'p1\np2\n');
+    await folder.keepFailed(target, { answer: 'não é JSON', problems: ['p'] });
+    assert.equal(await readFile(join(path, 'answer.txt'), 'utf8'), 'não é JSON');
+    assert.equal(await exists(join(path, 'answer.json')), false, 'the older answer is replaced');
+    assert.equal(await exists(target), false, 'the project folder is never created');
+  } finally {
+    await rm(parent, { recursive: true, force: true });
+  }
+});

@@ -1,7 +1,7 @@
-import { test } from 'node:test';
+import { after, test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { chmodSync, mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -12,9 +12,18 @@ const IDEA_FILE = join(CORE, 'test/fixtures/ai/story-idea.json');
 const ANSWER = readFileSync(join(CORE, 'test/fixtures/ai/story-answer.json'), 'utf8');
 const KEY_VARIABLES = /^(ANTHROPIC|OPENAI|GEMINI|ELEVENLABS|FISH)_API_KEY$/;
 
+// Every temporary folder of these tests, removed at the end.
+const TEMPORARY: string[] = [];
+function temporary(prefix: string): string {
+  const folder = mkdtempSync(join(tmpdir(), prefix));
+  TEMPORARY.push(folder);
+  return folder;
+}
+after(() => TEMPORARY.forEach((folder) => rmSync(folder, { recursive: true, force: true })));
+
 // A clean environment: a temporary HOME and none of the real key variables, so nothing reaches a real service.
 function giz(args: string[]) {
-  const home = mkdtempSync(join(tmpdir(), 'giz-script-home-'));
+  const home = temporary('giz-script-home-');
   const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !KEY_VARIABLES.test(name)));
   return spawnSync(process.execPath, ['src/presentation/cli/giz.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
 }
@@ -42,10 +51,10 @@ async function printed(run: () => Promise<void>): Promise<string> {
 }
 
 test('giz new: the estimate first, then the project written from the idea; giz script writes it again keeping the voice', async () => {
-  const folder = join(mkdtempSync(join(tmpdir(), 'giz-new-')), 'gatos');
+  const folder = join(temporary('giz-new-'), 'gatos');
   const { calls, overrides } = fakeAnthropic();
   const output = await printed(() => newCommand(['--idea', IDEA_FILE, folder, '--provider', 'anthropic'], overrides));
-  assert.match(output, /^custo estimado \(anthropic, modelo claude-sonnet-5-5\): até US\$ 0,\d+ na primeira chamada, até US\$ 0,\d+ com 3 correções/);
+  assert.match(output, /^custo estimado \(anthropic, modelo claude-sonnet-5-5\): até US\$ 0,\d+ na primeira chamada, até US\$ \d+,\d+ com 3 correções/);
   assert.match(output, /roteiro: 3 fala\(s\), 3 personagem\(ns\), 0 rodada\(s\) de correção → .*gatos/);
   assert.match(output, /uso: 1 chamada\(s\), 9000 tokens de entrada, 1500 de saída/);
   assert.match(output, /próximo passo: giz check .*gatos/);
@@ -63,7 +72,7 @@ test('giz new: the estimate first, then the project written from the idea; giz s
 });
 
 test('--estimate prints the cost and calls nothing', async () => {
-  const folder = join(mkdtempSync(join(tmpdir(), 'giz-new-')), 'gatos');
+  const folder = join(temporary('giz-new-'), 'gatos');
   const { calls, overrides } = fakeAnthropic();
   const output = await printed(() => newCommand(['--idea', IDEA_FILE, folder, '--estimate'], overrides));
   assert.match(output, /custo estimado \(anthropic/);
@@ -76,10 +85,20 @@ test('wrong usage exits with 2; a missing or invalid idea, or an existing projec
     assert.equal(run.status, 2, args.join(' '));
     assert.match(run.stderr, /^uso: giz (new --idea <ideia\.json> <pasta>|script <pasta>) \[--provider anthropic\|openai\|gemini\] \[--estimate\]/);
   }
-  const parent = mkdtempSync(join(tmpdir(), 'giz-new-cli-'));
+  const parent = temporary('giz-new-cli-');
   const missing = giz(['new', '--idea', join(parent, 'nada.json'), join(parent, 'p')]);
   assert.equal(missing.status, 1);
   assert.match(missing.stderr, /nada\.json: arquivo não encontrado/);
+
+  const folderAsIdea = giz(['new', '--idea', parent, join(parent, 'p')]);
+  assert.equal(folderAsIdea.status, 1);
+  assert.match(folderAsIdea.stderr, /: é uma pasta, não um arquivo/);
+  const locked = join(parent, 'trancada.json');
+  writeFileSync(locked, '{}');
+  chmodSync(locked, 0o000);
+  const denied = giz(['new', '--idea', locked, join(parent, 'p')]);
+  // As root the file is readable anyway: then it is an invalid idea, never "not found".
+  assert.match(denied.stderr, process.getuid?.() === 0 ? /trancada\.json: ideia inválida/ : /trancada\.json: sem permissão para ler o arquivo/);
 
   const wrong = join(parent, 'errada.json');
   writeFileSync(wrong, JSON.stringify({ format: 'podcast', aspect: '9:16', targetSeconds: 5 }));
@@ -101,7 +120,7 @@ test('wrong usage exits with 2; a missing or invalid idea, or an existing projec
 });
 
 test('without any text key: the estimate, then the key error with where to put it (no call is made)', () => {
-  const parent = mkdtempSync(join(tmpdir(), 'giz-new-cli-'));
+  const parent = temporary('giz-new-cli-');
   const run = giz(['new', '--idea', IDEA_FILE, join(parent, 'p')]);
   assert.equal(run.status, 1);
   assert.match(run.stdout, /custo estimado \(anthropic/);

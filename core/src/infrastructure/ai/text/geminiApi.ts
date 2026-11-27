@@ -7,7 +7,7 @@ const API = 'https://generativelanguage.googleapis.com/v1beta/models';
 const PART = z.object({ text: z.string().optional(), thought: z.boolean().optional() });
 // A blocked prompt has no candidates; the token counts may be missing too.
 const ANSWER = z.object({
-  candidates: z.array(z.object({ content: z.object({ parts: z.array(PART).optional() }).optional() })).optional(),
+  candidates: z.array(z.object({ content: z.object({ parts: z.array(PART).optional() }).optional(), finishReason: z.string().optional() })).optional(),
   usageMetadata: z.object({
     promptTokenCount: z.number().default(0),
     candidatesTokenCount: z.number().default(0),
@@ -29,12 +29,16 @@ export const GEMINI_API: TextApi = {
   provider: 'gemini',
   label: 'Google Gemini',
   defaultModel: 'gemini-3.8-flash',
+  // Gemini caches repeated prefixes implicitly; explicit caches are separate resources, not markers.
+  promptCaching: false,
   call: (model, request, key) => jsonPost(`${API}/${encodeURIComponent(model)}:generateContent`, { 'x-goog-api-key': key }, body(request)),
   answer: (json) => {
     const { candidates, usageMetadata: usage } = ANSWER.parse(json);
-    const parts = candidates?.[0]?.content?.parts ?? [];
+    const candidate = candidates?.[0];
+    const parts = candidate?.content?.parts ?? [];
     const text = parts.filter((part) => !part.thought).map((part) => part.text ?? '').join('');
     // Thinking tokens are billed as output.
-    return { text, usage: { inputTokens: usage.promptTokenCount, outputTokens: usage.candidatesTokenCount + usage.thoughtsTokenCount } };
+    const outputTokens = usage.candidatesTokenCount + usage.thoughtsTokenCount;
+    return { text, usage: { inputTokens: usage.promptTokenCount, outputTokens }, truncated: candidate?.finishReason === 'MAX_TOKENS' };
   },
 };

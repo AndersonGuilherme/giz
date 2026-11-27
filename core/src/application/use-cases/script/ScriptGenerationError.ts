@@ -10,11 +10,16 @@ export function shownProblems(problems: readonly string[]): string[] {
 /** The AI did not reach a valid script within the repair rounds; the message lists the last problems, in pt-BR. */
 export class ScriptGenerationError extends Error {
   readonly problems: readonly string[];
+  readonly draft: string;
 
-  constructor(rounds: number, problems: readonly string[]) {
-    const list = shownProblems(problems).map((problem) => `- ${problem}`);
-    super([`a IA não chegou a um roteiro válido depois de ${rounds} rodada(s) de correção. Problemas da última resposta:`, ...list].join('\n'));
+  /** `draft`: where the last answer and its problems were kept (the project folder is left untouched). */
+  constructor(rounds: number, failure: Readonly<{ problems: readonly string[]; draft: string }>) {
+    const list = shownProblems(failure.problems).map((problem) => `- ${problem}`);
+    const header = `a IA não chegou a um roteiro válido depois de ${rounds} rodada(s) de correção. Problemas da última resposta:`;
+    const footer = `a última resposta e a lista de problemas ficaram em ${failure.draft}; a pasta do projeto não foi alterada`;
+    super([header, ...list, footer].join('\n'));
     this.name = 'ScriptGenerationError';
-    this.problems = problems;
+    this.problems = failure.problems;
+    this.draft = failure.draft;
   }
 }

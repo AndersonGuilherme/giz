@@ -114,7 +114,8 @@ cenas de `presets/scenes/`) são opcionais: sem eles, a IA escolhe. A IA segue o
 (`formats/<story|lesson>/guide.<pt-BR|en>.md`) e o esquema do roteiro (gerado dos próprios esquemas de validação).
 A resposta passa pela mesma validação do `check`; se houver erro, a lista volta para a IA corrigir, até 3 vezes. A
 pasta só é escrita com um projeto válido: `idea.json`, `project.json`, `script.json` e `cast/` (cópias dos
-personagens prontos). Nenhum vídeo, canal ou personagem existente é imitado: o guia proíbe.
+personagens prontos). Se a resposta ainda tiver erro depois das 3 correções, a pasta não é tocada e a última resposta fica
+em `<pasta>.draft/` (`answer.json` e `problems.txt`), para corrigir à mão. Nenhum vídeo, canal ou personagem existente é imitado: o guia proíbe.
 
 Exemplos:
 

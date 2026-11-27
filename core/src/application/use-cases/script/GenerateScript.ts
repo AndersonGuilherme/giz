@@ -1,15 +1,16 @@
 import { CHARACTERS_PER_TOKEN } from '../../../domain/ai/ModelPrice.ts';
 import type { CostEstimate } from '../../../domain/ai/CostEstimate.ts';
 import type { Idea } from '../../../domain/idea/Idea.ts';
+import { grownOutputTokens } from '../../../domain/idea/speechPace.ts';
 import type { ProjectVoice } from '../../../domain/project/Project.ts';
 import type { ProjectFiles } from '../../ports/ProjectFolder.ts';
 import type { RigCatalog } from '../../ports/RigCatalog.ts';
 import type { ScriptMaterials } from '../../ports/ScriptMaterials.ts';
-import type { TextProvider, TextRequest, TokenUsage } from '../../ports/TextProvider.ts';
+import type { TextAnswer, TextProvider, TextRequest, TokenUsage } from '../../ports/TextProvider.ts';
 import { draftErrors, type Reviewers } from './draftReview.ts';
 import { checkIdeaChoices } from './ideaChoices.ts';
 import { rigReference } from './rigReference.ts';
-import { draftOf, type DraftContext } from './scriptDraft.ts';
+import { draftOf, jsonText, type DraftContext } from './scriptDraft.ts';
 import { ScriptGenerationError, shownProblems } from './ScriptGenerationError.ts';
 import { repairRequest, scriptRequest } from './scriptPrompt.ts';
 
@@ -28,6 +29,7 @@ export type ScriptEstimate = Readonly<{ firstCall: CostEstimate; maximum: CostEs
 type Prepared = Readonly<{ request: TextRequest; draft: Omit<DraftContext, 'voice'> }>;
 type Context = Readonly<{ base: TextRequest; draft: DraftContext; folder: string }>;
 type Attempt = Readonly<{ request: TextRequest; repairs: number; usage: ScriptUsage }>;
+type Review = Readonly<{ files?: ProjectFiles; problems: readonly string[] }>;
 
 const NO_USAGE: ScriptUsage = { calls: 0, inputTokens: 0, outputTokens: 0 };
 
@@ -35,8 +37,24 @@ function added(usage: ScriptUsage, call: TokenUsage): ScriptUsage {
   return { calls: usage.calls + 1, inputTokens: usage.inputTokens + call.inputTokens, outputTokens: usage.outputTokens + call.outputTokens };
 }
 
-// The longest previous answer a repair can resend: the whole output limit.
-const longestAnswer = (request: TextRequest) => ' '.repeat((request.maxTokens ?? 0) * CHARACTERS_PER_TOKEN);
+// The worst repairs: each previous answer as long as its whole limit and cut there, so each limit grows.
+function worstRepairs(request: TextRequest): TextRequest[] {
+  const repairs: TextRequest[] = [];
+  let limit = request.maxTokens ?? 0;
+  for (let round = 0; round < MAX_REPAIRS; round++) {
+    const grown = grownOutputTokens(limit);
+    repairs.push(repairRequest(request, { answer: ' '.repeat(limit * CHARACTERS_PER_TOKEN), maxTokens: grown }, []));
+    limit = grown;
+  }
+  return repairs;
+}
+
+// A cut answer is a problem of its own, and the repair gets more room to answer whole.
+function afterCut(answer: TextAnswer, limit: number, problems: readonly string[]): Readonly<{ problems: readonly string[]; maxTokens: number }> {
+  if (!answer.truncated) return { problems, maxTokens: limit };
+  const cut = `a resposta foi cortada no limite de ${limit} tokens de saída: responda com o JSON inteiro, mais enxuto`;
+  return { problems: [cut, ...problems], maxTokens: grownOutputTokens(limit) };
+}
 
 /** Writes a project from an idea with a text AI: prompt, validation as `giz check` does, and up to 3 repairs. */
 export class GenerateScript {
@@ -50,8 +68,7 @@ export class GenerateScript {
     const { text } = this.#dependencies;
     const { request } = await this.#prepared(idea);
     const firstCall = text.estimate(request);
-    const repair = text.estimate(repairRequest(request, longestAnswer(request), []));
-    return { firstCall, maximum: Array.from({ length: MAX_REPAIRS }, () => repair).reduce((sum, cost) => sum.plus(cost), firstCall) };
+    return { firstCall, maximum: worstRepairs(request).reduce((sum, repair) => sum.plus(text.estimate(repair)), firstCall) };
   }
 
   /** The valid project is saved into `target.folder`; nothing is written there while the answers are invalid. */
@@ -72,14 +89,15 @@ export class GenerateScript {
   async #attempt(context: Context, attempt: Attempt): Promise<ScriptResult> {
     const answer = await this.#dependencies.text.generate(attempt.request);
     const usage = added(attempt.usage, answer.usage);
-    const { files, problems } = await this.#reviewed(answer.text, context.draft);
-    if (files) return this.#saved(context.folder, { files, repairs: attempt.repairs, usage });
-    if (attempt.repairs >= MAX_REPAIRS) throw new ScriptGenerationError(attempt.repairs, problems);
-    const request = repairRequest(context.base, answer.text, shownProblems(problems));
+    const review = await this.#reviewed(answer.text, context.draft);
+    if (review.files) return this.#saved(context.folder, { files: review.files, repairs: attempt.repairs, usage });
+    const { problems, maxTokens } = afterCut(answer, attempt.request.maxTokens ?? 0, review.problems);
+    if (attempt.repairs >= MAX_REPAIRS) return this.#failed(context.folder, { answer: answer.text, problems, repairs: attempt.repairs });
+    const request = repairRequest(context.base, { answer: answer.text, maxTokens }, shownProblems(problems));
     return this.#attempt(context, { request, repairs: attempt.repairs + 1, usage });
   }
 
-  async #reviewed(text: string, context: DraftContext): Promise<Readonly<{ files?: ProjectFiles; problems: readonly string[] }>> {
+  async #reviewed(text: string, context: DraftContext): Promise<Review> {
     const draft = draftOf(text, context);
     if (!draft.files) return draft;
     const problems = await draftErrors(draft.files, this.#dependencies);
@@ -89,5 +107,11 @@ export class GenerateScript {
   async #saved(folder: string, result: ScriptResult): Promise<ScriptResult> {
     await this.#dependencies.folder.save(folder, result.files);
     return result;
+  }
+
+  // The last answer is kept next to the project folder (never inside it) for whoever wants to fix it by hand.
+  async #failed(folder: string, last: Readonly<{ answer: string; problems: readonly string[]; repairs: number }>): Promise<never> {
+    const draft = await this.#dependencies.folder.keepFailed(folder, { answer: jsonText(last.answer), problems: last.problems });
+    throw new ScriptGenerationError(last.repairs, { problems: last.problems, draft });
   }
 }

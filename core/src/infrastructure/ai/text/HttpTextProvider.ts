@@ -13,6 +13,12 @@ import { readableFailure, type FailureContext } from './textErrors.ts';
  */
 export type TextDependencies = Readonly<{ fetch: typeof fetch; keys: KeyStore; wait: Wait; send?: SendPolicy }>;
 
+// A request's cache hint goes only to an API that takes cache markers (the estimate follows what is sent).
+function sendable(api: TextApi, request: TextRequest): TextRequest {
+  if (api.promptCaching || request.stablePrefix === undefined) return request;
+  return { ...request, stablePrefix: undefined };
+}
+
 async function parsed(response: Response, api: TextApi): Promise<TextAnswer> {
   try {
     return api.answer(await response.json());
@@ -38,13 +44,13 @@ export class HttpTextProvider implements TextProvider {
   }
 
   estimate(request: TextRequest): CostEstimate {
-    return textCostEstimate(this.#api.provider, this.#model, request);
+    return textCostEstimate(this.#api.provider, this.#model, sendable(this.#api, request));
   }
 
   async generate(request: TextRequest): Promise<TextAnswer> {
     const { fetch, keys, wait, send = sendWithRetries } = this.#dependencies;
     const key = requiredKey(keys, this.#api.provider); // before sending: a missing key is not a failure to retry
-    const { url, init } = this.#api.call(this.#model, request, key);
+    const { url, init } = this.#api.call(this.#model, sendable(this.#api, request), key);
     const context: FailureContext = { label: this.#api.label, model: this.#model, key };
     const response = await send(this.#api.label, () => fetch(url, init), wait).catch((error: unknown) => {
       throw readableFailure(error, context);

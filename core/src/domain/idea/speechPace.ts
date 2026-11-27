@@ -19,3 +19,12 @@ const MAX_TOKENS = 32_000;
 export function scriptOutputTokens(seconds: number): number {
   return Math.min(MAX_TOKENS, BASE_TOKENS + seconds * TOKENS_PER_SECOND);
 }
+
+// A cut answer gets more room on the repair, up to a limit a non-streaming call still finishes within.
+const REPAIR_GROWTH = 1.5;
+const MAX_REPAIR_TOKENS = 48_000;
+
+/** The output limit of the repair after an answer cut at `previous` tokens. */
+export function grownOutputTokens(previous: number): number {
+  return Math.min(MAX_REPAIR_TOKENS, Math.ceil(previous * REPAIR_GROWTH));
+}
