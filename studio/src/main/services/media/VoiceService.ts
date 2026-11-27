@@ -4,18 +4,20 @@ import type { MediaCore, MediaFiles, StageItems } from '../../ports/MediaCore.ts
 import type { ProjectDisk } from '../../ports/ProjectDisk.ts';
 import { translate } from '../../text.ts';
 import type { FolderGrants } from '../FolderGrants.ts';
+import type { FolderQueue } from '../FolderQueue.ts';
 import { StudioError } from '../StudioError.ts';
 import { characterOf, projectVoiceOf } from './castFiles.ts';
 import { mediaUrlOf } from './mediaUrls.ts';
 import { OneJob } from './OneJob.ts';
 import { castIdsOf, lineIn, projectOf, scriptOf, type ScriptLine } from './projectJson.ts';
 
-/** `keyOf` reads a paid voice's key in main; `needsKey` false in rehearsal mode. */
+/** `saves`: each folder's writes in turn (shared with the script editor); `keyOf` reads a paid voice's key in main. */
 type Dependencies = Readonly<{
   core: MediaCore;
   disk: ProjectDisk;
   files: MediaFiles;
   grants: FolderGrants;
+  saves: FolderQueue;
   keyOf: (service: 'elevenlabs' | 'fish') => Promise<string | undefined>;
   needsKey: boolean;
   progress: (progress: VoiceProgress) => void;
@@ -47,7 +49,8 @@ export class VoiceService {
     const names = await this.#names(path, castIdsOf(project));
     const lines = await Promise.all(script.lines.map((line, index) => this.#lineOf(path, { line, number: index + 1, names, items: items.voices })));
     const pending = lines.filter(({ state }) => state !== 'done').length;
-    return { folder: path, provider: projectVoiceOf(project).provider, lines, pending, dollars: items.voiceDollars, stages: items.stages };
+    const generating = this.#job.running();
+    return { folder: path, provider: projectVoiceOf(project).provider, lines, pending, dollars: items.voiceDollars, stages: items.stages, generating };
   }
 
   /** Every pending line (`lineId` absent) or that one line, made again; one job at a time, cancellable between lines. */
@@ -55,10 +58,7 @@ export class VoiceService {
     const path = this.#dependencies.grants.require(folder);
     return this.#job.run(async (signal) => {
       if (lineId !== undefined) lineIn((await scriptOf(this.#dependencies.disk, path)).lines, lineId);
-      const key = await this.#key(path);
-      const onLine = (done: number, total: number, line: string) => this.#dependencies.progress({ done, total, lineId: line });
-      await this.#dependencies.core.generateVoices(path, { only: lineId, key, signal, onLine });
-      return this.read(path);
+      return this.#made(path, lineId, signal);
     });
   }
 
@@ -67,24 +67,42 @@ export class VoiceService {
   }
 
   /** The take must be a 16-bit PCM WAV; it is saved as recordings/<id>.wav and the line is made from it at once. */
-  async record(folder: string, lineId: string, wav: Uint8Array): Promise<VoicesDocument> {
-    const { disk, grants, core, files } = this.#dependencies;
+  record(folder: string, lineId: string, wav: Uint8Array): Promise<VoicesDocument> {
+    const { disk, grants, core, files, saves } = this.#dependencies;
     const path = grants.require(folder);
-    lineIn((await scriptOf(disk, path)).lines, lineId);
-    if (wav.byteLength > MAXIMUM_RECORDING_BYTES) throw new StudioError('invalid-request', translate('voices.tooLong'));
-    await core.checkWav(wav).catch((error: unknown) => {
-      throw new StudioError('invalid-request', translate('voices.notAWav'), [error instanceof Error ? error.message : String(error)]);
+    return this.#job.run(async (signal) => {
+      lineIn((await scriptOf(disk, path)).lines, lineId);
+      if (wav.byteLength > MAXIMUM_RECORDING_BYTES) throw new StudioError('invalid-request', translate('voices.tooLong'));
+      await core.checkWav(wav).catch((error: unknown) => {
+        throw new StudioError('invalid-request', translate('voices.notAWav'), [error instanceof Error ? error.message : String(error)]);
+      });
+      await saves.run(path, () => files.write(path, takeOf(lineId), wav));
+      return this.#made(path, lineId, signal);
     });
-    await files.write(path, takeOf(lineId), wav);
-    return this.generate(path, lineId);
   }
 
   /** Without its take, the line goes back to the project voice. */
-  async unrecord(folder: string, lineId: string): Promise<VoicesDocument> {
-    const path = this.#dependencies.grants.require(folder);
-    lineIn((await scriptOf(this.#dependencies.disk, path)).lines, lineId);
-    await this.#dependencies.files.remove(path, takeOf(lineId));
-    return this.generate(path, lineId);
+  unrecord(folder: string, lineId: string): Promise<VoicesDocument> {
+    const { disk, grants, files, saves } = this.#dependencies;
+    const path = grants.require(folder);
+    return this.#job.run(async (signal) => {
+      lineIn((await scriptOf(disk, path)).lines, lineId);
+      await saves.run(path, () => files.remove(path, takeOf(lineId)));
+      return this.#made(path, lineId, signal);
+    });
+  }
+
+  // Inside the job: the lines made, with progress; the end is told once the work really ends (a screen opened later reloads).
+  async #made(path: string, lineId: string | undefined, signal: AbortSignal): Promise<VoicesDocument> {
+    let last: VoiceProgress = { done: 0, total: 0, lineId: lineId ?? '' };
+    try {
+      const key = await this.#key(path);
+      const onLine = (done: number, total: number, line: string) => this.#dependencies.progress((last = { done, total, lineId: line }));
+      await this.#dependencies.core.generateVoices(path, { only: lineId, key, signal, onLine });
+      return await this.read(path);
+    } finally {
+      this.#dependencies.progress({ ...last, ended: true });
+    }
   }
 
   async #lineOf(folder: string, context: Readonly<{ line: ScriptLine; number: number; names: ReadonlyMap<string, string>; items: StageItems['voices'] }>): Promise<VoiceLine> {

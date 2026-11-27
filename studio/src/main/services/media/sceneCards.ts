@@ -1,14 +1,27 @@
+import { join } from 'node:path';
 import type { GeneratedState, ImageStyle, SceneBackground, SceneCard } from '../../../shared/scenarios.ts';
 import { IMAGE_STYLES } from '../../../shared/scenarios.ts';
-import type { StageItems } from '../../ports/MediaCore.ts';
-import { isObject, textOf, type Json, type ScriptLine } from './projectJson.ts';
+import type { MediaCore, MediaFiles, StageItems } from '../../ports/MediaCore.ts';
+import { translate } from '../../text.ts';
+import { StudioError } from '../StudioError.ts';
+import { mediaUrlOf } from './mediaUrls.ts';
+import { isObject, lineIn, textOf, type Json, type ScriptLine } from './projectJson.ts';
 
 /** A scenario scene of the script: the line that declares it and where it is. */
 export type ScenarioLine = Readonly<{ line: ScriptLine; number: number; background: Json }>;
-/** How a card shows a file: its URL (null when missing) and, for a picture, whether its shape is the video's. */
-export type FileView = Readonly<{ url: (file: string) => Promise<string | null>; aspectWarning: (file: string) => Promise<string | undefined> }>;
+/**
+ * How a card shows a file: its URL (null when missing) and, for a picture, whether its shape is the video's; `kept`:
+ * the prompt kept for a line switched to a vector.
+ */
+export type FileView = Readonly<{
+  url: (file: string) => Promise<string | null>;
+  aspectWarning: (file: string) => Promise<string | undefined>;
+  kept: (lineId: string) => SceneCard['generate'];
+}>;
 
 export const generatedFile = (lineId: string): string => `scenes/${lineId}.png`;
+/** Where the person's own picture of a scene is kept (a line id is a plain name: two lines never share a file). */
+export const ownFile = (lineId: string, format: 'png' | 'jpeg' | 'webp'): string => `scenes/own/${lineId}.${format === 'jpeg' ? 'jpg' : format}`;
 
 /** Every line with its own scenario scene (a line without a scene goes on with the scene before it). */
 export function scenarioLines(lines: readonly ScriptLine[]): ScenarioLine[] {
@@ -19,6 +32,13 @@ export function scenarioLines(lines: readonly ScriptLine[]): ScenarioLine[] {
   });
 }
 
+/** The line's own scenario scene; a line that only goes on with the scene before it (or has another scene) is refused. */
+export function scenarioOf(script: Readonly<{ lines: readonly ScriptLine[] }>, lineId: string): ScenarioLine {
+  const scene = scenarioLines(script.lines).find(({ line }) => line.id === lineIn(script.lines, lineId).id);
+  if (!scene) throw new StudioError('invalid-request', translate('scenarios.notAScenario', { line: lineId }));
+  return scene;
+}
+
 const STATES: ReadonlyArray<readonly [keyof StageItems['scenarios'], GeneratedState]> = [['blocked', 'blocked'], ['stale', 'stale'], ['missing', 'missing']];
 
 function stateOf(lineId: string, items: StageItems['scenarios']): GeneratedState {
@@ -26,7 +46,8 @@ function stateOf(lineId: string, items: StageItems['scenarios']): GeneratedState
   return found ? found[1] : 'done';
 }
 
-function generateOf(background: Json): SceneCard['generate'] {
+/** The background's `generate` (prompt and a known style), when it has one. */
+export function generateOf(background: Json): SceneCard['generate'] {
   if (!isObject(background.generate)) return undefined;
   const style = (IMAGE_STYLES as readonly unknown[]).includes(background.generate.style) ? { style: background.generate.style as ImageStyle } : {};
   return { prompt: textOf(background.generate.prompt), ...style };
@@ -45,7 +66,8 @@ export async function cardOf(scene: ScenarioLine, items: StageItems['scenarios']
   const { line, number } = scene;
   const generate = generateOf(scene.background);
   const problem = items.problems.find((text) => text.includes(`fala ${line.id}:`));
-  const extra = generate ? { generate, state: stateOf(line.id, items), ...(problem ? { problem } : {}) } : {};
+  const kept = view.kept(line.id);
+  const extra = generate ? { generate, state: stateOf(line.id, items), ...(problem ? { problem } : {}) } : kept ? { keptPrompt: kept } : {};
   return { lineId: line.id, number, text: line.text, background: await backgroundOf(scene, view), generated: await view.url(generatedFile(line.id)), ...extra };
 }
 
@@ -62,4 +84,17 @@ export function withBackground(script: Json & Readonly<{ lines: readonly ScriptL
 /** A background without some of its fields. */
 export function without(background: Json, ...fields: readonly string[]): Json {
   return Object.fromEntries(Object.entries(background).filter(([field]) => !fields.includes(field)));
+}
+
+/** The files of a project as its cards show them (the URL by last change; the shape against the video's aspect). */
+export function fileViewOf(parts: Readonly<{ files: MediaFiles; core: MediaCore }>, folder: string, shown: Readonly<{ aspect: '9:16' | '16:9'; kept: ReadonlyMap<string, NonNullable<SceneCard['generate']>> }>): FileView {
+  const url = async (file: string) => {
+    const version = await parts.files.modified(folder, file);
+    return version === undefined ? null : mediaUrlOf(join(folder, file), version);
+  };
+  const aspectWarning = async (file: string) => {
+    const shape = await parts.core.imageShape(join(folder, file), shown.aspect);
+    return shape && !shape.matches ? translate('scenarios.otherShape', { width: shape.width, height: shape.height, aspect: shown.aspect }) : undefined;
+  };
+  return { url, aspectWarning, kept: (lineId) => shown.kept.get(lineId) };
 }

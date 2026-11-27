@@ -30,6 +30,7 @@ import { KeyService } from './services/KeyService.ts';
 import { ProjectService } from './services/ProjectService.ts';
 import { ProjectsService } from './services/ProjectsService.ts';
 import { ScriptService } from './services/ScriptService.ts';
+import { FolderQueue } from './services/FolderQueue.ts';
 import { RenderService } from './services/RenderService.ts';
 import { SettingsService } from './services/SettingsService.ts';
 import { SetupService } from './services/SetupService.ts';
@@ -78,10 +79,10 @@ function keysOf(): KeyService {
 // Rehearsal mode moves a deleted project into the isolated home, never into the system trash.
 const trashOf = () => (STUDIO_PATHS.rehearsal ? new RehearsalTrash(join(STUDIO_PATHS.home, '.lixeira')) : new ShellTrash());
 
-type ScriptParts = Readonly<{ grants: FolderGrants; settings: SettingsService; keys: KeyService; slot: WindowSlot<BrowserWindow> }>;
+type ScriptParts = Readonly<{ grants: FolderGrants; settings: SettingsService; keys: KeyService; slot: WindowSlot<BrowserWindow>; saves: FolderQueue }>;
 
 /** The home screen, the Idea and the Script stages, on core's script use cases. */
-function scriptServicesOf({ grants, settings, keys, slot }: ScriptParts): Pick<Services, 'listing' | 'ideas' | 'script'> {
+function scriptServicesOf({ grants, settings, keys, slot, saves }: ScriptParts): Pick<Services, 'listing' | 'ideas' | 'script'> {
   const core = new GizScriptCore({ rehearsal: STUDIO_PATHS.rehearsal });
   const disk = new DiskProjects();
   const userData = app.getPath('userData');
@@ -92,7 +93,7 @@ function scriptServicesOf({ grants, settings, keys, slot }: ScriptParts): Pick<S
   const progress = sendTo(slot, SCRIPT_PROGRESS_EVENT);
   const folders = { newFolder: (theme: string) => listing.newFolder(theme), release: (folder: string) => listing.release(folder) };
   const ideas = new IdeaService({ core, provider, keyOf: (name) => keys.keyOf(name), needsKey: !STUDIO_PATHS.rehearsal, ...folders, portraitsFolder: join(userData, 'portraits'), progress });
-  return { listing, ideas, script: new ScriptService({ core, disk, grants }) };
+  return { listing, ideas, script: new ScriptService({ core, disk, grants, saves }) };
 }
 
 /** The services the IPC channels call, wired to core and to Electron; they reach the window through the slot. */
@@ -104,14 +105,15 @@ export function createServices(slot: WindowSlot<BrowserWindow>): Services {
   const tools = STUDIO_PATHS.rehearsal ? new RehearsalSetupTools() : new CoreSetupTools();
   const keys = keysOf();
   const settings = settingsOf(grants, picker, shared);
+  const saves = new FolderQueue(); // each folder's writes in turn: the script editor's and the media stages'
   return {
     projects: new ProjectService({ core, picker, grants, launchFolder: launchFolderIn(grants) }),
-    ...scriptServicesOf({ grants, settings, keys, slot }),
+    ...scriptServicesOf({ grants, settings, keys, slot, saves }),
     video: new RenderService({ core, grants, progress: sendTo(slot, RENDER_PROGRESS_EVENT) }),
     keys,
     settings,
     setup: new SetupService({ tools, shared, progress: sendTo(slot, SETUP_PROGRESS_EVENT) }),
-    ...mediaServicesOf({ grants, settings, keys, slot, rehearsal: STUDIO_PATHS.rehearsal }),
+    ...mediaServicesOf({ grants, settings, keys, slot, saves, rehearsal: STUDIO_PATHS.rehearsal }),
     grants,
   };
 }

@@ -1,4 +1,4 @@
-import type { GeneratedImage, ImageModel, ImageProvider, ImageRequest } from 'giz-core/src/application/ports/ImageProvider.ts';
+import type { GeneratedImage, ImageCallOptions, ImageModel, ImageProvider, ImageRequest } from 'giz-core/src/application/ports/ImageProvider.ts';
 import { fadedPng } from './solidPng.ts';
 
 const PAUSE = 900;
@@ -9,7 +9,11 @@ const PALETTES = [
   { top: [92, 52, 96], bottom: [246, 196, 120] },
 ] as const;
 
-const later = (milliseconds: number) => new Promise((done) => setTimeout(done, milliseconds));
+// The pause ends early on a cancel, as a real call's fetch does (an AbortError).
+const later = (milliseconds: number, signal: AbortSignal | undefined) => new Promise<void>((done, fail) => {
+  const timer = setTimeout(done, milliseconds);
+  signal?.addEventListener('abort', () => (clearTimeout(timer), fail(signal.reason)), { once: true });
+});
 
 /**
  * The pretend image AI of rehearsal mode: no network, no key. It answers a real PNG of the size asked for after a
@@ -24,9 +28,10 @@ export class RehearsalPainter implements ImageProvider {
     this.#real = real;
   }
 
-  async generate(request: ImageRequest): Promise<GeneratedImage> {
+  async generate(request: ImageRequest, { signal }: ImageCallOptions = {}): Promise<GeneratedImage> {
     this.calls += 1;
-    await later(PAUSE);
+    signal?.throwIfAborted();
+    await later(PAUSE, signal);
     const palette = PALETTES[request.prompt.length % PALETTES.length]!;
     return { bytes: fadedPng(request.size, palette), mime: 'image/png' };
   }

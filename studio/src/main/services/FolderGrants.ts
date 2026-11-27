@@ -1,11 +1,7 @@
-import { isAbsolute, relative, resolve, sep } from 'node:path';
+import { resolve } from 'node:path';
+import { isWithin, reallyWithin } from '../realPaths.ts';
 import { translate } from '../text.ts';
 import { StudioError } from './StudioError.ts';
-
-const isWithin = (granted: string, path: string) => {
-  const way = relative(granted, path);
-  return way === '' || (way.split(sep)[0] !== '..' && !isAbsolute(way));
-};
 
 /**
  * The folders the person gave the Studio (the folder picker, `--project`, later the projects root). The window can
@@ -20,10 +16,9 @@ export class FolderGrants {
     return path;
   }
 
-  /** Whether the path is inside a granted folder (the media scheme serves only these). */
+  /** Whether the path is really inside a granted folder, links resolved (a link never leads out of it). */
   allows(path: string): boolean {
-    const absolute = resolve(path);
-    return [...this.#folders].some((granted) => isWithin(granted, absolute));
+    return [...this.#folders].some((granted) => reallyWithin(granted, path));
   }
 
   /** The folder as an absolute path, when it is inside a granted one; otherwise an `invalid-request` error. */

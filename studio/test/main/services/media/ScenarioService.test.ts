@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FolderGrants } from '../../../../src/main/services/FolderGrants.ts';
+import { FolderQueue } from '../../../../src/main/services/FolderQueue.ts';
 import { ScenarioService } from '../../../../src/main/services/media/ScenarioService.ts';
 import type { ImageProgress } from '../../../../src/shared/scenarios.ts';
 import { FakeMediaCore, MemoryMediaFiles } from '../../../doubles/mediaFakes.ts';
@@ -25,11 +26,12 @@ function build(options: Readonly<{ key?: string; needsKey?: boolean }> = {}) {
   const files = new MemoryMediaFiles();
   const progress: ImageProgress[] = [];
   const keys: string[] = [];
+  const saves = new FolderQueue();
   const service = new ScenarioService({
-    core, disk, files, grants, vectors: async () => ['street', 'lab', 'room'], provider: async () => 'gemini',
+    core, disk, files, grants, saves, vectors: async () => ['street', 'lab', 'room'], provider: async () => 'gemini',
     keyOf: async (name) => (keys.push(name), options.key), needsKey: options.needsKey ?? true, progress: (step) => progress.push(step),
   });
-  return { disk, core, files, service, progress, keys };
+  return { disk, core, files, service, progress, keys, saves };
 }
 
 const lineOf = async (disk: MemoryDisk, id: string) => ((await disk.readJson(FOLDER, 'script.json')) as { lines: Array<{ id: string; scene: { background: Record<string, unknown> } }> }).lines.find((line) => line.id === id)!;
@@ -48,24 +50,50 @@ test('one card per scenario scene: its background, the prompt, the image giz mad
   assert.equal(document.provider, 'gemini');
 });
 
-test('a vector background replaces the image and the prompt; an unknown vector is refused', async () => {
+test('a vector background replaces the image and stops using the prompt, which is kept for later; an unknown vector is refused', async () => {
   const { service, disk } = build();
-  await service.vector(FOLDER, '3', 'room');
-  assert.deepEqual((await lineOf(disk, '3')).scene.background, { vector: 'room' });
+  const document = await service.vector(FOLDER, '3', 'room');
+  assert.deepEqual((await lineOf(disk, '3')).scene.background, { vector: 'room' }, 'the image AI no longer makes this scene');
+  const card = document.cards.find(({ lineId }) => lineId === '3')!;
+  assert.deepEqual([card.generate, card.keptPrompt], [undefined, { prompt: 'um laboratório', style: 'chalk' }]);
+  assert.deepEqual((await service.read(FOLDER)).cards[1]!.keptPrompt, { prompt: 'um laboratório', style: 'chalk' }, 'kept on disk');
+  await service.vector(FOLDER, '3', 'street');
+  assert.deepEqual((await service.read(FOLDER)).cards[1]!.keptPrompt, { prompt: 'um laboratório', style: 'chalk' }, 'a second vector keeps it too');
   await assert.rejects(service.vector(FOLDER, '3', 'mars'), { code: 'invalid-request' });
   await assert.rejects(service.vector(FOLDER, '2', 'room'), /não tem uma cena de cenário/);
 });
 
-test('upload: checked by its first bytes, copied as scenes/<id>-own.<ext>; it wins (own), with the shape warning', async () => {
+test('upload: checked by its first bytes, copied as scenes/own/<id>.<ext>; it wins (own), with the shape warning', async () => {
   const { service, disk, files } = build();
   const document = await service.upload(FOLDER, '1', PNG);
-  assert.ok(files.files.has(`${FOLDER}/scenes/1-own.png`));
-  assert.equal((await lineOf(disk, '1')).scene.background.image, 'scenes/1-own.png');
+  assert.ok(files.files.has(`${FOLDER}/scenes/own/1.png`));
+  assert.equal((await lineOf(disk, '1')).scene.background.image, 'scenes/own/1.png');
   const card = document.cards[0]!;
   assert.ok(card.background.kind === 'image' && card.background.own);
   assert.match(card.background.kind === 'image' ? card.background.aspectWarning ?? '' : '', /800×800, outra proporção/);
   await assert.rejects(service.upload(FOLDER, '1', new TextEncoder().encode('<html>')), /não é uma imagem/);
   await assert.rejects(service.upload(FOLDER, '9', PNG), { code: 'invalid-request' });
+});
+
+test('upload to a line without its own scenario scene is refused before anything is written', async () => {
+  const { service, files } = build();
+  await assert.rejects(service.upload(FOLDER, '2', PNG), /não tem uma cena de cenário/);
+  await assert.rejects(service.upload(FOLDER, '4', PNG), /não tem uma cena de cenário/);
+  assert.deepEqual([...files.files.keys()], []);
+});
+
+test("the scenario writes wait for the folder's other writes (one queue with the script editor)", async () => {
+  const { service, disk, saves } = build();
+  let release: () => void = () => undefined;
+  const held = saves.run(FOLDER, () => new Promise<void>((done) => (release = done)));
+  const writes = [service.vector(FOLDER, '1', 'lab'), service.prompt(FOLDER, '3', { prompt: 'outro' }), service.settings(FOLDER, { style: 'chalk' })];
+  await new Promise((done) => setTimeout(done, 5));
+  assert.equal(disk.writes.length, 0);
+  release();
+  await held;
+  await Promise.all(writes);
+  assert.equal((await lineOf(disk, '1')).scene.background.vector, 'lab');
+  assert.equal(((await lineOf(disk, '3')).scene.background.generate as { prompt: string }).prompt, 'outro', 'each write saw the one before it');
 });
 
 test('"usar a gerada": back to scenes/<id>.png when giz made it, otherwise no image (so the image AI makes it)', async () => {
@@ -106,7 +134,9 @@ test('one image at a time; cancel answers cancelled at once', async () => {
   await assert.rejects(service.generate(FOLDER, '1', false), { code: 'busy' });
   assert.equal(service.cancel(), true);
   await assert.rejects(first, { code: 'cancelled' });
+  await assert.rejects(service.generate(FOLDER, '1', false), { code: 'busy' }, 'busy until the call in flight really ends');
   release();
+  await new Promise((done) => setTimeout(done, 5));
   assert.equal(service.cancel(), false);
 });
 

@@ -17,7 +17,7 @@ function Presets({ presets, catalog, onAdd }: Readonly<{ presets: readonly CastP
       {presets.map((preset) => (
         <li key={preset.id}>
           <button type="button" className="cast-choice" title={preset.personality} data-testid={`preset-${preset.id}`} onClick={() => onAdd({ preset: preset.id })}>
-            <Face member={preset} catalog={catalog} size={175} />
+            <Face member={preset} catalog={catalog} size={80} />
             <span className="cast-name">{preset.name}</span>
           </button>
         </li>

@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FolderGrants } from '../../../../src/main/services/FolderGrants.ts';
+import { FolderQueue } from '../../../../src/main/services/FolderQueue.ts';
 import { CastService } from '../../../../src/main/services/media/CastService.ts';
 import { FakeMediaCore, MemoryMediaFiles } from '../../../doubles/mediaFakes.ts';
 import { MemoryDisk } from '../../../doubles/scriptFakes.ts';
@@ -19,8 +20,9 @@ function build() {
   const core = new FakeMediaCore();
   const files = new MemoryMediaFiles();
   const keys: string[] = [];
-  const service = new CastService({ core, disk, files, grants, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples' });
-  return { disk, core, files, service, keys };
+  const saves = new FolderQueue();
+  const service = new CastService({ core, disk, files, grants, saves, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples' });
+  return { disk, core, files, service, keys, saves };
 }
 
 test('read: every member with its file and how many lines it says; the narrator has no body; presets get the language style', async () => {
@@ -95,4 +97,20 @@ test('a paid voice sample reads its key in main; a recording project has no samp
   assert.deepEqual(core.samples[0]!.voice, { provider: 'fish', key: 'secret' });
   await disk.writeJson(FOLDER, 'project.json', { ...((await disk.readJson(FOLDER, 'project.json')) as object), voice: { provider: 'recording' } });
   await assert.rejects(service.sample(FOLDER, { id: 'x' }, 'Olá!'), { code: 'unavailable' });
+});
+
+test("every cast write waits for the folder's other writes (one queue with the script editor and the other stages)", async () => {
+  const { service, disk, saves } = build();
+  let release: () => void = () => undefined;
+  const held = saves.run(FOLDER, () => new Promise<void>((done) => (release = done)));
+  const writes = [service.save(FOLDER, { ...ANA, name: 'Ana Maria' }), service.voice(FOLDER, { provider: 'fish' }), service.add(FOLDER, { preset: 'bia' })];
+  await new Promise((done) => setTimeout(done, 5));
+  assert.equal(disk.writes.length, 0, 'nothing is written while another write of the folder runs');
+  release();
+  await held;
+  await Promise.all(writes);
+  const project = (await disk.readJson(FOLDER, 'project.json')) as { cast: string[]; voice: { provider: string } };
+  assert.deepEqual([project.voice.provider, project.cast], ['fish', ['ana', 'narrator', 'bia']], 'each write saw the one before it');
+  await service.remove(FOLDER, 'bia');
+  assert.deepEqual(((await disk.readJson(FOLDER, 'project.json')) as { cast: string[] }).cast, ['ana', 'narrator']);
 });

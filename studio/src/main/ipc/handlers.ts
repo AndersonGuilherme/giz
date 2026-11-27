@@ -10,6 +10,7 @@ import type { CastService } from '../services/media/CastService.ts';
 import type { ScenarioService } from '../services/media/ScenarioService.ts';
 import type { VoiceService } from '../services/media/VoiceService.ts';
 import type { FolderGrants } from '../services/FolderGrants.ts';
+import type { ServedFolders } from '../services/media/ServedFolders.ts';
 import { mediaHandlers } from './mediaHandlers.ts';
 import { projectHandlers, scriptHandlers } from './projectHandlers.ts';
 import type { Handlers } from './registry.ts';
@@ -28,6 +29,8 @@ export type Services = Readonly<{
   voices: VoiceService;
   /** The folders the person gave the Studio: the media scheme serves only files inside them. */
   grants: FolderGrants;
+  /** What the media scheme serves: the granted folders and the Studio's own media folders (the voice samples). */
+  served: ServedFolders;
 }>;
 
 /** The channel map: each channel name to the service call that answers it. */

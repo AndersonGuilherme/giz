@@ -21,8 +21,8 @@ function next(current: Answer, { status, result }: SaveAnswer): Answer {
   return result.ok ? { status, report: result.value, failure: null } : { ...current, status, failure: result.failure };
 }
 
-// Closing the window with a change on its way: the close waits for the save, then the window closes itself.
-function guardClose(saver: ScriptSaver): () => void {
+/** Closing the window with a change on its way: the close waits for the save, then the window closes itself. */
+export function guardClose(saver: Pick<ScriptSaver, 'hasPending' | 'flush'>): () => void {
   const listener = (event: BeforeUnloadEvent) => {
     if (!saver.hasPending()) return;
     event.preventDefault();

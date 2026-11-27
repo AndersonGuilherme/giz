@@ -2,10 +2,12 @@ import type { EditorCastMember, EditorReport, SceneProblem, ScriptDocument, Scri
 import type { ProjectDisk } from '../ports/ProjectDisk.ts';
 import type { ScriptCore } from '../ports/ScriptCore.ts';
 import { editorProblemOf } from './editorProblems.ts';
+import type { FolderQueue } from './FolderQueue.ts';
 import { SCRIPT_FILE, scriptIn } from './scriptFile.ts';
 import type { FolderGrants } from './FolderGrants.ts';
 
-type Dependencies = Readonly<{ core: ScriptCore; disk: ProjectDisk; grants: FolderGrants }>;
+/** `saves`: the writes of each folder, one after the other (shared with the Cast, Scenarios and Voices stages). */
+type Dependencies = Readonly<{ core: ScriptCore; disk: ProjectDisk; grants: FolderGrants; saves: FolderQueue }>;
 type Json = Readonly<Record<string, unknown>>;
 
 // A cast id names a file (cast/<id>.json): only a plain name is read, never a path.
@@ -16,7 +18,6 @@ const isObject = (value: unknown): value is Json => typeof value === 'object' &&
 /** The script editor's files: it reads a project as JSON (a broken one still opens), saves the script and checks it. */
 export class ScriptService {
   readonly #dependencies: Dependencies;
-  readonly #queues = new Map<string, Promise<unknown>>();
   // The folders whose script.json was already kept as .bak in this run.
   readonly #backedUp = new Set<string>();
 
@@ -34,22 +35,18 @@ export class ScriptService {
   }
 
   /**
-   * script.json is replaced atomically, then the project is checked as it is now on disk. The saves of a folder run one
+   * script.json is replaced atomically, then the project is checked as it is now on disk. The writes of a folder run one
    * after the other (the newest always lands last); the first save of a run keeps the file as script.json.bak, and a
    * file that is not a script is never saved over.
    */
   async save(folder: string, script: ScriptJson): Promise<EditorReport> {
     const path = this.#dependencies.grants.require(folder);
-    const run = (this.#queues.get(path) ?? Promise.resolve()).then(() => this.#save(path, script));
-    const settled = run.catch(() => undefined);
-    this.#queues.set(path, settled);
-    void settled.then(() => (this.#queues.get(path) === settled ? this.#queues.delete(path) : undefined));
-    return run;
+    return this.#dependencies.saves.run(path, () => this.#save(path, script));
   }
 
-  /** Waits for every save in flight (the app waits for them before it quits). */
-  async settled(): Promise<void> {
-    await Promise.all([...this.#queues.values()]);
+  /** Waits for every write in flight of every stage (the app waits for them before it quits). */
+  settled(): Promise<void> {
+    return this.#dependencies.saves.settled();
   }
 
   async check(folder: string): Promise<EditorReport> {

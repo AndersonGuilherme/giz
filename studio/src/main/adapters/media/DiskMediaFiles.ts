@@ -1,14 +1,15 @@
 import { randomUUID } from 'node:crypto';
-import { access, mkdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
-import { dirname, isAbsolute, join, relative, sep } from 'node:path';
+import { access, mkdir, readdir, readFile, rename, rm, stat, writeFile } from 'node:fs/promises';
+import { dirname, join, resolve } from 'node:path';
 import type { MediaFiles } from '../../ports/MediaCore.ts';
+import { isWithin, reallyWithin } from '../../realPaths.ts';
 import { translate } from '../../text.ts';
 
-// A file named by the script (`background.image`) must stay inside its project: `../` never leaves it.
+// A file named by the script (`background.image`) must stay inside its project: neither `../` nor a link leaves it.
 function inside(folder: string, file: string): string {
   const path = join(folder, file);
-  const way = relative(folder, path);
-  if (way === '' || way.split(sep)[0] === '..' || isAbsolute(way)) throw new Error(translate('media.outsideProject', { file }));
+  const plain = resolve(path) !== resolve(folder) && isWithin(resolve(folder), resolve(path));
+  if (!plain || !reallyWithin(folder, path)) throw new Error(translate('media.outsideProject', { file }));
   return path;
 }
 
@@ -41,5 +42,11 @@ export class DiskMediaFiles implements MediaFiles {
 
   async remove(folder: string, file: string): Promise<void> {
     await rm(inside(folder, file), { force: true });
+  }
+
+  async entries(folder: string): Promise<readonly Readonly<{ file: string; modified: number }>[]> {
+    const found = await readdir(folder, { withFileTypes: true }).catch(() => []);
+    const files = found.filter((entry) => entry.isFile()).map(({ name }) => name);
+    return Promise.all(files.map(async (file) => ({ file, modified: (await stat(join(folder, file))).mtimeMs })));
   }
 }

@@ -95,15 +95,47 @@ export async function castStage({ page, shoot }: Context, folder: string): Promi
   const refused = await call<{ saved: boolean; problems: Array<{ path: string }> }>(page, `window.giz.cast.save(${JSON.stringify(folder)}, ${JSON.stringify({ ...bia, parameters: { skin: 'roxo' } })})`);
   assert.deepEqual([refused.saved, refused.problems[0]?.path], [false, 'parameters.skin'], 'core refuses an invalid parameter; nothing is written');
   assert.equal((await jsonOf(folder, 'cast/bia.json')).parameters.outfit, 'lab-coat');
+  await headwearGrid(page, shoot);
   await page.click('[data-testid="cast-add"]');
   await page.until('[data-testid="cast-presets"] li svg');
   await shoot(page, 's4-04-adicionar');
+  await tallHatsWhole(page, shoot);
   await page.type('[data-testid="new-character-name"]', 'Prof. Rui');
   await page.click('[data-testid="new-character"]');
   await page.until('[data-testid="member-prof-rui"].on');
   assert.ok((await jsonOf(folder, 'project.json')).cast.includes('prof-rui'));
   await page.click('[data-testid="member-narrator"]');
   await page.untilText('[data-testid="live-preview"]', /só voz/);
+  await lastEditKept(page, folder);
+}
+
+// The headwear options are framed from above their top: a chef hat is drawn whole (s4fix).
+async function headwearGrid(page: Page, shoot: Context['shoot']): Promise<void> {
+  await page.click('[data-testid="param-headwear"] .option-current');
+  await page.until('[data-testid="param-headwear"] .option-choice[data-value="chef-hat"] svg');
+  await page.evaluate(`document.querySelector('[data-testid="param-headwear"] .option-choice[data-value="chef-hat"]').scrollIntoView({ block: 'center' })`);
+  await shoot(page, 's4fix-02-chapeus');
+  await page.click('[data-testid="param-headwear"] .option-current');
+  await page.evaluate('window.scrollTo(0, 0)');
+}
+
+// The ready characters with tall headwear (chef hat, knight's plume, viking horns, pirate hat): each face starts above
+// the rig's view box top, so nothing is cut (s4fix).
+async function tallHatsWhole(page: Page, shoot: Context['shoot']): Promise<void> {
+  for (const preset of ['nono', 'bento', 'sigrid', 'marina']) {
+    const top = Number(await page.evaluate(`document.querySelector('[data-testid="preset-${preset}"] svg').getAttribute('viewBox').split(' ')[1]`));
+    assert.ok(top < -30, `the ${preset} face is framed from above its headwear (viewBox top ${top})`);
+  }
+  await page.evaluate(`document.querySelector('[data-testid="preset-nono"]').scrollIntoView({ block: 'center' })`);
+  await shoot(page, 's4fix-01-presets-chapeus');
+}
+
+// A change still waiting for its autosave is not lost when the person goes to another stage right away.
+async function lastEditKept(page: Page, folder: string): Promise<void> {
+  await page.click('[data-testid="member-bia"]');
+  await replace(page, '[data-testid="character-name"]', 'Bia Detetive');
+  await page.click('[data-testid="tab-scenarios"]');
+  await until(async () => (await jsonOf(folder, 'cast/bia.json')).name === 'Bia Detetive', 'the pending character change saved on leaving');
 }
 
 async function setFile(page: Page, selector: string, path: string): Promise<void> {
@@ -122,11 +154,11 @@ export async function scenariosStage({ page, shoot, home }: Context, folder: str
   await writeFile(picture, squarePng());
   await setFile(page, '[data-testid="scene-file-1"]', picture);
   await page.untilText('[data-testid="scene-warning-1"]', /800×800, outra proporção/);
-  assert.equal((await jsonOf(folder, 'script.json')).lines[0].scene.background.image, 'scenes/1-own.png');
+  assert.equal((await jsonOf(folder, 'script.json')).lines[0].scene.background.image, 'scenes/own/1.png');
   await page.click('[data-testid="scene-generate-2"]');
   await replace(page, '[data-testid="image-prompt"]', 'um sótão cheio de caixas antigas, luz quente de fim de tarde');
   await page.click('[data-testid="image-price"]');
-  await page.untilText('[data-testid="image-estimate"]', /fal · fal-ai\/flux-2-pro[\s\S]*US\$/);
+  await page.untilText('[data-testid="image-estimate"]', /fal\.ai \(Flux\) · fal-ai\/flux-2-pro[\s\S]*US\$/);
   await shoot(page, 's4-06-custo');
   await page.click('[data-testid="image-confirm"]');
   await page.untilText('[data-testid="image-running"]', /pintando/);
@@ -140,14 +172,42 @@ export async function scenariosStage({ page, shoot, home }: Context, folder: str
   await until(async () => (await jsonOf(folder, 'script.json')).lines[1].scene.background.image === 'scenes/2.png', 'usar a gerada');
 }
 
+// Leaving the stage while every voice is being made, and coming back: the job still runs in main, so the screen shows
+// it busy (no second "Gerar todas"), then reloads by itself when it ends (s4fix).
+async function busyAfterComingBack(page: Page, shoot: Context['shoot']): Promise<void> {
+  await page.click('[data-testid="voices-generate-all"]');
+  await page.until('[data-testid="voices-progress"]');
+  await page.click('[data-testid="tab-script"]');
+  await page.click('[data-testid="tab-voices"]');
+  await page.until('[data-testid="voices-screen"]');
+  const shown = String(await page.evaluate(`(() => { const all = document.querySelector('[data-testid="voices-generate-all"]'); return [all.disabled, !!document.querySelector('[data-testid="voices-cancel"]')].join(); })()`));
+  const done = await page.evaluate(`document.querySelector('[data-testid="voice-4"]').dataset.state === 'done'`);
+  if (!done) assert.equal(shown, 'true,true', 'back on the stage mid-job: "Gerar todas" busy and cancellable');
+  console.log(done ? 'smoke: the voice job ended before the stage was back (busy check skipped)' : 'smoke: back on Vozes mid-job: "Gerar todas" disabled, cancel shown');
+  await page.until('[data-testid="voice-4"][data-state="done"]');
+  await page.until('[data-testid="voices-generate-all"]:disabled');
+  await page.until('[data-testid="voices-pending"]:not(:has([data-testid="voices-cancel"]))');
+  await shoot(page, 's4fix-03-vozes');
+}
+
+// Leaving the stage mid-take closes the microphone and keeps nothing of the take (s4fix).
+async function micClosedOnLeaving(page: Page, folder: string): Promise<void> {
+  await page.evaluate(`(() => { window.__streams = []; const ask = navigator.mediaDevices.getUserMedia.bind(navigator.mediaDevices); navigator.mediaDevices.getUserMedia = async (wanted) => { const stream = await ask(wanted); window.__streams.push(stream); return stream; }; })()`);
+  await page.click('[data-testid="voice-record-2"]');
+  await page.until('[data-testid="recording-2"]');
+  await page.click('[data-testid="tab-cast"]');
+  await page.until('[data-testid="cast-screen"]');
+  const closed = await page.evaluate(`window.__streams.length === 1 && window.__streams[0].getTracks().every((track) => track.readyState === 'ended')`);
+  assert.equal(closed, true, 'the microphone track ended when the Voices stage went away');
+  await readFile(join(folder, 'recordings', '2.wav')).then(() => assert.fail('a dropped take is never saved'), () => undefined);
+}
+
 /** The Voices stage: every pending line, one line again, then a take recorded with the (fake) microphone. */
 export async function voicesStage({ page, shoot }: Context, folder: string): Promise<void> {
   await page.click('[data-testid="tab-voices"]');
   await page.until('[data-testid="voice-1"][data-state="missing"]');
   await shoot(page, 's4-09-vozes');
-  await page.click('[data-testid="voices-generate-all"]');
-  await page.until('[data-testid="voices-progress"]');
-  await page.until('[data-testid="voice-4"][data-state="done"]');
+  await busyAfterComingBack(page, shoot);
   await page.until('[data-testid="voice-audio-1"]');
   const seconds = await page.evaluate(`new Promise((done) => { const audio = document.querySelector('[data-testid="voice-audio-2"]'); audio.addEventListener('loadedmetadata', () => done(audio.duration), { once: true }); audio.preload = 'metadata'; audio.load(); })`);
   assert.ok(Number(seconds) > 0.5, `the line's audio plays through the media scheme (${seconds} s)`);
@@ -164,4 +224,5 @@ export async function voicesStage({ page, shoot }: Context, folder: string): Pro
   assert.deepEqual([take.toString('latin1', 0, 4), take.readUInt16LE(22), take.readUInt16LE(34)], ['RIFF', 1, 16], 'a 16-bit mono WAV');
   assert.ok(take.length > 20_000, 'about a second and a half of audio');
   await shoot(page, 's4-11-gravado');
+  await micClosedOnLeaving(page, folder);
 }

@@ -1,4 +1,4 @@
-import { join } from 'node:path';
+import { basename, dirname, join } from 'node:path';
 import type { CastCatalog, CharacterProblem, CharacterVoice } from '../../src/shared/cast.ts';
 import type { ImageCost, ImageJob, MediaCore, MediaFiles, SampleVoice, SpokenSample, StageItems, VoiceJob } from '../../src/main/ports/MediaCore.ts';
 import { STAGES } from './scriptFakes.ts';
@@ -68,7 +68,7 @@ export class FakeMediaCore implements MediaCore {
   }
 
   async imageShape(path: string) {
-    return path.includes('-own') ? { width: 800, height: 800, matches: false } : { width: 1216, height: 2160, matches: true };
+    return path.includes('/own/') ? { width: 800, height: 800, matches: false } : { width: 1216, height: 2160, matches: true };
   }
 
   async checkWav(): Promise<void> {
@@ -79,11 +79,12 @@ export class FakeMediaCore implements MediaCore {
 /** The media files in memory: path → bytes, with a modification time per write. */
 export class MemoryMediaFiles implements MediaFiles {
   readonly files = new Map<string, Uint8Array>();
+  readonly #times = new Map<string, number>();
   #clock = 1000;
 
   async write(folder: string, file: string, bytes: Uint8Array) {
     this.files.set(join(folder, file), bytes);
-    this.#clock += 1;
+    this.#times.set(join(folder, file), (this.#clock += 1));
   }
 
   async read(folder: string, file: string) {
@@ -95,10 +96,16 @@ export class MemoryMediaFiles implements MediaFiles {
   }
 
   async modified(folder: string, file: string) {
-    return this.files.has(join(folder, file)) ? this.#clock : undefined;
+    return this.#times.get(join(folder, file));
   }
 
   async remove(folder: string, file: string) {
     this.files.delete(join(folder, file));
+    this.#times.delete(join(folder, file));
+  }
+
+  async entries(folder: string) {
+    const inFolder = [...this.#times].filter(([path]) => dirname(path) === folder);
+    return inFolder.map(([path, modified]) => ({ file: basename(path), modified }));
   }
 }

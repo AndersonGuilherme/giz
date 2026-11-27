@@ -25,9 +25,12 @@ export type VoicesDocument = Readonly<{
   pending: number;
   dollars: number | null;
   stages: readonly StageBrief[];
+  /** A voice job is running in the main process (it goes on when the screen is left; its end comes as `ended`). */
+  generating: boolean;
 }>;
 
-export type VoiceProgress = Readonly<{ done: number; total: number; lineId: string }>;
+/** One line made (`done` of `total`); `ended`: the job is over (made, failed or cancelled), the last counts kept. */
+export type VoiceProgress = Readonly<{ done: number; total: number; lineId: string; ended?: boolean }>;
 export const VOICES_PROGRESS_EVENT = 'voices.progress';
 /** The most a recorded take may weigh (about 10 minutes of 16-bit mono at 48 kHz). */
 export const MAXIMUM_RECORDING_BYTES = 60 * 1024 * 1024;

@@ -26,7 +26,7 @@ function register(): void {
   const rules = { window: () => slot.current(), origin: appOrigin() };
   allowOnlyOurMicrophone(session.defaultSession, { contents: () => slot.current()?.webContents, isAppUrl: (url) => isAppUrl(url, rules.origin) });
   const services = createServices(slot);
-  serveMedia((path) => services.grants.allows(path));
+  serveMedia((path) => services.served.allows(path));
   // The saved language and projects folder take effect before any channel answers (see afterReady).
   const restored = services.settings.restore().catch((error: unknown) => console.error('giz: the saved settings could not be restored:', error));
   const handlers = afterReady(handlersOf(services), restored);

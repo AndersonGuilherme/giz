@@ -3,8 +3,9 @@ type QuitEvent = Readonly<{ preventDefault: () => void }>;
 export type Quitting = Readonly<{ on(event: 'before-quit', listener: (event: QuitEvent) => void): unknown; quit(): void }>;
 
 /**
- * The app does not quit while a script save is on its way: the first quit waits for `settled` (every save in flight),
- * then quits again; a save that fails does not keep the app open.
+ * The app does not quit while a write is on its way: the first quit waits for `settled` (every write in flight of the
+ * folders' queue: the script editor's saves and the Cast, Scenarios and Voices writes), then quits again; a write that
+ * fails does not keep the app open.
  */
 export function quitAfterSaves(app: Quitting, settled: () => Promise<void>): void {
   let waited = false;

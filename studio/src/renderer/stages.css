@@ -23,8 +23,7 @@
 .cast-member:hover { background: rgba(243, 239, 226, 0.05); }
 .cast-member.on { border-color: var(--chalk-yellow); background: rgba(242, 193, 78, 0.08); }
 .member-text { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-.cast-face { width: 56px; height: 56px; border-radius: 14px; overflow: hidden; flex: none; display: flex; justify-content: center; align-items: flex-start; background: #33423f; box-shadow: inset 0 0 0 2px var(--line); }
-.cast-face svg { margin-top: 3px; }
+.cast-face { width: 56px; height: 56px; border-radius: 14px; overflow: hidden; flex: none; display: flex; justify-content: center; align-items: center; background: #33423f; box-shadow: inset 0 0 0 2px var(--line); }
 .cast-face.voice { align-items: center; font-size: 24px; color: var(--chalk-dim); }
 .preset-grid .cast-face { width: 80px; height: 80px; }
 .dialog .preset-grid { max-height: 300px; overflow: auto; margin-bottom: 10px; }
@@ -48,6 +47,7 @@
 .option-choice:hover { background: rgba(243, 239, 226, 0.06); }
 .option-choice.on { border-color: var(--chalk-yellow); background: rgba(242, 193, 78, 0.1); }
 .option-drawing { width: 74px; height: 86px; overflow: hidden; display: flex; justify-content: center; border-radius: 8px; background: #33423f; }
+.option-drawing.head { align-items: center; }
 .option-name { font-size: 11px; text-align: center; color: var(--chalk-dim); line-height: 1.2; }
 .option-choice.on .option-name { color: var(--chalk); font-weight: 700; }
 .color-row { display: flex; align-items: center; gap: 10px; }

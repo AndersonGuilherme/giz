@@ -48,4 +48,6 @@ export interface MediaFiles {
   /** Last change in milliseconds (the version of a giz-media URL), or undefined when there is no such file. */
   modified(folder: string, file: string): Promise<number | undefined>;
   remove(folder: string, file: string): Promise<void>;
+  /** The files right inside the folder (not its subfolders), with their last change; none when it does not exist. */
+  entries(folder: string): Promise<readonly Readonly<{ file: string; modified: number }>[]>;
 }

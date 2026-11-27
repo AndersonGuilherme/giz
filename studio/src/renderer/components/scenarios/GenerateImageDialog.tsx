@@ -2,6 +2,7 @@ import { useState } from 'react';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import { IMAGE_STYLES, type ImageEstimate, type ImageStyle, type ScenariosDocument, type SceneCard } from '../../../shared/scenarios.ts';
 import { useTranslate } from '../../i18n.ts';
+import { labelOf } from '../../labels.ts';
 import { costText } from '../../media/money.ts';
 import { useImageJob } from '../../state/useImageJob.ts';
 import { Modal } from '../common/Modal.tsx';
@@ -13,8 +14,10 @@ type Job = ReturnType<typeof useImageJob>;
 
 function Edit({ card, job, onClose }: Readonly<{ card: SceneCard; job: Job; onClose: () => void }>) {
   const translate = useTranslate();
-  const [prompt, setPrompt] = useState(card.generate?.prompt ?? '');
-  const [style, setStyle] = useState<ImageStyle | undefined>(card.generate?.style);
+  // A scene switched to a vector starts from the prompt it had (kept, no longer used).
+  const start = card.generate ?? card.keptPrompt;
+  const [prompt, setPrompt] = useState(start?.prompt ?? '');
+  const [style, setStyle] = useState<ImageStyle | undefined>(start?.style);
   return (
     <>
       <p className="muted small">{translate('scenarios.promptHint')}</p>
@@ -34,7 +37,7 @@ function Estimate({ estimate, job }: Readonly<{ estimate: ImageEstimate; job: Jo
   return (
     <>
       <dl className="facts costs" data-testid="image-estimate">
-        <div><dt>{translate('scenarios.service')}</dt><dd>{estimate.provider} · {estimate.model}</dd></div>
+        <div><dt>{translate('scenarios.service')}</dt><dd>{labelOf(translate, 'imageProvider', estimate.provider)} · {estimate.model}</dd></div>
         <div><dt>{translate('scenarios.cost')}</dt><dd>{current ? translate('scenarios.upToDate') : costText(estimate.dollars, translate)}</dd></div>
       </dl>
       {current && <p className="muted small">{translate('scenarios.makeAgainHint')}</p>}

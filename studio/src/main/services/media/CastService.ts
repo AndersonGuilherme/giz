@@ -3,17 +3,22 @@ import type { MediaCore, MediaFiles, SampleVoice } from '../../ports/MediaCore.t
 import type { ProjectDisk } from '../../ports/ProjectDisk.ts';
 import { translate } from '../../text.ts';
 import type { FolderGrants } from '../FolderGrants.ts';
+import type { FolderQueue } from '../FolderQueue.ts';
 import { StudioError } from '../StudioError.ts';
-import { characterOf, languageOf, memberOf, presetsOf, projectVoiceOf, savedFile } from './castFiles.ts';
+import { languageOf, memberOf, presetFile, presetsOf, projectVoiceOf, savedFile } from './castFiles.ts';
 import { castIdsOf, PLAIN_ID, projectOf, scriptOf, type Json } from './projectJson.ts';
 import { SampleShelf } from './samples.ts';
 
-/** `keyOf`: a voice service's key, read in main; `samples`: where the samples are kept (a folder the media scheme serves). */
+/**
+ * `saves`: the writes of each folder, one after the other (shared with the script editor); `keyOf`: a voice service's
+ * key, read in main; `samples`: where the samples are kept (a folder the media scheme serves).
+ */
 type Dependencies = Readonly<{
   core: MediaCore;
   disk: ProjectDisk;
   files: MediaFiles;
   grants: FolderGrants;
+  saves: FolderQueue;
   keyOf: (service: 'elevenlabs' | 'fish') => Promise<string | undefined>;
   samples: string;
 }>;
@@ -44,16 +49,20 @@ export class CastService {
   }
 
   /** Nothing is written while core finds a problem; the file is replaced atomically. */
-  async save(folder: string, character: CharacterFile): Promise<CharacterSaved> {
-    const path = this.#dependencies.grants.require(folder);
-    if (!castIdsOf(await projectOf(this.#dependencies.disk, path)).includes(character.id)) throw notInCast(character.id);
-    const problems = await this.check(character);
-    if (problems.length === 0) await this.#dependencies.disk.writeJson(path, `cast/${character.id}.json`, savedFile(character));
-    return { saved: problems.length === 0, problems, document: await this.read(path) };
+  save(folder: string, character: CharacterFile): Promise<CharacterSaved> {
+    return this.#serially(folder, async (path) => {
+      if (!castIdsOf(await projectOf(this.#dependencies.disk, path)).includes(character.id)) throw notInCast(character.id);
+      const problems = await this.check(character);
+      if (problems.length === 0) await this.#dependencies.disk.writeJson(path, `cast/${character.id}.json`, savedFile(character));
+      return { saved: problems.length === 0, problems, document: await this.read(path) };
+    });
   }
 
-  async add(folder: string, choice: Readonly<{ preset?: string; id?: string; name?: string }>): Promise<CastDocument> {
-    const path = this.#dependencies.grants.require(folder);
+  add(folder: string, choice: Readonly<{ preset?: string; id?: string; name?: string }>): Promise<CastDocument> {
+    return this.#serially(folder, (path) => this.#add(path, choice));
+  }
+
+  async #add(path: string, choice: Readonly<{ preset?: string; id?: string; name?: string }>): Promise<CastDocument> {
     const project = await projectOf(this.#dependencies.disk, path);
     const file = await this.#newFile(project, choice);
     if (castIdsOf(project).includes(file.id)) throw new StudioError('invalid-request', translate('cast.alreadyIn', { id: file.id }));
@@ -65,9 +74,12 @@ export class CastService {
   }
 
   /** The file stays in cast/: only project.json forgets it (refused while a line says it, or for the last one). */
-  async remove(folder: string, id: string): Promise<CastDocument> {
-    const { disk, grants } = this.#dependencies;
-    const path = grants.require(folder);
+  remove(folder: string, id: string): Promise<CastDocument> {
+    return this.#serially(folder, (path) => this.#remove(path, id));
+  }
+
+  async #remove(path: string, id: string): Promise<CastDocument> {
+    const { disk } = this.#dependencies;
     const [project, script] = await Promise.all([projectOf(disk, path), scriptOf(disk, path)]);
     const said = script.lines.filter(({ speaker }) => speaker === id).length;
     if (said > 0) throw new StudioError('invalid-request', translate('cast.stillSpeaks', { id, count: said }));
@@ -77,12 +89,13 @@ export class CastService {
     return this.read(path);
   }
 
-  async voice(folder: string, voice: ProjectVoice): Promise<CastDocument> {
-    const path = this.#dependencies.grants.require(folder);
-    const project = await projectOf(this.#dependencies.disk, path);
-    const model = voice.provider === 'qwen' && voice.model ? { model: voice.model } : {};
-    await this.#writeProject(path, { ...project, voice: { provider: voice.provider, ...model } });
-    return this.read(path);
+  voice(folder: string, voice: ProjectVoice): Promise<CastDocument> {
+    return this.#serially(folder, async (path) => {
+      const project = await projectOf(this.#dependencies.disk, path);
+      const model = voice.provider === 'qwen' && voice.model ? { model: voice.model } : {};
+      await this.#writeProject(path, { ...project, voice: { provider: voice.provider, ...model } });
+      return this.read(path);
+    });
   }
 
   /** Said once with the project's voice service and kept (the same voice, style and text plays again at once). */
@@ -119,15 +132,15 @@ export class CastService {
     await this.#dependencies.disk.writeJson(folder, `cast/${file.id}.json`, savedFile(file));
   }
 
+  // A granted folder's write, after the folder's other writes (the script editor's and the other stages').
+  #serially<T>(folder: string, write: (path: string) => Promise<T>): Promise<T> {
+    const path = this.#dependencies.grants.require(folder);
+    return this.#dependencies.saves.run(path, () => write(path));
+  }
+
   #writeProject(folder: string, project: Json): Promise<void> {
     return this.#dependencies.disk.writeJson(folder, 'project.json', project);
   }
 }
 
 const notInCast = (id: string) => new StudioError('invalid-request', translate('cast.notInCast', { id }));
-
-function presetFile(presets: readonly Readonly<{ id: string; file: CharacterFile }>[], id: string): CharacterFile {
-  const preset = presets.find((each) => each.id === id);
-  if (!preset) throw new StudioError('invalid-request', translate('cast.noSuchPreset', { id }));
-  return characterOf(preset.id, preset.file);
-}

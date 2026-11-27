@@ -1,6 +1,8 @@
 import type { CastMember, CastPreset, CharacterFile, ProjectVoice } from '../../../shared/cast.ts';
 import type { MediaCore } from '../../ports/MediaCore.ts';
 import type { ProjectDisk } from '../../ports/ProjectDisk.ts';
+import { translate } from '../../text.ts';
+import { StudioError } from '../StudioError.ts';
 import { isObject, textOf, type Json, type ScriptLine } from './projectJson.ts';
 
 const LANGUAGES = ['pt-BR', 'en'] as const;
@@ -57,4 +59,11 @@ export function savedFile(character: CharacterFile): Json {
   const body = rig ? { rig } : {};
   const about = personality?.trim() ? { personality: personality.trim() } : {};
   return { ...rest, ...body, voice: { id: voice.id, ...style }, ...about };
+}
+
+/** The file of a ready character (the presets read from core), by id; an unknown id is refused. */
+export function presetFile(presets: readonly Readonly<{ id: string; file: CharacterFile }>[], id: string): CharacterFile {
+  const preset = presets.find((each) => each.id === id);
+  if (!preset) throw new StudioError('invalid-request', translate('cast.noSuchPreset', { id }));
+  return characterOf(preset.id, preset.file);
 }

@@ -5,11 +5,14 @@ import { parametersOf } from '../../cast/characterDraft.ts';
 
 type Props = Readonly<{ document: CastDocument; catalog: CastCatalog; selected: string; select: (id: string) => void }>;
 
-/** A character's face: its rig drawn small (the narrator, a voice without a body, shows a microphone mark). */
-export function Face({ member, catalog, size = 120 }: Readonly<{ member: Pick<CastMember, 'file'>; catalog: CastCatalog; size?: number }>) {
+/**
+ * A character's face, `size` pixels square: head and shoulders framed from above its highest point (a tall hat stays
+ * whole); the narrator, a voice without a body, shows a music mark.
+ */
+export function Face({ member, catalog, size = 56 }: Readonly<{ member: Pick<CastMember, 'file'>; catalog: CastCatalog; size?: number }>) {
   const rig = catalog.rigs.find(({ id }) => id === member.file.rig);
   if (!rig) return <span className="cast-face voice" aria-hidden="true">♪</span>;
-  return <span className="cast-face" aria-hidden="true"><RigStill id={member.file.id} rig={rig.id} parameters={parametersOf(member.file, rig)} height={size} expression={member.file.defaultExpression as never} /></span>;
+  return <span className="cast-face" aria-hidden="true"><RigStill id={member.file.id} rig={rig.id} parameters={parametersOf(member.file, rig)} height={size} framing="head" expression={member.file.defaultExpression as never} /></span>;
 }
 
 function Member({ member, catalog, chosen, select }: Readonly<{ member: CastMember; catalog: CastCatalog; chosen: boolean; select: () => void }>) {

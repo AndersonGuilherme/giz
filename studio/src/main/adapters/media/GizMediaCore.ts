@@ -1,16 +1,10 @@
 import type { CastCatalog, CharacterProblem, CharacterVoice } from '../../../shared/cast.ts';
 import type { ImageCost, ImageJob, MediaCore, SampleVoice, SpokenSample, StageItems, VoiceJob } from '../../ports/MediaCore.ts';
-import { translate } from '../../text.ts';
-import { generateImageIn, generateVoicesIn, imageCostOf, stageItemsOf, type StandIns } from './coreJobs.ts';
+import { generateImageIn, generateVoicesIn, imageCostOf, stageItemsOf, voiceKeys, type StandIns } from './coreJobs.ts';
 import { coreAspect, coreCasting, coreImageFiles, coreLanguage, coreScriptMaterials, coreWav } from './mediaModules.ts';
 
 type Sampler = Awaited<ReturnType<Awaited<ReturnType<typeof coreCasting>>['voiceSampler']>>;
 type SampleRequest = CharacterVoice & Readonly<{ text: string; language: 'pt-BR' | 'en' }>;
-
-const serviceKey = (key: string | undefined) => (service: string): string => {
-  if (key) return key;
-  throw new Error(translate('media.noVoiceKey', { service }));
-};
 
 /** Core's cast, scenarios and voices stages, through core's composition point (loaded on first use). */
 export class GizMediaCore implements MediaCore {
@@ -80,7 +74,7 @@ export class GizMediaCore implements MediaCore {
     const known = this.#samplers.get(name);
     if (known && voice.provider === 'qwen') return known;
     const casting = await coreCasting();
-    const made = this.#standIns ? casting.voiceSamplerWith(this.#standIns.voice) : casting.voiceSampler({ ...voice, keys: serviceKey(voice.key) });
+    const made = this.#standIns ? casting.voiceSamplerWith(this.#standIns.voice) : casting.voiceSampler({ ...voice, keys: voiceKeys(voice.key) });
     this.#samplers.set(name, made);
     return made;
   }

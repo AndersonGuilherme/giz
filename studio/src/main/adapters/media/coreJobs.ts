@@ -67,8 +67,8 @@ export async function generateImageIn(folder: string, job: ImageJob, standIns: S
   await generate.run(project, { ...selectionOf(job), signal: job.signal });
 }
 
-// A paid voice's key is read by main; without one, the message says where to add it.
-const voiceKeys = (key: string | undefined) => (service: string): string => {
+/** A paid voice's key (read by main) as core asks for it; without one, the message says where to add it. */
+export const voiceKeys = (key: string | undefined) => (service: string): string => {
   if (key) return key;
   throw new Error(translate('media.noVoiceKey', { service }));
 };

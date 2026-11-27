@@ -1,5 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { FolderQueue } from '../../../src/main/services/FolderQueue.ts';
 import { ScriptService } from '../../../src/main/services/ScriptService.ts';
 import { editorProblemOf } from '../../../src/main/services/editorProblems.ts';
 import type { ScriptJson } from '../../../src/shared/script.ts';
@@ -16,7 +17,7 @@ function setup() {
   disk.put(FOLDER, 'cast/narrator.json', { id: 'narrator', name: 'Narrador', voice: { id: 'ryan' } });
   disk.put(FOLDER, 'script.json', SCRIPT);
   const core = new FakeScriptCore();
-  return { disk, core, service: new ScriptService({ core, disk, grants: grantsFor('/projetos') }) };
+  return { disk, core, service: new ScriptService({ core, disk, grants: grantsFor('/projetos'), saves: new FolderQueue() }) };
 }
 
 test('read gives the profile, the cast (who has a body) and the script; an id that is a path is never read', async () => {

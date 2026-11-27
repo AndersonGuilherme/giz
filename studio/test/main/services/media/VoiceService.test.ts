@@ -1,6 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { FolderGrants } from '../../../../src/main/services/FolderGrants.ts';
+import { FolderQueue } from '../../../../src/main/services/FolderQueue.ts';
 import { VoiceService } from '../../../../src/main/services/media/VoiceService.ts';
 import type { VoiceProgress } from '../../../../src/shared/voices.ts';
 import { FakeMediaCore, MemoryMediaFiles } from '../../../doubles/mediaFakes.ts';
@@ -24,8 +25,9 @@ function build(provider = 'qwen', key?: string) {
   core.items_ = { ...core.items_, voices: { stale: ['2'], missing: ['3'] }, voiceDollars: 0.004 };
   const files = new MemoryMediaFiles();
   const progress: VoiceProgress[] = [];
-  const service = new VoiceService({ core, disk, files, grants, keyOf: async () => key, needsKey: true, progress: (step) => progress.push(step) });
-  return { disk, core, files, service, progress };
+  const saves = new FolderQueue();
+  const service = new VoiceService({ core, disk, files, grants, saves, keyOf: async () => key, needsKey: true, progress: (step) => progress.push(step) });
+  return { disk, core, files, service, progress, saves };
 }
 
 test('every line with its speaker, its state (done, stale, missing), its audio and whether it is the person\'s own take', async () => {
@@ -46,7 +48,7 @@ test('"gerar todas as pendentes" makes every pending line; one line alone is mad
   await service.generate(FOLDER);
   await service.generate(FOLDER, '2');
   assert.deepEqual(core.voiceJobs.map(({ only }) => only), [undefined, '2']);
-  assert.deepEqual(progress.at(-1), { done: 1, total: 1, lineId: '2' });
+  assert.deepEqual(progress.slice(-2), [{ done: 1, total: 1, lineId: '2' }, { done: 1, total: 1, lineId: '2', ended: true }]);
   await assert.rejects(service.generate(FOLDER, '9'), { code: 'invalid-request' });
 });
 
@@ -86,4 +88,50 @@ test('without its take the line goes back to the project voice (made again)', as
   await service.unrecord(FOLDER, '1');
   assert.equal(files.files.has(`${FOLDER}/recordings/1.wav`), false);
   assert.equal(core.voiceJobs[0]!.only, '1');
+});
+
+const later = (milliseconds = 5) => new Promise((done) => setTimeout(done, milliseconds));
+
+test('while a job runs, a take is neither written nor removed (busy), and the document says a job is running', async () => {
+  const { service, core, files } = build();
+  await files.write(FOLDER, 'recordings/1.wav', WAV);
+  let release: () => void = () => undefined;
+  core.during = () => new Promise((done) => (release = done));
+  const running = service.generate(FOLDER);
+  await later();
+  assert.equal((await service.read(FOLDER)).generating, true);
+  await assert.rejects(service.record(FOLDER, '3', WAV), { code: 'busy' });
+  await assert.rejects(service.unrecord(FOLDER, '1'), { code: 'busy' });
+  assert.equal(files.files.has(`${FOLDER}/recordings/3.wav`), false);
+  assert.equal(files.files.has(`${FOLDER}/recordings/1.wav`), true);
+  release();
+  await running;
+  assert.equal((await service.read(FOLDER)).generating, false);
+});
+
+test('the end of a job is told (even after a cancel, once the line in flight really ends), so a screen opened later can reload', async () => {
+  const { service, core, progress } = build();
+  let release: () => void = () => undefined;
+  core.during = () => new Promise((done) => (release = done));
+  const running = service.generate(FOLDER);
+  await later();
+  service.cancel();
+  await assert.rejects(running, { code: 'cancelled' });
+  assert.equal(progress.some(({ ended }) => ended), false, 'not ended while the line is still being made');
+  release();
+  await later();
+  assert.deepEqual(progress.at(-1), { done: 1, total: 1, lineId: '1', ended: true });
+});
+
+test("the take is written in the folder's queue (after the folder's other writes)", async () => {
+  const { service, files, saves } = build();
+  let release: () => void = () => undefined;
+  const held = saves.run(FOLDER, () => new Promise<void>((done) => (release = done)));
+  const recording = service.record(FOLDER, '3', WAV);
+  await later();
+  assert.equal(files.files.has(`${FOLDER}/recordings/3.wav`), false);
+  release();
+  await held;
+  await recording;
+  assert.equal(files.files.has(`${FOLDER}/recordings/3.wav`), true);
 });

@@ -12,9 +12,13 @@ import { VoiceRow, type LineActions } from './VoiceRow.tsx';
 type Props = Readonly<{ api: GizApi; folder: string }>;
 type Stage = ReturnType<typeof useStageDocument<VoicesDocument>>;
 
-function useProgress(api: GizApi): VoiceProgress | null {
+// The job's progress; when it ends the document is read again (a job started before this screen opened ends here too).
+function useProgress(api: GizApi, onEnded: () => void): VoiceProgress | null {
   const [progress, setProgress] = useState<VoiceProgress | null>(null);
-  useEffect(() => api.voices.onProgress(setProgress), [api]);
+  useEffect(() => api.voices.onProgress((step) => {
+    setProgress(step.ended ? null : step);
+    if (step.ended) onEnded();
+  }), [api, onEnded]);
   return progress;
 }
 
@@ -28,17 +32,17 @@ function Progress({ progress }: Readonly<{ progress: VoiceProgress }>) {
   );
 }
 
-function Pending({ document, stage, api }: Readonly<{ document: VoicesDocument; stage: Stage; api: GizApi }>) {
+type PendingProps = Readonly<{ document: VoicesDocument; stage: Stage; api: GizApi; working: boolean; progress: VoiceProgress | null }>;
+
+function Pending({ document, stage, api, working, progress }: PendingProps) {
   const translate = useTranslate();
-  const progress = useProgress(api);
-  const running = stage.busy && progress !== null;
   return (
     <section className="card voices-pending" data-testid="voices-pending">
       <p><b>{translate(document.pending > 0 ? 'voices.pending' : 'voices.allDone', { count: document.pending })}</b> · {translate(`voiceProvider.${document.provider}`)} · <span data-testid="voices-cost">{costText(document.dollars, translate)}</span></p>
-      {running && <Progress progress={progress} />}
+      {working && progress && <Progress progress={progress} />}
       <div className="dialog-actions">
-        {stage.busy && <button type="button" className="chalk-button" data-testid="voices-cancel" onClick={() => void api.voices.cancel()}>{translate('common.cancel')}</button>}
-        <button type="button" className="chalk-button primary" data-testid="voices-generate-all" disabled={stage.busy || document.pending === 0} onClick={() => void stage.apply(api.voices.generate(document.folder))}>{translate('voices.generateAll')}</button>
+        {working && <button type="button" className="chalk-button" data-testid="voices-cancel" onClick={() => void api.voices.cancel()}>{translate('common.cancel')}</button>}
+        <button type="button" className="chalk-button primary" data-testid="voices-generate-all" disabled={working || document.pending === 0} onClick={() => void stage.apply(api.voices.generate(document.folder))}>{translate('voices.generateAll')}</button>
       </div>
     </section>
   );
@@ -62,17 +66,19 @@ export function VoicesScreen({ api, folder }: Props) {
   const translate = useTranslate();
   const load = useCallback(() => api.voices.read(folder), [api, folder]);
   const stage = useStageDocument(load);
+  const progress = useProgress(api, stage.reload);
   const recorder = useRecorder();
   const { document, failure } = stage;
   if (!document) return failure ? <main className="board"><FailurePanel failure={failure} /></main> : <p className="hint">{translate('editor.loading')}</p>;
   const actions = actionsOf({ api, stage, folder }, recorder);
+  const working = stage.busy || document.generating; // a job may run in main from before this screen opened
   return (
     <main className="board wide stage-screen" data-testid="voices-screen">
       <ScreenHead title={translate('voices.title')} hint={translate('voices.hint')} stages={document.stages} />
-      <Pending document={document} stage={stage} api={api} />
+      <Pending document={document} stage={stage} api={api} working={working} progress={progress} />
       {failure && <FailurePanel failure={failure} />}
       {recorder.failure && <p className="warning-text" role="alert">{translate('voices.micFailed', { reason: recorder.failure })}</p>}
-      <ol className="voice-list" data-testid="voice-list">{document.lines.map((line) => <VoiceRow key={line.lineId} line={line} busy={stage.busy} recording={recorder.recording} actions={actions} />)}</ol>
+      <ol className="voice-list" data-testid="voice-list">{document.lines.map((line) => <VoiceRow key={line.lineId} line={line} busy={working} recording={recorder.recording} actions={actions} />)}</ol>
     </main>
   );
 }

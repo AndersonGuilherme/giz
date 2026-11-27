@@ -5,11 +5,15 @@ import { useTranslate } from '../../i18n.ts';
 import { labelOf } from '../../labels.ts';
 import type { FieldProps, OptionLook } from './ParameterField.tsx';
 
-type Drawing = Readonly<{ id: string; rig: string; parameters: Readonly<Record<string, ParameterValue>> }>;
+type Drawing = Readonly<{ id: string; rig: string; parameters: Readonly<Record<string, ParameterValue>>; head: boolean }>;
 
-/** A small drawing of the character with one option (memoized: the grid redraws only what changed). */
-const OptionDrawing = memo(function OptionDrawing({ id, rig, parameters }: Drawing) {
-  return <span className="option-drawing" aria-hidden="true"><RigStill id={id} rig={rig} parameters={parameters} height={118} /></span>;
+/**
+ * A small drawing of the character with one option (memoized: the grid redraws only what changed); `head`: framed from
+ * above its highest point (headwear: a tall hat stays whole).
+ */
+const OptionDrawing = memo(function OptionDrawing({ id, rig, parameters, head }: Drawing) {
+  const still = head ? <RigStill id={id} rig={rig} parameters={parameters} height={74} framing="head" /> : <RigStill id={id} rig={rig} parameters={parameters} height={118} />;
+  return <span className={`option-drawing${head ? ' head' : ''}`} aria-hidden="true">{still}</span>;
 });
 
 type GridProps = FieldProps & Readonly<{ preview: (option: string) => OptionLook }>;
@@ -27,7 +31,7 @@ function Choice({ option, chosen, label, drawing, pick }: Readonly<{ option: str
 export function OptionGrid({ name, info, value, onChange, preview }: GridProps) {
   const translate = useTranslate();
   const [open, setOpen] = useState(false);
-  const drawingOf = (option: string): Drawing => ({ id: `option-${name}-${option}`, ...preview(option) });
+  const drawingOf = (option: string): Drawing => ({ id: `option-${name}-${option}`, ...preview(option), head: name === 'headwear' });
   const label = (option: string) => labelOf(translate, `opt.${name}`, option);
   return (
     <div className={`field option-field${open ? ' open' : ''}`} data-testid={`param-${name}`}>
