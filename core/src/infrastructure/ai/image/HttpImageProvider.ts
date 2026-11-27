@@ -6,7 +6,9 @@ import { sendWithRetries, ServiceHttpError, type SendPolicy, type Wait } from '.
 import { requiredKey } from '../../keys/requiredKey.ts';
 import { readableFailure, type FailureContext } from '../text/textErrors.ts';
 import type { ImageApi, ImageSource } from './imageApi.ts';
-import { cappedBytes, checkedImage, checkedLink, checkedType, MAXIMUM_IMAGE_BYTES, RejectedImage } from './imageDownload.ts';
+import {
+  cappedBytes, checkedImage, checkedLink, checkedType, isRedirect, MAXIMUM_IMAGE_BYTES, MAXIMUM_REDIRECTS, RejectedImage, redirectTarget,
+} from './imageDownload.ts';
 
 /**
  * What an image provider needs from outside: the HTTP client, the keys, a timer, how to send (retries by default) and
@@ -80,12 +82,34 @@ export class HttpImageProvider implements ImageProvider {
 
   // Only from the service's own hosts over https, and fetched without the key; the type, size and bytes are checked.
   async #download(link: Link, context: FailureContext, maximum: number): Promise<Uint8Array> {
-    const { fetch, wait, send = sendWithRetries } = this.#dependencies;
-    const url = checkedLink(link.url, this.#api.downloadHosts);
-    const response = await send(this.#api.label, () => fetch(url.href), wait).catch((error: unknown) => {
-      throw downloadFailure(error, context);
-    });
+    const hosts = this.#api.downloadHosts;
+    const response = await this.#followed(checkedLink(link.url, hosts), context, 0);
+    if (response.url) checkedLink(response.url, hosts); // a second check, should the client have followed on its own
     checkedType(response);
     return cappedBytes(response, maximum);
+  }
+
+  // Redirects are not followed blindly: each hop's Location goes through the same checks, at most MAXIMUM_REDIRECTS.
+  async #followed(url: URL, context: FailureContext, hops: number): Promise<Response> {
+    const response = await this.#fetchOnce(url, context);
+    const next = redirectTarget(response, url, this.#api.downloadHosts);
+    if (!next) return response;
+    if (hops >= MAXIMUM_REDIRECTS) throw new RejectedImage(`redirecionamentos demais (mais de ${MAXIMUM_REDIRECTS})`);
+    return this.#followed(next, context, hops + 1);
+  }
+
+  // The send policy lets only 2xx through: a redirect is set aside, and the policy sees an empty success.
+  async #fetchOnce(url: URL, context: FailureContext): Promise<Response> {
+    const { fetch, wait, send = sendWithRetries } = this.#dependencies;
+    let redirect: Response | undefined;
+    const response = await send(this.#api.label, async () => {
+      const answer = await fetch(url.href, { redirect: 'manual' });
+      if (!isRedirect(answer.status)) return answer;
+      redirect = answer;
+      return new Response(null, { status: 204 });
+    }, wait).catch((error: unknown) => {
+      throw downloadFailure(error, context);
+    });
+    return redirect ?? response;
   }
 }

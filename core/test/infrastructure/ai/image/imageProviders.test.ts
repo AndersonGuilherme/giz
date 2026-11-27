@@ -146,6 +146,42 @@ test('fal.ai download: only https, only fal hosts (subdomains too, not look-alik
   assert.equal(calls[1]?.url, 'https://v3b.fal.media/files/b/x.png');
 });
 
+const redirectTo = (location: string, status = 302) => new Response(null, { status, headers: { location } });
+
+test('fal.ai download: redirects are not followed blindly (manual); one to a foreign host is refused, unfetched', async () => {
+  const { calls, images } = provider(FAL_IMAGE_API, [json(FAL_OK), redirectTo('https://evil.example.com/x.png')]);
+  await assert.rejects(images.generate(vertical), refused(/o endereço da imagem é de outro servidor \(evil\.example\.com\)/));
+  assert.equal(calls.length, 2);
+  assert.equal(calls[1]?.init.redirect, 'manual');
+  const toHttp = provider(FAL_IMAGE_API, [json(FAL_OK), redirectTo('http://v3.fal.media/x.png')]);
+  await assert.rejects(toHttp.images.generate(vertical), refused(/não é https/));
+  const nowhere = provider(FAL_IMAGE_API, [json(FAL_OK), new Response(null, { status: 301 })]);
+  await assert.rejects(nowhere.images.generate(vertical), refused(/redirecionamento \(301\) sem destino válido/));
+});
+
+test('fal.ai download: a redirect to another fal.media subdomain (a relative Location too) is followed, without the key', async () => {
+  const { calls, images } = provider(FAL_IMAGE_API, [json(FAL_OK), redirectTo('https://v3b.fal.media/files/b/praca.png', 307), redirectTo('/files/b/final.png'), bytes(PIXELS)]);
+  const image = await images.generate(vertical);
+  assert.deepEqual(calls.slice(1).map((call) => call.url), [
+    'https://v3.fal.media/files/koala/praca.png', 'https://v3b.fal.media/files/b/praca.png', 'https://v3b.fal.media/files/b/final.png',
+  ]);
+  assert.ok(calls.slice(1).every((call) => call.init.redirect === 'manual' && !JSON.stringify(call.init).includes(KEY)));
+  assert.deepEqual(Buffer.from(image.bytes), PIXELS);
+});
+
+test('fal.ai download: a redirect loop is refused after 3 hops', async () => {
+  const loop = Array.from({ length: 6 }, (_unused, index) => redirectTo(`https://v3.fal.media/files/${index % 2 ? 'a' : 'b'}.png`));
+  const { calls, images } = provider(FAL_IMAGE_API, [json(FAL_OK), ...loop]);
+  await assert.rejects(images.generate(vertical), refused(/redirecionamentos demais \(mais de 3\)/));
+  assert.equal(calls.length, 1 + 4);
+});
+
+test('fal.ai download: the final response URL is checked too (a client that followed on its own)', async () => {
+  const followed = bytes(PIXELS);
+  Object.defineProperty(followed, 'url', { value: 'https://evil.example.com/x.png' });
+  await assert.rejects(provider(FAL_IMAGE_API, [json(FAL_OK), followed]).images.generate(vertical), refused(/outro servidor \(evil\.example\.com\)/));
+});
+
 test('fal.ai download: a declared size over the limit is refused before reading; a streamed body stops at the limit', async () => {
   const declared = new Response(new Uint8Array(PIXELS), { headers: { 'content-type': 'image/png', 'content-length': '999999999' } });
   await assert.rejects(provider(FAL_IMAGE_API, [json(FAL_OK), declared]).images.generate(vertical), refused(/maior que 50 MB/));

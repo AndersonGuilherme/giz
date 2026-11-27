@@ -19,6 +19,22 @@ export function checkedLink(text: string, hosts: readonly string[]): URL {
   return url;
 }
 
+/** How many redirects a download follows before it is refused. */
+export const MAXIMUM_REDIRECTS = 3;
+
+export const isRedirect = (status: number): boolean => status >= 300 && status < 400;
+
+/**
+ * Where a 3xx answer sends the download, resolved against the address it came from and checked like the first link
+ * (https, the service's hosts); `undefined` for an answer that is not a redirect.
+ */
+export function redirectTarget(response: Response, from: URL, hosts: readonly string[]): URL | undefined {
+  if (!isRedirect(response.status)) return undefined;
+  const location = response.headers.get('location');
+  if (!location || !URL.canParse(location, from)) throw new RejectedImage(`redirecionamento (${response.status}) sem destino válido`);
+  return checkedLink(new URL(location, from).href, hosts);
+}
+
 /** The declared type must be one of the image formats (the bytes are checked too, by `checkedImage`). */
 export function checkedType(response: Response): void {
   const type = (response.headers.get('content-type') ?? '').split(';')[0]!.trim().toLowerCase();
