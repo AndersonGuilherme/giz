@@ -61,6 +61,11 @@ export class Placement {
     return spots.sort((first, second) => first.y - second.y);
   }
 
+  /** How many characters fit on stage in this aspect ratio. */
+  static limitOf(aspect: AspectRatio): number {
+    return arrangementOf(aspect).limit;
+  }
+
   /** The floor line, in video pixels, where the feet rest and the backgrounds draw their floor. */
   static groundOf(aspect: AspectRatio): number {
     return arrangementOf(aspect).ground * aspect.height();

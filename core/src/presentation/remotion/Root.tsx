@@ -5,6 +5,7 @@ import { CharacterSheet, type CharacterSheetProps } from './CharacterSheet.tsx';
 import { PREVIEW_DEFAULTS } from './previewScene.ts';
 import { catalogMetadata, FRAMES_PER_SCENE, SceneCatalog } from './SceneCatalog.tsx';
 import { CATALOG_SAMPLES } from './catalogSamples.ts';
+import { CastPortraits, castPortraitsMetadata } from './CastPortraits.tsx';
 import { PresetSheet, presetSheetMetadata } from './PresetSheet.tsx';
 import { previewMetadata, ScenePreview } from './ScenePreview.tsx';
 import { EMPTY_VIDEO } from './emptyVideo.ts';
@@ -92,6 +93,20 @@ const BackgroundGalleryComposition: FC = () => (
   />
 );
 
+// The ready characters as square portraits in one picture (the Studio's cast picker); `--props` gives the cards.
+const CastPortraitsComposition: FC = () => (
+  <Composition
+    id="CastPortraits"
+    component={CastPortraits}
+    width={160}
+    height={160}
+    fps={30}
+    durationInFrames={1}
+    defaultProps={{ cards: [], cell: 160, columns: 8 }}
+    calculateMetadata={castPortraitsMetadata}
+  />
+);
+
 export const Root: FC = () => (
   <>
     <VideoComposition />
@@ -100,5 +115,6 @@ export const Root: FC = () => (
     <CatalogComposition />
     <PresetSheetComposition />
     <BackgroundGalleryComposition />
+    <CastPortraitsComposition />
   </>
 );

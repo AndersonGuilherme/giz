@@ -16,6 +16,7 @@ import { DiskVoiceStore } from '../../infrastructure/disk/DiskVoiceStore.ts';
 import { DiskProjectRepository } from '../../infrastructure/disk/DiskProjectRepository.ts';
 import { SrtCaptionWriter } from '../../infrastructure/disk/SrtCaptionWriter.ts';
 import { RemotionRenderer } from '../../infrastructure/render/RemotionRenderer.ts';
+import { RemotionPortraits } from '../../infrastructure/render/RemotionPortraits.ts';
 import { RemotionSheet } from '../../infrastructure/render/RemotionSheet.ts';
 import { headlessShellIn } from '../../infrastructure/render/browserLocation.ts';
 import { EspeakPhonemizer } from '../../infrastructure/phonetics/EspeakPhonemizer.ts';
@@ -65,4 +66,9 @@ export function produceVideo(folder: string): ProduceVideo {
 
 export function characterSheet(): RemotionSheet {
   return new RemotionSheet(REMOTION);
+}
+
+/** The ready characters' portraits in one picture (the Studio's cast picker). */
+export function castPortraits(): RemotionPortraits {
+  return new RemotionPortraits(REMOTION);
 }

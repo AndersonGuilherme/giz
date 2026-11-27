@@ -20,14 +20,18 @@ export const MAX_REPAIRS = 3;
 const DEFAULT_VOICE: ProjectVoice = { provider: 'qwen' };
 
 type Dependencies = Reviewers & Readonly<{ text: TextProvider; materials: ScriptMaterials; rigs: RigCatalog }>;
-export type ScriptTarget = Readonly<{ folder: string; voice?: ProjectVoice }>;
+/**
+ * `onCall(call, most)` is told before each call to the AI (1 of 4, then 2 of 4 for a repair...); an aborted `signal`
+ * stops before the next call and before anything is saved (the answer of a call already made is then thrown away).
+ */
+export type ScriptTarget = Readonly<{ folder: string; voice?: ProjectVoice; onCall?: (call: number, most: number) => void; signal?: AbortSignal }>;
 export type ScriptUsage = Readonly<{ calls: number; inputTokens: number; outputTokens: number }>;
 export type ScriptResult = Readonly<{ files: ProjectFiles; repairs: number; usage: ScriptUsage }>;
 /** Before calling: the first call, and the most it can cost with every repair round (each resends the answer). */
 export type ScriptEstimate = Readonly<{ firstCall: CostEstimate; maximum: CostEstimate }>;
 
 type Prepared = Readonly<{ request: TextRequest; draft: Omit<DraftContext, 'voice'> }>;
-type Context = Readonly<{ base: TextRequest; draft: DraftContext; folder: string }>;
+type Context = Readonly<{ base: TextRequest; draft: DraftContext; target: ScriptTarget }>;
 type Attempt = Readonly<{ request: TextRequest; repairs: number; usage: ScriptUsage }>;
 type Review = Readonly<{ files?: ProjectFiles; problems: readonly string[] }>;
 
@@ -74,7 +78,7 @@ export class GenerateScript {
   /** The valid project is saved into `target.folder`; nothing is written there while the answers are invalid. */
   async run(idea: Idea, target: ScriptTarget): Promise<ScriptResult> {
     const { request, draft } = await this.#prepared(idea);
-    const context = { base: request, draft: { ...draft, voice: target.voice ?? DEFAULT_VOICE }, folder: target.folder };
+    const context = { base: request, draft: { ...draft, voice: target.voice ?? DEFAULT_VOICE }, target };
     return this.#attempt(context, { request, repairs: 0, usage: NO_USAGE });
   }
 
@@ -87,14 +91,22 @@ export class GenerateScript {
   }
 
   async #attempt(context: Context, attempt: Attempt): Promise<ScriptResult> {
-    const answer = await this.#dependencies.text.generate(attempt.request);
+    const answer = await this.#called(context.target, attempt);
     const usage = added(attempt.usage, answer.usage);
     const review = await this.#reviewed(answer.text, context.draft);
-    if (review.files) return this.#saved(context.folder, { files: review.files, repairs: attempt.repairs, usage });
+    if (review.files) return this.#saved(context.target, { files: review.files, repairs: attempt.repairs, usage });
     const { problems, maxTokens } = afterCut(answer, attempt.request.maxTokens ?? 0, review.problems);
-    if (attempt.repairs >= MAX_REPAIRS) return this.#failed(context.folder, { answer: answer.text, problems, repairs: attempt.repairs });
+    if (attempt.repairs >= MAX_REPAIRS) return this.#failed(context.target.folder, { answer: answer.text, problems, repairs: attempt.repairs });
     const request = repairRequest(context.base, { answer: answer.text, maxTokens }, shownProblems(problems));
     return this.#attempt(context, { request, repairs: attempt.repairs + 1, usage });
+  }
+
+  async #called(target: ScriptTarget, attempt: Attempt): Promise<TextAnswer> {
+    target.onCall?.(attempt.repairs + 1, MAX_REPAIRS + 1);
+    target.signal?.throwIfAborted();
+    const answer = await this.#dependencies.text.generate(attempt.request);
+    target.signal?.throwIfAborted();
+    return answer;
   }
 
   async #reviewed(text: string, context: DraftContext): Promise<Review> {
@@ -104,8 +116,9 @@ export class GenerateScript {
     return problems.length > 0 ? { problems } : draft;
   }
 
-  async #saved(folder: string, result: ScriptResult): Promise<ScriptResult> {
-    await this.#dependencies.folder.save(folder, result.files);
+  async #saved(target: ScriptTarget, result: ScriptResult): Promise<ScriptResult> {
+    target.signal?.throwIfAborted();
+    await this.#dependencies.folder.save(target.folder, result.files);
     return result;
   }
 

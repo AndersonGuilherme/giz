@@ -260,3 +260,35 @@ test('regenerating keeps the voice the project already had', async () => {
     assert.deepEqual((await readJson(folder, 'project.json')).voice, { provider: 'qwen', model: '0.6b' });
   });
 });
+
+test('each call is announced before it is made: call 1 of 4, then 2 of 4 for the repair', async () => {
+  await withFolder(async (folder) => {
+    const { generate } = generator([INVALID, VALID]);
+    const calls: Array<[number, number]> = [];
+    await generate.run(Idea.fromJson(IDEA), { folder, onCall: (call, most) => calls.push([call, most]) });
+    assert.deepEqual(calls, [[1, 4], [2, 4]]);
+  });
+});
+
+test('an aborted signal stops before the next call and never saves the folder', async () => {
+  await withFolder(async (folder) => {
+    const { text, generate } = generator([INVALID, VALID]);
+    const controller = new AbortController();
+    const run = generate.run(Idea.fromJson(IDEA), { folder, signal: controller.signal, onCall: (call) => (call === 2 ? controller.abort() : undefined) });
+    await assert.rejects(run, { name: 'AbortError' });
+    assert.equal(text.requests.length, 1);
+    assert.equal(await exists(folder), false);
+    assert.equal(await exists(`${folder}.draft`), false);
+  });
+});
+
+test('an answer that arrives after the abort is not saved', async () => {
+  await withFolder(async (folder) => {
+    const controller = new AbortController();
+    const text = new FakeTextProvider([VALID]);
+    const late = { generate: async (request: Parameters<typeof text.generate>[0]) => { const answer = await text.generate(request); controller.abort(); return answer; }, estimate: text.estimate.bind(text) };
+    const generate = new GenerateScript({ text: late, materials, rigs, folder: new DiskProjectFolder(), repository, check });
+    await assert.rejects(generate.run(Idea.fromJson(IDEA), { folder, signal: controller.signal }), { name: 'AbortError' });
+    assert.equal(await exists(folder), false);
+  });
+});

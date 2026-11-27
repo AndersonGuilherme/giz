@@ -73,6 +73,11 @@ export class ProblemCollector {
     issues.forEach((issue) => this.#problems.push(...issueProblems(file, issue)));
   }
 
+  /** The problems gathered so far (a caller that reports them instead of failing). */
+  problems(): readonly Problem[] {
+    return [...this.#problems];
+  }
+
   failIfAny(): void {
     if (this.#problems.length > 0) this.fail();
   }
