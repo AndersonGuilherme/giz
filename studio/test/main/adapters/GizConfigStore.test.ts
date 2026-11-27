@@ -5,6 +5,12 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { GizConfigStore } from '../../../src/main/adapters/GizConfigStore.ts';
 
+// Back to how it was: a variable that was not set is deleted (not set to the string "undefined").
+function restoreQuiet(previous: string | undefined): void {
+  if (previous === undefined) return void delete process.env.GIZ_QUIET;
+  process.env.GIZ_QUIET = previous;
+}
+
 test("the shared values go through core's config: only the Studio's keys change, every other key stays", async () => {
   const folder = await mkdtemp(join(tmpdir(), 'giz-shared-'));
   const previousQuiet = process.env.GIZ_QUIET;
@@ -23,13 +29,14 @@ test("the shared values go through core's config: only the Studio's keys change,
     assert.equal(saved.device, 'cuda');
     assert.match((await store.defaults()).modelsDir, /\.cache[/\\]giz$/);
   } finally {
-    process.env.GIZ_QUIET = previousQuiet;
+    restoreQuiet(previousQuiet);
     await rm(folder, { recursive: true, force: true });
   }
 });
 
 test('without giz.config.json the reads are core defaults, and the first write creates it', async () => {
   const folder = await mkdtemp(join(tmpdir(), 'giz-shared-'));
+  const previousQuiet = process.env.GIZ_QUIET;
   process.env.GIZ_QUIET = '1';
   try {
     const store = new GizConfigStore(join(folder, 'giz.config.json'));
@@ -39,7 +46,7 @@ test('without giz.config.json the reads are core defaults, and the first write c
     assert.equal(saved.remotionLicense, 'pessoa-fisica');
     assert.equal(saved.brand, 'giz');
   } finally {
-    delete process.env.GIZ_QUIET;
+    restoreQuiet(previousQuiet);
     await rm(folder, { recursive: true, force: true });
   }
 });

@@ -7,18 +7,24 @@ import { StepRail } from './StepRail.tsx';
 
 type FooterProps = Readonly<{ step: number; panel: Panel; go: (step: number) => void }>;
 
-function Footer({ step, panel, go }: FooterProps) {
+// The way on: an optional step not done yet is only skipped (its own button is the action); otherwise "Continuar".
+function Forward({ step, panel, go }: FooterProps) {
   const translate = useTranslate();
-  const { settings, actions } = useSetup();
+  const setup = useSetup();
+  const done = panel.done(setup);
   const last = step === PANELS.length - 1;
-  const next = () => (last ? actions.finish() : go(step + 1));
+  if (panel.optional && !done) return <button type="button" className="chalk-button" data-testid="wizard-skip" onClick={() => go(step + 1)}>{translate('app.skip')}</button>;
+  const next = () => (last ? setup.actions.finish() : go(step + 1));
+  return <button type="button" className="chalk-button primary" data-testid="wizard-next" disabled={!done} onClick={next}>{translate(last ? 'app.finish' : 'app.next')}</button>;
+}
+
+function Footer(props: FooterProps) {
+  const translate = useTranslate();
+  const { step, go } = props;
   return (
     <footer className="wizard-footer">
       {step > 0 ? <button type="button" className="chalk-button quiet" data-testid="wizard-back" onClick={() => go(step - 1)}>{translate('app.back')}</button> : <span />}
-      <div className="row">
-        {panel.optional && <button type="button" className="chalk-button quiet" data-testid="wizard-skip" onClick={() => go(step + 1)}>{translate('app.skip')}</button>}
-        <button type="button" className="chalk-button primary" data-testid="wizard-next" disabled={!panel.ready(settings)} onClick={next}>{translate(last ? 'app.finish' : 'app.next')}</button>
-      </div>
+      <Forward {...props} />
     </footer>
   );
 }

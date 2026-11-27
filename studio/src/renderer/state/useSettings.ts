@@ -1,9 +1,13 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Failure, Result } from '../../shared/contract.ts';
 import type { GizApi } from '../../shared/GizApi.ts';
 import type { FolderSource, Settings, SettingsPatch } from '../../shared/settings.ts';
+import { serially } from './serially.ts';
 
-/** The settings, loaded once and replaced by each answer of the main process (which owns them). */
+/**
+ * The settings, loaded once and replaced by each answer of the main process (which owns them). The calls go one at a
+ * time, so the last answer shown is always the one of the last change.
+ */
 export function useSettings(api: GizApi) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
@@ -12,12 +16,14 @@ export function useSettings(api: GizApi) {
     setFailure(null);
     setSettings(result.value);
   }, []);
-  const reload = useCallback(() => void api.settings.get().then(take), [api, take]);
+  const queue = useMemo(serially, []);
+  const send = useCallback((call: () => Promise<Result<Settings>>) => void queue(call).then(take), [queue, take]);
+  const reload = useCallback(() => send(() => api.settings.get()), [api, send]);
   useEffect(reload, [reload]);
-  const update = useCallback((patch: SettingsPatch) => void api.settings.update(patch).then(take), [api, take]);
-  const projectsFolder = useCallback((source: FolderSource) => void api.settings.projectsFolder(source).then(take), [api, take]);
-  const modelsFolder = useCallback((source: FolderSource) => void api.settings.modelsFolder(source).then(take), [api, take]);
-  const finish = useCallback(() => void api.settings.finish().then(take), [api, take]);
+  const update = useCallback((patch: SettingsPatch) => send(() => api.settings.update(patch)), [api, send]);
+  const projectsFolder = useCallback((source: FolderSource) => send(() => api.settings.projectsFolder(source)), [api, send]);
+  const modelsFolder = useCallback((source: FolderSource) => send(() => api.settings.modelsFolder(source)), [api, send]);
+  const finish = useCallback(() => send(() => api.settings.finish()), [api, send]);
   return { settings, failure, reload, update, projectsFolder, modelsFolder, finish };
 }
 

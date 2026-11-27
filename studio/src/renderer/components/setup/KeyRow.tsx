@@ -23,9 +23,25 @@ function TestButton({ provider }: Readonly<{ provider: KeyProvider }>) {
   return <button type="button" className="chalk-button small" data-testid={`test-${provider}`} disabled={busy} onClick={() => void accounts.test(provider)}>{translate(busy ? 'accounts.testing' : 'accounts.test')}</button>;
 }
 
+// With a keychain, a key file is the giz command's (the Studio writes none then): it is shown, never removed here.
+function CliFile({ provider }: Readonly<{ provider: KeyProvider }>) {
+  const translate = useTranslate();
+  const folder = useSetup().accounts.status?.fileFolder ?? '';
+  return (
+    <>
+      <div className="row">
+        <span className="chip file">{translate('accounts.cliFile')}</span>
+        <TestButton provider={provider} />
+      </div>
+      <p className="muted small" data-testid={`cli-file-${provider}`}>{translate('accounts.cliFileStays', { folder })}</p>
+    </>
+  );
+}
+
 function KeyActions({ provider, storage }: Readonly<{ provider: KeyProvider; storage: KeyStorage }>) {
   const translate = useTranslate();
   const { accounts } = useSetup();
+  if (storage === 'file' && accounts.status?.secure) return <CliFile provider={provider} />;
   return (
     <div className="row">
       <span className={`chip ${storage}`}>{translate(STORAGE_TEXT[storage])}</span>

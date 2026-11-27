@@ -33,6 +33,8 @@ const sharedPatchOf = ({ device, model, remotionLicense }: SettingsPatch): Parti
  */
 export class SettingsService {
   readonly #dependencies: Dependencies;
+  // The changes run one after the other: two made at once (a quick double click) must not overwrite each other.
+  #queue: Promise<unknown> = Promise.resolve();
 
   constructor(dependencies: Dependencies) {
     this.#dependencies = dependencies;
@@ -53,7 +55,32 @@ export class SettingsService {
     return { ...own, ...shared, firstRun: !firstRunDone, defaultProjectsFolder: this.#dependencies.defaultProjectsFolder };
   }
 
-  async update(patch: SettingsPatch): Promise<Settings> {
+  update(patch: SettingsPatch): Promise<Settings> {
+    return this.#exclusive(() => this.#update(patch));
+  }
+
+  projectsFolder(source: FolderSource): Promise<Settings> {
+    return this.#exclusive(() => this.#projectsFolder(source));
+  }
+
+  modelsFolder(source: FolderSource): Promise<Settings> {
+    return this.#exclusive(() => this.#modelsFolder(source));
+  }
+
+  finish(): Promise<Settings> {
+    return this.#exclusive(async () => {
+      await this.#saveApp({ ...(await this.#app()), firstRunDone: true });
+      return this.get();
+    });
+  }
+
+  #exclusive<T>(task: () => Promise<T>): Promise<T> {
+    const run = this.#queue.then(task);
+    this.#queue = run.catch(() => undefined);
+    return run;
+  }
+
+  async #update(patch: SettingsPatch): Promise<Settings> {
     const app = await this.#app();
     const providers = { ...app.providers, ...patch.providers };
     await this.#saveApp({ ...app, language: patch.language ?? app.language, providers });
@@ -64,7 +91,7 @@ export class SettingsService {
     return this.get();
   }
 
-  async projectsFolder(source: FolderSource): Promise<Settings> {
+  async #projectsFolder(source: FolderSource): Promise<Settings> {
     const { defaultProjectsFolder, grants } = this.#dependencies;
     const folder = source === 'pick' ? await this.#dependencies.picker.pickFolder() : defaultProjectsFolder;
     if (folder === null) return this.get();
@@ -73,17 +100,12 @@ export class SettingsService {
     return this.get();
   }
 
-  async modelsFolder(source: FolderSource): Promise<Settings> {
+  async #modelsFolder(source: FolderSource): Promise<Settings> {
     const { shared, picker } = this.#dependencies;
     const folder = source === 'pick' ? await picker.pickFolder() : (await shared.defaults()).modelsDir;
     if (folder === null) return this.get();
     await this.#dependencies.makeFolder(folder);
     await shared.write({ modelsDir: folder });
-    return this.get();
-  }
-
-  async finish(): Promise<Settings> {
-    await this.#saveApp({ ...(await this.#app()), firstRunDone: true });
     return this.get();
   }
 

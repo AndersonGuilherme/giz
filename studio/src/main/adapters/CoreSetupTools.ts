@@ -1,7 +1,7 @@
 import type { GpuStatus, ModelsStatus, SetupTask } from '../../shared/setup.ts';
 import type { SetupJob, SetupTools } from '../ports/SetupTools.ts';
 import { coreTools } from './coreModules.ts';
-import { freeBytesOf } from './diskSpace.ts';
+import { bytesIn, freeBytesOf } from './diskSpace.ts';
 import { runInWorker } from './WorkerSetupRunner.ts';
 
 const GIGABYTE = 1e9;
@@ -20,13 +20,16 @@ export class CoreSetupTools implements SetupTools {
   }
 
   async models(modelsDir: string): Promise<ModelsStatus> {
-    const { VOICE_MODEL_SIZES, voiceModelReady, whisperReady } = await coreTools();
-    const voiceOf = (model: '0.6b' | '1.7b') => ({ ready: voiceModelReady(model, modelsDir), bytes: VOICE_MODEL_SIZES[model].gigabytes * GIGABYTE });
+    const { VOICE_MODEL_SIZES, voiceModelReady, voiceModelFolder, whisperReady } = await coreTools();
+    const voiceOf = async (model: '0.6b' | '1.7b') => ({
+      ready: voiceModelReady(model, modelsDir), bytes: VOICE_MODEL_SIZES[model].gigabytes * GIGABYTE, onDiskBytes: await bytesIn(voiceModelFolder(model, modelsDir)),
+    });
     return {
       modelsDir,
       freeBytes: await freeBytesOf(modelsDir),
-      voice: { '0.6b': voiceOf('0.6b'), '1.7b': voiceOf('1.7b') },
-      whisper: { ready: whisperReady(), bytes: WHISPER_BYTES },
+      voice: { '0.6b': await voiceOf('0.6b'), '1.7b': await voiceOf('1.7b') },
+      // A stopped Whisper download starts over (see core's whisperDownload.ts): nothing of it counts.
+      whisper: { ready: whisperReady(), bytes: WHISPER_BYTES, onDiskBytes: 0 },
     };
   }
 

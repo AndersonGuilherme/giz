@@ -51,6 +51,11 @@ export class KeyService {
     });
   }
 
+  /** The key for a call the main process makes itself (a script generation); never sent to the window. */
+  keyOf(provider: KeyProvider): Promise<string | undefined> {
+    return this.#read(provider);
+  }
+
   #exclusive<T>(task: () => Promise<T>): Promise<T> {
     const run = this.#queue.then(task);
     this.#queue = run.catch(() => undefined);
@@ -79,13 +84,14 @@ export class KeyService {
     return files.read(provider);
   }
 
-  // Forgets the key wherever the Studio sees it: the keychain vault and the CLI file.
+  // Forgets the key where the Studio keeps it: the keychain vault, or (without a keychain) the file it wrote there. With
+  // a keychain, a ~/.config/giz file is the CLI's (the Studio never writes one then): it stays for the giz command.
   async #forget(provider: KeyProvider): Promise<boolean> {
-    const { vault, files } = this.#dependencies;
+    const { cipher, vault, files } = this.#dependencies;
+    if (!cipher.available()) return files.remove(provider);
     const keys = await vault.read();
-    const sealed = Object.hasOwn(keys, provider);
-    if (sealed) await vault.write(Object.fromEntries(Object.entries(keys).filter(([name]) => name !== provider)));
-    const filed = await files.remove(provider);
-    return sealed || filed;
+    if (!Object.hasOwn(keys, provider)) return false;
+    await vault.write(Object.fromEntries(Object.entries(keys).filter(([name]) => name !== provider)));
+    return true;
   }
 }

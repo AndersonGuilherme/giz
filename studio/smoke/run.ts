@@ -49,7 +49,9 @@ async function shoot(page: Page, name: string): Promise<void> {
 async function firstScreen(page: Page): Promise<void> {
   const mounted = await page.until('[data-testid="wizard-language"]', Date.now() + 30_000).catch(() => false);
   if (mounted) return;
-  console.log('smoke: the first page load did not mount; reloading once. Console:', page.problems.join(' | ') || '(nothing)');
+  const cause = await page.evaluate(`document.readyState + ', #root children: ' + (document.getElementById('root')?.childElementCount ?? 'none')`).catch(String);
+  const mainLog = output.split('\n').filter((line) => line.includes('giz page:')).slice(-10).join(' | ');
+  console.log(`smoke: the window did not mount in 30 s (page ${cause}; main: ${mainLog || 'no page problem logged'}; console: ${page.problems.join(' | ') || 'nothing'}); reloading once`);
   await page.send('Page.reload', { ignoreCache: true });
   await page.until('[data-testid="wizard-language"]');
 }
@@ -78,6 +80,8 @@ async function projectsStep(page: Page): Promise<void> {
 
 async function gpuStep(page: Page): Promise<void> {
   await page.until('[data-testid="gpu-install"]');
+  assert.equal(await page.evaluate(`document.querySelector('[data-testid="wizard-next"]')`), null, 'an optional step not done offers only the skip');
+  await page.until('[data-testid="wizard-skip"]');
   await shoot(page, '03a-gpu-detectada');
   await page.click('[data-testid="gpu-install"]');
   await page.untilText('[data-testid="task-gpu"]', /libcublas · [1-9]/);
@@ -127,6 +131,7 @@ async function accountsStep(page: Page): Promise<void> {
   await page.click('[data-testid="test-openai"]');
   await page.untilText('[data-testid="account-openai"]', /a chave foi recusada \(401\)/);
   await page.click('.choice:nth-child(2) .segmented button:nth-child(3)');
+  await page.until('[data-testid="missing-key-fal"]');
   await saveKey(page, 'elevenlabs', 'xi-ensaio');
   await page.untilText('[data-testid="account-elevenlabs"]', /sem teste por enquanto/);
   const status = (await page.evaluate('window.giz.keys.status()')) as { value: { secure: boolean; keys: Record<string, string | null> } };

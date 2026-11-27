@@ -23,11 +23,25 @@ function lockNavigation(window: BrowserWindow): void {
   window.webContents.on('will-navigate', (event) => event.preventDefault());
 }
 
+// What goes wrong in the page is written to the main process output (the terminal, the smoke test's log): a preload
+// that failed, a renderer that died, a page that did not load, and the page's own warnings and errors.
+const PAGE_LOG = 'giz page:';
+function logPageProblems(window: BrowserWindow): void {
+  const contents = window.webContents;
+  contents.on('preload-error', (_event, path, error) => console.error(PAGE_LOG, 'preload-error', path, error.message));
+  contents.on('render-process-gone', (_event, details) => console.error(PAGE_LOG, 'render-process-gone', details.reason, details.exitCode));
+  contents.on('did-fail-load', (...[, code, description, url]) => console.error(PAGE_LOG, 'did-fail-load', code, description, url));
+  contents.on('console-message', ({ level, message, sourceId, lineNumber }) => {
+    if (level === 'warning' || level === 'error') console.error(PAGE_LOG, `console-${level}`, message, `${sourceId}:${lineNumber}`);
+  });
+}
+
 /** The Studio window, with the slate background already painted while the page loads. */
 export function createMainWindow(title: string): BrowserWindow {
   const preload = join(__dirname, 'preload.cjs');
   const window = new BrowserWindow({ width: 1100, height: 760, minWidth: 720, minHeight: 520, title, backgroundColor: '#26302d', webPreferences: { ...WEB_PREFERENCES, preload } });
   lockNavigation(window);
+  logPageProblems(window);
   void load(window);
   return window;
 }

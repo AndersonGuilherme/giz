@@ -1,6 +1,7 @@
 import { app, BrowserWindow, ipcMain, session } from 'electron';
 import started from 'electron-squirrel-startup';
 import { createServices, preparePaths } from './composition.ts';
+import { afterReady } from './ipc/afterReady.ts';
 import { handlersOf } from './ipc/handlers.ts';
 import { registerChannels } from './ipc/registry.ts';
 import { REQUEST_SCHEMAS } from './ipc/schemas.ts';
@@ -22,9 +23,10 @@ function register(): void {
   denyAllPermissions(session.defaultSession);
   const rules = { window: () => slot.current(), origin: appOrigin() };
   const services = createServices(slot);
-  // The saved language and projects folder take effect (the window asks for the settings when it loads).
-  void services.settings.restore();
-  registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers: handlersOf(services), trusts: (event) => isTrustedSender(event, rules) });
+  // The saved language and projects folder take effect before any channel answers (see afterReady).
+  const restored = services.settings.restore().catch((error: unknown) => console.error('giz: the saved settings could not be restored:', error));
+  const handlers = afterReady(handlersOf(services), restored);
+  registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers, trusts: (event) => isTrustedSender(event, rules) });
 }
 
 function openWindow(): void {

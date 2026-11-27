@@ -31,7 +31,7 @@ function VoiceOption({ model, models }: Readonly<{ model: VoiceModel; models: Mo
   const badge = settings.model === model ? translate('models.chosen') : undefined;
   return (
     <OptionCard testId={`model-${model}`} selected={settings.model === model} onSelect={() => actions.update({ model })} title={title} badge={badge} detail={translate(TEXTS[model].detail)}>
-      <ModelDownload task={voiceTaskOf(model)} status={models.voice[model]} freeBytes={models.freeBytes} />
+      <ModelDownload task={voiceTaskOf(model)} status={models.voice[model]} freeBytes={models.freeBytes} resumable />
     </OptionCard>
   );
 }
@@ -45,7 +45,7 @@ function Whisper({ models }: Readonly<{ models: ModelsStatus }>) {
         <strong>{translate('models.whisper')}</strong> <span className="muted">· {formatBytes(models.whisper.bytes, settings.language)}</span>
         <p className="muted">{translate('models.whisperDetail')}</p>
       </div>
-      <ModelDownload task="whisper" status={models.whisper} freeBytes={models.freeBytes} />
+      <ModelDownload task="whisper" status={models.whisper} freeBytes={models.freeBytes} resumable={false} />
     </div>
   );
 }

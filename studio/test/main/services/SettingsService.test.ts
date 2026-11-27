@@ -5,8 +5,8 @@ import { SettingsService } from '../../../src/main/services/SettingsService.ts';
 import { grantsFor } from '../../doubles/fakes.ts';
 import { CORE_DEFAULTS, InMemoryAppConfig, InMemorySharedConfig } from '../../doubles/settingsFakes.ts';
 
-function settingsService(picked: string | null = null) {
-  const app = new InMemoryAppConfig();
+function settingsService(picked: string | null = null, delay = 0) {
+  const app = new InMemoryAppConfig(delay);
   const shared = new InMemorySharedConfig();
   const grants = grantsFor();
   const made: string[] = [];
@@ -78,4 +78,19 @@ test('finish ends the first run; restore applies the saved language and grants t
   await again.service.restore();
   assert.deepEqual(again.languages, ['pt-BR']);
   assert.equal(again.grants.require('/home/ana/giz/projetos/x'), '/home/ana/giz/projetos/x');
+});
+
+test('changes made at the same time all survive (the read-modify-writes run one at a time)', async () => {
+  const { service, app } = settingsService(null, 5);
+  await Promise.all([
+    service.update({ language: 'pt-BR' }),
+    service.update({ providers: { text: 'gemini' } }),
+    service.update({ providers: { voice: 'fish' } }),
+    service.projectsFolder('default'),
+  ]);
+  assert.equal(app.config?.language, 'pt-BR');
+  assert.deepEqual(app.config?.providers, { text: 'gemini', image: 'openai', voice: 'fish' });
+  assert.equal(app.config?.projectsFolder, '/home/ana/giz/projetos');
+  await service.finish();
+  assert.equal(app.config?.language, 'pt-BR');
 });

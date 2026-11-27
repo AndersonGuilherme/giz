@@ -13,6 +13,14 @@ const CHOICES: ReadonlyArray<Readonly<{ task: Task; label: 'accounts.text' | 'ac
   { task: 'voice', label: 'accounts.voice', options: VOICE_PROVIDERS },
 ];
 
+// The chosen service has no key yet: say so next to the choice (the local voice needs none).
+function MissingKey({ chosen }: Readonly<{ chosen: ProviderChoices[Task] }>) {
+  const translate = useTranslate();
+  const { status } = useSetup().accounts;
+  if (chosen === 'qwen' || !status || status.keys[chosen] !== null) return null;
+  return <span className="warning-text" data-testid={`missing-key-${chosen}`}>{translate('accounts.noKeyFor', { name: providerName(chosen) })}</span>;
+}
+
 function ProviderChoice({ task, label, options }: (typeof CHOICES)[number]) {
   const translate = useTranslate();
   const { settings, actions } = useSetup();
@@ -25,6 +33,7 @@ function ProviderChoice({ task, label, options }: (typeof CHOICES)[number]) {
           <button key={option} type="button" role="radio" aria-checked={settings.providers[task] === option} className={settings.providers[task] === option ? 'on' : ''} onClick={() => actions.update({ providers: { [task]: option } })}>{nameOf(option)}</button>
         ))}
       </div>
+      <MissingKey chosen={settings.providers[task]} />
     </div>
   );
 }

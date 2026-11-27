@@ -41,15 +41,25 @@ export class FakeChecker implements KeyChecker {
   }
 }
 
+const later = (milliseconds: number) => new Promise((done) => setTimeout(done, milliseconds));
+
+/** studio.json in memory; `delay` makes reads and writes slow, so overlapping read-modify-writes would lose changes. */
 export class InMemoryAppConfig implements AppConfigStore {
   config: AppConfig | null = null;
   writes = 0;
+  readonly #delay: number;
+
+  constructor(delay = 0) {
+    this.#delay = delay;
+  }
 
   async read(): Promise<AppConfig | null> {
+    await later(this.#delay);
     return this.config;
   }
 
   async write(config: AppConfig): Promise<void> {
+    await later(this.#delay);
     this.config = config;
     this.writes += 1;
   }
@@ -94,7 +104,7 @@ export class FakeSetupTools implements SetupTools {
   }
 
   async models(modelsDir: string): Promise<ModelsStatus> {
-    const model = { ready: false, bytes: 1 };
+    const model = { ready: false, bytes: 1, onDiskBytes: 0 };
     return { modelsDir, freeBytes: 10, voice: { '0.6b': model, '1.7b': model }, whisper: model };
   }
 

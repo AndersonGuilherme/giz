@@ -20,7 +20,7 @@ export class RehearsalSetupTools implements SetupTools {
   }
 
   async models(modelsDir: string): Promise<ModelsStatus> {
-    const status = (task: SetupTask) => ({ ready: this.#done.has(task), bytes: SIZES[task] });
+    const status = (task: SetupTask) => ({ ready: this.#done.has(task), bytes: SIZES[task], onDiskBytes: (SIZES[task] * (this.#reached.get(task) ?? 0)) / STEPS });
     return { modelsDir, freeBytes: 120 * GIGABYTE, voice: { '0.6b': status('voice-0.6b'), '1.7b': status('voice-1.7b') }, whisper: status('whisper') };
   }
 

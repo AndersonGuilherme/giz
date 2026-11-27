@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useTranslate } from '../../i18n.ts';
+import { Brand } from '../Brand.tsx';
 import { PANELS } from '../setup/panels.ts';
 
 type NavProps = Readonly<{ current: string; choose: (id: string) => void; onClose: () => void }>;
@@ -24,12 +25,15 @@ export function SettingsScreen({ onClose }: Readonly<{ onClose: () => void }>) {
   const panel = PANELS.find(({ id }) => id === current) ?? PANELS[0];
   const { Component } = panel;
   return (
-    <div className="settings" data-testid={`settings-${panel.id}`}>
-      <SettingsNav current={current} choose={choose} onClose={onClose} />
-      <section className="card panel">
-        <h2 className="panel-title">{translate(panel.title)}</h2>
-        <Component />
-      </section>
-    </div>
+    <>
+      <header className="header"><Brand /></header>
+      <div className="settings" data-testid={`settings-${panel.id}`}>
+        <SettingsNav current={current} choose={choose} onClose={onClose} />
+        <section className="card panel">
+          <h2 className="panel-title">{translate(panel.title)}</h2>
+          <Component />
+        </section>
+      </div>
+    </>
   );
 }

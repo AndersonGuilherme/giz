@@ -10,7 +10,8 @@ export type GpuInfo = Readonly<{ name: string; memoryMiB: number; driver: string
 /** `supported`: the GPU setup exists for this system (Linux x64, WSL included); `ready`: the voice can run on it. */
 export type GpuStatus = Readonly<{ gpu: GpuInfo | null; supported: boolean; ready: boolean; bytes: number }>;
 
-export type ModelStatus = Readonly<{ ready: boolean; bytes: number }>;
+/** `bytes`: the whole model; `onDiskBytes`: what a stopped download already left on disk (it needs only the rest). */
+export type ModelStatus = Readonly<{ ready: boolean; bytes: number; onDiskBytes: number }>;
 /** `freeBytes`: free space where the models go (null when it cannot be read). */
 export type ModelsStatus = Readonly<{ modelsDir: string; freeBytes: number | null; voice: Readonly<Record<VoiceModel, ModelStatus>>; whisper: ModelStatus }>;
 

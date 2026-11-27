@@ -5,6 +5,8 @@ import { useSetup } from '../../state/SetupContext.ts';
 import { fractionOf, jobOf, type JobState } from '../../state/setupJobs.ts';
 
 type Props = Readonly<{ task: SetupTask; stopLabel: 'task.cancel' | 'task.pause' }>;
+// A paused download picks up where it stopped; a cancelled one (GPU install, Whisper) starts over.
+const STOPPED_TEXT = { 'task.pause': 'task.stopped', 'task.cancel': 'task.cancelled' } as const;
 
 function Bytes({ job }: Readonly<{ job: JobState }>) {
   const translate = useTranslate();
@@ -27,7 +29,7 @@ export function TaskBar({ task, stopLabel }: Props) {
     <div className="task" data-testid={`task-${task}`}>
       <progress className="chalk-progress" max={1} value={fraction ?? undefined} />
       <div className="task-line">
-        <span className="task-status" aria-live="polite"><Bytes job={job} />{job.status === 'stopped' && <> · {translate('task.stopped')}</>}</span>
+        <span className="task-status" aria-live="polite"><Bytes job={job} />{job.status === 'stopped' && <> · {translate(STOPPED_TEXT[stopLabel])}</>}</span>
         {job.status === 'running' && <button type="button" className="chalk-button small" onClick={() => jobs.stop(task)}>{translate(stopLabel)}</button>}
       </div>
     </div>

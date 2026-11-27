@@ -5,19 +5,21 @@ import { useSetup } from '../../state/SetupContext.ts';
 import { jobOf } from '../../state/setupJobs.ts';
 import { TaskBar, TaskFailure } from './TaskBar.tsx';
 
-type Props = Readonly<{ task: SetupTask; status: ModelStatus; freeBytes: number | null }>;
+/** `resumable`: a stop pauses (Qwen, resumed from its .part files); otherwise it cancels and starts over (Whisper). */
+type Props = Readonly<{ task: SetupTask; status: ModelStatus; freeBytes: number | null; resumable: boolean }>;
 
-function DownloadButton({ task, status, freeBytes }: Props) {
+function DownloadButton({ task, status, freeBytes, resumable }: Props) {
   const translate = useTranslate();
   const { settings, jobs } = useSetup();
   const job = jobOf(jobs.jobs, task);
   if (job.status === 'running') return null;
   const size = formatBytes(status.bytes, settings.language);
-  const tooBig = freeBytes !== null && freeBytes < status.bytes;
+  // A paused download needs only what it does not have yet.
+  const tooBig = freeBytes !== null && freeBytes < status.bytes - status.onDiskBytes;
   return (
     <>
       <button type="button" className="chalk-button small" data-testid={`download-${task}`} disabled={tooBig} onClick={() => jobs.run(task)}>
-        {translate(job.status === 'stopped' ? 'task.resume' : 'models.download')} · {size}
+        {translate(job.status === 'stopped' && resumable ? 'task.resume' : 'models.download')} · {size}
       </button>
       {tooBig && <span className="warning-text">{translate('models.notEnough', { size })}</span>}
     </>
@@ -33,7 +35,7 @@ export function ModelDownload(props: Props) {
   return (
     <div className="download">
       <DownloadButton {...props} />
-      <TaskBar task={task} stopLabel="task.pause" />
+      <TaskBar task={task} stopLabel={props.resumable ? 'task.pause' : 'task.cancel'} />
       <TaskFailure task={task} />
     </div>
   );

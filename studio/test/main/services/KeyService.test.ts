@@ -105,3 +105,16 @@ test('a failed write does not block the next call', async () => {
   await assert.rejects(keys.set('openai', 'a-key'));
   assert.equal(await keys.set('openai', 'a-key'), 'keychain');
 });
+
+test("with the keychain in use, remove forgets the Studio's key but never deletes a CLI key file it did not write", async () => {
+  const { service: keys, vault, files } = keyService();
+  files.files.set('openai', 'from-the-cli');
+  await keys.set('openai', SECRET);
+  assert.equal((await keys.status()).keys.openai, 'keychain');
+  assert.equal(await keys.remove('openai'), true);
+  assert.deepEqual(vault.keys, {});
+  assert.equal(files.files.get('openai'), 'from-the-cli');
+  assert.equal((await keys.status()).keys.openai, 'file', 'the CLI key is still there for the giz command');
+  assert.equal(await keys.remove('openai'), false, 'a CLI file is not the Studio\'s to remove while it has a keychain');
+  assert.equal(files.files.get('openai'), 'from-the-cli');
+});
