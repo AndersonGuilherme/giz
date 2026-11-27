@@ -66,10 +66,16 @@ const REMOTION = {
   browserExecutable: headlessShellIn(PACKAGE_FOLDER),
 };
 
+/** The package public folder: the sound effects the video plays (`sounds/<name>.wav`), also for the Studio's preview. */
+export const publicFolder = (): string => REMOTION.publicFolder;
+
+/** The Studio's render options: `variant` names other output files (the other aspect); `frames` renders only the first ones. */
+export type VideoOutput = Readonly<{ variant?: string; frames?: number }>;
+
 /** `signal` (optional): aborting it cancels the render, as the Studio's cancel button does. */
-export function renderVideo(folder: string, signal?: AbortSignal): RenderVideo {
-  const renderer = new RemotionRenderer(REMOTION, folder, { signal });
-  return new RenderVideo({ build: buildTimeline(folder), renderer, captions: new SrtCaptionWriter() });
+export function renderVideo(folder: string, signal?: AbortSignal, output: VideoOutput = {}): RenderVideo {
+  const renderer = new RemotionRenderer(REMOTION, folder, { signal, frames: output.frames });
+  return new RenderVideo({ build: buildTimeline(folder), renderer, captions: new SrtCaptionWriter(), variant: output.variant });
 }
 
 export function produceVideo(folder: string): ProduceVideo {

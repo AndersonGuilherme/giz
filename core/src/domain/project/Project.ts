@@ -75,6 +75,12 @@ export class Project {
     return this.#profile.aspect;
   }
 
+  /** The same project seen in another aspect (the Studio's preview and render in the other shape); its files stay. */
+  inAspect(aspect: AspectRatio): Project {
+    if (aspect === this.#profile.aspect) return this;
+    return new Project({ ...this.#profile, aspect }, this.#content);
+  }
+
   format(): Format {
     return this.#profile.format;
   }

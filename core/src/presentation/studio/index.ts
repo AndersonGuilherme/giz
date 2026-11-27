@@ -4,3 +4,5 @@ export { CharacterPreview } from './CharacterPreview.tsx';
 export { previewStateAt, speechFromText, type CharacterPreviewProps, type PreviewSpeech } from './previewState.ts';
 export { RigStill } from './RigStill.tsx';
 export { BackgroundStill } from './BackgroundStill.tsx';
+export { VideoPreview, type VideoPreviewProps } from './VideoPreview.tsx';
+export { videoMarks, type ChapterMark, type LineMark, type VideoMarks } from './videoMarks.ts';

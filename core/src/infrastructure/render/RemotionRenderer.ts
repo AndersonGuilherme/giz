@@ -12,8 +12,14 @@ const COMPOSITION = 'Video';
 export type RemotionCalls = Readonly<{ withBundle: typeof withBundle; selectComposition: typeof selectComposition; renderMedia: typeof renderMedia }>;
 const REMOTION_CALLS: RemotionCalls = { withBundle, selectComposition, renderMedia };
 
-/** `signal`: aborting it cancels the render (the Studio's cancel button); the render then rejects. */
-export type RenderOptions = Readonly<{ signal?: AbortSignal; calls?: RemotionCalls }>;
+/**
+ * `signal`: aborting it cancels the render (the Studio's cancel button); the render then rejects. `frames`: only the
+ * first frames are rendered (a short real render, as the Studio's rehearsal mode makes).
+ */
+export type RenderOptions = Readonly<{ signal?: AbortSignal; calls?: RemotionCalls; frames?: number }>;
+
+// The first `frames` frames of the composition, never past its end; none: the whole video.
+const frameRangeOf = (frames: number | undefined, duration: number) => (frames === undefined ? {} : { frameRange: [0, Math.min(frames, duration) - 1] as [number, number] });
 
 /** Remotion's own cancel signal, cancelled when `signal` aborts, also when it was already aborted before this call. */
 export function remotionCancelSignal(signal: AbortSignal | undefined) {
@@ -32,12 +38,14 @@ export class RemotionRenderer implements Renderer {
   readonly #folder: string;
   readonly #signal: AbortSignal | undefined;
   readonly #calls: RemotionCalls;
+  readonly #frames: number | undefined;
 
   constructor(sources: RemotionSources, folder: string, options: RenderOptions = {}) {
     this.#sources = sources;
     this.#folder = folder;
     this.#signal = options.signal;
     this.#calls = options.calls ?? REMOTION_CALLS;
+    this.#frames = options.frames;
   }
 
   async render(props: VideoProps, output: string, onProgress: (fraction: number) => void): Promise<void> {
@@ -51,7 +59,8 @@ export class RemotionRenderer implements Renderer {
       this.#signal?.throwIfAborted();
       const reportProgress = ({ progress }: { progress: number }) => onProgress(progress);
       const cancelSignal = remotionCancelSignal(this.#signal);
-      await renderWith({ composition, serveUrl, codec: 'h264', outputLocation: output, inputProps: props, onProgress: reportProgress, browserExecutable, cancelSignal });
+      const range = frameRangeOf(this.#frames, composition.durationInFrames);
+      await renderWith({ composition, serveUrl, codec: 'h264', outputLocation: output, inputProps: props, onProgress: reportProgress, browserExecutable, cancelSignal, ...range });
     });
   }
 }
