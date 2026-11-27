@@ -26,9 +26,7 @@
 .line-body:not([hidden]) { display: flex; flex-direction: column; gap: 12px; padding: 10px 10px 0 42px; animation: unfold 160ms ease-out; }
 @keyframes unfold { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
 
-.editor-title { display: grid; grid-template-columns: auto auto; column-gap: 14px; align-items: center; justify-content: start; }
-.editor-title .folder { grid-column: 1; }
-.editor-title .tour-show { grid-row: 1; grid-column: 2; }
+.editor-title .title-row { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
 
 /* The tour: the page dimmed (the hole's shadow), the target lit up with a yellow chalk ring, the card beside it. */
 .tour { position: fixed; inset: 0; z-index: 60; }

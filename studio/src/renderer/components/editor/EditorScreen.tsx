@@ -56,9 +56,11 @@ function Title({ tools, tour }: Readonly<{ tools: EditorTools; tour: TourControl
   const { document } = tools;
   return (
     <div className="editor-title">
-      <h2>{document.title}</h2>
+      <div className="title-row">
+        <h2>{document.title}</h2>
+        <button type="button" className="chalk-button small quiet tour-show" data-testid="tour-show" title={translate('tour.showTitle')} onClick={tour.start}><Icon name="help" /> {translate('tour.show')}</button>
+      </div>
       <p className="folder">{document.folder}</p>
-      <button type="button" className="chalk-button small quiet tour-show" data-testid="tour-show" title={translate('tour.showTitle')} onClick={tour.start}><Icon name="help" /> {translate('tour.show')}</button>
     </div>
   );
 }
@@ -84,7 +86,7 @@ export function EditorScreen({ api, folder, focus }: Props) {
   const translate = useTranslate();
   const editor = useEditor(api, folder);
   const tools = useTools(api, editor, useLocal());
-  const folding = useScriptFolding(folder, tools);
+  const folding = useScriptFolding(folder, tools, editor.history?.by === 'edit');
   const tour = useTour(SCRIPT_TOUR, tools !== null);
   useFocusLine(tools, folding, focus);
   useTourLine(tour, folding, tools);

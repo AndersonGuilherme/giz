@@ -18,6 +18,27 @@ const until = async (check: () => Promise<boolean>, what: string, deadline = Dat
   return until(check, what, deadline);
 };
 
+async function pressTab(page: Page, shift = false): Promise<void> {
+  const key = { key: 'Tab', code: 'Tab', windowsVirtualKeyCode: 9, nativeVirtualKeyCode: 9, modifiers: shift ? 8 : 0 };
+  await page.send('Input.dispatchKeyEvent', { type: 'keyDown', ...key });
+  await page.send('Input.dispatchKeyEvent', { type: 'keyUp', ...key });
+}
+
+const focusInCard = (page: Page) => page.evaluate(`document.querySelector('[data-testid="tour"]')?.contains(document.activeElement) ?? false`);
+
+/** The tour is modal: the page under it is inert, and Tab (and Shift+Tab) go round the card's buttons, never out. */
+async function staysModal(page: Page): Promise<void> {
+  assert.equal(await page.evaluate(`document.getElementById('root').hasAttribute('inert')`), true, 'the page under the tour is inert');
+  for (let press = 0; press < 5; press++) {
+    await pressTab(page);
+    assert.equal(await focusInCard(page), true, `Tab ${press + 1} stays in the card`);
+  }
+  for (let press = 0; press < 5; press++) {
+    await pressTab(page, true);
+    assert.equal(await focusInCard(page), true, `Shift+Tab ${press + 1} stays in the card`);
+  }
+}
+
 async function tourStep(page: Page, id: string, centred: boolean): Promise<void> {
   await page.until(`[data-testid="tour"][data-step="${id}"]`);
   assert.equal(await attribute(page, '[data-testid="tour"]', 'data-centred'), String(centred), `step ${id} centred: ${centred}`);
@@ -27,6 +48,7 @@ async function tourStep(page: Page, id: string, centred: boolean): Promise<void>
 export async function firstTour({ page, shoot, home }: Context): Promise<void> {
   await tourStep(page, 'intro', true);
   await page.untilText('[data-testid="tour-count"]', /^1\/9$/);
+  await staysModal(page);
   await shoot(page, 's6-03-tour-1-roteiro');
   await page.click('[data-testid="tour-next"]');
   await tourStep(page, 'add', false);
@@ -38,6 +60,7 @@ export async function firstTour({ page, shoot, home }: Context): Promise<void> {
   await page.click('[data-testid="tour-skip"]');
   await until(async () => (await page.evaluate(`document.querySelector('[data-testid="tour"]') === null`)) === true, 'the tour to close');
   await until(async () => (await toursSeen(home)).includes('script'), 'the tour remembered in studio.json');
+  assert.equal(await page.evaluate(`document.getElementById('root').hasAttribute('inert')`), false, 'the page is usable again');
 }
 
 /** Another tab and back: no tour. "Ver tutorial" starts it again, and "Próximo" to the end finishes it. */

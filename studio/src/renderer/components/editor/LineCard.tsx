@@ -38,16 +38,19 @@ function useOpened(open: boolean): boolean {
 // (A jump to the selected line folded by hand opens it again, and it is scrolled to again.)
 function useArrival(card: RefObject<HTMLLIElement | null>, index: number, id: string): void {
   const { selected } = useEditorTools();
-  const { fresh, isOpen } = useFolding();
+  const { fresh, arrived, isOpen } = useFolding();
   const open = isOpen(id);
   useEffect(() => {
     if (selected === index && open) card.current?.scrollIntoView({ block: 'center', behavior: 'smooth' });
   }, [selected, index, open]);
   useEffect(() => {
     if (fresh !== id) return;
-    card.current?.querySelector<HTMLTextAreaElement>('.line-text textarea')?.focus({ preventScroll: true });
+    const text = card.current?.querySelector<HTMLTextAreaElement>('.line-text textarea');
+    if (!text) return;
+    text.focus({ preventScroll: true });
     card.current?.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
-  }, [fresh, id]);
+    arrived();
+  }, [fresh, id, arrived]);
 }
 
 const classesOf = (states: Readonly<Record<'open' | 'failing' | 'selected' | 'dragging', boolean>>) =>

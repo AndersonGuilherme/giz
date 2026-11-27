@@ -4,11 +4,14 @@ import type { TourControl } from '../../state/useTour.ts';
 import type { EditorTools } from './EditorContext.ts';
 import type { FoldingTools } from './FoldingContext.ts';
 
-/** The open lines of this project, and `show`: open a line and select it (it scrolls into view). */
-export function useScriptFolding(folder: string, tools: EditorTools | null): FoldingTools {
+/**
+ * The open lines of this project (`byEdit`: the script's last change was an edit, not undo or redo), and `show`: open a
+ * line and select it (it scrolls into view).
+ */
+export function useScriptFolding(folder: string, tools: EditorTools | null, byEdit: boolean): FoldingTools {
   const lines = tools?.script.lines;
   const ids = useMemo(() => lines?.map(({ id }) => String(id)) ?? null, [lines]);
-  const folding = useLineFolding(folder, ids);
+  const folding = useLineFolding(folder, ids, byEdit);
   const { open } = folding;
   const select = tools?.select;
   const show = useCallback((index: number) => {
@@ -30,7 +33,7 @@ export function useFocusLine(tools: EditorTools | null, folding: FoldingTools, f
   }, [ready, focus]);
 }
 
-// The tour points at a line's fields: when it starts with every line folded, the first one opens.
+// The tour points at a line's fields: when it starts with no line really open, the first one opens.
 export function useTourLine(control: TourControl, folding: FoldingTools, tools: EditorTools | null): void {
   const first = tools?.script.lines[0]?.id;
   useEffect(() => {

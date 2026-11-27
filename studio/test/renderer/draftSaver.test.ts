@@ -45,3 +45,45 @@ test('a change taken back before its delay (back to what is on disk) sends nothi
   assert.deepEqual(sent, []);
   assert.deepEqual(answers.map(({ status }) => status), ['pending', 'saved']);
 });
+
+const FAILED: Result<CharacterSaved> = { ok: false, failure: { code: 'failed', message: 'Não deu para salvar', details: [] } };
+
+test('taken back after a failure: the version that failed is sent again, never shown as saved', async () => {
+  const sent: string[] = [];
+  let fail = true;
+  const { instance, answers } = saver(async (file) => (sent.push(file.name), fail ? FAILED : SAVED(file)));
+  const maria = { ...ANA, name: 'Ana Maria' };
+  instance.change(maria);
+  await instance.flush();
+  assert.equal(answers.at(-1)?.status, 'failed');
+  fail = false;
+  instance.change({ ...maria, name: 'Ana Maria!' });
+  instance.change(maria);
+  assert.equal(instance.hasPending(), true, 'what failed is still to be saved');
+  assert.notEqual(answers.at(-1)?.status, 'saved');
+  await instance.flush();
+  assert.deepEqual(sent, ['Ana Maria', 'Ana Maria']);
+  assert.equal(answers.at(-1)?.status, 'saved');
+});
+
+test('taken back to what is on disk after a failure: no "saved" without the result, the failure stays shown', async () => {
+  const { instance, answers } = saver(async () => FAILED);
+  instance.change({ ...ANA, name: 'Ana Maria' });
+  await instance.flush();
+  instance.change({ ...ANA, name: 'Bia' });
+  instance.change(ANA);
+  assert.equal(instance.hasPending(), false, 'ANA is what the disk has');
+  assert.deepEqual(answers.at(-1), { status: 'failed', result: FAILED });
+});
+
+test('taken back after a save core refused (problems): the answer carries that result again', async () => {
+  const problems = [{ path: 'parameters.skin', message: 'cor inválida' }];
+  const refused: Result<CharacterSaved> = { ok: true, value: { saved: false, problems, document: {} as never } };
+  const { instance, answers } = saver(async () => refused);
+  const roxo = { ...ANA, name: 'Ana Roxa' };
+  instance.change(roxo);
+  await instance.flush();
+  instance.change({ ...roxo, name: 'Ana Roxa!' });
+  instance.change(roxo);
+  assert.deepEqual(answers.at(-1), { status: 'saved', result: refused });
+});

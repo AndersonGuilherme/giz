@@ -5,8 +5,13 @@ import { Logo } from '../Logo.tsx';
 
 type Props = Readonly<{ control: TourControl; pointing: boolean; style: CSSProperties; side: string }>;
 
+const dotClass = (at: number, step: number): string => {
+  if (at === step) return 'on';
+  return at < step ? 'past' : '';
+};
+
 function Dots({ step, steps }: Readonly<{ step: number; steps: number }>) {
-  return <span className="tour-dots" aria-hidden="true">{Array.from({ length: steps }, (_none, at) => <i key={at} className={at === step ? 'on' : at < step ? 'past' : ''} />)}</span>;
+  return <span className="tour-dots" aria-hidden="true">{Array.from({ length: steps }, (_none, at) => <i key={at} className={dotClass(at, step)} />)}</span>;
 }
 
 function Buttons({ control }: Readonly<{ control: TourControl }>) {
@@ -31,7 +36,7 @@ export const TourCard = forwardRef<HTMLElement, Props>(function TourCard({ contr
   const { tour, state } = control;
   const step = tour.steps[state.step]!;
   return (
-    <section ref={ref} className={`tour-card side-${side}`} style={style} role="dialog" aria-modal="true" aria-label={translate('tour.dialog')} aria-labelledby={`${ids}t`} aria-describedby={`${ids}d`} data-testid="tour" data-step={step.id} data-centred={!pointing}>
+    <section ref={ref} className={`tour-card side-${side}`} style={style} role="dialog" aria-modal="true" aria-labelledby={`${ids}t`} aria-describedby={`${ids}d`} data-testid="tour" data-step={step.id} data-centred={!pointing}>
       <header className="tour-top"><Logo /><span className="tour-count" data-testid="tour-count">{translate('tour.counter', { step: state.step + 1, total: state.steps })}</span></header>
       <h2 id={`${ids}t`}>{translate(step.title)}</h2>
       <p id={`${ids}d`}>{translate(step.text)}</p>

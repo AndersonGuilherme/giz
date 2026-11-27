@@ -58,3 +58,15 @@ test('a change from disk goes into every version, as no step: undo and redo keep
   assert.equal(redone(linked).present.lines[0]!.image, 'a.png');
   assert.equal(throughout(linked, (script) => script), linked, 'nothing changed: the same history');
 });
+
+test('each version says what made it (an edit, undo or redo), so a line that comes back by undo is no new line', () => {
+  let history = historyOf(version('a'));
+  assert.equal(history.by, undefined, 'the script as it opened');
+  history = edited(history, version('b'));
+  assert.equal(history.by, 'edit');
+  assert.equal(edited(history, version('c'), { key: 'k', at: 1 }).by, 'edit');
+  history = undone(history);
+  assert.equal(history.by, 'undo');
+  history = redone(history);
+  assert.equal(history.by, 'redo');
+});

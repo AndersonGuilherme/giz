@@ -38,5 +38,5 @@ test('the script tour has the nine steps of the brief, with a title and a text e
   }
   const keys = SCRIPT_TOUR.steps.flatMap(({ title, text, absent }) => [title, text, absent].filter((each) => each !== undefined));
   for (const key of keys) assert.ok(hasMessage(key) && translator('en')(key) !== key, key);
-  assert.deepEqual(SCRIPT_TOUR.steps.map(({ target }) => target ?? null), [null, 'add-line', 'speaker', 'text', 'scene', 'line-row', 'check', 'generate', null]);
+  assert.deepEqual(SCRIPT_TOUR.steps.map(({ target }) => target ?? null), [null, 'add-line', 'speaker', 'text', 'scene', 'line-row', 'check', null, null]);
 });

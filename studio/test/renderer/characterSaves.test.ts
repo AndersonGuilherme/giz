@@ -19,3 +19,11 @@ test('saved and refused by the check as before; a change typed meanwhile shows w
   const failed = shownAfter(SAVED, { status: 'failed', result: { ok: false, failure } });
   assert.deepEqual(shownAfter(failed, { status: 'saved', result: { ok: true, value: { saved: true, problems: [], document } } }), SAVED);
 });
+
+test('a change taken back after core refused the save shows the problems again, not "waiting" forever', () => {
+  const problems = [{ path: 'parameters.skin', message: 'cor inválida' }];
+  const refused = { ok: true as const, value: { saved: false, problems, document: {} as never } };
+  const shown = shownAfter(SAVED, { status: 'saved', result: refused });
+  const typing = shownAfter(shown, { status: 'pending' });
+  assert.deepEqual(shownAfter(typing, { status: 'saved', result: refused }), { state: 'problems', problems, failure: null });
+});

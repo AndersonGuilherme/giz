@@ -1,6 +1,7 @@
-import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useEffect, useLayoutEffect, useRef, useState, type RefObject } from 'react';
 import { createPortal } from 'react-dom';
 import { placementOf, type Size } from '../../tour/placement.ts';
+import { tourKeyAction, wrappedFocus } from '../../tour/tourKeys.ts';
 import type { TourControl } from '../../state/useTour.ts';
 import { TourCard } from './TourCard.tsx';
 import { useTargetBox } from './useTargetBox.ts';
@@ -20,26 +21,56 @@ function useCardSize(step: number) {
   return { card, size };
 }
 
-// Escape skips, the arrows go on and back.
-function useKeys({ dispatch }: TourControl): void {
+const BUTTONS = 'button:not(:disabled)';
+
+const actionOf = (event: KeyboardEvent, card: HTMLElement | null) =>
+  tourKeyAction({ code: event.code || event.key, shift: event.shiftKey, control: event.ctrlKey || event.metaKey, inCard: card?.contains(document.activeElement) ?? false });
+
+// Escape skips; the arrows go on and back while the focus is in the card; Tab goes round inside it; the page's own
+// shortcuts (undo, redo) are swallowed before they reach it (a capture listener runs first).
+function useKeys({ dispatch }: TourControl, card: RefObject<HTMLElement | null>): void {
   useEffect(() => {
-    const keys: Readonly<Record<string, 'skip' | 'next' | 'back'>> = { Escape: 'skip', ArrowRight: 'next', ArrowLeft: 'back' };
     const press = (event: KeyboardEvent) => {
-      const type = keys[event.key];
-      if (!type) return;
+      const action = actionOf(event, card.current);
+      if (action === 'none') return;
+      if (action === 'tab') return keepTabInside(event, card.current);
       event.preventDefault();
-      dispatch({ type });
+      event.stopImmediatePropagation();
+      if (action !== 'block') dispatch({ type: action });
     };
-    window.addEventListener('keydown', press);
-    return () => window.removeEventListener('keydown', press);
-  }, [dispatch]);
+    window.addEventListener('keydown', press, true);
+    return () => window.removeEventListener('keydown', press, true);
+  }, [dispatch, card]);
+}
+
+function keepTabInside(event: KeyboardEvent, card: HTMLElement | null): void {
+  const buttons = [...(card?.querySelectorAll<HTMLElement>(BUTTONS) ?? [])];
+  const target = wrappedFocus(buttons.length, buttons.indexOf(document.activeElement as HTMLElement), event.shiftKey);
+  if (target === null) return;
+  event.preventDefault();
+  buttons[target]?.focus();
+}
+
+// While the tour is open the page under it is inert (no click, no focus, no screen reader); on close the focus goes
+// back where it was.
+function useModal(): void {
+  useEffect(() => {
+    const before = document.activeElement as HTMLElement | null;
+    const page = document.getElementById('root');
+    page?.setAttribute('inert', '');
+    return () => {
+      page?.removeAttribute('inert');
+      if (before?.isConnected) before.focus({ preventScroll: true });
+    };
+  }, []);
 }
 
 function Overlay({ control }: Readonly<{ control: TourControl }>) {
   const { tour, state } = control;
   const box = useTargetBox(tour.steps[state.step]?.target, state.step);
   const { card, size } = useCardSize(state.step);
-  useKeys(control);
+  useKeys(control, card);
+  useModal();
   const placed = placementOf(box, { width: window.innerWidth, height: window.innerHeight }, size);
   return createPortal(
     <div className="tour" data-testid="tour-overlay">

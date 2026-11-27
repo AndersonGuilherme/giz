@@ -10,8 +10,9 @@ const SCHEMA = z.object({
   projectsFolder: z.string().min(1).nullable(),
   providers: z.object({ text: z.enum(TEXT_PROVIDERS), image: z.enum(IMAGE_PROVIDERS), voice: z.enum(VOICE_PROVIDERS) }),
   firstRunDone: z.boolean(),
-  // Older files have no tours; a tour this version does not know is dropped (never the whole config).
-  toursSeen: z.array(z.string()).default([]).transform((tours) => TOURS.filter((tour) => tours.includes(tour))),
+  // Older files have no tours, a broken field reads as none, and a tour this version does not know is dropped: the
+  // tours never throw the whole config away.
+  toursSeen: z.array(z.string()).catch([]).transform((tours) => TOURS.filter((tour) => tours.includes(tour))),
 });
 
 /** studio.json in the Studio's userData. A missing or broken file reads as none: the wizard runs again and rewrites it. */

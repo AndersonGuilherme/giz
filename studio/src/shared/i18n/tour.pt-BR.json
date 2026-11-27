@@ -1,5 +1,4 @@
 {
-  "tour.dialog": "Tutorial",
   "tour.next": "Próximo",
   "tour.back": "Voltar",
   "tour.skip": "Pular tutorial",
@@ -40,5 +39,5 @@
   "editor.beatCount.other": "{count} beats",
   "editor.problemCount.one": "1 problema",
   "editor.problemCount.other": "{count} problemas",
-  "editor.noSpeaker": "sem quem fale"
+  "editor.noSpeaker": "sem personagem"
 }

@@ -1,7 +1,7 @@
 import type { ScriptJson } from '../../shared/script.ts';
 
-/** The script now, the versions before it (undo) and after it (redo). */
-export type History = Readonly<{ past: readonly ScriptJson[]; present: ScriptJson; future: readonly ScriptJson[]; last?: Readonly<{ key: string; at: number }> }>;
+/** The script now, the versions before it (undo) and after it (redo); `by`: what made the present one (none: as opened). */
+export type History = Readonly<{ past: readonly ScriptJson[]; present: ScriptJson; future: readonly ScriptJson[]; last?: Readonly<{ key: string; at: number }>; by?: 'edit' | 'undo' | 'redo' }>;
 /** `key`: what was edited (a line's field); `at`: when, in milliseconds. */
 export type EditMark = Readonly<{ key: string; at: number }>;
 
@@ -17,21 +17,21 @@ const sameTyping = (last: EditMark | undefined, mark: EditMark | undefined) => l
 /** A new version: one more step to undo (or the same step, while the same field is being typed); redo is gone. */
 export function edited(history: History, script: ScriptJson, mark?: EditMark): History {
   if (script === history.present) return history;
-  if (sameTyping(history.last, mark)) return { ...history, present: script, future: [], last: mark };
+  if (sameTyping(history.last, mark)) return { ...history, present: script, future: [], last: mark, by: 'edit' };
   const past = [...history.past, history.present].slice(-HISTORY_LIMIT);
-  return { past, present: script, future: [], last: mark };
+  return { past, present: script, future: [], last: mark, by: 'edit' };
 }
 
 export function undone(history: History): History {
   const previous = history.past.at(-1);
   if (!previous) return history;
-  return { past: history.past.slice(0, -1), present: previous, future: [history.present, ...history.future] };
+  return { past: history.past.slice(0, -1), present: previous, future: [history.present, ...history.future], by: 'undo' };
 }
 
 export function redone(history: History): History {
   const [next, ...future] = history.future;
   if (!next) return history;
-  return { past: [...history.past, history.present], present: next, future };
+  return { past: [...history.past, history.present], present: next, future, by: 'redo' };
 }
 
 /**
@@ -42,6 +42,7 @@ export function throughout(history: History, change: (script: ScriptJson) => Scr
   const present = change(history.present);
   const past = history.past.map(change);
   const future = history.future.map(change);
-  const same = present === history.present && [...past, ...future].every((script, at) => script === [...history.past, ...history.future][at]);
+  const before = [...history.past, ...history.future];
+  const same = present === history.present && [...past, ...future].every((script, at) => script === before[at]);
   return same ? history : { ...history, past, present, future };
 }

@@ -20,7 +20,9 @@ export const SCRIPT_TOUR: Tour = {
     step('scene', 'scene', true),
     step('fold', 'line-row', true),
     step('check', 'check'),
-    step('generate', 'generate'),
+    // No target yet: AI generation lives in the new-project wizard. A "Gerar roteiro com IA" button in the editor would
+    // take `data-tour="generate"` and this step would point at it.
+    step('generate'),
     step('next'),
   ],
 };

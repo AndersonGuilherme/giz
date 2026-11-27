@@ -48,3 +48,14 @@ test('a config written before the tours existed reads with no tour seen; an unkn
     await rm(folder, { recursive: true, force: true });
   }
 });
+
+test('a broken tours field never throws the config away: it reads as no tour seen', async () => {
+  const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
+  try {
+    const file = join(folder, 'studio.json');
+    await writeFile(file, JSON.stringify({ ...CONFIG, toursSeen: 42 }));
+    assert.deepEqual(await new JsonAppConfig(file).read(), { ...CONFIG, toursSeen: [] });
+  } finally {
+    await rm(folder, { recursive: true, force: true });
+  }
+});

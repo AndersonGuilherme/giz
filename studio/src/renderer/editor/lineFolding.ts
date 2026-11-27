@@ -31,3 +31,9 @@ export function addedLineOf(before: readonly string[] | null, after: readonly st
   const added = after.filter((id) => !before.includes(id));
   return added.length === 1 ? added[0]! : null;
 }
+
+/** Every line open ("Expandir todas" has nothing to do). */
+export const everyOpen = (folding: Folding, ids: readonly string[]): boolean => ids.every((id) => isOpen(folding, id));
+
+/** Some line really open ("Recolher todas" has something to do; the tour need not open one). */
+export const someOpen = (folding: Folding, ids: readonly string[]): boolean => ids.some((id) => isOpen(folding, id));

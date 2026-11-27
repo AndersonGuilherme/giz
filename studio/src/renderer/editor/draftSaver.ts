@@ -29,10 +29,14 @@ export class DraftSaver<Value, Report> {
   #chain: Promise<unknown> = Promise.resolve();
   #sent = 0;
   #landed = 0;
+  // The last answer that came back, and the last version known to be on disk (a failed save never counts).
+  #last: Result<Report> | undefined;
+  #onDisk: Value;
 
   constructor(options: Options<Value, Report>) {
     this.#options = options;
     this.#saved = options.saved;
+    this.#onDisk = options.saved;
   }
 
   change(value: Value): void {
@@ -40,8 +44,8 @@ export class DraftSaver<Value, Report> {
     timers.clear(this.#timer);
     const waiting = this.#pending !== null;
     this.#pending = value === this.#saved ? null : value;
-    // Taken back to what was sent last (an undo before the delay): nothing to send, and no "pending" left behind.
-    if (this.#pending === null) return void (waiting && onAnswer({ status: this.#settled() }));
+    // Taken back to what was sent last (an undo before the delay): nothing to send, and the last answer shown again.
+    if (this.#pending === null) return void (waiting && onAnswer(this.#settled()));
     onAnswer({ status: 'pending' });
     this.#timer = timers.set(() => void this.#send(), delay);
   }
@@ -56,9 +60,11 @@ export class DraftSaver<Value, Report> {
     return this.#chain.then(() => undefined);
   }
 
-  // What the status is with nothing waiting: the last save still on its way, or everything on disk.
-  #settled(): SaveStatus {
-    return this.#landed < this.#sent ? 'saving' : 'saved';
+  // With nothing waiting: the last save still on its way, or the last answer (a failure stays a failure).
+  #settled(): DraftAnswer<Report> {
+    if (this.#landed < this.#sent) return { status: 'saving' };
+    const status: SaveStatus = this.#last?.ok === false ? 'failed' : 'saved';
+    return this.#last ? { status, result: this.#last } : { status };
   }
 
   #send(): Promise<unknown> {
@@ -68,13 +74,17 @@ export class DraftSaver<Value, Report> {
     this.#saved = value;
     const number = ++this.#sent;
     this.#options.onAnswer({ status: 'saving' });
-    this.#chain = this.#chain.then(() => this.#options.send(value)).then((result) => this.#answered(number, result));
+    this.#chain = this.#chain.then(() => this.#options.send(value)).then((result) => this.#answered(number, value, result));
     return this.#chain;
   }
 
-  #answered(number: number, result: Result<Report>): void {
+  #answered(number: number, value: Value, result: Result<Report>): void {
     this.#landed = number;
+    this.#last = result;
+    if (result.ok) this.#onDisk = value;
     if (number !== this.#sent) return;
+    // A failed save: what it carried is not on disk, so the same version typed again is sent again.
+    if (!result.ok) this.#saved = this.#onDisk;
     const status = this.#pending !== null ? 'pending' : result.ok ? 'saved' : 'failed';
     this.#options.onAnswer({ status, result });
   }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { addedLineOf, ALL_FOLDED, allOpened, isOpen, opened, toggled } from '../../src/renderer/editor/lineFolding.ts';
+import { addedLineOf, ALL_FOLDED, allOpened, everyOpen, isOpen, opened, someOpen, toggled } from '../../src/renderer/editor/lineFolding.ts';
 
 test('every line starts folded; opening one folds the one open before (one at a time)', () => {
   assert.equal(isOpen(ALL_FOLDED, '01'), false);
@@ -30,4 +30,15 @@ test('the line just added is the one new id when the list grew by one; anything 
   assert.equal(addedLineOf(['01', '02'], ['02', '01']), null, 'a move');
   assert.equal(addedLineOf(['01', '02'], ['01']), null, 'a removal');
   assert.equal(addedLineOf(['01'], ['01', '02', '03']), null, 'a reload with many new lines');
+});
+
+test('"all open" only while no line is folded by hand; "any open" only when an open id is one of the lines', () => {
+  const ids = ['01', '02', '03'];
+  assert.equal(everyOpen(allOpened(), ids), true);
+  assert.equal(everyOpen(toggled(allOpened(), '02'), ids), false, 'one folded by hand: "expand all" works again');
+  assert.equal(everyOpen(toggled(ALL_FOLDED, '01'), ids), false);
+  assert.equal(someOpen(toggled(ALL_FOLDED, '01'), ids), true);
+  assert.equal(someOpen(toggled(ALL_FOLDED, '99'), ids), false, 'the open id is not a line any more (removed)');
+  assert.equal(someOpen(ids.reduce(toggled, allOpened()), ids), false, 'all open, then each folded by hand');
+  assert.equal(someOpen(allOpened(), []), false);
 });
