@@ -4,10 +4,13 @@ import portugueseScript from './script.pt-BR.json' with { type: 'json' };
 import englishScript from './script.en.json' with { type: 'json' };
 import portugueseMedia from './media.pt-BR.json' with { type: 'json' };
 import englishMedia from './media.en.json' with { type: 'json' };
+import portugueseVideo from './video.pt-BR.json' with { type: 'json' };
+import englishVideo from './video.en.json' with { type: 'json' };
 
-// One file per area (the first run and Settings; the projects, the idea and the script; the cast, scenarios and voices), merged per language.
-const portuguese = { ...portugueseBase, ...portugueseScript, ...portugueseMedia };
-const english = { ...englishBase, ...englishScript, ...englishMedia };
+// One file per area (the first run and Settings; the projects, the idea and the script; the cast, scenarios and voices;
+// the video), merged per language.
+const portuguese = { ...portugueseBase, ...portugueseScript, ...portugueseMedia, ...portugueseVideo };
+const english = { ...englishBase, ...englishScript, ...englishMedia, ...englishVideo };
 
 /** The interface languages; pt-BR is the default until Settings (S2) lets the person choose. */
 export type InterfaceLanguage = 'pt-BR' | 'en';

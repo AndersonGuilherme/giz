@@ -6,6 +6,7 @@ import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, S
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
 import type { MediaApi } from './mediaApi.ts';
+import type { VideoDocument } from './video.ts';
 
 type Reply<T> = Promise<Result<T>>;
 
@@ -44,6 +45,11 @@ export type GizApi = MediaApi & Readonly<{
     cancel(): Reply<boolean>;
     /** Calls `listener` on each progress step of the running render; returns the function that stops listening. */
     onProgress(listener: (progress: RenderProgress) => void): () => void;
+    /** "Montar" and everything the Video stage shows, in `aspect` (the project's own when absent). */
+    preview(folder: string, aspect?: Aspect): Reply<VideoDocument>;
+    openFolder(folder: string): Reply<true>;
+    copyCaptions(folder: string, aspect: Aspect): Reply<true>;
+    exportCaptions(folder: string, aspect: Aspect): Reply<string | null>;
   }>;
   /** The key goes in and never comes back out: there is no call that reads it. */
   keys: Readonly<{

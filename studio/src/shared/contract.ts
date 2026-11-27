@@ -9,6 +9,7 @@ import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary
 import type { CastChannels } from './cast.ts';
 import type { ScenarioChannels } from './scenarios.ts';
 import type { VoiceChannels } from './voices.ts';
+import type { VideoChannels } from './video.ts';
 
 export { KEY_PROVIDERS, type KeyProvider } from './accounts.ts';
 
@@ -52,12 +53,13 @@ type TaskRequest = Readonly<{ task: SetupTask }>;
 type IdeaRequest = Readonly<{ idea: IdeaFields }>;
 
 /** Every channel the window may invoke: what it sends and what it gets back (always wrapped in a `Result`). */
-export type Channels = CastChannels & ScenarioChannels & VoiceChannels & Readonly<{
+export type Channels = CastChannels & ScenarioChannels & VoiceChannels & VideoChannels & Readonly<{
   'projects.pick': Channel<Nothing, string | null>;
   /** The folder given on the command line (`--project=<folder>`), or null. */
   'projects.launched': Channel<Nothing, string | null>;
   'projects.open': Channel<FolderRequest, ProjectSummary>;
   'projects.check': Channel<FolderRequest, CheckReport>;
+  /** Renders in that aspect (the other one gets its own files) after "montar" and the check; progress on `video.progress`. */
   'video.render': Channel<FolderRequest & Readonly<{ aspect: Aspect }>, RenderedFiles>;
   'video.cancel': Channel<Nothing, boolean>;
   /** Where the key went: the system keychain, or the 600-mode file when there is none. */

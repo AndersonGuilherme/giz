@@ -11,6 +11,7 @@ import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { devtools, poll, type Page } from './devtools.ts';
 import { castStage, scenariosStage, storyProject, voicesStage } from './mediaSteps.ts';
+import { videoStage } from './videoSteps.ts';
 import { brokenScript, duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
@@ -45,7 +46,7 @@ const S3_VIEW = { width: 1280, height: 860 };
 
 async function shoot(page: Page, name: string): Promise<void> {
   const file = join(SHOTS, `${name}.png`);
-  await page.screenshot(file, /^s[34]-/.test(name) ? S3_VIEW : undefined);
+  await page.screenshot(file, /^s[345]-/.test(name) ? S3_VIEW : undefined);
   shots.push(file);
 }
 
@@ -230,6 +231,7 @@ async function smoke(): Promise<void> {
   const bridge = await studio(page);
   await scriptStage(page);
   await mediaStages(page);
+  await videoStage({ page, shoot, home: HOME }, FOLDER);
   await settings(page);
   await inEnglish({ page, shoot, home: HOME });
   page.close();

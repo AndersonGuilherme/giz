@@ -50,6 +50,10 @@ const giz: GizApi = {
     render: (folder, aspect) => call('video.render', { folder, aspect }),
     cancel: () => call('video.cancel', {}),
     onProgress: listen(RENDER_PROGRESS_EVENT),
+    preview: (folder, aspect) => call('video.preview', { folder, ...(aspect ? { aspect } : {}) }),
+    openFolder: (folder) => call('video.openFolder', { folder }),
+    copyCaptions: (folder, aspect) => call('video.copyCaptions', { folder, aspect }),
+    exportCaptions: (folder, aspect) => call('video.exportCaptions', { folder, aspect }),
   },
   keys: {
     set: (provider, key) => call('keys.set', { provider, key }),

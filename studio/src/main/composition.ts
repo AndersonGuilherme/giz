@@ -3,7 +3,6 @@ import { mkdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { app, type BrowserWindow } from 'electron';
-import { RENDER_PROGRESS_EVENT } from '../shared/contract.ts';
 import { SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
 import { ConfigFolderKeyFiles } from './adapters/ConfigFolderKeyFiles.ts';
@@ -31,13 +30,13 @@ import { ProjectService } from './services/ProjectService.ts';
 import { ProjectsService } from './services/ProjectsService.ts';
 import { ScriptService } from './services/ScriptService.ts';
 import { FolderQueue } from './services/FolderQueue.ts';
-import { RenderService } from './services/RenderService.ts';
 import { SettingsService } from './services/SettingsService.ts';
 import { SetupService } from './services/SetupService.ts';
 import { defaultProjectsFolderIn, keyFolderIn, studioPathsOf, systemLanguageOf } from './studioPaths.ts';
 import { setInterfaceLanguage } from './text.ts';
 import type { WindowSlot } from './WindowSlot.ts';
 import { mediaServicesOf } from './composition/media.ts';
+import { videoServicesOf } from './composition/video.ts';
 
 export const STUDIO_PATHS = studioPathsOf(process.env, homedir());
 
@@ -100,20 +99,20 @@ function scriptServicesOf({ grants, settings, keys, slot, saves }: ScriptParts):
 export function createServices(slot: WindowSlot<BrowserWindow>): Services {
   const core = new GizCore();
   const grants = new FolderGrants();
-  const picker = new DialogFolderPicker(() => slot.current());
-  const shared = new GizConfigStore(STUDIO_PATHS.gizConfig);
+  const [picker, shared] = [new DialogFolderPicker(() => slot.current()), new GizConfigStore(STUDIO_PATHS.gizConfig)];
   const tools = STUDIO_PATHS.rehearsal ? new RehearsalSetupTools() : new CoreSetupTools();
   const keys = keysOf();
   const settings = settingsOf(grants, picker, shared);
   const saves = new FolderQueue(); // each folder's writes in turn: the script editor's and the media stages'
+  const media = mediaServicesOf({ grants, settings, keys, slot, saves, rehearsal: STUDIO_PATHS.rehearsal });
   return {
     projects: new ProjectService({ core, picker, grants, launchFolder: launchFolderIn(grants) }),
     ...scriptServicesOf({ grants, settings, keys, slot, saves }),
-    video: new RenderService({ core, grants, progress: sendTo(slot, RENDER_PROGRESS_EVENT) }),
+    ...videoServicesOf({ grants, served: media.served, slot, rehearsal: STUDIO_PATHS.rehearsal, home: STUDIO_PATHS.home }),
     keys,
     settings,
     setup: new SetupService({ tools, shared, progress: sendTo(slot, SETUP_PROGRESS_EVENT) }),
-    ...mediaServicesOf({ grants, settings, keys, slot, saves, rehearsal: STUDIO_PATHS.rehearsal }),
+    ...media,
     grants,
   };
 }

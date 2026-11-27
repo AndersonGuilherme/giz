@@ -1,11 +1,23 @@
-import type { Aspect, RenderedFiles, RenderProgress } from '../../shared/contract.ts';
+import type { RenderedFiles, RenderProgress } from '../../shared/contract.ts';
+import type { MediaFiles } from '../ports/MediaCore.ts';
+import type { VideoCore } from '../ports/VideoCore.ts';
 import { translate } from '../text.ts';
 import { StudioError } from './StudioError.ts';
-import type { StudioCore } from '../ports/StudioCore.ts';
 import type { FolderGrants } from './FolderGrants.ts';
+import type { BuildService } from './video/BuildService.ts';
+import { variantOf } from './video/outputFiles.ts';
+import { recordRender } from './video/renderHistory.ts';
 
-type Dependencies = Readonly<{ core: StudioCore; grants: FolderGrants; progress: (progress: RenderProgress) => void }>;
-export type RenderRequest = Readonly<{ folder: string; aspect: Aspect }>;
+type Dependencies = Readonly<{
+  core: VideoCore;
+  build: BuildService;
+  files: MediaFiles;
+  grants: FolderGrants;
+  progress: (progress: RenderProgress) => void;
+  now?: () => Date;
+}>;
+export type RenderRequest = Readonly<{ folder: string; aspect: RenderedAspect }>;
+type RenderedAspect = Parameters<VideoCore['render']>[1];
 
 /** Sends one progress event per whole percent, not one per frame. */
 export function percentSteps(send: (progress: RenderProgress) => void): (fraction: number) => void {
@@ -23,7 +35,10 @@ function failureOfRender(error: unknown, signal: AbortSignal): unknown {
   return error;
 }
 
-/** Renders one video at a time through core, streaming progress; `cancel` stops the running render. */
+/**
+ * Renders one video at a time through core, in either aspect (the other one gets its own files), streaming progress;
+ * "montar" and the check in that aspect come first. `cancel` stops the running render. Each render enters the history.
+ */
 export class RenderService {
   readonly #dependencies: Dependencies;
   #running: AbortController | undefined;
@@ -52,11 +67,12 @@ export class RenderService {
   }
 
   async #run({ folder, aspect }: RenderRequest, signal: AbortSignal): Promise<RenderedFiles> {
-    const { core, progress } = this.#dependencies;
-    const project = await core.load(folder);
-    const projectAspect = project.aspect().text();
-    if (projectAspect !== aspect) throw new StudioError('invalid-request', translate('errors.aspect', { project: projectAspect, asked: aspect }));
+    const { core, build, files, progress, now = () => new Date() } = this.#dependencies;
+    const montage = await build.ready(folder, aspect);
     signal.throwIfAborted();
-    return core.render(folder, project, { signal, onProgress: percentSteps(progress) });
+    const variant = variantOf(aspect, montage.inspection.projectAspect);
+    const { video, captions, seconds = montage.build.seconds } = await core.render(folder, aspect, { signal, onProgress: percentSteps(progress), variant });
+    await recordRender(files, folder, { at: now().toISOString(), aspect, seconds: Math.min(seconds, montage.build.seconds), video, captions });
+    return { video, captions };
   }
 }

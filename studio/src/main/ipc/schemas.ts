@@ -1,9 +1,10 @@
 import { z } from 'zod';
 import { onInterfaceLanguage, translate } from '../text.ts';
-import { ASPECTS, KEY_PROVIDERS, type ChannelName, type RequestOf } from '../../shared/contract.ts';
+import { KEY_PROVIDERS, type ChannelName, type RequestOf } from '../../shared/contract.ts';
 import { DEVICES, IMAGE_PROVIDERS, INTERFACE_LANGUAGES, REMOTION_LICENSES, TEXT_PROVIDERS, VOICE_MODELS, VOICE_PROVIDERS } from '../../shared/settings.ts';
 import { SETUP_TASKS } from '../../shared/setup.ts';
 import { MEDIA_SCHEMAS } from './mediaSchemas.ts';
+import { VIDEO_SCHEMAS } from './videoSchemas.ts';
 import { IDEA_REQUEST, SCENE_REQUEST, SCRIPT_REQUEST } from './scriptSchemas.ts';
 
 // zod's own messages (wrong type, unknown key, invalid option) in the interface language, following its changes.
@@ -27,12 +28,11 @@ const patch = z.object({
 /** The zod schema of each channel's payload: the main process trusts nothing the window sends before this. */
 export const REQUEST_SCHEMAS: { readonly [Name in ChannelName]: z.ZodType<RequestOf<Name>> } = {
   ...MEDIA_SCHEMAS,
+  ...VIDEO_SCHEMAS,
   'projects.pick': nothing,
   'projects.launched': nothing,
   'projects.open': z.object({ folder }).strict(),
   'projects.check': z.object({ folder }).strict(),
-  'video.render': z.object({ folder, aspect: z.enum(ASPECTS) }).strict(),
-  'video.cancel': nothing,
   'keys.set': z.object({ provider, key: z.string().trim().min(1, { error: () => translate('errors.emptyKey') }).max(4096) }).strict(),
   'keys.has': z.object({ provider }).strict(),
   'keys.remove': z.object({ provider }).strict(),

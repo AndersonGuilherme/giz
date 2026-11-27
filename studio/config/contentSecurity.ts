@@ -11,7 +11,9 @@ const STRICT: Directives = {
   // blob: a take just recorded, played before it is saved.
   'img-src': ["'self'", 'data:', 'giz-media:'],
   'media-src': ["'self'", 'giz-media:', 'blob:'],
-  'connect-src': ["'self'"],
+  // The video preview's fonts (Nunito, JetBrains Mono): core's scenes fetch their bytes from Google Fonts' font host,
+  // as the render does; without them the preview draws the text in another font. Only that host, only reads.
+  'connect-src': ["'self'", 'https://fonts.gstatic.com'],
   'object-src': ["'none'"],
   'base-uri': ["'none'"],
   'form-action': ["'none'"],

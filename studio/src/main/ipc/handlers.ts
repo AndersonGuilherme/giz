@@ -9,10 +9,12 @@ import type { SetupService } from '../services/SetupService.ts';
 import type { CastService } from '../services/media/CastService.ts';
 import type { ScenarioService } from '../services/media/ScenarioService.ts';
 import type { VoiceService } from '../services/media/VoiceService.ts';
+import type { VideoService } from '../services/video/VideoService.ts';
 import type { FolderGrants } from '../services/FolderGrants.ts';
 import type { ServedFolders } from '../services/media/ServedFolders.ts';
 import { mediaHandlers } from './mediaHandlers.ts';
 import { projectHandlers, scriptHandlers } from './projectHandlers.ts';
+import { videoHandlers } from './videoHandlers.ts';
 import type { Handlers } from './registry.ts';
 
 export type Services = Readonly<{
@@ -21,6 +23,7 @@ export type Services = Readonly<{
   ideas: IdeaService;
   script: ScriptService;
   video: RenderService;
+  videoStage: VideoService;
   keys: KeyService;
   settings: SettingsService;
   setup: SetupService;
@@ -42,8 +45,7 @@ export function handlersOf(services: Services): Handlers {
     ...scriptHandlers(ideas, script),
     'projects.open': ({ folder }) => projects.open(folder),
     'projects.check': ({ folder }) => projects.check(folder),
-    'video.render': (request) => video.render(request),
-    'video.cancel': async () => video.cancel(),
+    ...videoHandlers(video, services.videoStage),
     ...keyHandlers(keys),
     ...settingsHandlers(settings),
     'gpu.status': () => setup.gpu(),

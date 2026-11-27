@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useEditor, type Editor } from '../../state/useEditor.ts';
@@ -11,7 +11,7 @@ import { ProblemsPanel } from './ProblemsPanel.tsx';
 import { RenderBox } from './RenderBox.tsx';
 import { useUndoKeys } from './useUndoKeys.ts';
 
-type Props = Readonly<{ api: GizApi; folder: string }>;
+type Props = Readonly<{ api: GizApi; folder: string; focus?: string }>;
 
 type Local = Pick<EditorTools, 'selected' | 'select' | 'unsaved' | 'markDraft'>;
 
@@ -56,11 +56,22 @@ function Title({ tools }: Readonly<{ tools: EditorTools }>) {
   );
 }
 
+// A line named by another stage (the Video stage's check) is selected once the script is loaded (the card scrolls to it).
+function useFocus(tools: EditorTools | null, focus: string | undefined): void {
+  const ready = tools !== null;
+  useEffect(() => {
+    if (!tools || focus === undefined) return;
+    const index = tools.script.lines.findIndex((line) => line.id === focus);
+    if (index >= 0) tools.select(index);
+  }, [ready, focus]);
+}
+
 /** The Script stage: the stages on top, the lines in the middle, the check and the render beside them. */
-export function EditorScreen({ api, folder }: Props) {
+export function EditorScreen({ api, folder, focus }: Props) {
   const translate = useTranslate();
   const editor = useEditor(api, folder);
   const tools = useTools(api, editor, useLocal());
+  useFocus(tools, focus);
   useUndoKeys(editor.undo, editor.redo);
   if (editor.failure) return <main className="board"><FailurePanel failure={editor.failure} /></main>;
   if (!tools) return <p className="hint">{translate('editor.loading')}</p>;

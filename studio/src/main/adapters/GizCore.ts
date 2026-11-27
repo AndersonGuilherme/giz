@@ -1,5 +1,4 @@
-import type { RenderedFiles } from '../../shared/contract.ts';
-import type { Project, RenderJob, StudioCore } from '../ports/StudioCore.ts';
+import type { Project, StudioCore } from '../ports/StudioCore.ts';
 
 type Composition = typeof import('giz-core/src/presentation/cli/composition.ts');
 
@@ -19,11 +18,6 @@ export class GizCore implements StudioCore {
   async check(project: Project) {
     const composition = await this.#loaded();
     return composition.checkProject().run(project);
-  }
-
-  async render(folder: string, project: Project, job: RenderJob): Promise<RenderedFiles> {
-    const composition = await this.#loaded();
-    return composition.renderVideo(folder, job.signal).run(folder, project, job.onProgress);
   }
 
   #loaded(): Promise<Composition> {
