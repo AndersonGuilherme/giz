@@ -34,5 +34,9 @@
   "errors.invalidProject": "projeto inválido",
   "errors.emptyFolder": "informe a pasta do projeto",
   "errors.emptyKey": "a chave está vazia",
-  "errors.request": "pedido"
+  "errors.request": "pedido",
+  "errors.failed": "A operação falhou.",
+  "errors.untrustedSender": "pedido recusado: não veio da janela do Estúdio",
+  "errors.folderNotGranted": "Esta pasta não foi aberta pelo Estúdio: {folder}",
+  "errors.vaultUnreadable": "Não foi possível ler as chaves guardadas ({file})."
 }

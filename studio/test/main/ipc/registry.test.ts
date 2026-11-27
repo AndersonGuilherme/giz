@@ -31,7 +31,7 @@ test('a valid payload runs the handler and its answer comes back as ok', async (
   assert.deepEqual(await run({ provider: 'openai' }), { ok: true, value: true });
 });
 
-test('a StudioError keeps its code and message; any other error shows only its message, never the stack', async () => {
+test('a StudioError keeps its code and message; any other error says it failed, with its own text in the details, never the stack', async () => {
   const busy = guarded<'video.cancel'>(REQUEST_SCHEMAS['video.cancel'], async () => {
     throw new StudioError('busy', 'ocupado');
   });
@@ -40,7 +40,7 @@ test('a StudioError keeps its code and message; any other error shows only its m
     throw new Error('disco cheio');
   });
   const result = await broken(undefined);
-  assert.deepEqual(result, { ok: false, failure: { code: 'failed', message: 'disco cheio', details: [] } });
+  assert.deepEqual(result, { ok: false, failure: { code: 'failed', message: 'A operação falhou.', details: ['disco cheio'] } });
 });
 
 test("core's ProjectError becomes invalid-project with one line per problem (file › field: message)", async () => {
@@ -55,14 +55,36 @@ test("core's ProjectError becomes invalid-project with one line per problem (fil
   assert.deepEqual(result.failure.details, ['cast/lia.json › parameters.skin: cor "roxo" inválida']);
 });
 
-test('every channel of the map is registered on the IPC server, and the server answers through the guard', async () => {
+test('zod messages come in pt-BR', () => {
+  const result = REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'acme' });
+  assert.match(result.error?.issues[0]?.message ?? '', /^Opção inválida: esperava uma das seguintes opções/);
+});
+
+function serverWith(trusted: boolean) {
   const registered = new Map<string, (event: unknown, payload: unknown) => Promise<unknown>>();
   const server = { handle: (channel: string, listener: (event: unknown, payload: unknown) => Promise<unknown>) => void registered.set(channel, listener) };
-  const answer = async () => null;
+  let called = 0;
+  const answer = async () => {
+    called += 1;
+    return null;
+  };
   const handlers = Object.fromEntries(Object.keys(REQUEST_SCHEMAS).map((name) => [name, answer])) as unknown as Handlers;
-  registerChannels(server, REQUEST_SCHEMAS, handlers);
+  registerChannels(server, { schemas: REQUEST_SCHEMAS, handlers, trusts: () => trusted });
+  return { registered, calls: () => called };
+}
+
+test('every channel of the map is registered on the IPC server, and the server answers through the guard', async () => {
+  const { registered } = serverWith(true);
   assert.deepEqual([...registered.keys()].sort(), Object.keys(REQUEST_SCHEMAS).sort());
   assert.deepEqual(await registered.get('projects.pick')?.({}, {}), { ok: true, value: null });
   const refused = (await registered.get('projects.pick')?.({}, { folder: '/x' })) as { ok: boolean };
   assert.equal(refused.ok, false);
+});
+
+test('a call from an untrusted sender is refused before validation and never reaches the handler', async () => {
+  const { registered, calls } = serverWith(false);
+  const refused = (await registered.get('projects.pick')?.({}, {})) as { ok: boolean; failure: { code: string } };
+  assert.equal(refused.ok, false);
+  assert.equal(refused.failure.code, 'invalid-request');
+  assert.equal(calls(), 0);
 });

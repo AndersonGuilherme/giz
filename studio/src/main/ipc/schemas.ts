@@ -1,6 +1,10 @@
 import { z } from 'zod';
-import { translate } from '../text.ts';
+import { INTERFACE_LANGUAGE, translate } from '../text.ts';
 import { ASPECTS, KEY_PROVIDERS, type ChannelName, type RequestOf } from '../../shared/contract.ts';
+
+// zod's own messages (wrong type, unknown key, invalid option) in the interface language.
+const ZOD_LOCALES = { 'pt-BR': z.locales.ptBR, en: z.locales.en } as const;
+z.config(ZOD_LOCALES[INTERFACE_LANGUAGE]());
 
 const nothing = z.object({}).strict();
 const folder = z.string().trim().min(1, translate('errors.emptyFolder'));

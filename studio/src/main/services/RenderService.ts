@@ -2,8 +2,9 @@ import type { Aspect, RenderedFiles, RenderProgress } from '../../shared/contrac
 import { translate } from '../text.ts';
 import { StudioError } from './StudioError.ts';
 import type { StudioCore } from '../ports/StudioCore.ts';
+import type { FolderGrants } from './FolderGrants.ts';
 
-type Dependencies = Readonly<{ core: StudioCore; progress: (progress: RenderProgress) => void }>;
+type Dependencies = Readonly<{ core: StudioCore; grants: FolderGrants; progress: (progress: RenderProgress) => void }>;
 export type RenderRequest = Readonly<{ folder: string; aspect: Aspect }>;
 
 /** Sends one progress event per whole percent, not one per frame. */
@@ -32,11 +33,12 @@ export class RenderService {
   }
 
   async render(request: RenderRequest): Promise<RenderedFiles> {
+    const folder = this.#dependencies.grants.require(request.folder);
     if (this.#running) throw new StudioError('busy', translate('errors.busy'));
     const controller = new AbortController();
     this.#running = controller;
     try {
-      return await this.#run(request, controller.signal);
+      return await this.#run({ ...request, folder }, controller.signal);
     } catch (error) {
       throw failureOfRender(error, controller.signal);
     } finally {

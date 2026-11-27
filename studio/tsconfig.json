@@ -14,5 +14,5 @@
     "erasableSyntaxOnly": true,
     "types": ["node"]
   },
-  "include": ["src", "test", "smoke", "*.mts"]
+  "include": ["src", "test", "smoke", "config", "*.mts"]
 }

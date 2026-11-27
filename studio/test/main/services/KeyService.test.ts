@@ -42,3 +42,20 @@ test('the key is never logged and no answer carries it', async () => {
   assert.equal(JSON.stringify(answers).includes(SECRET), false);
   spies.forEach((spy) => spy.mock.restore());
 });
+
+test('two keys set at the same time both survive (the read-modify-write runs one at a time)', async () => {
+  const vault = new InMemoryVault(5);
+  const keys = new KeyService({ cipher: new FakeCipher(), vault });
+  await Promise.all([keys.set('openai', 'a-key'), keys.set('anthropic', 'b-key'), keys.set('google', 'c-key')]);
+  assert.deepEqual(Object.keys(vault.keys).sort(), ['anthropic', 'google', 'openai']);
+  await Promise.all([keys.remove('openai'), keys.remove('google')]);
+  assert.deepEqual(Object.keys(vault.keys), ['anthropic']);
+});
+
+test('a failed write does not block the next call', async () => {
+  const vault = new InMemoryVault();
+  const keys = new KeyService({ cipher: new FakeCipher(), vault });
+  vault.failNextWrite = true;
+  await assert.rejects(keys.set('openai', 'a-key'));
+  assert.equal(await keys.set('openai', 'a-key'), true);
+});

@@ -29,11 +29,17 @@ export function guarded<Name extends ChannelName>(schema: z.ZodType<RequestOf<Na
   };
 }
 
-/** Registers every channel of the map on the IPC server. */
-export function registerChannels(server: IpcServer, schemas: Schemas, handlers: Handlers): void {
+/** The channels to register: their schemas and handlers, and who may call them (`trusts` sees the IPC event). */
+export type Bridge = Readonly<{ schemas: Schemas; handlers: Handlers; trusts: (event: unknown) => boolean }>;
+
+const untrusted = (): Result<never> => ({ ok: false, failure: { code: 'invalid-request', message: translate('errors.untrustedSender'), details: [] } });
+
+/** Registers every channel of the map on the IPC server; a call from an untrusted sender is refused before anything runs. */
+export function registerChannels(server: IpcServer, bridge: Bridge): void {
+  const { schemas, handlers, trusts } = bridge;
   const names = Object.keys(handlers) as ChannelName[];
   for (const name of names) {
     const run = guarded(schemas[name], handlers[name] as Handler<typeof name>);
-    server.handle(name, (_event, payload) => run(payload));
+    server.handle(name, async (event, payload) => (trusts(event) ? run(payload) : untrusted()));
   }
 }

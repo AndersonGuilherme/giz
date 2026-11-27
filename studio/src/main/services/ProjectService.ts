@@ -1,9 +1,10 @@
 import type { Aspect, CheckReport, ProjectSummary } from '../../shared/contract.ts';
 import type { FolderPicker } from '../ports/FolderPicker.ts';
 import type { Project, StudioCore } from '../ports/StudioCore.ts';
+import type { FolderGrants } from './FolderGrants.ts';
 
-/** `launchFolder`: the project folder given on the command line, if any. */
-type Dependencies = Readonly<{ core: StudioCore; picker: FolderPicker; launchFolder: string | null }>;
+/** `launchFolder`: the project folder given on the command line, if any (already granted by the composition). */
+type Dependencies = Readonly<{ core: StudioCore; picker: FolderPicker; grants: FolderGrants; launchFolder: string | null }>;
 
 function summaryOf(folder: string, project: Project): ProjectSummary {
   const script = project.script();
@@ -38,8 +39,11 @@ export class ProjectService {
     this.#dependencies = dependencies;
   }
 
-  pick(): Promise<string | null> {
-    return this.#dependencies.picker.pickFolder();
+  /** The folder the person picks is granted: the window may open, check and render it from then on. */
+  async pick(): Promise<string | null> {
+    const { picker, grants } = this.#dependencies;
+    const folder = await picker.pickFolder();
+    return folder === null ? null : grants.grant(folder);
   }
 
   launched(): string | null {
@@ -47,11 +51,14 @@ export class ProjectService {
   }
 
   async open(folder: string): Promise<ProjectSummary> {
-    return summaryOf(folder, await this.#dependencies.core.load(folder));
+    const { core, grants } = this.#dependencies;
+    const path = grants.require(folder);
+    return summaryOf(path, await core.load(path));
   }
 
   async check(folder: string): Promise<CheckReport> {
-    const { core } = this.#dependencies;
-    return plainReport(await core.check(await core.load(folder)));
+    const { core, grants } = this.#dependencies;
+    const path = grants.require(folder);
+    return plainReport(await core.check(await core.load(path)));
   }
 }

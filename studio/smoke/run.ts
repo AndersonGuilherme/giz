@@ -1,5 +1,6 @@
 // Smoke test: boots the real app (electron-forge start), waits for the window, and through Chrome DevTools Protocol
-// checks the bridge answers `projects.check` on core's coupon lesson, then saves a screenshot of the window.
+// checks the bridge answers `projects.check` on core's coupon lesson (and refuses a folder never granted), then saves
+// a screenshot of the whole page.
 // Run: npm run smoke   (SMOKE_HEADLESS=1 for no display: Chromium's headless Ozone platform).
 import { spawn } from 'node:child_process';
 import { mkdir, writeFile } from 'node:fs/promises';
@@ -80,15 +81,21 @@ async function smoke(): Promise<void> {
   const refused = (await evaluate(`window.giz.projects.check('')`)) as { ok: boolean; failure: { code: string } };
   assert.equal(refused.ok, false);
   assert.equal(refused.failure.code, 'invalid-request');
+  const ungranted = (await evaluate(`window.giz.projects.check('/tmp')`)) as { ok: boolean; failure: { code: string } };
+  assert.equal(ungranted.ok, false);
+  assert.equal(ungranted.failure.code, 'invalid-request');
   const shown = await evaluate(`document.querySelector('[data-testid="check-report"]').innerText`);
   assert.match(String(shown), /Tudo certo/);
   const title = await evaluate(`document.querySelector('h2').innerText`);
+  // The whole page in the picture: the viewport grows to the content height (at least the window's 1100×760).
+  const height = Number(await evaluate('document.documentElement.scrollHeight'));
+  await send('Emulation.setDeviceMetricsOverride', { width: 1100, height: Math.max(760, height), deviceScaleFactor: 1, mobile: false });
   await pause(300);
   const { data } = (await send('Page.captureScreenshot', { format: 'png' })) as { data: string };
   await mkdir(dirname(SHOT), { recursive: true });
   await writeFile(SHOT, Buffer.from(data, 'base64'));
   close();
-  console.log(JSON.stringify({ window: page.url, title, check: { ok: check.ok, errors: check.value.errors.length, warnings: check.value.warnings.length }, refused: refused.failure.code, screenshot: SHOT }));
+  console.log(JSON.stringify({ window: page.url, title, check: { ok: check.ok, errors: check.value.errors.length, warnings: check.value.warnings.length }, refused: refused.failure.code, ungranted: ungranted.failure.code, screenshot: SHOT }));
 }
 
 try {

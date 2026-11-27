@@ -3,7 +3,9 @@ import assert from 'node:assert/strict';
 import { percentSteps, RenderService } from '../../../src/main/services/RenderService.ts';
 import type { RenderJob } from '../../../src/main/ports/StudioCore.ts';
 import type { RenderProgress } from '../../../src/shared/contract.ts';
-import { FakeCore, fakeProject } from '../../doubles/fakes.ts';
+import { FakeCore, fakeProject, grantsFor } from '../../doubles/fakes.ts';
+
+const grants = grantsFor('/p', '/q');
 
 test('progress is sent once per whole percent, clamped to 0..1', () => {
   const sent: number[] = [];
@@ -15,7 +17,7 @@ test('progress is sent once per whole percent, clamped to 0..1', () => {
 test('render streams the progress and returns the files', async () => {
   const progress: RenderProgress[] = [];
   const core = new FakeCore(fakeProject('9:16'), undefined, async (job) => [0.25, 0.5, 1].forEach(job.onProgress));
-  const service = new RenderService({ core, progress: (event) => progress.push(event) });
+  const service = new RenderService({ core, grants, progress: (event) => progress.push(event) });
   const files = await service.render({ folder: '/p', aspect: '9:16' });
   assert.deepEqual(files, { video: '/p/output/video.mp4', captions: '/p/output/captions.srt' });
   assert.deepEqual(progress, [{ fraction: 0.25 }, { fraction: 0.5 }, { fraction: 1 }]);
@@ -24,7 +26,7 @@ test('render streams the progress and returns the files', async () => {
 test('an aspect other than the project one is refused before rendering', async () => {
   let rendered = false;
   const core = new FakeCore(fakeProject('16:9'), undefined, async () => void (rendered = true));
-  const service = new RenderService({ core, progress: () => undefined });
+  const service = new RenderService({ core, grants, progress: () => undefined });
   await assert.rejects(service.render({ folder: '/p', aspect: '9:16' }), { code: 'invalid-request', message: 'Este projeto é 16:9, não 9:16.' });
   assert.equal(rendered, false);
 });
@@ -33,7 +35,7 @@ test('an aspect other than the project one is refused before rendering', async (
 const untilAborted = async ({ signal }: RenderJob) => new Promise<void>((_resolve, reject) => signal.addEventListener('abort', () => reject(new Error('renderMedia() got cancelled'))));
 
 test('cancel stops the running render, which then fails as cancelled; a second render meanwhile is busy', async () => {
-  const service = new RenderService({ core: new FakeCore(fakeProject(), undefined, untilAborted), progress: () => undefined });
+  const service = new RenderService({ core: new FakeCore(fakeProject(), undefined, untilAborted), grants, progress: () => undefined });
   const running = service.render({ folder: '/p', aspect: '16:9' });
   await assert.rejects(service.render({ folder: '/q', aspect: '16:9' }), { code: 'busy' });
   await new Promise((resolve) => setImmediate(resolve));
@@ -46,7 +48,15 @@ test('a render failure that was not a cancel passes through as it is', async () 
   const core = new FakeCore(fakeProject(), undefined, async () => {
     throw new Error('ffmpeg falhou');
   });
-  const service = new RenderService({ core, progress: () => undefined });
+  const service = new RenderService({ core, grants, progress: () => undefined });
   await assert.rejects(service.render({ folder: '/p', aspect: '16:9' }), { message: 'ffmpeg falhou' });
+  assert.equal(service.cancel(), false);
+});
+
+test('a folder the person did not give is refused before anything loads', async () => {
+  const core = new FakeCore(fakeProject());
+  const service = new RenderService({ core, grants, progress: () => undefined });
+  await assert.rejects(service.render({ folder: '/etc', aspect: '16:9' }), { code: 'invalid-request' });
+  assert.deepEqual(core.loads, []);
   assert.equal(service.cancel(), false);
 });

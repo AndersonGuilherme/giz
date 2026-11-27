@@ -34,5 +34,9 @@
   "errors.invalidProject": "invalid project",
   "errors.emptyFolder": "enter the project folder",
   "errors.emptyKey": "the key is empty",
-  "errors.request": "request"
+  "errors.request": "request",
+  "errors.failed": "The operation failed.",
+  "errors.untrustedSender": "request refused: it did not come from the Studio window",
+  "errors.folderNotGranted": "This folder was not opened by the Studio: {folder}",
+  "errors.vaultUnreadable": "Could not read the saved keys ({file})."
 }
