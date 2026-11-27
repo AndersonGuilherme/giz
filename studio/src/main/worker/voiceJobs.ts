@@ -1,12 +1,13 @@
 import type { SpokenSample } from '../ports/MediaCore.ts';
 import type { VoiceWork } from '../ports/VoiceWork.ts';
 import { setInterfaceLanguage, translate } from '../text.ts';
-import { toVoiceWorker, type FromVoiceWorker, type ToVoiceWorker } from './voiceMessages.ts';
+import { MOST_MESSAGE, toVoiceWorker, type FromVoiceWorker, type ToVoiceWorker } from './voiceMessages.ts';
 
 type Tell = (message: FromVoiceWorker) => void;
 type Job = Exclude<ToVoiceWorker, Readonly<{ type: 'cancel' }>>;
 
-const messageOf = (error: unknown) => (error instanceof Error ? error.message : String(error));
+// Cut to what an answer may carry (voiceMessages): a longer one would be refused and the worker dropped for it.
+const messageOf = (error: unknown) => (error instanceof Error ? error.message : String(error)).slice(0, MOST_MESSAGE);
 const idOf = (message: unknown) => (message as { id?: unknown } | null)?.id;
 
 /**

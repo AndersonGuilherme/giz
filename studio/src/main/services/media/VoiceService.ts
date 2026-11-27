@@ -66,6 +66,11 @@ export class VoiceService {
     return this.#job.cancel();
   }
 
+  /** Whether a voice job (all pending, one line, a take) is running now. */
+  generating(): boolean {
+    return this.#job.running();
+  }
+
   /** Resolves when the job in flight (if any) has really ended, even after a cancel answered at once (the render waits for it). */
   ended(): Promise<void> {
     return this.#job.ended();

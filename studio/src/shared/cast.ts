@@ -41,6 +41,8 @@ export type CastDocument = Readonly<{
   members: readonly CastMember[];
   presets: readonly CastPreset[];
   stages: readonly StageBrief[];
+  /** The voices are being made now: a sample asked meanwhile waits for that job (one voice job at a time). */
+  voicesGenerating: boolean;
 }>;
 
 /** One problem of a character file: the field (`parameters.skin`) and the message. */

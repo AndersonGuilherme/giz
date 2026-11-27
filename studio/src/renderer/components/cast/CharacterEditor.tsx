@@ -20,6 +20,7 @@ type Props = Readonly<{
   voice: ProjectVoice;
   onSaved: (document: CastDocument) => void;
   onRemove: () => void;
+  voicesBusy: boolean;
 }>;
 
 const rigOf = (catalog: CastCatalog, file: CharacterFile): RigInfo | undefined => catalog.rigs.find(({ id }) => id === file.rig);
@@ -32,7 +33,7 @@ function Preview({ file, catalog, gestures, sentence, sample }: Readonly<{ file:
 }
 
 /** One character: who it is, its body (rig and parameters), its voice, and the live preview beside them. */
-export function CharacterEditor({ api, folder, member, catalog, gestures, voice, onSaved, onRemove }: Props) {
+export function CharacterEditor({ api, folder, member, catalog, gestures, voice, onSaved, onRemove, voicesBusy }: Props) {
   const translate = useTranslate();
   const { draft, setDraft, state, problems, failure, sample, listen } = useCharacterDraft({ api, folder, onSaved }, member.file);
   const [sentence, setSentence] = useState(translate('cast.defaultSentence', { name: member.file.name }));
@@ -45,7 +46,7 @@ export function CharacterEditor({ api, folder, member, catalog, gestures, voice,
         </div>
         <IdentityFields file={draft} gestures={gestures} onChange={setDraft} />
         <BodyFields file={draft} catalog={catalog} onChange={setDraft} />
-        <VoiceFields voice={draft.voice} project={voice} catalog={catalog} sentence={sentence} sampling={sample.busy} onVoice={(next) => setDraft({ ...draft, voice: next })} onSentence={setSentence} onSample={() => listen(draft.voice, sentence)} />
+        <VoiceFields voice={draft.voice} project={voice} catalog={catalog} sentence={sentence} sampling={sample.busy} voicesBusy={voicesBusy} onVoice={(next) => setDraft({ ...draft, voice: next })} onSentence={setSentence} onSample={() => listen(draft.voice, sentence)} />
         {sample.failure && <FailurePanel failure={sample.failure} />}
       </div>
       <aside className="character-side"><Preview file={draft} catalog={catalog} gestures={gestures} sentence={sentence} sample={sample} /></aside>

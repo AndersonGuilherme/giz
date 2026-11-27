@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import type { SampleVoice, SpokenSample, VoiceJob } from '../../../src/main/ports/MediaCore.ts';
 import type { SampleRequest, VoiceWork } from '../../../src/main/ports/VoiceWork.ts';
-import type { FromVoiceWorker } from '../../../src/main/worker/voiceMessages.ts';
+import { fromVoiceWorker, type FromVoiceWorker } from '../../../src/main/worker/voiceMessages.ts';
 import { VoiceJobs } from '../../../src/main/worker/voiceJobs.ts';
 
 const SAMPLE: SpokenSample = { wav: new Uint8Array([1, 2, 3]), seconds: 0.2, envelope: [0.5], visemes: 'A' };
@@ -98,4 +98,17 @@ test('a job that fails tells its message; a message of another shape is refused 
   assert.equal(told.length, 2);
   assert.deepEqual([told[1]!.type, told[1]!.id], ['failed', 4]);
   assert.equal(work.jobs.length, 0);
+});
+
+test('a very long failure is cut to what the answer may carry, so the main process never drops the worker for it', async () => {
+  const work = new SteppedWork();
+  work.sample = async () => {
+    throw new Error('x'.repeat(5000));
+  };
+  const { jobs, told } = jobsWith(work);
+  jobs.receive({ type: 'sample', id: 7, voice: { provider: 'qwen' }, request: { id: 'vivian', text: 'Oi', language: 'pt-BR' }, language: 'pt-BR' });
+  await settle();
+  const [failed] = told;
+  assert.equal(failed!.type === 'failed' && failed!.message.length, 4000);
+  assert.equal(fromVoiceWorker.safeParse(failed).success, true);
 });

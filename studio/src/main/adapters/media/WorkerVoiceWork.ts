@@ -29,6 +29,7 @@ export class WorkerVoiceWork implements VoiceWork {
   readonly #open: () => VoiceChannel;
   readonly #pending = new Map<number, Pending>();
   #channel: VoiceChannel | undefined;
+  #restarting = false;
   #next = 1;
 
   constructor(open: () => VoiceChannel) {
@@ -43,17 +44,34 @@ export class WorkerVoiceWork implements VoiceWork {
   async sample(voice: SampleVoice, request: SampleRequest): Promise<SpokenSample> {
     const language = interfaceLanguage();
     const sample = await this.#ask((id) => ({ type: 'sample', id, voice, request, language }));
-    return sample!;
+    if (!sample) throw new Error(translate('media.voiceWorkerAnswer'));
+    return sample;
+  }
+
+  /**
+   * Closes the worker so the next job opens a new one, which reads the install config and the models again (after a
+   * model download or a voice setting change); a job in flight ends first.
+   */
+  restart(): void {
+    this.#restarting = this.#channel !== undefined;
+    this.#closeWhenIdle();
   }
 
   #ask(message: (id: number) => ToVoiceWorker, job?: VoiceJob): Promise<SpokenSample | undefined> {
     const asked = { id: this.#next++, channel: this.#channel ?? this.#opened() };
     return new Promise((resolve, reject) => {
-      this.#pending.set(asked.id, { resolve, reject, job });
       asked.channel.send(message(asked.id));
+      this.#pending.set(asked.id, { resolve, reject, job });
       job?.signal?.addEventListener('abort', () => this.#cancel(asked), { once: true });
       if (job?.signal?.aborted) this.#cancel(asked);
     });
+  }
+
+  #closeWhenIdle(): void {
+    const channel = this.#channel;
+    if (!this.#restarting || !channel || this.#pending.size > 0) return;
+    [this.#restarting, this.#channel] = [false, undefined];
+    channel.kill();
   }
 
   #cancel({ id, channel }: Asked): void {
@@ -80,6 +98,11 @@ export class WorkerVoiceWork implements VoiceWork {
     if (!pending) return;
     if (message.type === 'line') return pending.job?.onLine?.(message.done, message.total, message.lineId);
     this.#pending.delete(message.id);
+    this.#settle(pending, message);
+    this.#closeWhenIdle();
+  }
+
+  #settle(pending: Pending, message: Exclude<FromVoiceWorker, Readonly<{ type: 'line' }>>): void {
     if (message.type === 'ended') return pending.resolve(message.sample);
     pending.reject(failureOf(pending, message.message));
   }

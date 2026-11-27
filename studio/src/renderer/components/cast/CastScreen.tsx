@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { CastCatalog, CastDocument, CastMember } from '../../../shared/cast.ts';
 import type { GizApi } from '../../../shared/GizApi.ts';
+import { voicesBusyAfter } from '../../cast/sampleLabel.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useStageDocument } from '../../state/useStageDocument.ts';
 import { ScreenHead } from '../common/ScreenHead.tsx';
@@ -26,12 +27,20 @@ function useTools(api: GizApi): Tools | null {
 
 type BodyProps = Readonly<{ api: GizApi; document: CastDocument; tools: Tools; selected: string; select: (id: string) => void; set: (document: CastDocument) => void; remove: (member: CastMember) => void }>;
 
+// Busy while a voice job runs: from the document when the screen opens, then from the job's progress.
+function useVoicesBusy(api: GizApi, opened: boolean): boolean {
+  const [busy, setBusy] = useState(opened);
+  useEffect(() => api.voices.onProgress((progress) => setBusy(voicesBusyAfter(progress))), [api]);
+  return busy;
+}
+
 function Body({ api, document, tools, selected, select, set, remove }: BodyProps) {
+  const voicesBusy = useVoicesBusy(api, document.voicesGenerating);
   const member = document.members.find(({ file }) => file.id === selected) ?? document.members[0];
   return (
     <div className="cast-body">
       <CastList document={document} catalog={tools.catalog} selected={member?.file.id ?? ''} select={select} />
-      {member && <CharacterEditor key={member.file.id} api={api} folder={document.folder} member={member} catalog={tools.catalog} gestures={tools.gestures} voice={document.voice} onSaved={set} onRemove={() => remove(member)} />}
+      {member && <CharacterEditor key={member.file.id} api={api} folder={document.folder} member={member} catalog={tools.catalog} gestures={tools.gestures} voice={document.voice} onSaved={set} onRemove={() => remove(member)} voicesBusy={voicesBusy} />}
     </div>
   );
 }

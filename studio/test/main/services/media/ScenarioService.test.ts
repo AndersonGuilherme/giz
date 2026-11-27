@@ -104,6 +104,27 @@ test('crop: the chosen part of the picture is kept in background.crop (never the
   await assert.rejects(service.crop(FOLDER, '1', { zoom: 2, x: 0, y: 0 }), /tem imagem/);
 });
 
+test('"usar a gerada" drops the crop of the own picture (it framed another picture), in both cases', async () => {
+  const { service, disk, files } = build();
+  await service.upload(FOLDER, '3', PNG);
+  await service.crop(FOLDER, '3', { zoom: 2, x: 0.1, y: 0.9 });
+  await service.useGenerated(FOLDER, '3');
+  assert.equal('crop' in (await lineOf(disk, '3')).scene.background, false);
+  await service.upload(FOLDER, '1', PNG);
+  await service.crop(FOLDER, '1', { zoom: 2, x: 0.1, y: 0.9 });
+  await files.remove(FOLDER, 'scenes/1.png');
+  await service.useGenerated(FOLDER, '1');
+  assert.deepEqual(Object.keys((await lineOf(disk, '1')).scene.background).sort(), ['vector']);
+});
+
+test('a framed picture of another shape says it was framed by the person, not that its edges are cut', async () => {
+  const { service } = build();
+  await service.upload(FOLDER, '1', PNG);
+  const document = await service.crop(FOLDER, '1', { zoom: 1.4, x: 0.5, y: 0.5 });
+  const background = document.cards[0]!.background;
+  assert.match(background.kind === 'image' ? background.aspectWarning ?? '' : '', /800×800, enquadrada por você/);
+});
+
 test('upload to a line without its own scenario scene is refused before anything is written', async () => {
   const { service, files } = build();
   await assert.rejects(service.upload(FOLDER, '2', PNG), /não tem uma cena de cenário/);

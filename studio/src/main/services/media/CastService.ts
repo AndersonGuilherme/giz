@@ -21,6 +21,8 @@ type Dependencies = Readonly<{
   saves: FolderQueue;
   keyOf: (service: 'elevenlabs' | 'fish') => Promise<string | undefined>;
   samples: string;
+  /** Whether the voices are being made now: the voice worker runs one job at a time, so a sample waits for it. */
+  voicesBusy: () => boolean;
 }>;
 
 /** The Cast stage: the project's characters, checked by core's rig catalog before each save, and their voice samples. */
@@ -41,7 +43,8 @@ export class CastService {
     const [project, script] = await Promise.all([projectOf(disk, path), scriptOf(disk, path)]);
     const members = await Promise.all(castIdsOf(project).map((id) => memberOf({ disk, folder: path }, id, script.lines)));
     const [presets, items] = await Promise.all([presetsOf(core, languageOf(project)), core.items(path)]);
-    return { folder: path, language: languageOf(project), voice: projectVoiceOf(project), members, presets, stages: items.stages };
+    const voicesGenerating = this.#dependencies.voicesBusy();
+    return { folder: path, language: languageOf(project), voice: projectVoiceOf(project), members, presets, stages: items.stages, voicesGenerating };
   }
 
   check(character: CharacterFile): Promise<readonly CharacterProblem[]> {

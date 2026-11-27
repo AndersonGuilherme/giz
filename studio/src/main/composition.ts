@@ -35,7 +35,9 @@ import { SetupService } from './services/SetupService.ts';
 import { defaultProjectsFolderIn, keyFolderIn, studioPathsOf, systemLanguageOf } from './studioPaths.ts';
 import { setInterfaceLanguage } from './text.ts';
 import type { WindowSlot } from './WindowSlot.ts';
-import { mediaServicesOf } from './composition/media.ts';
+import type { SharedConfigStore } from './ports/SettingsStores.ts';
+import { mediaServicesOf, voiceWorkOf } from './composition/media.ts';
+import { restartingAfterConfig, restartingAfterSetup } from './adapters/media/voiceRestarts.ts';
 import { videoServicesOf } from './composition/video.ts';
 
 export const STUDIO_PATHS = studioPathsOf(process.env, homedir());
@@ -61,7 +63,7 @@ function launchFolderIn(grants: FolderGrants): string | null {
 
 const makeFolder = async (folder: string) => void (await mkdir(folder, { recursive: true }));
 
-function settingsOf(grants: FolderGrants, picker: DialogFolderPicker, shared: GizConfigStore): SettingsService {
+function settingsOf(grants: FolderGrants, picker: DialogFolderPicker, shared: SharedConfigStore): SettingsService {
   const { home } = STUDIO_PATHS;
   const appConfig = new JsonAppConfig(join(app.getPath('userData'), 'studio.json'));
   const base = { app: appConfig, shared, picker, grants, makeFolder, onLanguage: setInterfaceLanguage };
@@ -95,16 +97,23 @@ function scriptServicesOf({ grants, settings, keys, slot, saves }: ScriptParts):
   return { listing, ideas, script: new ScriptService({ core, disk, grants, saves }) };
 }
 
+// giz.config.json and the setup tools. The voice worker reads the install config and the models once, so a model setup
+// or a voice setting closes it (the next voice job opens a new one).
+function machineOf(restartVoices: () => void) {
+  const shared = restartingAfterConfig(new GizConfigStore(STUDIO_PATHS.gizConfig), restartVoices);
+  const tools = restartingAfterSetup(STUDIO_PATHS.rehearsal ? new RehearsalSetupTools() : new CoreSetupTools(), restartVoices);
+  return { shared, tools };
+}
+
 /** The services the IPC channels call, wired to core and to Electron; they reach the window through the slot. */
 export function createServices(slot: WindowSlot<BrowserWindow>): Services {
-  const core = new GizCore();
-  const grants = new FolderGrants();
-  const [picker, shared] = [new DialogFolderPicker(() => slot.current()), new GizConfigStore(STUDIO_PATHS.gizConfig)];
-  const tools = STUDIO_PATHS.rehearsal ? new RehearsalSetupTools() : new CoreSetupTools();
+  const [core, grants, voices] = [new GizCore(), new FolderGrants(), voiceWorkOf(STUDIO_PATHS.rehearsal)];
+  const { shared, tools } = machineOf(() => voices.restart());
+  const picker = new DialogFolderPicker(() => slot.current());
   const keys = keysOf();
   const settings = settingsOf(grants, picker, shared);
   const saves = new FolderQueue(); // each folder's writes in turn: the script editor's and the media stages'
-  const media = mediaServicesOf({ grants, settings, keys, slot, saves, rehearsal: STUDIO_PATHS.rehearsal });
+  const media = mediaServicesOf({ grants, settings, keys, slot, saves, voices, rehearsal: STUDIO_PATHS.rehearsal });
   return {
     projects: new ProjectService({ core, picker, grants, launchFolder: launchFolderIn(grants) }),
     ...scriptServicesOf({ grants, settings, keys, slot, saves }),

@@ -9,7 +9,7 @@ import { MemoryDisk } from '../../../doubles/scriptFakes.ts';
 const FOLDER = '/projects/cats';
 const ANA = { id: 'ana', name: 'Ana', rig: 'giz', parameters: { skin: 'light' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
 
-function build() {
+function build(voicesBusy = () => false) {
   const disk = new MemoryDisk();
   disk.put(FOLDER, 'project.json', { version: 2, title: 'Gatos', language: 'pt-BR', aspect: '9:16', cast: ['ana', 'narrator'], voice: { provider: 'qwen', model: '0.6b' } });
   disk.put(FOLDER, 'script.json', { chapters: ['Começo'], lines: [{ id: '1', chapter: 1, speaker: 'ana', text: 'Oi.' }, { id: '2', chapter: 1, speaker: 'ana', text: 'Tchau.' }] });
@@ -21,7 +21,7 @@ function build() {
   const files = new MemoryMediaFiles();
   const keys: string[] = [];
   const saves = new FolderQueue();
-  const service = new CastService({ core, disk, files, grants, saves, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples' });
+  const service = new CastService({ core, disk, files, grants, saves, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples', voicesBusy });
   return { disk, core, files, service, keys, saves };
 }
 
@@ -113,4 +113,12 @@ test("every cast write waits for the folder's other writes (one queue with the s
   assert.deepEqual([project.voice.provider, project.cast], ['fish', ['ana', 'narrator', 'bia']], 'each write saw the one before it');
   await service.remove(FOLDER, 'bia');
   assert.deepEqual(((await disk.readJson(FOLDER, 'project.json')) as { cast: string[] }).cast, ['ana', 'narrator']);
+});
+
+test('read tells whether the voices are being made now (a sample asked then waits for the voice job)', async () => {
+  let busy = false;
+  const { service } = build(() => busy);
+  assert.equal((await service.read('/projects/cats')).voicesGenerating, false);
+  busy = true;
+  assert.equal((await service.read('/projects/cats')).voicesGenerating, true);
 });

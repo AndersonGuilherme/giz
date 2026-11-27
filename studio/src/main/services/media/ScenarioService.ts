@@ -99,7 +99,7 @@ export class ScenarioService {
   useGenerated(folder: string, lineId: string): Promise<ScenariosDocument> {
     return this.#change(folder, lineId, async (path, { background }) => {
       const made = await this.#dependencies.files.exists(path, generatedFile(lineId));
-      return made ? { ...background, image: generatedFile(lineId) } : without(background, 'image');
+      return made ? { ...without(background, 'crop'), image: generatedFile(lineId) } : without(background, 'image', 'crop');
     });
   }
 

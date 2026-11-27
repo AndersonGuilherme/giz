@@ -15,7 +15,8 @@ export type ScenarioLine = Readonly<{ line: ScriptLine; number: number; backgrou
  */
 export type FileView = Readonly<{
   url: (file: string) => Promise<string | null>;
-  aspectWarning: (file: string) => Promise<string | undefined>;
+  /** `framed`: the person chose the part shown, so another shape is said as such (nothing unexpected is cut). */
+  aspectWarning: (file: string, framed: boolean) => Promise<string | undefined>;
   kept: (lineId: string) => SceneCard['generate'];
 }>;
 
@@ -64,8 +65,8 @@ async function backgroundOf(scene: ScenarioLine, view: FileView): Promise<SceneB
   const image = textOf(scene.background.image);
   if (!image) return { kind: 'vector', vector: textOf(scene.background.vector) || 'room', colors: (isObject(scene.background.colors) ? scene.background.colors : {}) as Record<string, string> };
   const own = image !== generatedFile(scene.line.id);
-  const warning = await view.aspectWarning(image);
   const crop = cropOf(scene.background.crop);
+  const warning = await view.aspectWarning(image, crop !== undefined);
   return { kind: 'image', image, url: await view.url(image), own, ...(warning ? { aspectWarning: warning } : {}), ...(crop ? { crop } : {}) };
 }
 
@@ -100,9 +101,10 @@ export function fileViewOf(parts: Readonly<{ files: MediaFiles; core: MediaCore 
     const version = await parts.files.modified(folder, file);
     return version === undefined ? null : mediaUrlOf(join(folder, file), version);
   };
-  const aspectWarning = async (file: string) => {
+  const aspectWarning = async (file: string, framed: boolean) => {
     const shape = await parts.core.imageShape(join(folder, file), shown.aspect);
-    return shape && !shape.matches ? translate('scenarios.otherShape', { width: shape.width, height: shape.height, aspect: shown.aspect }) : undefined;
+    const values = shape && { width: shape.width, height: shape.height, aspect: shown.aspect };
+    return values && !shape.matches ? translate(framed ? 'scenarios.framedShape' : 'scenarios.otherShape', values) : undefined;
   };
   return { url, aspectWarning, kept: (lineId) => shown.kept.get(lineId) };
 }

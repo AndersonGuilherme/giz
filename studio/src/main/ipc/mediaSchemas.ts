@@ -1,3 +1,4 @@
+import { CROP_LIMITS } from 'giz-core/src/domain/scenario/ImageCrop.ts';
 import { z } from 'zod';
 import { CAST_VOICE_PROVIDERS, QWEN_MODELS, type CharacterFile } from '../../shared/cast.ts';
 import type { ChannelName, RequestOf } from '../../shared/contract.ts';
@@ -12,6 +13,9 @@ const plainId = z.string().regex(/^[a-z0-9][a-z0-9_-]*$/i, { error: () => transl
 const shortText = (most: number) => z.string().max(most);
 const bytes = (most: number) => z.instanceof(Uint8Array).refine((data) => data.byteLength <= most, { error: () => translate('media.tooBig', { most: Math.round(most / 1024 / 1024) }) });
 const line = { folder, lineId: plainId };
+// The crop's ranges are core's own (the same the script check and the crop editor use).
+const within = ({ least, most }: Readonly<{ least: number; most: number }>) => z.number().min(least).max(most);
+const crop = z.object({ zoom: within(CROP_LIMITS.zoom), x: within(CROP_LIMITS.focus), y: within(CROP_LIMITS.focus) }).strict();
 
 // Only the shape and the sizes: core's rig catalog checks the rig and every parameter (and says what is wrong).
 const character = z.object({
@@ -44,7 +48,7 @@ export const MEDIA_SCHEMAS: { readonly [Name in MediaChannel]: z.ZodType<Request
   'scenarios.generate': z.object({ ...line, force: z.boolean() }).strict(),
   'scenarios.cancel': nothing,
   'scenarios.useGenerated': z.object(line).strict(),
-  'scenarios.crop': z.object({ ...line, crop: z.object({ zoom: z.number().min(1).max(4), x: z.number().min(0).max(1), y: z.number().min(0).max(1) }).strict().nullable() }).strict(),
+  'scenarios.crop': z.object({ ...line, crop: crop.nullable() }).strict(),
   'scenarios.settings': z.object({ folder, style: z.enum(IMAGE_STYLES).optional(), provider: z.enum(SCENE_IMAGE_PROVIDERS).optional() }).strict(),
   'voices.read': z.object({ folder }).strict(),
   'voices.generate': z.object({ folder, lineId: plainId.optional() }).strict(),

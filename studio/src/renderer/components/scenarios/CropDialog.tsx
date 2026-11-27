@@ -1,3 +1,4 @@
+import { CROP_LIMITS } from 'giz-core/src/presentation/studio/index.ts';
 import { useRef, useState, type PointerEvent } from 'react';
 import type { ImageCrop, SceneCard } from '../../../shared/scenarios.ts';
 import { useTranslate } from '../../i18n.ts';
@@ -23,6 +24,8 @@ function useDragging(crop: ImageCrop, setCrop: (crop: ImageCrop) => void, shape:
       if (begun && known) setCrop(dragged(begun.from, { dx: event.clientX - begun.x, dy: event.clientY - begun.y }, known));
     },
     onPointerUp: () => void (start.current = null),
+    onPointerCancel: () => void (start.current = null),
+    onLostPointerCapture: () => void (start.current = null),
   };
 }
 
@@ -30,10 +33,10 @@ function Stage({ url, aspect, crop, setCrop }: Readonly<{ url: string; aspect: P
   const picture = useRef<HTMLImageElement | null>(null);
   const width = BOX_WIDTH[aspect];
   const height = aspect === '9:16' ? (width * 16) / 9 : (width * 9) / 16;
-  const shape = () => picture.current && { box: { width, height }, picture: { width: picture.current.naturalWidth, height: picture.current.naturalHeight } };
+  const shape = () => picture.current && { box: { width, height }, picture: { width: picture.current.naturalWidth, height: picture.current.naturalHeight }, limits: CROP_LIMITS };
   const drag = useDragging(crop, setCrop, () => shape() ?? undefined);
   return (
-    <div className="crop-stage" style={{ width, height }} data-testid="crop-stage" onWheel={(event) => setCrop(zoomed(crop, crop.zoom - event.deltaY / 500))} {...drag}>
+    <div className="crop-stage" style={{ width, height }} data-testid="crop-stage" onWheel={(event) => setCrop(zoomed(crop, crop.zoom - event.deltaY / 500, CROP_LIMITS))} {...drag}>
       <PictureBox url={url} crop={crop} onLoad={(image) => void (picture.current = image)} />
       <div className="crop-frame" style={{ inset: FRAME_INSET }} aria-hidden="true" />
     </div>
@@ -50,7 +53,7 @@ export function CropDialog({ card, url, aspect, onSave, onClose }: Props) {
       <Stage url={url} aspect={aspect} crop={crop} setCrop={setCrop} />
       <label className="field crop-zoom">
         <span className="field-label">{translate('scenarios.cropZoom')}</span>
-        <input type="range" min={1} max={4} step={0.01} value={crop.zoom} data-testid="crop-zoom" onChange={(event) => setCrop(zoomed(crop, Number(event.target.value)))} />
+        <input type="range" min={CROP_LIMITS.zoom.least} max={CROP_LIMITS.zoom.most} step={0.01} value={crop.zoom} data-testid="crop-zoom" onChange={(event) => setCrop(zoomed(crop, Number(event.target.value), CROP_LIMITS))} />
       </label>
       <div className="dialog-actions">
         <button type="button" className="chalk-button quiet" data-testid="crop-cancel" onClick={onClose}>{translate('common.cancel')}</button>

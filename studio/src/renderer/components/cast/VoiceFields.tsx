@@ -1,4 +1,5 @@
 import type { CastCatalog, CharacterVoice, ProjectVoice } from '../../../shared/cast.ts';
+import { sampleLabel } from '../../cast/sampleLabel.ts';
 import { useTranslate } from '../../i18n.ts';
 import { Picker } from '../common/Picker.tsx';
 import { TextField } from '../common/TextField.tsx';
@@ -9,6 +10,8 @@ type Props = Readonly<{
   catalog: CastCatalog;
   sentence: string;
   sampling: boolean;
+  /** The voices are being made now: a sample waits for that job. */
+  voicesBusy: boolean;
   onVoice: (voice: CharacterVoice) => void;
   onSentence: (sentence: string) => void;
   onSample: () => void;
@@ -30,7 +33,7 @@ function VoiceId({ voice, project, catalog, onVoice }: Pick<Props, 'voice' | 'pr
 /** The character's voice: the voice id, its style, and "ouvir amostra" with a sentence of the person's choice. */
 export function VoiceFields(props: Props) {
   const translate = useTranslate();
-  const { voice, project, sentence, sampling, onVoice, onSentence, onSample } = props;
+  const { voice, project, sentence, sampling, voicesBusy, onVoice, onSentence, onSample } = props;
   const recording = project.provider === 'recording';
   const cannot = recording || sampling || !voice.id || !sentence.trim();
   return (
@@ -40,7 +43,7 @@ export function VoiceFields(props: Props) {
       <TextField label={translate('cast.voiceStyle')} value={voice.style ?? ''} multiline onChange={(style) => onVoice({ ...voice, style })} testId="voice-style" hint={translate('cast.voiceStyleHint')} />
       <div className="sample-row">
         <TextField label={translate('cast.sampleSentence')} value={sentence} onChange={onSentence} testId="sample-sentence" />
-        <button type="button" className="chalk-button primary" data-testid="voice-sample" disabled={cannot} onClick={onSample}>{translate(sampling ? 'cast.sampling' : 'cast.listen')}</button>
+        <button type="button" className="chalk-button primary" data-testid="voice-sample" disabled={cannot} onClick={onSample}>{translate(sampleLabel({ sampling, voicesBusy }))}</button>
       </div>
     </section>
   );

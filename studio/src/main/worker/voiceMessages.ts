@@ -21,7 +21,9 @@ const wav = z.custom<Uint8Array>((value) => value instanceof Uint8Array);
 const spoken = z.object({ wav, seconds: z.number(), envelope: z.array(z.number()).readonly(), visemes: z.string() }).strict();
 const line = z.object({ type: z.literal('line'), id, done: z.number().int(), total: z.number().int(), lineId: text(64) }).strict();
 const ended = z.object({ type: z.literal('ended'), id, sample: spoken.optional() }).strict();
-const failed = z.object({ type: z.literal('failed'), id, message: text(4000) }).strict();
+/** The longest failure message an answer carries (the worker cuts a longer one). */
+export const MOST_MESSAGE = 4000;
+const failed = z.object({ type: z.literal('failed'), id, message: text(MOST_MESSAGE) }).strict();
 
 /** Worker → main: a line done, the job's end (a sample's audio with it), or its failure; each job ends exactly once. */
 export const fromVoiceWorker = z.discriminatedUnion('type', [line, ended, failed]);

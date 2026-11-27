@@ -115,3 +115,50 @@ test('an answer of another shape closes the worker and fails what was in flight'
   await assert.rejects(job, /fora do formato/);
   assert.equal(channels[0]!.killed, true);
 });
+
+test('restart closes an idle worker at once; the next job opens a new one (a new model or config is read there)', async () => {
+  const { work, channels } = runner();
+  const first = work.sample({ provider: 'qwen' }, REQUEST);
+  channels[0]!.answer({ type: 'ended', id: 1, sample: SAMPLE });
+  await first;
+  work.restart();
+  assert.equal(channels[0]!.killed, true);
+  const next = work.sample({ provider: 'qwen' }, REQUEST);
+  assert.equal(channels.length, 2);
+  channels[1]!.answer({ type: 'ended', id: 2, sample: SAMPLE });
+  await next;
+});
+
+test('restart during a job waits for it to end: the job is not failed, the worker closes right after', async () => {
+  const { work, channels } = runner();
+  const job = work.generate('/p', {});
+  work.restart();
+  assert.equal(channels[0]!.killed, false);
+  channels[0]!.answer({ type: 'ended', id: 1 });
+  await job;
+  assert.equal(channels[0]!.killed, true);
+  work.restart();
+  assert.equal(channels.length, 1, 'nothing open, nothing to close');
+});
+
+test('a sample that ends without its audio is refused as an answer of another shape', async () => {
+  const { work, channels } = runner();
+  const sample = work.sample({ provider: 'qwen' }, REQUEST);
+  channels[0]!.answer({ type: 'ended', id: 1 });
+  await assert.rejects(sample, /fora do formato/);
+});
+
+test('a send that throws (the worker just died) fails that job and leaves nothing pending', async () => {
+  const { work, channels } = runner();
+  const first = work.sample({ provider: 'qwen' }, REQUEST);
+  channels[0]!.answer({ type: 'ended', id: 1, sample: SAMPLE });
+  await first;
+  channels[0]!.send = () => {
+    throw new Error('port closed');
+  };
+  await assert.rejects(work.generate('/p', {}), /port closed/);
+  channels[0]!.crash(1);
+  const next = work.sample({ provider: 'qwen' }, REQUEST);
+  channels[1]!.answer({ type: 'ended', id: channels[1]!.sent[0]!.id, sample: SAMPLE });
+  assert.deepEqual(await next, SAMPLE);
+});
