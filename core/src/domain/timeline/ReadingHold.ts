@@ -16,13 +16,19 @@ function readingSeconds(scene: Scene): number {
   return Math.min(MAXIMUM_IN_SECONDS, Math.max(MINIMUM_IN_SECONDS, byLines)) + (hasAdded ? 1 : 0);
 }
 
+// The line's own reading time (the motor `read`) applies to any scene it opens; `false` turns the reading hold off.
+function ownReading(line: Line): number | undefined {
+  const own = line.reading();
+  return own === false ? 0 : own;
+}
+
 /**
- * The hold after the line: the explicit one (`holdAfter`) and/or the reading hold of code the line opens on screen;
- * the larger one wins. `openedScene` is the scene the line opens (absent when it inherits the previous one); the reading
+ * The hold after the line: the explicit one (`holdAfter`) and/or the reading hold of code the line opens on screen (or
+ * the line's own `reading`); the larger one wins. `openedScene` is the scene the line opens (absent when it inherits the previous one); the reading
  * hold is labeled in the video language.
  */
 export function lineHold(line: Line, openedScene: Scene | undefined, language: Language): HoldAfter | undefined {
-  const reading = openedScene ? readingSeconds(openedScene) : 0;
+  const reading = openedScene ? ownReading(line) ?? readingSeconds(openedScene) : 0;
   const explicit = line.holdAfter();
   if (explicit) return { ...explicit, seconds: Math.max(explicit.seconds, reading) };
   if (reading > 0) return { seconds: reading, label: fixedTexts(language).readTheCode };

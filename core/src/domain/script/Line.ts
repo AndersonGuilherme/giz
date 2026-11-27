@@ -32,6 +32,7 @@ export type LineData = Readonly<{
   scene?: Scene;
   beats?: readonly Beat[];
   holdAfter?: HoldAfter;
+  reading?: number | false;
   sfx?: SoundEffect;
 }>;
 
@@ -103,6 +104,11 @@ export class Line {
 
   holdAfter(): HoldAfter | undefined {
     return this.#data.holdAfter;
+  }
+
+  /** The reading hold of the scene the line opens, in seconds (`false`: none); absent: the automatic one. */
+  reading(): number | false | undefined {
+    return this.#data.reading;
   }
 
   sfx(): SoundEffect | undefined {

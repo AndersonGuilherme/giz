@@ -36,6 +36,8 @@ export const lineSchema = z
     scene: sceneSchema.optional(),
     beats: z.array(beatSchema).optional(),
     holdAfter: holdSchema.optional(),
+    // The reading hold when the line opens a scene: seconds, or false for none (absent: automatic, for code).
+    reading: z.union([z.number().min(0), z.literal(false)]).optional(),
     sfx: sfx.optional(),
   })
   .strict();
