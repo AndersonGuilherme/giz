@@ -36,6 +36,7 @@ import { SetupService } from './services/SetupService.ts';
 import { defaultProjectsFolderIn, keyFolderIn, studioPathsOf, systemLanguageOf } from './studioPaths.ts';
 import { setInterfaceLanguage } from './text.ts';
 import type { WindowSlot } from './WindowSlot.ts';
+import { mediaServicesOf } from './composition/media.ts';
 
 export const STUDIO_PATHS = studioPathsOf(process.env, homedir());
 
@@ -110,5 +111,7 @@ export function createServices(slot: WindowSlot<BrowserWindow>): Services {
     keys,
     settings,
     setup: new SetupService({ tools, shared, progress: sendTo(slot, SETUP_PROGRESS_EVENT) }),
+    ...mediaServicesOf({ grants, settings, keys, slot, rehearsal: STUDIO_PATHS.rehearsal }),
+    grants,
   };
 }

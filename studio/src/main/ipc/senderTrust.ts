@@ -11,7 +11,8 @@ type EventLike = Readonly<{ sender?: unknown; senderFrame?: FrameLike | null }>;
 
 const isIndexFile = (url: URL, indexFile: string) => url.protocol === 'file:' && resolve(fileURLToPath(url)) === resolve(indexFile);
 
-function isAppUrl(text: string, origin: AppOrigin): boolean {
+/** Whether the URL is our page (the dev server's origin, or our exact index.html once packaged). */
+export function isAppUrl(text: string, origin: AppOrigin): boolean {
   const url = URL.parse(text);
   if (!url) return false;
   if (origin.devServer) return url.origin === new URL(origin.devServer).origin;

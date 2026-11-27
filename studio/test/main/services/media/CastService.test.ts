@@ -1,0 +1,98 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { FolderGrants } from '../../../../src/main/services/FolderGrants.ts';
+import { CastService } from '../../../../src/main/services/media/CastService.ts';
+import { FakeMediaCore, MemoryMediaFiles } from '../../../doubles/mediaFakes.ts';
+import { MemoryDisk } from '../../../doubles/scriptFakes.ts';
+
+const FOLDER = '/projects/cats';
+const ANA = { id: 'ana', name: 'Ana', rig: 'giz', parameters: { skin: 'light' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
+
+function build() {
+  const disk = new MemoryDisk();
+  disk.put(FOLDER, 'project.json', { version: 2, title: 'Gatos', language: 'pt-BR', aspect: '9:16', cast: ['ana', 'narrator'], voice: { provider: 'qwen', model: '0.6b' } });
+  disk.put(FOLDER, 'script.json', { chapters: ['Começo'], lines: [{ id: '1', chapter: 1, speaker: 'ana', text: 'Oi.' }, { id: '2', chapter: 1, speaker: 'ana', text: 'Tchau.' }] });
+  disk.put(FOLDER, 'cast/ana.json', ANA);
+  disk.put(FOLDER, 'cast/narrator.json', { id: 'narrator', name: 'Narrador', voice: { id: 'ryan' }, defaultExpression: 'neutral' });
+  const grants = new FolderGrants();
+  grants.grant('/projects');
+  const core = new FakeMediaCore();
+  const files = new MemoryMediaFiles();
+  const keys: string[] = [];
+  const service = new CastService({ core, disk, files, grants, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples' });
+  return { disk, core, files, service, keys };
+}
+
+test('read: every member with its file and how many lines it says; the narrator has no body; presets get the language style', async () => {
+  const { service } = build();
+  const document = await service.read(FOLDER);
+  assert.deepEqual(document.members.map(({ file, lines }) => [file.id, file.rig ?? null, lines]), [['ana', 'giz', 2], ['narrator', null, 0]]);
+  assert.deepEqual(document.voice, { provider: 'qwen', model: '0.6b' });
+  assert.equal(document.presets[0]!.file.voice.style, 'Fale em português do Brasil');
+});
+
+test('save: core checks the file first; with a problem nothing is written', async () => {
+  const { service, core, disk } = build();
+  core.problems = [{ path: 'parameters.skin', message: 'opção "roxo" inválida' }];
+  const refused = await service.save(FOLDER, { ...ANA, parameters: { skin: 'roxo' } });
+  assert.equal(refused.saved, false);
+  assert.equal(disk.writes.length, 0);
+  core.problems = [];
+  const saved = await service.save(FOLDER, { ...ANA, name: 'Ana Lu', personality: '  ', voice: { id: 'vivian', style: ' calma ' } });
+  assert.equal(saved.saved, true);
+  assert.deepEqual(await disk.readJson(FOLDER, 'cast/ana.json'), { id: 'ana', name: 'Ana Lu', rig: 'giz', parameters: { skin: 'light' }, voice: { id: 'vivian', style: 'calma' }, defaultExpression: 'happy' });
+});
+
+test('save refuses a character that is not in the project, and any folder the person did not give', async () => {
+  const { service } = build();
+  await assert.rejects(service.save(FOLDER, { ...ANA, id: 'zed' }), { code: 'invalid-request' });
+  await assert.rejects(service.read('/etc'), { code: 'invalid-request' });
+});
+
+test('add a preset (its file copied, with the style) or a new one (giz rig, first voice); the same id twice is refused', async () => {
+  const { service, disk } = build();
+  const withBia = await service.add(FOLDER, { preset: 'bia' });
+  assert.deepEqual(withBia.members.map(({ file }) => file.id), ['ana', 'narrator', 'bia']);
+  assert.equal(((await disk.readJson(FOLDER, 'cast/bia.json')) as { voice: { style: string } }).voice.style, 'Fale em português do Brasil');
+  const withRui = await service.add(FOLDER, { id: 'Rui', name: 'Prof. Rui' });
+  const rui = withRui.members.find(({ file }) => file.id === 'rui')!.file;
+  assert.deepEqual([rui.name, rui.rig, rui.voice.id], ['Prof. Rui', 'giz', 'vivian']);
+  await assert.rejects(service.add(FOLDER, { preset: 'bia' }), { code: 'invalid-request' });
+  await assert.rejects(service.add(FOLDER, { id: '../x' }), { code: 'invalid-request' });
+});
+
+test('remove: refused while a line says the character; otherwise only project.json forgets it', async () => {
+  const { service, disk } = build();
+  await assert.rejects(service.remove(FOLDER, 'ana'), /ainda diz 2 fala/);
+  const document = await service.remove(FOLDER, 'narrator');
+  assert.deepEqual(document.members.map(({ file }) => file.id), ['ana']);
+  assert.ok(await disk.exists(`${FOLDER}/cast/narrator.json`));
+  await assert.rejects(service.remove(FOLDER, 'ana'), { code: 'invalid-request' });
+});
+
+test('the project voice: provider and model (the model only for the local voice)', async () => {
+  const { service, disk } = build();
+  await service.voice(FOLDER, { provider: 'elevenlabs', model: '1.7b' });
+  assert.deepEqual(((await disk.readJson(FOLDER, 'project.json')) as { voice: unknown }).voice, { provider: 'elevenlabs' });
+});
+
+test('a sample: said with the project voice, kept and served from the samples folder; the same one again calls nothing', async () => {
+  const { service, core, files } = build();
+  const sample = await service.sample(FOLDER, { id: 'vivian', style: 'calma' }, 'Olá!');
+  assert.match(sample.audio, /^giz-media:\/\/file\/%2Fuser%2Fsamples%2F[0-9a-f]{40}\.wav\?v=\d+$/);
+  assert.deepEqual([sample.seconds, sample.visemes], [1.5, 'XA']);
+  assert.deepEqual(core.samples[0]!.voice, { provider: 'qwen', model: '0.6b' });
+  await service.sample(FOLDER, { id: 'vivian', style: 'calma' }, 'Olá!');
+  assert.equal(core.samples.length, 1);
+  assert.equal(files.files.size, 2);
+});
+
+test('a paid voice sample reads its key in main; a recording project has no sample', async () => {
+  const { service, core, keys, disk } = build();
+  await service.voice(FOLDER, { provider: 'fish' });
+  await service.sample(FOLDER, { id: 'abc123' }, 'Olá!');
+  assert.deepEqual(keys, ['fish']);
+  assert.deepEqual(core.samples[0]!.voice, { provider: 'fish', key: 'secret' });
+  await disk.writeJson(FOLDER, 'project.json', { ...((await disk.readJson(FOLDER, 'project.json')) as object), voice: { provider: 'recording' } });
+  await assert.rejects(service.sample(FOLDER, { id: 'x' }, 'Olá!'), { code: 'unavailable' });
+});

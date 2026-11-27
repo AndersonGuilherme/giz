@@ -10,6 +10,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { devtools, poll, type Page } from './devtools.ts';
+import { castStage, scenariosStage, storyProject, voicesStage } from './mediaSteps.ts';
 import { brokenScript, duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
@@ -22,7 +23,7 @@ await writeFile(join(HOME, 'giz.config.json'), JSON.stringify({ brand: 'canal-de
 
 const headless = process.env.SMOKE_HEADLESS === '1' ? ['--ozone-platform=headless'] : [];
 const env = { ...process.env, GIZ_STUDIO_HOME: HOME, GIZ_STUDIO_REHEARSAL: '1', GIZ_QUIET: '1' };
-const app = spawn('npx', ['electron-forge', 'start', '--', `--remote-debugging-port=${PORT}`, `--project=${FOLDER}`, '--lang=en-US', ...headless], {
+const app = spawn('npx', ['electron-forge', 'start', '--', `--remote-debugging-port=${PORT}`, `--project=${FOLDER}`, '--lang=en-US', '--use-fake-device-for-media-stream', ...headless], {
   cwd: STUDIO, stdio: ['ignore', 'pipe', 'pipe'], detached: true, env,
 });
 let output = '';
@@ -44,7 +45,7 @@ const S3_VIEW = { width: 1280, height: 860 };
 
 async function shoot(page: Page, name: string): Promise<void> {
   const file = join(SHOTS, `${name}.png`);
-  await page.screenshot(file, name.startsWith('s3-') ? S3_VIEW : undefined);
+  await page.screenshot(file, /^s[34]-/.test(name) ? S3_VIEW : undefined);
   shots.push(file);
 }
 
@@ -204,6 +205,20 @@ async function scriptStage(page: Page): Promise<void> {
   await failAndCancel(context);
 }
 
+// S4: the cast, the scenarios and the voices of a story (in pt-BR, before Settings switches to English).
+async function mediaStages(page: Page): Promise<void> {
+  const context = { page, shoot, home: HOME };
+  const folder = await storyProject(context);
+  await castStage(context, folder);
+  await scenariosStage(context, folder);
+  await voicesStage(context, folder);
+  await page.click('[data-testid="tab-script"]');
+  await page.until('[data-testid="check-report"]');
+  await page.click('[data-testid="go-home"]');
+  await page.click('[data-testid="project-um-robo-aprende-a-cozinhar"] [data-testid="project-open"]');
+  await page.until('[data-testid="check-report"]');
+}
+
 let lastPage: Page | undefined;
 
 async function smoke(): Promise<void> {
@@ -214,6 +229,7 @@ async function smoke(): Promise<void> {
   for (const step of [languageStep, projectsStep, gpuStep, modelsStep, accountsStep, licenseStep]) await step(page);
   const bridge = await studio(page);
   await scriptStage(page);
+  await mediaStages(page);
   await settings(page);
   await inEnglish({ page, shoot, home: HOME });
   page.close();

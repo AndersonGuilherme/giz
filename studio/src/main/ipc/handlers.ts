@@ -6,6 +6,11 @@ import type { ScriptService } from '../services/ScriptService.ts';
 import type { RenderService } from '../services/RenderService.ts';
 import type { SettingsService } from '../services/SettingsService.ts';
 import type { SetupService } from '../services/SetupService.ts';
+import type { CastService } from '../services/media/CastService.ts';
+import type { ScenarioService } from '../services/media/ScenarioService.ts';
+import type { VoiceService } from '../services/media/VoiceService.ts';
+import type { FolderGrants } from '../services/FolderGrants.ts';
+import { mediaHandlers } from './mediaHandlers.ts';
 import { projectHandlers, scriptHandlers } from './projectHandlers.ts';
 import type { Handlers } from './registry.ts';
 
@@ -18,11 +23,18 @@ export type Services = Readonly<{
   keys: KeyService;
   settings: SettingsService;
   setup: SetupService;
+  cast: CastService;
+  scenarios: ScenarioService;
+  voices: VoiceService;
+  /** The folders the person gave the Studio: the media scheme serves only files inside them. */
+  grants: FolderGrants;
 }>;
 
 /** The channel map: each channel name to the service call that answers it. */
-export function handlersOf({ projects, listing, ideas, script, video, keys, settings, setup }: Services): Handlers {
+export function handlersOf(services: Services): Handlers {
+  const { projects, listing, ideas, script, video, keys, settings, setup } = services;
   return {
+    ...mediaHandlers(services),
     ...projectHandlers(projects, listing),
     ...scriptHandlers(ideas, script),
     'projects.open': ({ folder }) => projects.open(folder),

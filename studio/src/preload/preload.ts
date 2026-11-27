@@ -3,6 +3,7 @@ import { RENDER_PROGRESS_EVENT, type ChannelName, type RequestOf, type ResponseO
 import type { GizApi } from '../shared/GizApi.ts';
 import { SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
+import { mediaBridge } from './mediaBridge.ts';
 
 // Only invokes the named channels; the main process validates every payload with zod before using it.
 const call = <Name extends ChannelName>(name: Name, request: RequestOf<Name>) => ipcRenderer.invoke(name, request) as Promise<Result<ResponseOf<Name>>>;
@@ -17,6 +18,7 @@ function listen<Payload>(event: string) {
 }
 
 const giz: GizApi = {
+  ...mediaBridge(call, listen),
   projects: {
     pick: () => call('projects.pick', {}),
     launched: () => call('projects.launched', {}),

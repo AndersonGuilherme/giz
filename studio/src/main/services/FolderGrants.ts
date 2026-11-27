@@ -20,6 +20,12 @@ export class FolderGrants {
     return path;
   }
 
+  /** Whether the path is inside a granted folder (the media scheme serves only these). */
+  allows(path: string): boolean {
+    const absolute = resolve(path);
+    return [...this.#folders].some((granted) => isWithin(granted, absolute));
+  }
+
   /** The folder as an absolute path, when it is inside a granted one; otherwise an `invalid-request` error. */
   require(folder: string): string {
     const path = resolve(folder);

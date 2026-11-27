@@ -7,7 +7,10 @@ const STRICT: Directives = {
   'default-src': ["'self'"],
   'script-src': ["'self'"],
   'style-src': ["'self'"],
-  'img-src': ["'self'", 'data:'],
+  // giz-media: the projects' pictures and audio, served by the main process from the granted folders only;
+  // blob: a take just recorded, played before it is saved.
+  'img-src': ["'self'", 'data:', 'giz-media:'],
+  'media-src': ["'self'", 'giz-media:', 'blob:'],
   'connect-src': ["'self'"],
   'object-src': ["'none'"],
   'base-uri': ["'none'"],

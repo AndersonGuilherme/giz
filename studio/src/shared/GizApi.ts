@@ -5,10 +5,12 @@ import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from './setup.t
 import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, ScriptProgress, StageBrief } from './projects.ts';
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
+import type { MediaApi } from './mediaApi.ts';
+
 type Reply<T> = Promise<Result<T>>;
 
 /** What the preload exposes as `window.giz`: every call goes to the main process, which validates it. */
-export type GizApi = Readonly<{
+export type GizApi = MediaApi & Readonly<{
   projects: Readonly<{
     pick(): Reply<string | null>;
     launched(): Reply<string | null>;

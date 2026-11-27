@@ -9,7 +9,8 @@ const RENDERER = '^src/renderer/';
 const SHARED = '^src/shared/';
 const SERVICES = '^src/main/(services|ports|ipc)/';
 const ADAPTERS = '^src/main/adapters/';
-const COMPOSITION = '^src/main/composition\\.ts$';
+const CORE_DRAWINGS = '^(\\.\\./core|node_modules/giz-core)/src/presentation/studio/index\\.ts$';
+const COMPOSITION = '^src/main/composition(\\.ts|/[^/]+\\.ts)$';
 
 module.exports = {
   forbidden: [
@@ -21,7 +22,13 @@ module.exports = {
       to: { dependencyTypes: ['core'] },
     },
     { name: 'renderer-no-electron', severity: 'error', from: { path: RENDERER }, to: { path: '^(node_modules/)?electron(/|$)' } },
-    { name: 'renderer-only-renderer-and-shared', severity: 'error', from: { path: RENDERER }, to: { path: [MAIN, PRELOAD, 'giz-core', '^\\.\\./core/'] } },
+    {
+      name: 'renderer-only-renderer-and-shared',
+      comment: "Of core, the renderer imports only its web drawings (src/presentation/studio/index.ts, kept free of Node by core's own rules).",
+      severity: 'error',
+      from: { path: RENDERER },
+      to: { path: [MAIN, PRELOAD, 'giz-core', '^\\.\\./core/'], pathNot: CORE_DRAWINGS },
+    },
     { name: 'preload-only-shared', severity: 'error', from: { path: PRELOAD }, to: { path: [MAIN, RENDERER, 'giz-core', '^\\.\\./core/', 'zod'] } },
     { name: 'main-not-renderer-nor-preload', severity: 'error', from: { path: MAIN }, to: { path: [RENDERER, PRELOAD] } },
     {

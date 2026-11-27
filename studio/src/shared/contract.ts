@@ -6,6 +6,10 @@ import type { GpuStatus, ModelsStatus, SetupTask } from './setup.ts';
 import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, StageBrief } from './projects.ts';
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
+import type { CastChannels } from './cast.ts';
+import type { ScenarioChannels } from './scenarios.ts';
+import type { VoiceChannels } from './voices.ts';
+
 export { KEY_PROVIDERS, type KeyProvider } from './accounts.ts';
 
 export const ASPECTS = ['9:16', '16:9'] as const;
@@ -48,7 +52,7 @@ type TaskRequest = Readonly<{ task: SetupTask }>;
 type IdeaRequest = Readonly<{ idea: IdeaFields }>;
 
 /** Every channel the window may invoke: what it sends and what it gets back (always wrapped in a `Result`). */
-export type Channels = Readonly<{
+export type Channels = CastChannels & ScenarioChannels & VoiceChannels & Readonly<{
   'projects.pick': Channel<Nothing, string | null>;
   /** The folder given on the command line (`--project=<folder>`), or null. */
   'projects.launched': Channel<Nothing, string | null>;

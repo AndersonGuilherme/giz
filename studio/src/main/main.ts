@@ -5,10 +5,11 @@ import { afterReady } from './ipc/afterReady.ts';
 import { handlersOf } from './ipc/handlers.ts';
 import { registerChannels } from './ipc/registry.ts';
 import { REQUEST_SCHEMAS } from './ipc/schemas.ts';
-import { isTrustedSender } from './ipc/senderTrust.ts';
+import { isAppUrl, isTrustedSender } from './ipc/senderTrust.ts';
 import { launcher } from './launcher.ts';
 import { quitAfterSaves } from './quitGuard.ts';
-import { denyAllPermissions } from './security/permissions.ts';
+import { registerMediaScheme, serveMedia } from './security/mediaProtocol.ts';
+import { allowOnlyOurMicrophone } from './security/permissions.ts';
 import { translate } from './text.ts';
 import { appOrigin, createMainWindow } from './window.ts';
 import { WindowSlot } from './WindowSlot.ts';
@@ -18,12 +19,14 @@ if (started) app.quit();
 
 const slot = new WindowSlot<BrowserWindow>();
 preparePaths();
+registerMediaScheme();
 
 // Once per app run: the permission policy and the IPC channels (only our window's top frame may call them).
 function register(): void {
-  denyAllPermissions(session.defaultSession);
   const rules = { window: () => slot.current(), origin: appOrigin() };
+  allowOnlyOurMicrophone(session.defaultSession, { contents: () => slot.current()?.webContents, isAppUrl: (url) => isAppUrl(url, rules.origin) });
   const services = createServices(slot);
+  serveMedia((path) => services.grants.allows(path));
   // The saved language and projects folder take effect before any channel answers (see afterReady).
   const restored = services.settings.restore().catch((error: unknown) => console.error('giz: the saved settings could not be restored:', error));
   const handlers = afterReady(handlersOf(services), restored);
