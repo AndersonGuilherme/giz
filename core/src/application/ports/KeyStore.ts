@@ -1,8 +1,9 @@
+import type { ImageProviderName } from '../../domain/ai/ImageProviderName.ts';
 import type { TextProviderName } from '../../domain/ai/TextProviderName.ts';
 
 /** Every paid service that needs the person's own key. */
-export type KeyedService = TextProviderName | 'elevenlabs' | 'fish';
-export const KEYED_SERVICES: readonly KeyedService[] = ['anthropic', 'openai', 'gemini', 'elevenlabs', 'fish'];
+export type KeyedService = TextProviderName | ImageProviderName | 'elevenlabs' | 'fish';
+export const KEYED_SERVICES: readonly KeyedService[] = ['anthropic', 'openai', 'gemini', 'fal', 'elevenlabs', 'fish'];
 
 /** Where the keys live (the CLI: environment or ~/.config/giz; the studio: encrypted storage). Never logs them. */
 export interface KeyStore {

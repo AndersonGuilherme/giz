@@ -35,6 +35,8 @@ export function projectToDomain(json: ProjectJson, content: ProjectContent): Pro
     brand: json.brand,
     captionStyle: json.captionStyle,
     voice: json.voice,
+    style: json.style,
+    imageProvider: json.imageProvider,
   };
   return Project.of(profile, content);
 }

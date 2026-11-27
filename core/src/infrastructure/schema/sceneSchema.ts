@@ -1,6 +1,7 @@
 import { z } from 'zod';
 import { BackgroundPalette } from '../../domain/scenario/BackgroundPalette.ts';
 import { BackgroundSource } from '../../domain/scenario/BackgroundSource.ts';
+import { IMAGE_STYLES } from '../../domain/scenario/ImageStyle.ts';
 import { ProjectPath } from '../../domain/values/ProjectPath.ts';
 import { DIRECTIONS, NAMED_POSITIONS, type Scene } from '../../domain/script/Scene.ts';
 import { lessonSceneSchemas } from './lessonSceneSchemas.ts';
@@ -35,20 +36,28 @@ function rejectUnknownColors(background: BackgroundJson, context: z.RefinementCt
     context.addIssue({ code: 'custom', path: ['colors', key], message: `cor desconhecida no fundo "${vector}" (use ${valid})` }));
 }
 
-export const backgroundSchema = z
-  .object({
-    // Relative to the project folder and inside it: the render serves it from there.
-    image: nonEmptyText.pipe(validatedByDomain((text) => ProjectPath.of(text))).optional(),
-    vector: nonEmptyText.optional(),
-    colors: z.record(z.string(), colorSchema).optional(),
-  })
+const backgroundFields = {
+  // Relative to the project folder and inside it: the render serves it from there.
+  image: nonEmptyText.pipe(validatedByDomain((text) => ProjectPath.of(text))).optional(),
+  vector: nonEmptyText.optional(),
+  colors: z.record(z.string(), colorSchema).optional(),
+};
+
+/** The background a beat switches to: an image or a vector background (images are generated per scene only). */
+export const backgroundSchema = z.object(backgroundFields).strict().superRefine(rejectUnknownColors);
+
+// `giz images` makes the image from the prompt; `style` overrides the project's `style` for this scene.
+const generateSchema = z.object({ prompt: nonEmptyText, style: z.enum(IMAGE_STYLES).optional() }).strict();
+
+const sceneBackgroundSchema = z
+  .object({ ...backgroundFields, generate: generateSchema.optional() })
   .strict()
   .superRefine(rejectUnknownColors);
 
 const scenarioSchema = z
   .object({
     type: z.literal('scenario'),
-    background: backgroundSchema,
+    background: sceneBackgroundSchema,
     characters: z.array(characterInSceneSchema),
     camera: cameraSchema.optional(),
     effects: z.array(effectSchema).optional(),

@@ -94,12 +94,18 @@ ou `node src/presentation/cli/giz.ts <comando> ...`).
 | `sounds [pasta]` | Sintetiza os efeitos sonoros (`pop`, `whoosh`, `ding`...) em `public/sounds/`, iguais byte a byte aos versionados. |
 | `new --idea <ideia.json> <pasta>` | Cria um projeto com o roteiro escrito por uma IA de texto a partir da ideia (veja abaixo). Mostra antes o custo estimado. `--provider anthropic\|openai\|gemini` escolhe a IA (sem ele, a primeira com chave); `--estimate` só mostra o custo. |
 | `script <pasta>` | Escreve de novo o roteiro de um projeto a partir do `idea.json` dele, mantendo a voz do `project.json`. Aceita as mesmas opções. |
-| `keys list` | Mostra quais serviços pagos têm chave (`anthropic`, `openai`, `gemini`, `elevenlabs`, `fish`) e onde pôr as que faltam. Nunca mostra a chave. |
+| `images <pasta>` | Gera com uma IA de imagem os cenários marcados com `background.generate` (seção 8.2) em `scenes/<id-da-fala>.png` e aponta o `background.image` da cena para eles. Mostra antes o custo estimado; uma imagem cujo prompt, estilo, proporção, provedor e modelo não mudaram nunca é gerada de novo. `--provider openai\|gemini\|fal` (sem ele: o `imageProvider` do projeto, ou o primeiro com chave); `--estimate` só mostra o custo; `--only <fala>` só aquela cena; `--force <fala>` gera aquela de novo mesmo em dia. |
+| `keys list` | Mostra quais serviços pagos têm chave (`anthropic`, `openai`, `gemini`, `fal`, `elevenlabs`, `fish`) e onde pôr as que faltam. Nunca mostra a chave. |
 | `keys test <anthropic\|openai\|gemini>` | Faz **uma** chamada real e mínima (frações de centavo) para conferir a chave e responde `ok` ou o erro. |
 
 As chaves das IAs de texto vêm de `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` e `GEMINI_API_KEY`, ou de
 `~/.config/giz/<serviço>.key`. O modelo de cada uma muda com `GIZ_ANTHROPIC_MODEL`, `GIZ_OPENAI_MODEL` e
 `GIZ_GEMINI_MODEL` (padrões: `claude-sonnet-5-5`, `gpt-6.2-astra` e `gemini-3.8-flash`).
+
+As IAs de imagem usam `OPENAI_API_KEY`, `GEMINI_API_KEY` e `FAL_KEY` (ou `~/.config/giz/fal.key`). O modelo muda com
+`GIZ_OPENAI_IMAGE_MODEL`, `GIZ_GEMINI_IMAGE_MODEL` e `GIZ_FAL_IMAGE_MODEL` (padrões: `gpt-image-2.6-sunburst`,
+`gemini-nano-banana-2.1` e `fal-ai/flux-2-pro`). O custo estimado é por imagem, na tabela de preços de cada serviço;
+o do GPT Image é uma aproximação (a OpenAI não publica os tokens por imagem dos modelos atuais).
 
 **Roteiro com IA.** O `idea.json` descreve o vídeo:
 
@@ -159,6 +165,8 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 | `brand` | não | texto | Uma marca no canto superior esquerdo. Só aparece em aula 16:9. |
 | `cast` | sim | lista de ids | Quem participa. Cada id precisa de um `cast/<id>.json`. |
 | `voice.provider` | sim | `qwen`, `recording`, `elevenlabs`, `fish` | `qwen`: voz local gerada na GPU (ou CPU). `recording`: você grava cada fala em `recordings/<id-da-fala>.wav` (WAV PCM de 16 bits); o `check` avisa sobre gravação ausente ou inválida, e uma gravação refeita gera a fala de novo. `elevenlabs` e `fish`: os serviços pagos (veja abaixo). |
+| `style` | não | `painted-2d`, `flat-vector`, `watercolor`, `chalk` | O estilo dos cenários gerados por IA (`giz images`), igual em todas as cenas. Sem ele, `painted-2d`. |
+| `imageProvider` | não | `openai`, `gemini`, `fal` | A IA de imagem do projeto, para o `giz images`. |
 | `voice.model` | não | `0.6b`, `1.7b` | O modelo Qwen. O `1.7b` é mais natural e é o único que segue o `style` da voz. Sem ele, vale o `giz.config.json`. Trocar o modelo aqui gera as vozes de novo. |
 
 **Serviços de voz pagos.** Com `elevenlabs` ou `fish`, o `voice.id` de cada personagem é o id da voz no serviço. A
@@ -472,6 +480,15 @@ de 5% de diferença) gera um aviso, porque o render corta as bordas para cobrir 
 
 ```json
 { "background": { "image": "images/praia.png", "vector": "field" } }
+```
+
+**Cenário gerado por IA.** Com `generate`, o `giz images` cria a imagem a partir do `prompt` (no estilo do projeto, ou
+no `style` da cena) e grava `scenes/<id-da-fala>.png`, já na proporção do vídeo e 12% maior que o quadro (a folga da
+câmera). O pedido à IA deixa livre o lugar onde os personagens ficam, sem texto, marcas ou lugares reais. Até a imagem
+existir, o `check` avisa e o vídeo usa o fundo vetorial. Só a cena de uma fala aceita `generate` (não um `beat`):
+
+```json
+{ "background": { "generate": { "prompt": "uma praça de cidade pequena ao entardecer", "style": "watercolor" }, "vector": "street" } }
 ```
 
 #### Cenas prontas (`presets/scenes/`)

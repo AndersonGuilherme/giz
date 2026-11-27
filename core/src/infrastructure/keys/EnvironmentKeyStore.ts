@@ -8,6 +8,8 @@ const VARIABLES: Readonly<Record<KeyedService, string>> = {
   anthropic: 'ANTHROPIC_API_KEY',
   openai: 'OPENAI_API_KEY',
   gemini: 'GEMINI_API_KEY',
+  // fal.ai's own name for it, as in its docs and SDKs.
+  fal: 'FAL_KEY',
   elevenlabs: 'ELEVENLABS_API_KEY',
   fish: 'FISH_API_KEY',
 };

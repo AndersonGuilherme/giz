@@ -2,11 +2,11 @@ import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { parseArgs } from 'node:util';
 import type { ScriptResult, ScriptTarget } from '../../../application/use-cases/script/GenerateScript.ts';
-import type { CostEstimate } from '../../../domain/ai/CostEstimate.ts';
 import { isTextProvider, TEXT_PROVIDERS } from '../../../domain/ai/TextProviderName.ts';
 import { DomainError } from '../../../domain/DomainError.ts';
 import { Idea } from '../../../domain/idea/Idea.ts';
 import type { TextOverrides } from '../composition/text.ts';
+import { dollars } from '../dollars.ts';
 import { UsageError } from '../usage.ts';
 
 // `giz new` and `giz script`: the script written by a text AI. The composition part loads on demand.
@@ -71,11 +71,6 @@ async function ideaFile(file: string): Promise<Idea> {
   });
   return ideaOf(parsedJson(text, file), file);
 }
-
-const dollars = (cost: CostEstimate) => {
-  const value = cost.dollars();
-  return value === undefined ? 'desconhecido' : `US$ ${value.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 4 })}`;
-};
 
 function report(folder: string, { files, repairs, usage }: ScriptResult): void {
   const lines = (files.script as { lines?: unknown[] }).lines?.length ?? 0;

@@ -12,13 +12,24 @@ const BY_STATUS: Readonly<Record<number, Describe>> = {
   401: () => 'a chave foi recusada (401): confira se ela está certa e ativa',
   403: (detail) => `acesso negado (403): ${detail}`,
   404: (detail, model) => `modelo ${model} não encontrado (404): ${detail}`,
+  422: (detail) => `pedido recusado (422): ${detail}`,
   429: () => 'limite de uso atingido (429): espere um pouco ou confira o saldo e os limites da conta',
 };
 
+type ErrorBody = Readonly<{ error?: { message?: unknown }; detail?: unknown }>;
+
+// `{error: {message}}` (Anthropic, OpenAI, Gemini) or fal.ai's `{detail}`: a text, or a list of `{msg}` (422).
+function detailOf(detail: unknown): string | undefined {
+  if (typeof detail === 'string') return detail;
+  const first = Array.isArray(detail) ? (detail[0] as { msg?: unknown } | undefined) : undefined;
+  return typeof first?.msg === 'string' ? first.msg : undefined;
+}
+
 const ERROR_BODY = (body: string): string | undefined => {
   try {
-    const message = (JSON.parse(body) as { error?: { message?: unknown } }).error?.message;
-    return typeof message === 'string' ? message : undefined;
+    const parsed = JSON.parse(body) as ErrorBody;
+    const message = parsed.error?.message;
+    return typeof message === 'string' ? message : detailOf(parsed.detail);
   } catch {
     return undefined;
   }

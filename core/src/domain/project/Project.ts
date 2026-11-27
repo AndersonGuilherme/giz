@@ -3,6 +3,8 @@ import type { Script } from '../script/Script.ts';
 import type { Language } from '../values/Language.ts';
 import type { AspectRatio } from '../values/AspectRatio.ts';
 import { Lexicon } from '../speech/Lexicon.ts';
+import type { ImageProviderName } from '../ai/ImageProviderName.ts';
+import { DEFAULT_IMAGE_STYLE, type ImageStyle } from '../scenario/ImageStyle.ts';
 
 export const FORMATS = ['story', 'lesson'] as const;
 export type Format = (typeof FORMATS)[number];
@@ -36,6 +38,10 @@ export type ProjectProfile = Readonly<{
   /** Optional: without it, `captionStyleOf` picks the default of the format. */
   captionStyle?: CaptionStyle;
   voice: ProjectVoice;
+  /** Optional: the style of the AI-generated scenarios (without it, `DEFAULT_IMAGE_STYLE`). */
+  style?: ImageStyle;
+  /** Optional: the image AI of the project (without it, the CLI picks one). */
+  imageProvider?: ImageProviderName;
 }>;
 
 /**
@@ -84,6 +90,15 @@ export class Project {
 
   voice(): ProjectVoice {
     return this.#profile.voice;
+  }
+
+  /** The style of the generated scenarios: the declared one, or the default. */
+  imageStyle(): ImageStyle {
+    return this.#profile.style ?? DEFAULT_IMAGE_STYLE;
+  }
+
+  imageProvider(): ImageProviderName | undefined {
+    return this.#profile.imageProvider;
   }
 
   cast(): Cast {

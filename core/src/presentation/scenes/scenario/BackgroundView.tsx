@@ -5,6 +5,7 @@ import { BackdropLayout } from '../../../domain/scenario/BackdropLayout.ts';
 import { BackgroundPalette } from '../../../domain/scenario/BackgroundPalette.ts';
 import type { BackgroundChoice } from '../../../domain/scenario/BackgroundSource.ts';
 import { Parallax, type Layer } from '../../../domain/scenario/Parallax.ts';
+import { IMAGE_BLEED } from '../../../domain/scenario/ScenarioImageFrame.ts';
 import type { AspectRatio } from '../../../domain/values/AspectRatio.ts';
 import { backgroundRegistry } from './backgrounds/backgroundRegistry.ts';
 import { LayerCanvas } from './backgrounds/LayerCanvas.tsx';
@@ -18,12 +19,14 @@ const PART_LAYERS: Readonly<Record<BackgroundPart, readonly Layer[]>> = { behind
 type ViewProps = Readonly<{ choice: BackgroundChoice; camera: Framing; aspect: AspectRatio; part: BackgroundPart; onImageError: () => void }>;
 
 // The image is 12% larger than the frame (6% each side), so the camera can move without showing its edge.
+const [BLEED, COVER] = [`-${IMAGE_BLEED * 100}%`, `${100 + 2 * IMAGE_BLEED * 100}%`];
+
 const ImageBackground: FC<Readonly<{ image: string; camera: Framing; onImageError: () => void }>> = ({ image, camera, onImageError }) => (
   <CameraPlane framing={camera}>
     <Img
       src={staticFile(image)}
       onError={onImageError}
-      style={{ position: 'absolute', left: '-6%', top: '-6%', width: '112%', height: '112%', objectFit: 'cover' }}
+      style={{ position: 'absolute', left: BLEED, top: BLEED, width: COVER, height: COVER, objectFit: 'cover' }}
     />
   </CameraPlane>
 );

@@ -1,4 +1,5 @@
 import type { LessonScene } from './LessonScenes.ts';
+import type { ImageStyle } from '../scenario/ImageStyle.ts';
 import type { Effect, Hud, CameraMoveJson, Point, BigText } from './SceneElements.ts';
 
 export const NAMED_POSITIONS = ['left', 'center', 'right'] as const;
@@ -11,7 +12,16 @@ export type CharacterInScene = Readonly<{
   direction?: (typeof DIRECTIONS)[number];
 }>;
 
-export type Background = Readonly<{ image?: string; vector?: string; colors?: Readonly<Record<string, string>> }>;
+/** A scenario image to make with an image AI: what to show and, optionally, a style other than the project's. */
+export type BackgroundRequest = Readonly<{ prompt: string; style?: ImageStyle }>;
+
+export type Background = Readonly<{
+  image?: string;
+  vector?: string;
+  colors?: Readonly<Record<string, string>>;
+  /** Only on a scene (not on a beat): `giz images` makes the image and points `image` to it. */
+  generate?: BackgroundRequest;
+}>;
 
 export type ScenarioScene = Readonly<{
   type: 'scenario';
