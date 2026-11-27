@@ -71,3 +71,14 @@ test('an HTTP error or a short file fails with a readable message, keeping the .
   await assert.rejects(downloadResumable({ url: 'https://x/m', destination, label: 'm', expectedBytes: 8 }, { fetch: short.fetch }), /download incompleto de m/);
   assert.equal(readFileSync(`${destination}.part`, 'utf8'), 'cont');
 });
+
+test('onBytes follows the bytes on disk, counting the ones a resumed download already had', async () => {
+  const destination = join(folder(), 'model.onnx');
+  writeFileSync(`${destination}.part`, 'cont');
+  const seen: number[] = [];
+  const { fetch } = fakeFetch(() => new Response('eudo', { status: 206 }));
+  await downloadResumable({ url: 'https://x/m', destination, label: 'm', expectedBytes: 8 }, { fetch, onBytes: (received) => seen.push(received) });
+  assert.equal(seen[0], 4);
+  assert.equal(seen.at(-1), 8);
+  assert.ok(seen.every((value, index) => index === 0 || value >= (seen[index - 1] ?? 0)));
+});

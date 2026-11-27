@@ -1,7 +1,7 @@
 import { execFileSync } from 'node:child_process';
 import { existsSync, mkdirSync, readdirSync, renameSync, rmSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { downloadResumable } from '../download/resumableDownload.ts';
+import { downloadResumable, type DownloadProgress } from '../download/resumableDownload.ts';
 import { ensureOrtCuda, requiredCudaMajor } from './onnxRuntimeCuda.ts';
 
 const NVIDIA = 'https://developer.download.nvidia.com/compute';
@@ -15,6 +15,9 @@ type Manifest = Record<string, { 'linux-x86_64'?: { relative_path: string } }>;
 type CudnnManifest = { cudnn: { 'linux-x86_64': Record<string, { relative_path: string } | undefined> } };
 type Archive = Readonly<{ name: string; url: string }>;
 type Log = (message: string) => void;
+type Progress = (progress: DownloadProgress) => void;
+type Report = Readonly<{ log: Log; onProgress: Progress }>;
+const quiet: Progress = () => undefined;
 
 /** <modelsDir>/cuda/<major>/lib: where the NVIDIA libraries are extracted. */
 export const cudaLibraryFolder = (modelsDir: string, major: number): string => join(modelsDir, 'cuda', String(major), 'lib');
@@ -51,29 +54,43 @@ function extract(archive: string, folders: Readonly<{ base: string; lib: string 
   rmSync(archive);
 }
 
-async function install(archive: Archive, folders: Readonly<{ base: string; lib: string }>, log: Log): Promise<void> {
+async function install(archive: Archive, folders: Readonly<{ base: string; lib: string }>, { log, onProgress }: Report): Promise<void> {
   const file = join(folders.base, 'archives', archive.url.split('/').pop() ?? archive.name);
-  const onStart = (total: number) => log(`  baixando ${archive.name} (${(total / 1e6).toFixed(0)} MB)...`);
-  await downloadResumable({ url: archive.url, destination: file, label: archive.name }, { onStart });
+  let totalBytes = 0;
+  const onStart = (total: number) => {
+    totalBytes = total;
+    log(`  baixando ${archive.name} (${(total / 1e6).toFixed(0)} MB)...`);
+  };
+  const onBytes = (receivedBytes: number) => onProgress({ label: archive.name, receivedBytes, totalBytes });
+  await downloadResumable({ url: archive.url, destination: file, label: archive.name }, { onStart, onBytes });
   extract(file, folders);
 }
 
+/** Whether the NVIDIA libraries the installed provider needs are already extracted (false without the provider). */
+export function cudaLibrariesReady(modelsDir: string, major: () => number = requiredCudaMajor): boolean {
+  try {
+    return existsSync(join(dirname(cudaLibraryFolder(modelsDir, major())), DONE_MARKER));
+  } catch {
+    return false;
+  }
+}
+
 /** Downloads and extracts the NVIDIA libraries the provider asks for, once; returns the lib/ folder. */
-export async function ensureCudaLibraries(modelsDir: string, log: Log): Promise<string> {
+export async function ensureCudaLibraries(modelsDir: string, log: Log, onProgress: Progress = quiet): Promise<string> {
   const major = requiredCudaMajor();
   const lib = cudaLibraryFolder(modelsDir, major);
   const base = dirname(lib);
   if (existsSync(join(base, DONE_MARKER))) return lib;
   mkdirSync(lib, { recursive: true });
   log(`  ONNX Runtime pede CUDA ${major}: baixando as bibliotecas da NVIDIA para ${base}`);
-  for (const archive of await archivesFor(major)) await install(archive, { base, lib }, log);
+  for (const archive of await archivesFor(major)) await install(archive, { base, lib }, { log, onProgress });
   rmSync(join(base, 'archives'), { recursive: true, force: true });
   writeFileSync(join(base, DONE_MARKER), new Date().toISOString());
   return lib;
 }
 
-/** Everything the voice needs to run on the GPU: the CUDA provider and the NVIDIA libraries. */
-export async function installGpu(modelsDir: string, log: Log): Promise<void> {
+/** Everything the voice needs to run on the GPU: the CUDA provider and the NVIDIA libraries (`onProgress`: their bytes). */
+export async function installGpu(modelsDir: string, log: Log, onProgress: Progress = quiet): Promise<void> {
   ensureOrtCuda(log);
-  await ensureCudaLibraries(modelsDir, log);
+  await ensureCudaLibraries(modelsDir, log, onProgress);
 }

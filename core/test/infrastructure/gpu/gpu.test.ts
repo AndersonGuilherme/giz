@@ -48,3 +48,23 @@ test('cuda without the ONNX Runtime CUDA provider runs on the CPU with a readabl
   assert.equal(usableDevice('cpu', () => assert.fail('not asked'), warn), 'cpu');
   assert.equal(warnings.length, 1);
 });
+
+test('the CUDA libraries are ready only once their done marker exists', async () => {
+  const { mkdtempSync, mkdirSync, writeFileSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { cudaLibrariesReady } = await import('../../../src/infrastructure/gpu/cudaLibraries.ts');
+  const modelsDir = mkdtempSync(join(tmpdir(), 'giz-cuda-'));
+  assert.equal(cudaLibrariesReady(modelsDir, () => 13), false);
+  mkdirSync(join(modelsDir, 'cuda', '13'), { recursive: true });
+  writeFileSync(join(modelsDir, 'cuda', '13', '.completo'), 'x');
+  assert.equal(cudaLibrariesReady(modelsDir, () => 13), true);
+  assert.equal(cudaLibrariesReady(modelsDir, () => { throw new Error('sem provider'); }), false);
+});
+
+test('the ONNX Runtime installer runs as Node inside Electron (whose binary is not node) and without the npm variables', async () => {
+  const { installerEnvironment } = await import('../../../src/infrastructure/gpu/onnxRuntimeCuda.ts');
+  const env = { PATH: '/bin', npm_config_x: '1', ONNXRUNTIME_NODE_INSTALL_CUDA: 'skip' };
+  assert.deepEqual(installerEnvironment(env, undefined), { PATH: '/bin' });
+  assert.deepEqual(installerEnvironment(env, '45.5.0'), { PATH: '/bin', ELECTRON_RUN_AS_NODE: '1' });
+});

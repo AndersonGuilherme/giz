@@ -27,10 +27,14 @@ export function cudaMajorIn(binary: string): number {
 /** The CUDA major version the installed provider needs. */
 export const requiredCudaMajor = (): number => cudaMajorIn(readFileSync(providerPath()).toString('latin1'));
 
+type Environment = Readonly<Record<string, string | undefined>>;
+
 // Without the npm_* variables: when called from `npm run`, the ONNX Runtime installer thinks it is a local install
-// and exits; the ONNXRUNTIME_NODE_INSTALL* ones would make it skip CUDA again.
-function installerEnvironment(): NodeJS.ProcessEnv {
-  return Object.fromEntries(Object.entries(process.env).filter(([name]) => !/^npm_|^ONNXRUNTIME_NODE_INSTALL/i.test(name)));
+// and exits; the ONNXRUNTIME_NODE_INSTALL* ones would make it skip CUDA again. Inside Electron (the Studio)
+// process.execPath is the Electron binary: ELECTRON_RUN_AS_NODE makes it run the installer as plain Node.
+export function installerEnvironment(env: Environment = process.env, electron: string | undefined = process.versions.electron): NodeJS.ProcessEnv {
+  const kept = Object.fromEntries(Object.entries(env).filter(([name]) => !/^npm_|^ONNXRUNTIME_NODE_INSTALL/i.test(name)));
+  return electron ? { ...kept, ELECTRON_RUN_AS_NODE: '1' } : kept;
 }
 
 /** Downloads the ONNX Runtime CUDA provider with the package's own installer, if it is not there yet. */
