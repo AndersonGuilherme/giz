@@ -23,9 +23,19 @@ function totalOf(response: Response, download: Download, resumedFrom: number): n
   return Number(response.headers.get('content-length') ?? 0) + resumedFrom;
 }
 
-async function request(download: Download, have: number, options: DownloadOptions): Promise<Response> {
+// 416 to a Range from the end of the .part: there is nothing left to send. The .part is whole when its size is the
+// expected one (or the size the server gives in Content-Range: bytes */<size>).
+function partIsWhole(response: Response, download: Download, have: number): boolean {
+  if (response.status !== 416 || have === 0) return false;
+  const total = download.expectedBytes ?? Number(response.headers.get('content-range')?.split('/')[1]);
+  return total === have;
+}
+
+/** The answer with the bytes still missing, or null when the .part already has them all. */
+async function request(download: Download, have: number, options: DownloadOptions): Promise<Response | null> {
   const send = options.fetch ?? fetch;
   const response = await send(download.url, { headers: have ? { Range: `bytes=${have}-` } : {} });
+  if (partIsWhole(response, download, have)) return null;
   if (!response.ok || !response.body) throw new Error(`falha ao baixar ${download.label}: HTTP ${response.status}`);
   return response;
 }
@@ -57,6 +67,12 @@ export async function downloadResumable(download: Download, options: DownloadOpt
   mkdirSync(dirname(download.destination), { recursive: true });
   const part = `${download.destination}.part`;
   const response = await request(download, sizeOf(part), options);
+  if (response === null) return renameSync(part, download.destination);
+  await receive(response, { download, part }, options);
+}
+
+// Writes the answer after the bytes the .part already has (or over them, when the server sent the whole file).
+async function receive(response: Response, { download, part }: Readonly<{ download: Download; part: string }>, options: DownloadOptions): Promise<void> {
   const kept = resumedFrom(response, sizeOf(part));
   const total = totalOf(response, download, kept);
   options.onStart?.(total);

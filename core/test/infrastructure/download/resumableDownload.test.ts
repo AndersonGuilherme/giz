@@ -82,3 +82,21 @@ test('onBytes follows the bytes on disk, counting the ones a resumed download al
   assert.equal(seen.at(-1), 8);
   assert.ok(seen.every((value, index) => index === 0 || value >= (seen[index - 1] ?? 0)));
 });
+
+test('a .part already complete answered 416 (nothing left to send) is done: renamed, not an error', async () => {
+  const destination = join(folder(), 'model.onnx');
+  writeFileSync(`${destination}.part`, 'conteudo');
+  const { calls, fetch } = fakeFetch(() => new Response('', { status: 416 }));
+  await downloadResumable({ url: 'https://x/m', destination, label: 'm', expectedBytes: 8 }, { fetch });
+  assert.equal(calls[0]?.range, 'bytes=8-');
+  assert.equal(readFileSync(destination, 'utf8'), 'conteudo');
+  assert.equal(existsSync(`${destination}.part`), false);
+});
+
+test('a 416 for a .part of the wrong size is still an error (the .part is kept)', async () => {
+  const destination = join(folder(), 'model.onnx');
+  writeFileSync(`${destination}.part`, 'cont');
+  const { fetch } = fakeFetch(() => new Response('', { status: 416 }));
+  await assert.rejects(downloadResumable({ url: 'https://x/m', destination, label: 'm', expectedBytes: 8 }, { fetch }), /HTTP 416/);
+  assert.equal(readFileSync(`${destination}.part`, 'utf8'), 'cont');
+});

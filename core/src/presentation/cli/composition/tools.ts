@@ -2,13 +2,14 @@
 // and `giz sounds`. The heavy modules (onnxruntime, transformers) are imported only by the tool that needs them.
 import { fileURLToPath } from 'node:url';
 import { Audio } from '../../../domain/speech/Audio.ts';
-import { whisperDownloaded } from '../../../infrastructure/alignment/whisperModel.ts';
+import { downloadWhisperModel, whisperDownloaded } from '../../../infrastructure/alignment/whisperDownload.ts';
 import type { DownloadProgress } from '../../../infrastructure/download/resumableDownload.ts';
 import { cudaLibrariesReady, installGpu } from '../../../infrastructure/gpu/cudaLibraries.ts';
 import { detectNvidia, type GpuInfo } from '../../../infrastructure/gpu/nvidiaGpu.ts';
 import { ortHasCuda, requiredCudaMajor } from '../../../infrastructure/gpu/onnxRuntimeCuda.ts';
 import { writeSounds } from '../../../infrastructure/sound/writeSounds.ts';
 import { downloadModel, ensureModel, modelReady } from '../../../infrastructure/voice/qwen/modelDownload.ts';
+import { modelFolder } from '../../../infrastructure/voice/qwen/qwenModels.ts';
 import { QWEN_MODELS, QWEN_RATE, repositoryOf } from '../../../infrastructure/voice/qwen/qwenModels.ts';
 import { toWav } from '../../../infrastructure/voice/wav.ts';
 import type { GizConfig } from './install.ts';
@@ -43,6 +44,9 @@ export function downloadVoiceModel(config: GizConfig, log: Log): Promise<string>
 /** Whether a voice model was downloaded to the end into `modelsDir`. */
 export const voiceModelReady = (model: GizConfig['model'], modelsDir: string): boolean => modelReady(repositoryOf(model), modelsDir);
 
+/** The folder of a voice model in `modelsDir` (the Studio counts the bytes already there). */
+export const voiceModelFolder = (model: GizConfig['model'], modelsDir: string): string => modelFolder(repositoryOf(model), modelsDir);
+
 /** The same download with the bytes of the whole model (the Studio's progress bar). */
 export function downloadVoiceModelWithProgress(config: Pick<GizConfig, 'model' | 'modelsDir'>, onProgress: (receivedBytes: number, totalBytes: number) => void): Promise<string> {
   return downloadModel(repositoryOf(config.model), config.modelsDir, { log: () => undefined, onProgress });
@@ -57,10 +61,12 @@ export const wavOf = (samples: Float32Array): Buffer => toWav(Audio.of(samples, 
 export const secondsOf = (samples: Float32Array): number => samples.length / QWEN_RATE;
 export const modelGigabytes = (model: GizConfig['model']): number => QWEN_MODELS[model].gigabytes;
 
-/** Downloads Whisper (~250 MB, the pronunciation check) into the transformers cache; `onProgress`: each file's bytes. */
-export async function downloadWhisper(onProgress?: Progress): Promise<void> {
-  const { loadRecognizer } = await import('../../../infrastructure/alignment/whisperModel.ts');
-  await loadRecognizer(onProgress);
+/**
+ * Downloads Whisper (~250 MB, the pronunciation check) into the transformers cache; `onProgress`: each file's bytes.
+ * A stopped download leaves nothing half-written in the cache (see whisperDownload.ts).
+ */
+export function downloadWhisper(onProgress?: Progress): Promise<void> {
+  return downloadWhisperModel({ onProgress });
 }
 
 /** Whether Whisper is already downloaded (checked without loading transformers). */
