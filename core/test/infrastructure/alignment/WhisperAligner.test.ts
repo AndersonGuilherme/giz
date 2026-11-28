@@ -11,6 +11,7 @@ import { Language } from '../../../src/domain/values/Language.ts';
 import { EnvelopeAligner } from '../../../src/infrastructure/alignment/EnvelopeAligner.ts';
 import { WhisperAligner, type Listener } from '../../../src/infrastructure/alignment/WhisperAligner.ts';
 import { WHISPER_MODEL, WhisperListener } from '../../../src/infrastructure/alignment/WhisperListener.ts';
+import { WHISPER_REVISION } from '../../../src/infrastructure/alignment/whisperModel.ts';
 import { fromWav } from '../../../src/infrastructure/voice/wav.ts';
 
 const sound = Audio.of(new Float32Array(24000), 24000);
@@ -84,7 +85,8 @@ test('WhisperAligner limits the times to the audio duration', async () => {
 });
 
 // Integration with the real model: runs only if it is already in the cache and the fixture already has a voice.
-const downloadedModel = existsSync(join(env.cacheDir ?? '', WHISPER_MODEL, 'config.json'));
+// transformers keeps a pinned revision under <model>/<revision>/.
+const downloadedModel = existsSync(join(env.cacheDir ?? '', WHISPER_MODEL, WHISPER_REVISION, 'config.json'));
 const fixtureWav = new URL('../../fixtures/minimal-project/voice/1.wav', import.meta.url);
 const withoutModel = `modelo ${WHISPER_MODEL} não está em ${env.cacheDir} (baixa sozinho na primeira voz gerada)`;
 const voiceless = 'the fixture has no voice/1.wav (generate it with: node src/presentation/cli/giz.ts voice test/fixtures/minimal-project)';
