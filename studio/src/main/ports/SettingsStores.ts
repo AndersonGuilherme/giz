@@ -16,12 +16,12 @@ export interface AppConfigStore {
   write(config: AppConfig): Promise<void>;
 }
 
-/** The values the Studio shares with the `giz` CLI through the repository's giz.config.json (core's config). */
+/** The values the Studio shares with the `gizzy` CLI through the repository's gizzycera.config.json (core's config). */
 export type SharedSettings = Readonly<{ modelsDir: string; device: Device; model: VoiceModel; remotionLicense: RemotionLicense }>;
 
 export interface SharedConfigStore {
   read(): Promise<SharedSettings>;
-  /** Writes only these keys; every other key of giz.config.json stays as it was. Returns the new values. */
+  /** Writes only these keys; every other key of gizzycera.config.json stays as it was. Returns the new values. */
   write(patch: Partial<SharedSettings>): Promise<SharedSettings>;
   /** Core's defaults (the models folder when the person asks for the default one). */
   defaults(): Promise<SharedSettings>;

@@ -1,6 +1,6 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 import { RENDER_PROGRESS_EVENT, type ChannelName, type RequestOf, type ResponseOf, type Result } from '../shared/contract.ts';
-import type { GizApi } from '../shared/GizApi.ts';
+import type { GizzyApi } from '../shared/GizzyApi.ts';
 import { PROJECT_LAUNCHED_EVENT, SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
 import { mediaBridge } from './mediaBridge.ts';
@@ -17,7 +17,7 @@ function listen<Payload>(event: string) {
   };
 }
 
-const giz: GizApi = {
+const gizzy: GizzyApi = {
   ...mediaBridge(call, listen),
   projects: {
     pick: () => call('projects.pick', {}),
@@ -78,4 +78,4 @@ const giz: GizApi = {
   },
 };
 
-contextBridge.exposeInMainWorld('giz', giz);
+contextBridge.exposeInMainWorld('gizzy', gizzy);

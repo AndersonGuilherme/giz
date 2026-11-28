@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { beforeLeaving } from '../state/leaving.ts';
 import { OpenSettingsContext } from '../state/OpenSettings.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import { Header } from './Header.tsx';
 import { NewProjectScreen } from './idea/NewProjectScreen.tsx';
 import { ProjectScreen, type WorkStage } from './project/ProjectScreen.tsx';
@@ -10,13 +10,13 @@ import { ProjectsScreen } from './projects/ProjectsScreen.tsx';
 /** Where the Studio is: the projects list, the new-project wizard or a project at one of its stages (the script first). */
 /** `focus`: a line to show at the stage (the Video stage's check jumps to it in the script). */
 export type View = Readonly<{ name: 'home' }> | Readonly<{ name: 'new' }> | Readonly<{ name: 'editor'; folder: string; stage?: WorkStage; focus?: string }>;
-type Props = Readonly<{ api: GizApi; view: View; go: (view: View) => void; onSettings: () => void }>;
+type Props = Readonly<{ api: GizzyApi; view: View; go: (view: View) => void; onSettings: () => void }>;
 
 // The folder given on the command line (`--project`) opens in the editor once per app run: not again after a visit
 // to Settings (which unmounts the Studio).
 let launchAsked = false;
 
-function useLaunched(api: GizApi, go: (view: View) => void): void {
+function useLaunched(api: GizzyApi, go: (view: View) => void): void {
   useEffect(() => {
     const open = () => void api.projects.launched().then(async (launched) => {
       if (!launched.ok || !launched.value) return;

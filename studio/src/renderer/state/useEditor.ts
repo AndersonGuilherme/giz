@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Failure } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { EditorReport, ScriptDocument, ScriptJson, Vocabulary } from '../../shared/script.ts';
 import { edited, historyOf, redone, throughout, undone, type History } from '../editor/editorHistory.ts';
 import { withImageOnDisk } from '../editor/linkedImages.ts';
@@ -9,7 +9,7 @@ import { useAutosave } from './useAutosave.ts';
 type Loaded = Readonly<{ document: ScriptDocument; vocabulary: Vocabulary; report: EditorReport }>;
 
 /** Opens the project: its document, the pickers' lists and the first check (nothing is saved by opening). */
-function useLoaded(api: GizApi, folder: string) {
+function useLoaded(api: GizzyApi, folder: string) {
   const [loaded, setLoaded] = useState<Loaded | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   useEffect(() => {
@@ -46,7 +46,7 @@ type Relink = ReturnType<typeof useHistory>['relink'];
 // A scenario image made while the script is open is linked on disk by core: the script is read again and that link
 // enters the edited one (and every version of its history: it is no step to undo, and undo never drops it), so the
 // next save keeps it instead of writing the old background back.
-function useImageLinks(api: GizApi, folder: string, relink: Relink): void {
+function useImageLinks(api: GizzyApi, folder: string, relink: Relink): void {
   useEffect(() => api.scenarios.onProgress(({ lineId, phase }) => {
     if (phase !== 'done') return;
     void api.script.read(folder).then((read) => (read.ok ? relink((script) => withImageOnDisk(script, read.value.script, lineId)) : undefined));
@@ -54,7 +54,7 @@ function useImageLinks(api: GizApi, folder: string, relink: Relink): void {
 }
 
 /** The script being edited, saved (and checked) a moment after the typing stops. */
-export function useEditor(api: GizApi, folder: string) {
+export function useEditor(api: GizzyApi, folder: string) {
   const { loaded, failure } = useLoaded(api, folder);
   const { history, ...changes } = useHistory(loaded);
   useImageLinks(api, folder, changes.relink);

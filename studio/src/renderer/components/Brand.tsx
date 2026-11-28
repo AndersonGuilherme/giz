@@ -1,7 +1,7 @@
 import { useTranslate } from '../i18n.ts';
 import { Logo } from './Logo.tsx';
 
-/** The giz mark: the chalk speech bubble, the name and the tagline. */
+/** The Gizzycera mark: the chalk speech bubble, the name and the tagline. */
 export function Brand() {
   const translate = useTranslate();
   return (

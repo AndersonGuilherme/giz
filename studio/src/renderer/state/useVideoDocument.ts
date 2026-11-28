@@ -1,13 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Aspect, Failure } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { VideoDocument } from '../../shared/video.ts';
 
 /**
  * The Video stage's document in the chosen aspect (the project's own until one is chosen): `load` runs "montar"
  * again; only the answer of the latest request is shown (an older one arriving late is dropped).
  */
-export function useVideoDocument(api: GizApi, folder: string) {
+export function useVideoDocument(api: GizzyApi, folder: string) {
   const [document, setDocument] = useState<VideoDocument | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const [loading, setLoading] = useState(true);

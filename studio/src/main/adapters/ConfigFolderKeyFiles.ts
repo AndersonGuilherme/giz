@@ -10,7 +10,7 @@ const missing = (error: NodeJS.ErrnoException) => {
 };
 
 /**
- * <folder>/<service>.key (the CLI's ~/.config/giz), each file mode 600. A key is written whole to a new 600 draft and
+ * <folder>/<service>.key (the CLI's ~/.config/gizzycera), each file mode 600. A key is written whole to a new 600 draft and
  * renamed over the old file, so it is never readable by others, not even for a moment. The folder is made 700 only
  * when the Studio creates it; an existing one is the person's and is left alone (with a warning when others can read it).
  */

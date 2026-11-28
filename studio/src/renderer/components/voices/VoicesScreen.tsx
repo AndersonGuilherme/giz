@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import type { VoiceProgress, VoicesDocument } from '../../../shared/voices.ts';
 import { useTranslate } from '../../i18n.ts';
 import { costText, isPaidVoice } from '../../media/money.ts';
@@ -10,11 +10,11 @@ import { ScreenHead } from '../common/ScreenHead.tsx';
 import { FailurePanel } from '../FailurePanel.tsx';
 import { VoiceRow, type LineActions } from './VoiceRow.tsx';
 
-type Props = Readonly<{ api: GizApi; folder: string }>;
+type Props = Readonly<{ api: GizzyApi; folder: string }>;
 type Stage = ReturnType<typeof useStageDocument<VoicesDocument>>;
 
 // The job's progress; when it ends the document is read again (a job started before this screen opened ends here too).
-function useProgress(api: GizApi, onEnded: () => void): VoiceProgress | null {
+function useProgress(api: GizzyApi, onEnded: () => void): VoiceProgress | null {
   const [progress, setProgress] = useState<VoiceProgress | null>(null);
   useEffect(() => api.voices.onProgress((step) => {
     setProgress(step.ended ? null : step);
@@ -33,7 +33,7 @@ function Progress({ progress }: Readonly<{ progress: VoiceProgress }>) {
   );
 }
 
-type PendingProps = Readonly<{ document: VoicesDocument; stage: Stage; api: GizApi; working: boolean; progress: VoiceProgress | null }>;
+type PendingProps = Readonly<{ document: VoicesDocument; stage: Stage; api: GizzyApi; working: boolean; progress: VoiceProgress | null }>;
 
 // A paid voice asks first, with what the pending lines cost; the local voice and a recording start at once.
 function PaidConfirm({ open, document, onYes, onNo }: Readonly<{ open: boolean; document: VoicesDocument; onYes: () => void; onNo: () => void }>) {
@@ -65,7 +65,7 @@ function Pending({ document, stage, api, working, progress }: PendingProps) {
   );
 }
 
-function actionsOf({ api, stage, folder }: Readonly<{ api: GizApi; stage: Stage; folder: string }>, recorder: ReturnType<typeof useRecorder>): LineActions {
+function actionsOf({ api, stage, folder }: Readonly<{ api: GizzyApi; stage: Stage; folder: string }>, recorder: ReturnType<typeof useRecorder>): LineActions {
   return {
     regenerate: (lineId) => void stage.apply(api.voices.generate(folder, lineId)),
     record: recorder.start,

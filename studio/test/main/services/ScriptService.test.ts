@@ -13,7 +13,7 @@ const SCRIPT: ScriptJson = { chapters: ['Um'], lines: [{ id: '01', chapter: 1, s
 function setup() {
   const disk = new MemoryDisk();
   disk.put(FOLDER, 'project.json', { title: 'Gatos', format: 'story', aspect: '9:16', language: 'pt-BR', cast: ['bia', 'narrator', '../../etc/passwd'] });
-  disk.put(FOLDER, 'cast/bia.json', { id: 'bia', name: 'Bia', rig: 'giz' });
+  disk.put(FOLDER, 'cast/bia.json', { id: 'bia', name: 'Bia', rig: 'gizzy' });
   disk.put(FOLDER, 'cast/narrator.json', { id: 'narrator', name: 'Narrador', voice: { id: 'ryan' } });
   disk.put(FOLDER, 'script.json', SCRIPT);
   const core = new FakeScriptCore();

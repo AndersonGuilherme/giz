@@ -5,8 +5,8 @@ import type { AppConfig, AppConfigStore, SharedConfigStore, SharedSettings } fro
 import type { FolderGrants } from './FolderGrants.ts';
 
 /**
- * `makeFolder` creates a folder (and its parents); `systemLanguage` is the first-run language (from the system's);
- * `onLanguage` switches the main process texts.
+ * `makeFolder` creates a folder (and its parents); `defaultProjectsFolder` is the suggested one in an interface
+ * language; `systemLanguage` is the first-run language (from the system's); `onLanguage` switches the main process texts.
  */
 type Dependencies = Readonly<{
   app: AppConfigStore;
@@ -14,7 +14,7 @@ type Dependencies = Readonly<{
   picker: FolderPicker;
   grants: FolderGrants;
   makeFolder: (folder: string) => Promise<void>;
-  defaultProjectsFolder: string;
+  defaultProjectsFolder: (language: InterfaceLanguage) => string;
   systemLanguage: InterfaceLanguage;
   onLanguage: (language: InterfaceLanguage) => void;
 }>;
@@ -28,7 +28,7 @@ const sharedPatchOf = ({ device, model, remotionLicense }: SettingsPatch): Parti
 
 /**
  * The first-run and Settings choices. The Studio's own ones go to its userData; the ones the CLI also reads (models
- * folder, device, model, Remotion license) go to giz.config.json through core's config, so both always agree.
+ * folder, device, model, Remotion license) go to gizzycera.config.json through core's config, so both always agree.
  * Folders are chosen only by the default or the system dialog, and the projects folder is granted to the window.
  */
 export class SettingsService {
@@ -52,7 +52,7 @@ export class SettingsService {
     const app = await this.#app();
     const shared = await this.#dependencies.shared.read();
     const { firstRunDone, ...own } = app;
-    return { ...own, ...shared, firstRun: !firstRunDone, defaultProjectsFolder: this.#dependencies.defaultProjectsFolder };
+    return { ...own, ...shared, firstRun: !firstRunDone, defaultProjectsFolder: this.#dependencies.defaultProjectsFolder(own.language) };
   }
 
   update(patch: SettingsPatch): Promise<Settings> {
@@ -99,7 +99,7 @@ export class SettingsService {
     const providers = { ...app.providers, ...patch.providers };
     await this.#saveApp({ ...app, language: patch.language ?? app.language, providers });
     const shared = sharedPatchOf(patch);
-    // giz.config.json is written only when one of its own keys changes (the language is the Studio's alone).
+    // gizzycera.config.json is written only when one of its own keys changes (the language is the Studio's alone).
     if (Object.keys(shared).length > 0) await this.#dependencies.shared.write(shared);
     if (patch.language) this.#dependencies.onLanguage(patch.language);
     return this.get();
@@ -107,7 +107,8 @@ export class SettingsService {
 
   async #projectsFolder(source: FolderSource): Promise<Settings> {
     const { defaultProjectsFolder, grants } = this.#dependencies;
-    const folder = source === 'pick' ? await this.#dependencies.picker.pickFolder() : defaultProjectsFolder;
+    const { language } = await this.#app();
+    const folder = source === 'pick' ? await this.#dependencies.picker.pickFolder() : defaultProjectsFolder(language);
     if (folder === null) return this.get();
     await this.#dependencies.makeFolder(folder);
     await this.#saveApp({ ...(await this.#app()), projectsFolder: grants.grant(folder) });

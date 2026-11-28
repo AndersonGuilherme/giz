@@ -1,4 +1,4 @@
-import type { VideoMarks } from 'giz-core/src/presentation/studio/index.ts';
+import type { VideoMarks } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { VideoLine } from '../../../shared/video.ts';
 import { useTranslate } from '../../i18n.ts';
 import { clockText } from '../../video/playhead.ts';

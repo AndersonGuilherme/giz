@@ -1,10 +1,10 @@
 {
-  "name": "giz-studio",
-  "productName": "giz Estúdio",
+  "name": "gizzycera-studio",
+  "productName": "Gizzycera",
   "version": "0.1.0",
   "private": true,
   "type": "module",
-  "description": "giz Estúdio: the desktop app that makes animated videos with the giz core",
+  "description": "Gizzycera: the desktop app that makes animated videos with the Gizzycera core",
   "license": "MIT",
   "main": ".vite/build/main.cjs",
   "scripts": {
@@ -24,7 +24,7 @@
   "dependencies": {
     "@remotion/player": "4.0.545",
     "electron-squirrel-startup": "^1.0.1",
-    "giz-core": "file:../core",
+    "gizzycera-core": "file:../core",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "remotion": "4.0.545",

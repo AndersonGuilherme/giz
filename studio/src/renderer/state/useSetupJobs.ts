@@ -1,11 +1,11 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { GpuStatus, ModelsStatus, SetupTask } from '../../shared/setup.ts';
 import { reduceJobs, type JobEvent } from './setupJobs.ts';
 
 type Dispatch = (event: JobEvent) => void;
 
-async function runTask(api: GizApi, dispatch: Dispatch, task: SetupTask): Promise<void> {
+async function runTask(api: GizzyApi, dispatch: Dispatch, task: SetupTask): Promise<void> {
   dispatch({ type: 'started', task });
   const result = await api.setup.run(task);
   if (result.ok) return dispatch({ type: 'finished', task });
@@ -18,7 +18,7 @@ async function runTask(api: GizApi, dispatch: Dispatch, task: SetupTask): Promis
  * when a task ends or the models folder changes (`modelsDir`). `onEnded` runs after each task (a finished GPU install
  * changes the voice device in the settings).
  */
-export function useSetupJobs(api: GizApi, modelsDir: string | undefined, onEnded: () => void) {
+export function useSetupJobs(api: GizzyApi, modelsDir: string | undefined, onEnded: () => void) {
   const [jobs, dispatch] = useReducer(reduceJobs, {});
   const [gpu, setGpu] = useState<GpuStatus | null>(null);
   const [models, setModels] = useState<ModelsStatus | null>(null);

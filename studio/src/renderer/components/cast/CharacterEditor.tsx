@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import type { CastCatalog, CastDocument, CastMember, CharacterFile, ProjectVoice, RigInfo } from '../../../shared/cast.ts';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useCharacterDraft } from '../../state/useCharacterDraft.ts';
 import { drawableParameters } from '../../cast/characterDraft.ts';
@@ -13,7 +13,7 @@ import { SaveStatus } from './SaveStatus.tsx';
 import { VoiceFields } from './VoiceFields.tsx';
 
 type Props = Readonly<{
-  api: GizApi;
+  api: GizzyApi;
   folder: string;
   member: CastMember;
   catalog: CastCatalog;

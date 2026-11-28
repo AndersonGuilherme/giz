@@ -8,7 +8,7 @@ import { JsonAppConfig } from '../../../src/main/adapters/JsonAppConfig.ts';
 const CONFIG = { language: 'en', projectsFolder: '/p', providers: { text: 'gemini', image: 'fal', voice: 'fish' }, firstRunDone: true, toursSeen: ['script'] } as const;
 
 test('no file is the first run; a written config reads back; the write leaves no draft behind', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-app-'));
   try {
     const store = new JsonAppConfig(join(folder, 'userData', 'studio.json'));
     assert.equal(await store.read(), null);
@@ -21,7 +21,7 @@ test('no file is the first run; a written config reads back; the write leaves no
 });
 
 test('a broken or foreign file reads as none (the wizard runs again), never as half a config', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-app-'));
   try {
     const file = join(folder, 'studio.json');
     const store = new JsonAppConfig(file);
@@ -35,7 +35,7 @@ test('a broken or foreign file reads as none (the wizard runs again), never as h
 });
 
 test('a config written before the tours existed reads with no tour seen; an unknown tour is dropped', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-app-'));
   try {
     const file = join(folder, 'studio.json');
     const store = new JsonAppConfig(file);
@@ -50,7 +50,7 @@ test('a config written before the tours existed reads with no tour seen; an unkn
 });
 
 test('a broken tours field never throws the config away: it reads as no tour seen', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-app-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-app-'));
   try {
     const file = join(folder, 'studio.json');
     await writeFile(file, JSON.stringify({ ...CONFIG, toursSeen: 42 }));

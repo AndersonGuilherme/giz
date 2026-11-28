@@ -21,6 +21,6 @@ test('no channel answers before the start is done (the projects folder is grante
 });
 
 test('a failed start does not block the calls', async () => {
-  const handlers = afterReady(handlersThat(async () => 'ok'), Promise.reject(new Error('giz.config.json quebrado')));
+  const handlers = afterReady(handlersThat(async () => 'ok'), Promise.reject(new Error('gizzycera.config.json quebrado')));
   assert.equal(await handlers['settings.get']({}), 'ok');
 });

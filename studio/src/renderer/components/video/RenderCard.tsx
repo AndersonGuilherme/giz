@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import type { Failure, Result } from '../../../shared/contract.ts';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import type { VideoDocument } from '../../../shared/video.ts';
 import { useTranslate } from '../../i18n.ts';
 import { renderOf, type RenderJobState, type RenderView } from '../../state/renderJob.ts';
@@ -10,7 +10,7 @@ import { RenderPanel } from '../RenderPanel.tsx';
 import { RenderHistory } from './RenderHistory.tsx';
 import { WatchDialog } from './WatchDialog.tsx';
 
-type Props = Readonly<{ api: GizApi; document: VideoDocument; onRendered: () => void }>;
+type Props = Readonly<{ api: GizzyApi; document: VideoDocument; onRendered: () => void }>;
 
 // The answer of an output action as a short note (or its failure).
 function useNote() {
@@ -24,7 +24,7 @@ function useNote() {
   return { note, failure, show };
 }
 
-type OutputProps = Readonly<{ api: GizApi; document: VideoDocument; captions: boolean; show: ReturnType<typeof useNote>['show']; onWatch: (() => void) | null }>;
+type OutputProps = Readonly<{ api: GizzyApi; document: VideoDocument; captions: boolean; show: ReturnType<typeof useNote>['show']; onWatch: (() => void) | null }>;
 
 function OutputButtons({ api, document, captions, show, onWatch }: OutputProps) {
   const translate = useTranslate();
@@ -45,7 +45,7 @@ function Note({ note, failure }: Readonly<{ note: string | null; failure: Failur
 }
 
 // What the last render in the chosen aspect left: watch it, open its folder, copy or export its captions.
-function Outputs({ api, document }: Readonly<{ api: GizApi; document: VideoDocument }>) {
+function Outputs({ api, document }: Readonly<{ api: GizzyApi; document: VideoDocument }>) {
   const [watching, setWatching] = useState(false);
   const { note, failure, show } = useNote();
   const made = document.rendered.find(({ aspect }) => aspect === document.aspect);

@@ -1,4 +1,4 @@
-import { RigStill } from 'giz-core/src/presentation/studio/index.ts';
+import { RigStill } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { CastCatalog, CastDocument, CastMember } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
 import { drawableParameters } from '../../cast/characterDraft.ts';

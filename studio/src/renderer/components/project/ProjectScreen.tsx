@@ -1,5 +1,5 @@
 import type { ComponentType } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { CastScreen } from '../cast/CastScreen.tsx';
 import { EditorScreen } from '../editor/EditorScreen.tsx';
@@ -14,9 +14,9 @@ export type WorkStage = (typeof WORK_STAGES)[number];
 /** Goes to a stage; `focus` names a line to show there (the Script stage selects it). */
 export type GoToStage = (stage: WorkStage, focus?: string) => void;
 /** What every stage screen gets: the project, the line to show first (when one was named) and the way to another stage. */
-export type StageProps = Readonly<{ api: GizApi; folder: string; focus?: string; onStage: GoToStage }>;
+export type StageProps = Readonly<{ api: GizzyApi; folder: string; focus?: string; onStage: GoToStage }>;
 
-type Props = Readonly<{ api: GizApi; folder: string; stage: WorkStage; focus?: string; onStage: GoToStage }>;
+type Props = Readonly<{ api: GizzyApi; folder: string; stage: WorkStage; focus?: string; onStage: GoToStage }>;
 
 const SCREENS: Readonly<Record<WorkStage, ComponentType<StageProps>>> = { script: EditorScreen, cast: CastScreen, scenarios: ScenariosScreen, voices: VoicesScreen, video: VideoScreen };
 

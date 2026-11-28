@@ -17,7 +17,7 @@ test('binary payloads must be bytes and within the limit', () => {
 });
 
 test('a character: only its shape and sizes here (core checks the rig and the parameters), no unknown field', () => {
-  const character = { id: 'ana', name: 'Ana', rig: 'giz', parameters: { skin: 'roxo' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
+  const character = { id: 'ana', name: 'Ana', rig: 'gizzy', parameters: { skin: 'roxo' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
   assert.equal(MEDIA_SCHEMAS['cast.save'].safeParse({ folder: '/p', character }).success, true);
   assert.equal(MEDIA_SCHEMAS['cast.save'].safeParse({ folder: '/p', character: { ...character, script: 'x' } }).success, false);
   assert.equal(MEDIA_SCHEMAS['cast.voice'].safeParse({ folder: '/p', voice: { provider: 'azure' } }).success, false);

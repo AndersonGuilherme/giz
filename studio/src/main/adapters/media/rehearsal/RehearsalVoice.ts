@@ -1,5 +1,5 @@
-import type { VoiceProvider, VoiceRequest } from 'giz-core/src/application/ports/VoiceProvider.ts';
-import type { Audio } from 'giz-core/src/domain/speech/Audio.ts';
+import type { VoiceProvider, VoiceRequest } from 'gizzycera-core/src/application/ports/VoiceProvider.ts';
+import type { Audio } from 'gizzycera-core/src/domain/speech/Audio.ts';
 
 const RATE = 24000;
 const SECONDS_PER_LETTER = 0.055;
@@ -27,7 +27,7 @@ export class RehearsalVoice implements VoiceProvider {
   async generate(request: VoiceRequest): Promise<Audio> {
     this.requests.push(request);
     await new Promise((done) => setTimeout(done, PAUSE));
-    const { Audio } = await import('giz-core/src/domain/speech/Audio.ts');
+    const { Audio } = await import('gizzycera-core/src/domain/speech/Audio.ts');
     return Audio.of(hum(request.text), RATE);
   }
 }

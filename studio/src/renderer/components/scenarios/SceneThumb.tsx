@@ -1,4 +1,4 @@
-import { BackgroundStill } from 'giz-core/src/presentation/studio/index.ts';
+import { BackgroundStill } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { SceneBackground } from '../../../shared/scenarios.ts';
 import { useTranslate } from '../../i18n.ts';
 import { FramedPicture } from './CroppedPicture.tsx';

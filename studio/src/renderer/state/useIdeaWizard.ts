@@ -1,12 +1,12 @@
 import { useCallback, useEffect, useReducer, useState } from 'react';
 import type { Failure } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { Portraits, Presets } from '../../shared/projects.ts';
 import { IDLE, reduceGeneration } from '../idea/generation.ts';
 import { emptyDraft, ideaOf, type IdeaDraft } from '../idea/ideaDraft.ts';
 
 /** The ready characters and scenes, and the portraits (they take a moment the first time: the picker waits for them). */
-function usePresets(api: GizApi) {
+function usePresets(api: GizzyApi) {
   const [presets, setPresets] = useState<Presets | null>(null);
   const [portraits, setPortraits] = useState<Portraits | null>(null);
   useEffect(() => {
@@ -17,7 +17,7 @@ function usePresets(api: GizApi) {
 }
 
 /** "Gerar com IA": the estimate, the confirmation, the calls (with progress) and their end. */
-function useGeneration(api: GizApi, draft: IdeaDraft, onCreated: (folder: string) => void) {
+function useGeneration(api: GizzyApi, draft: IdeaDraft, onCreated: (folder: string) => void) {
   const [generation, dispatch] = useReducer(reduceGeneration, IDLE);
   useEffect(() => api.script.onProgress((progress) => dispatch({ type: 'progress', progress })), [api]);
   const estimate = useCallback(async () => {
@@ -37,7 +37,7 @@ function useGeneration(api: GizApi, draft: IdeaDraft, onCreated: (folder: string
 const IDLE_STATES: readonly string[] = ['idle', 'failed', 'cancelled'];
 
 /** The new-project wizard: the draft, the presets, "write it myself" and "generate with AI". */
-export function useIdeaWizard(api: GizApi, language: IdeaDraft['language'], onCreated: (folder: string) => void) {
+export function useIdeaWizard(api: GizzyApi, language: IdeaDraft['language'], onCreated: (folder: string) => void) {
   const [draft, setDraft] = useState(() => emptyDraft(language));
   const [failure, setFailure] = useState<Failure | null>(null);
   const change = useCallback((patch: Partial<IdeaDraft>) => setDraft((current) => ({ ...current, ...patch })), []);

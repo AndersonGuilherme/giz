@@ -1,4 +1,4 @@
-/* giz identity: a slate board with chalk lines and one yellow chalk accent. */
+/* Gizzycera identity: a slate board with chalk lines and one yellow chalk accent. */
 /* The window's Nunito is core's bundled file (OFL), built into the page: no font is ever fetched from the network. */
 @font-face { font-family: 'Nunito'; src: url('../../../core/public/fonts/Nunito.ttf') format('truetype'); font-weight: 200 1000; font-display: swap; }
 :root {

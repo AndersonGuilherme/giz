@@ -1,4 +1,4 @@
-import { cropStyle, IMAGE_BLEED } from 'giz-core/src/presentation/studio/index.ts';
+import { cropStyle, IMAGE_BLEED } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { ImageCrop } from '../../../shared/scenarios.ts';
 
 const MARGIN = `${-IMAGE_BLEED * 100}%`;

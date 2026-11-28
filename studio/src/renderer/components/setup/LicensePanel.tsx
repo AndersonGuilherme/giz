@@ -11,7 +11,7 @@ const ANSWER = {
   'nao-informado': 'license.later',
 } as const;
 
-/** The Remotion license notice, and who uses giz (core's `remotionLicense`, shared with the CLI). */
+/** The Remotion license notice, and who uses Gizzycera (core's `remotionLicense`, shared with the CLI). */
 export function LicensePanel() {
   const translate = useTranslate();
   const { settings, actions } = useSetup();

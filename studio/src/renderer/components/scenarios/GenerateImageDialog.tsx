@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { IMAGE_STYLES, type ImageEstimate, type ImageStyle, type ScenariosDocument, type SceneCard } from '../../../shared/scenarios.ts';
 import { useTranslate } from '../../i18n.ts';
 import { labelOf } from '../../labels.ts';
@@ -9,7 +9,7 @@ import { Modal } from '../common/Modal.tsx';
 import { Picker } from '../common/Picker.tsx';
 import { TextField } from '../common/TextField.tsx';
 
-type Props = Readonly<{ api: GizApi; document: ScenariosDocument; card: SceneCard; onClose: () => void; onDone: (document: ScenariosDocument) => void }>;
+type Props = Readonly<{ api: GizzyApi; document: ScenariosDocument; card: SceneCard; onClose: () => void; onDone: (document: ScenariosDocument) => void }>;
 type Job = ReturnType<typeof useImageJob>;
 
 function Edit({ card, job, onClose }: Readonly<{ card: SceneCard; job: Job; onClose: () => void }>) {

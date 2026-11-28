@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { JsonKeyVault } from '../../../src/main/adapters/JsonKeyVault.ts';
 
 test('no file yet reads as no keys; a write is readable back and only by this user', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-vault-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-vault-'));
   try {
     const vault = new JsonKeyVault(join(folder, 'studio', 'keys.json'));
     assert.deepEqual(await vault.read(), {});
@@ -20,7 +20,7 @@ test('no file yet reads as no keys; a write is readable back and only by this us
 });
 
 test('an unreadable vault fails with a pt-BR message, the raw error in the details; overlapping writes leave no tmp files', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-vault-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-vault-'));
   try {
     const file = join(folder, 'keys.json');
     const vault = new JsonKeyVault(file);

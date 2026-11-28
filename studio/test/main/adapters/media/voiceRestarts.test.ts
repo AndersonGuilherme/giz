@@ -27,7 +27,7 @@ test('a finished setup task (a model, Whisper, the GPU) closes the voice worker;
   assert.equal(restarts, 1);
 });
 
-test('a giz.config.json change the voices read (model, device, models folder) closes the voice worker; the license does not', async () => {
+test('a gizzycera.config.json change the voices read (model, device, models folder) closes the voice worker; the license does not', async () => {
   let restarts = 0;
   const store: SharedConfigStore = { read: async () => SHARED, write: async (patch) => ({ ...SHARED, ...patch }), defaults: async () => SHARED };
   const watched = restartingAfterConfig(store, () => restarts++);

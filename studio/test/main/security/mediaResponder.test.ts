@@ -35,10 +35,10 @@ test('%2e%2e in the URL never climbs out: not served, not even asked about', asy
   const asked: string[] = [];
   const { fetched, answer } = responder((path) => (asked.push(path), true));
   for (const url of [
-    'giz-media://file/%2Fprojects%2Fcats%2F%2e%2e%2F%2e%2e%2Fhome%2Fana%2F.ssh%2Fid.png',
-    'giz-media://file/%2Fprojects%2Fcats%2F..%2F..%2Fetc%2Fx.png',
-    'giz-media://file/%2Fprojects/%2e%2e/%2e%2e/etc/x.png',
-    'giz-media://file/%2Fprojects%2Fcats%2Fkeys.json',
+    'gizzy-media://file/%2Fprojects%2Fcats%2F%2e%2e%2F%2e%2e%2Fhome%2Fana%2F.ssh%2Fid.png',
+    'gizzy-media://file/%2Fprojects%2Fcats%2F..%2F..%2Fetc%2Fx.png',
+    'gizzy-media://file/%2Fprojects/%2e%2e/%2e%2e/etc/x.png',
+    'gizzy-media://file/%2Fprojects%2Fcats%2Fkeys.json',
   ]) {
     assert.equal((await answer(new Request(url))).status, 404, url);
   }

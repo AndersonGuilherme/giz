@@ -1,4 +1,4 @@
-// User bugs #1 in the smoke test: a character file with a value its rig cannot draw (a Lia color as a Giz skin, what
+// User bugs #1 in the smoke test: a character file with a value its rig cannot draw (a Lia color as a Gizzy skin, what
 // a rig switch used to keep) still shows the whole cast and the preview, with a note and a refusal in words; the rig
 // switch keeps only values the other rig accepts; the preview draws the usual expression and tries others.
 import { readFile, writeFile } from 'node:fs/promises';
@@ -43,7 +43,7 @@ async function wrongSkinShown({ page, shoot }: Context, folder: string): Promise
   const faces = await page.evaluate(`[...document.querySelectorAll('.cast-face:not(.voice)')].map((face) => face.querySelector('svg') !== null)`);
   assert.ok((faces as boolean[]).every(Boolean), 'every face of the list is drawn');
   await page.untilText('[data-testid="preview-wrong"]', /Pele/);
-  await page.untilText('[data-testid="character-save"]', /Pele: “#ffffff” não é uma das opções do modelo Giz/);
+  await page.untilText('[data-testid="character-save"]', /Pele: “#ffffff” não é uma das opções do modelo Gizzy/);
   assert.equal((await textOf(page, '[data-testid="character-save"]')).includes('parameters.'), false, 'no path of core in the refusal');
   await shoot(page, 'bugs1-03-erro-amigavel');
   await page.click('[data-testid="param-skin"] .option-current');
@@ -53,9 +53,9 @@ async function wrongSkinShown({ page, shoot }: Context, folder: string): Promise
   assert.equal(await page.evaluate(`document.querySelector('[data-testid="preview-wrong"]')`), null);
 }
 
-// Giz → Lia → Giz: each step is saved (no refusal), and Giz never gets a color as its skin.
+// Gizzy → Lia → Gizzy: each step is saved (no refusal), and Gizzy never gets a color as its skin.
 async function rigSwitch(page: Page, folder: string): Promise<void> {
-  for (const rig of ['lia-style', 'giz']) {
+  for (const rig of ['lia-style', 'gizzy']) {
     await page.click(`[data-testid="character-rig"] [data-value="${rig}"]`);
     await until(async () => (await biaOf(folder)).rig === rig, `bia drawn with ${rig}`);
     await page.until('[data-testid="character-save"][data-state="saved"]');

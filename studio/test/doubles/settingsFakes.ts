@@ -10,7 +10,7 @@ export class InMemoryKeyFiles implements KeyFiles {
   readonly files = new Map<KeyProvider, string>();
 
   folder(): string {
-    return '/home/ana/.config/giz';
+    return '/home/ana/.config/gizzycera';
   }
 
   async read(provider: KeyProvider): Promise<string | undefined> {
@@ -65,12 +65,12 @@ export class InMemoryAppConfig implements AppConfigStore {
   }
 }
 
-export const CORE_DEFAULTS: SharedSettings = { modelsDir: '/home/ana/.cache/giz', device: 'cpu', model: '0.6b', remotionLicense: 'nao-informado' };
+export const CORE_DEFAULTS: SharedSettings = { modelsDir: '/home/ana/.cache/gizzycera', device: 'cpu', model: '0.6b', remotionLicense: 'nao-informado' };
 
-/** giz.config.json in memory: `others` stands for the keys the Studio does not own (they must survive every write). */
+/** gizzycera.config.json in memory: `others` stands for the keys the Studio does not own (they must survive every write). */
 export class InMemorySharedConfig implements SharedConfigStore {
   values: SharedSettings = CORE_DEFAULTS;
-  others = { brand: 'giz', voices: { lia: 'vivian' } };
+  others = { brand: 'gizzycera', voices: { lia: 'vivian' } };
   writes: Array<Partial<SharedSettings>> = [];
 
   async read(): Promise<SharedSettings> {

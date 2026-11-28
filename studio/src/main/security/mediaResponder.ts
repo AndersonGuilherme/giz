@@ -20,7 +20,7 @@ function headersOf(answer: Response, path: string): Headers {
 }
 
 /**
- * The answer to a `giz-media://file/<path>` request: only the types of MEDIA_TYPES (pictures, WAV audio, rendered MP4
+ * The answer to a `gizzy-media://file/<path>` request: only the types of MEDIA_TYPES (pictures, WAV audio, rendered MP4
  * videos, core's fonts), only where `allowed` says; anything else is a 404, so the page cannot read any other file of
  * the disk through it. The type comes from the extension. A font (loaded in CORS mode) alone says any origin may
  * read it (only our window ever reaches this scheme).

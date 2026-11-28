@@ -11,7 +11,7 @@ export function registerMediaScheme(): void {
 }
 
 /**
- * Serves `giz-media://file/<path>`: only the media types (pictures, WAV audio, rendered videos, core's fonts), only
+ * Serves `gizzy-media://file/<path>`: only the media types (pictures, WAV audio, rendered videos, core's fonts), only
  * inside a folder the media scheme may serve (`allowed`: the granted project folders and the Studio's own folders:
  * the voice samples, core's sounds and fonts); anything else is a 404.
  */

@@ -1,10 +1,10 @@
-// Smoke test: boots the real app (electron-forge start) in an isolated Studio home (GIZ_STUDIO_HOME) with the rehearsal
-// machine tools (GIZ_STUDIO_REHEARSAL=1: a pretend GPU and pretend downloads, no network), walks the whole first-run
+// Smoke test: boots the real app (electron-forge start) in an isolated Studio home (GIZZY_STUDIO_HOME) with the rehearsal
+// machine tools (GIZZY_STUDIO_REHEARSAL=1: a pretend GPU and pretend downloads, no network), walks the whole first-run
 // wizard through Chrome DevTools Protocol taking a screenshot of every step, then checks the bridge on core's coupon
 // lesson (and that a folder never granted is refused), launches the app a second time (it opens that project in the
 // first window) and opens Settings.
 // Run: npm run smoke   (SMOKE_HEADLESS=1 for no display: Chromium's headless Ozone platform).
-// SMOKE_APP=<program>: the same walk on the packaged app (npm run package, out/<name>-<platform>-<arch>/giz-estudio)
+// SMOKE_APP=<program>: the same walk on the packaged app (npm run package, out/<name>-<platform>-<arch>/gizzycera)
 // instead of the dev server: `npm run smoke:packaged` packages and runs it.
 import { spawn } from 'node:child_process';
 import { mkdir, mkdtemp, readFile, rm, stat, writeFile } from 'node:fs/promises';
@@ -24,12 +24,12 @@ const FOLDER = resolve(STUDIO, '../core/examples/coupon-lesson/pt-BR');
 const PACKAGED = process.env.SMOKE_APP;
 const SHOTS = join(STUDIO, 'out', PACKAGED ? 'smoke-packaged' : 'smoke');
 const PORT = 9400 + Math.floor(Math.random() * 400);
-const HOME = await mkdtemp(join(tmpdir(), 'giz-smoke-home-'));
-// A giz.config.json the CLI already made: the Studio must keep its other keys (brand) and use its models folder.
-await writeFile(join(HOME, 'giz.config.json'), JSON.stringify({ brand: 'canal-de-teste', modelsDir: join(HOME, '.cache', 'giz') }));
+const HOME = await mkdtemp(join(tmpdir(), 'gizzy-smoke-home-'));
+// A gizzycera.config.json the CLI already made: the Studio must keep its other keys (brand) and use its models folder.
+await writeFile(join(HOME, 'gizzycera.config.json'), JSON.stringify({ brand: 'canal-de-teste', modelsDir: join(HOME, '.cache', 'gizzycera') }));
 
 const headless = process.env.SMOKE_HEADLESS === '1' ? ['--ozone-platform=headless'] : [];
-const env = { ...process.env, GIZ_STUDIO_HOME: HOME, GIZ_STUDIO_REHEARSAL: '1', GIZ_QUIET: '1' };
+const env = { ...process.env, GIZZY_STUDIO_HOME: HOME, GIZZY_STUDIO_REHEARSAL: '1', GIZZY_QUIET: '1' };
 const appArgs = [`--remote-debugging-port=${PORT}`, `--project=${FOLDER}`, '--lang=en-US', '--use-fake-device-for-media-stream', ...headless];
 const [command, args] = PACKAGED ? [PACKAGED, appArgs] : ['npx', ['electron-forge', 'start', '--', ...appArgs]];
 const app = spawn(command, args, {
@@ -64,7 +64,7 @@ async function firstScreen(page: Page): Promise<void> {
   const mounted = await page.until('[data-testid="wizard-language"]', Date.now() + 30_000).catch(() => false);
   if (mounted) return;
   const cause = await page.evaluate(`document.readyState + ', #root children: ' + (document.getElementById('root')?.childElementCount ?? 'none')`).catch(String);
-  const mainLog = output.split('\n').filter((line) => line.includes('giz page:')).slice(-10).join(' | ');
+  const mainLog = output.split('\n').filter((line) => line.includes('Gizzycera page:')).slice(-10).join(' | ');
   console.log(`smoke: the window did not mount in 30 s (page ${cause}; main: ${mainLog || 'no page problem logged'}; console: ${page.problems.join(' | ') || 'nothing'}); reloading once`);
   await page.send('Page.reload', { ignoreCache: true });
   await page.until('[data-testid="wizard-language"]');
@@ -72,12 +72,12 @@ async function firstScreen(page: Page): Promise<void> {
 
 async function languageStep(page: Page): Promise<void> {
   await firstScreen(page);
-  const isolation = await page.evaluate(`({ require: typeof require, process: typeof process, giz: typeof window.giz })`);
-  assert.deepEqual(isolation, { require: 'undefined', process: 'undefined', giz: 'object' });
-  await page.untilText('h2', /Let's set up your Studio/);
+  const isolation = await page.evaluate(`({ require: typeof require, process: typeof process, gizzy: typeof window.gizzy })`);
+  assert.deepEqual(isolation, { require: 'undefined', process: 'undefined', gizzy: 'object' });
+  await page.untilText('h2', /Let's set up Gizzycera/);
   await shoot(page, '01-language-en');
   await page.click('[data-testid="language-pt-BR"] button');
-  await page.untilText('h2', /Vamos preparar o seu Estúdio/);
+  await page.untilText('h2', /Vamos preparar o Gizzycera/);
   await shoot(page, '01-idioma');
   await page.click('[data-testid="wizard-next"]');
 }
@@ -86,8 +86,8 @@ async function projectsStep(page: Page): Promise<void> {
   await page.until('[data-testid="wizard-projects"]');
   assert.equal(await page.evaluate(`document.querySelector('[data-testid="wizard-next"]').disabled`), true, 'the projects folder is required');
   await page.click('[data-testid="projects-default"]');
-  await page.untilText('[data-testid="projects-folder"]', /Os projetos ficam em[\s\S]*giz\/projetos/i);
-  assert.ok((await stat(join(HOME, 'giz', 'projetos'))).isDirectory());
+  await page.untilText('[data-testid="projects-folder"]', /Os projetos ficam em[\s\S]*Gizzycera\/projetos/i);
+  assert.ok((await stat(join(HOME, 'Gizzycera', 'projetos'))).isDirectory());
   await shoot(page, '02-pasta-de-projetos');
   await page.click('[data-testid="wizard-next"]');
 }
@@ -104,7 +104,7 @@ async function gpuStep(page: Page): Promise<void> {
   await page.until('.panel .option.selected [aria-checked="true"]');
   await page.untilText('.panel .option.selected', /Na placa de vídeo/);
   await shoot(page, '03c-gpu-pronta');
-  assert.equal((await json(join(HOME, 'giz.config.json'))).device, 'cuda', 'a ready GPU becomes the voice device of the CLI too');
+  assert.equal((await json(join(HOME, 'gizzycera.config.json'))).device, 'cuda', 'a ready GPU becomes the voice device of the CLI too');
   await page.click('[data-testid="wizard-next"]');
 }
 
@@ -125,7 +125,7 @@ async function modelsStep(page: Page): Promise<void> {
   await page.until('[data-testid="ready-voice-1.7b"]');
   await page.click('[data-testid="model-1.7b"] button');
   await page.untilText('[data-testid="model-1.7b"]', /Usado nos vídeos/);
-  assert.equal((await json(join(HOME, 'giz.config.json'))).model, '1.7b');
+  assert.equal((await json(join(HOME, 'gizzycera.config.json'))).model, '1.7b');
   await page.click('[data-testid="wizard-next"]');
 }
 
@@ -148,10 +148,10 @@ async function accountsStep(page: Page): Promise<void> {
   await page.until('[data-testid="missing-key-fal"]');
   await saveKey(page, 'elevenlabs', 'xi-ensaio');
   await page.untilText('[data-testid="account-elevenlabs"]', /sem teste por enquanto/);
-  const status = (await page.evaluate('window.giz.keys.status()')) as { value: { secure: boolean; keys: Record<string, string | null> } };
+  const status = (await page.evaluate('window.gizzy.keys.status()')) as { value: { secure: boolean; keys: Record<string, string | null> } };
   assert.equal(JSON.stringify(status).includes('sk-ensaio'), false, 'no answer carries a key');
   const secure = status.value.secure;
-  if (!secure) assert.equal(((await stat(join(HOME, '.config', 'giz', 'anthropic.key'))).mode & 0o777), 0o600, 'without a keychain: the CLI file, mode 600');
+  if (!secure) assert.equal(((await stat(join(HOME, '.config', 'gizzycera', 'anthropic.key'))).mode & 0o777), 0o600, 'without a keychain: the CLI file, mode 600');
   if (!secure) await page.until('[data-testid="no-keychain"]');
   await shoot(page, '05b-contas');
   await page.click('[data-testid="wizard-next"]');
@@ -162,21 +162,21 @@ async function licenseStep(page: Page): Promise<void> {
   await page.click('[data-testid="license-pessoa-fisica"] button');
   await page.untilText('.panel', /Gratuito para você/);
   await shoot(page, '06-licenca');
-  const shared = await json(join(HOME, 'giz.config.json'));
+  const shared = await json(join(HOME, 'gizzycera.config.json'));
   assert.deepEqual([shared.remotionLicense, shared.brand], ['pessoa-fisica', 'canal-de-teste'], 'the CLI keys the Studio does not own stay');
   await page.click('[data-testid="wizard-next"]');
 }
 
 async function studio(page: Page): Promise<Record<string, unknown>> {
   await page.until('[data-testid="check-report"]');
-  const check = (await page.evaluate(`window.giz.script.check(${JSON.stringify(FOLDER)})`)) as { ok: boolean; value: { errors: unknown[]; warnings: unknown[] } };
+  const check = (await page.evaluate(`window.gizzy.script.check(${JSON.stringify(FOLDER)})`)) as { ok: boolean; value: { errors: unknown[]; warnings: unknown[] } };
   assert.equal(check.ok, true);
   assert.deepEqual(check.value.errors, []);
-  const refused = (await page.evaluate(`window.giz.script.check('')`)) as { failure: { code: string } };
+  const refused = (await page.evaluate(`window.gizzy.script.check('')`)) as { failure: { code: string } };
   assert.equal(refused.failure.code, 'invalid-request');
-  const ungranted = (await page.evaluate(`window.giz.script.check('/tmp')`)) as { failure: { code: string } };
+  const ungranted = (await page.evaluate(`window.gizzy.script.check('/tmp')`)) as { failure: { code: string } };
   assert.equal(ungranted.failure.code, 'invalid-request');
-  const named = (await page.evaluate(`window.giz.settings.update({ modelsDir: '/etc' })`)) as { failure: { code: string } };
+  const named = (await page.evaluate(`window.gizzy.settings.update({ modelsDir: '/etc' })`)) as { failure: { code: string } };
   assert.equal(named.failure.code, 'invalid-request', 'the window cannot name a folder');
   await page.untilText('[data-testid="check-report"]', /Tudo certo/);
   await shoot(page, '07-estudio');
@@ -226,7 +226,7 @@ async function mediaStages(page: Page): Promise<void> {
   await scenariosStage(context, folder);
   await voicesStage(context, folder);
   // The sample and every voice job (all pending, one line again, a take) ran in one long-lived voice worker.
-  assert.equal(output.match(/giz voices: worker ready/g)?.length, 1, 'one voice worker, kept for every job');
+  assert.equal(output.match(/gizzy voices: worker ready/g)?.length, 1, 'one voice worker, kept for every job');
   await page.click('[data-testid="tab-script"]');
   await page.until('[data-testid="check-report"]');
   await page.click('[data-testid="go-home"]');

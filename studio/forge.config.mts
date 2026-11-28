@@ -16,26 +16,26 @@ import { STAGED_CORE, stageCore } from './scripts/stageCore.ts';
 
 // The Linux menus' entry (deb, rpm and AppImage).
 const LINUX_ENTRY = {
-  name: 'giz-estudio',
-  productName: 'giz Estúdio',
+  name: 'gizzycera',
+  productName: 'Gizzycera',
   genericName: 'Video Studio',
-  bin: 'giz-estudio',
+  bin: 'gizzycera',
   icon: 'assets/icon/icon.png',
   categories: ['AudioVideo' as const, 'Video' as const],
 };
 // The deb and rpm menu entry: their default names the window class after the product name, but Electron's window
-// class on Linux is the program's name (WM_CLASS "giz-estudio", checked with xprop), which links the window to its entry.
+// class on Linux is the program's name (WM_CLASS "gizzycera", checked with xprop), which links the window to its entry.
 const DESKTOP_TEMPLATE = 'assets/linux/desktop.ejs';
 // electron-installer-redhat reads desktopTemplate too (the common installer does), but Forge's rpm options type omits it.
 const RPM_DESKTOP = { desktopTemplate: DESKTOP_TEMPLATE } as unknown as Record<string, never>;
 // The package's own text, in both languages of the app.
 const DESCRIPTION = 'Vídeos animados a partir de um roteiro / Animated videos from a script';
 const LONG_DESCRIPTION = [
-  'giz Estúdio: escreva (ou gere) um roteiro, escolha personagens e cenários, grave as vozes e renderize o vídeo animado.',
-  'giz Estúdio: write (or generate) a script, pick characters and scenarios, record the voices and render the animated video.',
+  'Gizzycera: escreva (ou gere) um roteiro, escolha personagens e cenários, grave as vozes e renderize o vídeo animado.',
+  'Gizzycera: write (or generate) a script, pick characters and scenarios, record the voices and render the animated video.',
 ].join('\n');
 // A placeholder that names no one (the package format asks for an e-mail).
-const MAINTAINER = 'giz <noreply@users.noreply.github.com>';
+const MAINTAINER = 'gizzy <noreply@users.noreply.github.com>';
 
 // The AppImage runtime of the machine making the package, from a pinned release (see scripts/appImageRuntime.ts).
 const APPIMAGE_ARCH = process.arch === 'arm64' ? 'arm64' : 'x64';
@@ -55,7 +55,7 @@ const config: ForgeConfig = {
   packagerConfig: {
     asar: true,
     // No spaces or accents in the program's file name (the Linux packages and their menu entries run it by name).
-    executableName: 'giz-estudio',
+    executableName: 'gizzycera',
     // No extension: the packager picks icon.ico on Windows and icon.icns on macOS.
     icon: 'assets/icon/icon',
     // Core (sources, data, production modules, the prebuilt Remotion bundle, Chrome Headless Shell) goes to
@@ -74,7 +74,7 @@ const config: ForgeConfig = {
     postMake: (_config, results) => renameArtifacts(results),
   },
   makers: [
-    new MakerSquirrel({ name: 'giz_estudio', setupIcon: 'assets/icon/icon.ico' }),
+    new MakerSquirrel({ name: 'gizzycera', setupIcon: 'assets/icon/icon.ico' }),
     new MakerZIP({}, ['darwin', 'linux', 'win32']),
     new MakerDMG({ icon: 'assets/icon/icon.icns', format: 'ULFO' }),
     new MakerDeb({ options: { ...LINUX_ENTRY, desktopTemplate: DESKTOP_TEMPLATE, maintainer: MAINTAINER, section: 'video', description: DESCRIPTION, productDescription: LONG_DESCRIPTION } }),

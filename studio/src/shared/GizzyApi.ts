@@ -10,8 +10,8 @@ import type { VideoDocument } from './video.ts';
 
 type Reply<T> = Promise<Result<T>>;
 
-/** What the preload exposes as `window.giz`: every call goes to the main process, which validates it. */
-export type GizApi = MediaApi & Readonly<{
+/** What the preload exposes as `window.gizzy`: every call goes to the main process, which validates it. */
+export type GizzyApi = MediaApi & Readonly<{
   projects: Readonly<{
     pick(): Reply<string | null>;
     launched(): Reply<string | null>;

@@ -8,7 +8,7 @@ import { JsonOpenedFolders } from '../../../src/main/adapters/JsonOpenedFolders.
 import { RehearsalTrash } from '../../../src/main/adapters/rehearsal/RehearsalTrash.ts';
 
 async function withFolder(use: (folder: string) => Promise<void>): Promise<void> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-disk-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-disk-'));
   try {
     await use(folder);
   } finally {

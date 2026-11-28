@@ -28,7 +28,7 @@ export type SceneCard = Readonly<{
   generate?: Readonly<{ prompt: string; style?: ImageStyle }>;
   /** The prompt of a scene switched to a vector: no longer used (the image AI does not make it), kept to start from. */
   keptPrompt?: Readonly<{ prompt: string; style?: ImageStyle }>;
-  /** The image giz made for this scene (scenes/<id>.png), shown even while an upload wins. */
+  /** The image Gizzycera made for this scene (scenes/<id>.png), shown even while an upload wins. */
   generated: string | null;
   state?: GeneratedState;
   problem?: string;

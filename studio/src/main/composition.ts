@@ -1,8 +1,9 @@
 // The Studio's single composition point: only here are the main-process adapters created with `new`.
 import { mkdir } from 'node:fs/promises';
 import { homedir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import { app, type BrowserWindow } from 'electron';
+import { migrateFormerSetup } from 'gizzycera-core/src/infrastructure/config/formerNames.ts';
 import { SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
 import { ConfigFolderKeyFiles } from './adapters/ConfigFolderKeyFiles.ts';
@@ -10,8 +11,9 @@ import { CoreKeyChecker } from './adapters/CoreKeyChecker.ts';
 import { CoreSetupTools } from './adapters/CoreSetupTools.ts';
 import { DialogFolderPicker } from './adapters/DialogFolderPicker.ts';
 import { DiskProjects } from './adapters/DiskProjects.ts';
-import { GizConfigStore } from './adapters/GizConfigStore.ts';
-import { GizScriptCore } from './adapters/GizScriptCore.ts';
+import { formerUserDataIn, migrateFormerUserData } from './formerUserData.ts';
+import { GizzyConfigStore } from './adapters/GizzyConfigStore.ts';
+import { GizzyScriptCore } from './adapters/GizzyScriptCore.ts';
 import { JsonAppConfig } from './adapters/JsonAppConfig.ts';
 import { JsonKeyVault } from './adapters/JsonKeyVault.ts';
 import { JsonOpenedFolders } from './adapters/JsonOpenedFolders.ts';
@@ -42,9 +44,24 @@ import { videoServicesOf } from './composition/video.ts';
 
 export const STUDIO_PATHS = studioPathsOf(process.env, homedir());
 
-/** Before the app is ready and before anything reads it: userData is giz-estudio, or an isolated home's own. */
+/** giz Estúdio's userData (before the rename), when there is one; an isolated home has none. */
+export const formerUserData = (): string | undefined => (STUDIO_PATHS.userData === undefined ? formerUserDataIn(app.getPath('appData')) : undefined);
+
+/**
+ * Before the app is ready and before anything reads it: userData is gizzycera, or an isolated home's own. The first
+ * run after the rename copies giz Estúdio's settings and the CLI's ~/.config/giz (and, in a checkout, the repository's
+ * giz.config.json) to the new names; the old ones stay. A copy that fails only logs: the first-run wizard still works.
+ */
 export function preparePaths(): void {
-  app.setPath('userData', userDataIn(STUDIO_PATHS, app.getPath('appData')));
+  const userData = userDataIn(STUDIO_PATHS, app.getPath('appData'));
+  app.setPath('userData', userData);
+  if (STUDIO_PATHS.userData !== undefined) return;
+  try {
+    const copied = [...migrateFormerUserData({ former: formerUserData(), now: userData }), ...migrateFormerSetup({ home: STUDIO_PATHS.home, repository: dirname(app.getAppPath()) })];
+    copied.forEach((copy) => console.log(`Gizzycera: copied from before the rename: ${copy}`));
+  } catch (error) {
+    console.error('Gizzycera: what was set up before the rename could not be copied:', error);
+  }
 }
 
 function sendTo<Payload>(slot: WindowSlot<BrowserWindow>, event: string): (payload: Payload) => void {
@@ -67,7 +84,7 @@ function settingsOf(grants: FolderGrants, picker: DialogFolderPicker, shared: Sh
   const { home } = STUDIO_PATHS;
   const appConfig = new JsonAppConfig(join(app.getPath('userData'), 'studio.json'));
   const base = { app: appConfig, shared, picker, grants, makeFolder, onLanguage: setInterfaceLanguage };
-  return new SettingsService({ ...base, defaultProjectsFolder: defaultProjectsFolderIn(home), systemLanguage: systemLanguageOf(app.getLocale()) });
+  return new SettingsService({ ...base, defaultProjectsFolder: (language) => defaultProjectsFolderIn(home, language), systemLanguage: systemLanguageOf(app.getLocale()) });
 }
 
 function keysOf(): KeyService {
@@ -84,7 +101,7 @@ type ScriptParts = Readonly<{ grants: FolderGrants; settings: SettingsService; k
 
 /** The home screen, the Idea and the Script stages, on core's script use cases. */
 function scriptServicesOf({ grants, settings, keys, slot, saves }: ScriptParts): Pick<Services, 'listing' | 'ideas' | 'script'> {
-  const core = new GizScriptCore({ rehearsal: STUDIO_PATHS.rehearsal });
+  const core = new GizzyScriptCore({ rehearsal: STUDIO_PATHS.rehearsal });
   const disk = new DiskProjects();
   const userData = app.getPath('userData');
   const projectsFolder = async () => (await settings.get()).projectsFolder;
@@ -97,10 +114,10 @@ function scriptServicesOf({ grants, settings, keys, slot, saves }: ScriptParts):
   return { listing, ideas, script: new ScriptService({ core, disk, grants, saves }) };
 }
 
-// giz.config.json and the setup tools. The voice worker reads the install config and the models once, so a model setup
+// gizzycera.config.json and the setup tools. The voice worker reads the install config and the models once, so a model setup
 // or a voice setting closes it (the next voice job opens a new one).
 function machineOf(restartVoices: () => void) {
-  const shared = restartingAfterConfig(new GizConfigStore(STUDIO_PATHS.gizConfig), restartVoices);
+  const shared = restartingAfterConfig(new GizzyConfigStore(STUDIO_PATHS.gizzyConfig), restartVoices);
   const tools = restartingAfterSetup(STUDIO_PATHS.rehearsal ? new RehearsalSetupTools() : new CoreSetupTools(), restartVoices);
   return { shared, tools };
 }

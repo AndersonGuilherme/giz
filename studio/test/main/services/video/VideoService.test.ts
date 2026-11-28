@@ -18,13 +18,13 @@ function setup() {
   return { core, files, shell, service };
 }
 
-test('the preview: the montage with a giz-media URL per file, the numbered lines, the check, and nothing missing', async () => {
+test('the preview: the montage with a gizzy-media URL per file, the numbered lines, the check, and nothing missing', async () => {
   const { service } = setup();
   const document = await service.preview('/p');
   assert.deepEqual([document.aspect, document.projectAspect, document.title], ['16:9', '16:9', 'O cupom']);
   assert.deepEqual(document.lines.map(({ lineId, number }) => [lineId, number]), [['a1', 1], ['a2', 2], ['a3', 3]]);
   assert.deepEqual(Object.keys(document.montage?.files ?? {}), ['voice/a1.wav', 'sounds/pop.wav']);
-  assert.match(document.montage?.files['voice/a1.wav'] ?? '', /^giz-media:\/\/file\/%2Fp%2Fvoice%2Fa1\.wav\?v=/);
+  assert.match(document.montage?.files['voice/a1.wav'] ?? '', /^gizzy-media:\/\/file\/%2Fp%2Fvoice%2Fa1\.wav\?v=/);
   assert.equal(document.montage?.seconds, 62.5);
   assert.deepEqual([document.failure, document.rendered, document.renders], [null, [], []]);
 });
@@ -48,7 +48,7 @@ test('the videos rendered in each aspect can be played; the history comes newest
   await files.write('/p', HISTORY_FILE, bytes(JSON.stringify([record, { broken: true }])));
   const document = await service.preview('/p');
   assert.deepEqual(document.rendered.map(({ aspect, captions }) => [aspect, captions]), [['9:16', false], ['16:9', true]]);
-  assert.match(document.rendered[1]?.url ?? '', /^giz-media:\/\/file\/%2Fp%2Foutput%2Fvideo\.mp4\?v=/);
+  assert.match(document.rendered[1]?.url ?? '', /^gizzy-media:\/\/file\/%2Fp%2Foutput%2Fvideo\.mp4\?v=/);
   assert.deepEqual(document.renders, [record]);
 });
 

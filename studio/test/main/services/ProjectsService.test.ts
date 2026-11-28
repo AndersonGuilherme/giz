@@ -4,7 +4,7 @@ import { ProjectsService } from '../../../src/main/services/ProjectsService.ts';
 import { FolderGrants } from '../../../src/main/services/FolderGrants.ts';
 import { FakeScriptCore, IDEA, MemoryDisk, MemoryOpened, MemoryTrash, STAGES } from '../../doubles/scriptFakes.ts';
 
-const ROOT = '/home/ana/giz/projetos';
+const ROOT = '/home/ana/Gizzycera/projetos';
 const PROFILE = { version: 2, title: 'Gatos', format: 'story', language: 'pt-BR', aspect: '9:16', cast: ['bia'] };
 
 function setup(root: string | null = ROOT) {

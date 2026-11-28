@@ -33,7 +33,7 @@ function senderOf(child: Electron.UtilityProcess): (message: ToVoiceWorker) => v
 /** Opens the voice worker's utility process. */
 export const voiceWorkerChannel = (rehearsal: boolean) => (): VoiceChannel => {
   const env = { ...process.env, [VOICE_REHEARSAL_VARIABLE]: rehearsal ? '1' : '' };
-  const child = utilityProcess.fork(WORKER(), [], { env, serviceName: 'giz voices', stdio: 'inherit' });
+  const child = utilityProcess.fork(WORKER(), [], { env, serviceName: 'gizzy voices', stdio: 'inherit' });
   return {
     send: senderOf(child),
     onMessage: (listener) => void child.on('message', listener),

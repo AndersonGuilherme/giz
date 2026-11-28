@@ -24,7 +24,7 @@ const desktopLog = async (home: string) => (await readFile(join(home, 'desktop.l
 
 /** A copy of the coupon lesson in the projects folder, without its output, line 010's voice nor the short title. */
 async function couponCopy(home: string, coupon: string): Promise<string> {
-  const folder = join(home, 'giz', 'projetos', SLUG);
+  const folder = join(home, 'Gizzycera', 'projetos', SLUG);
   await cp(coupon, folder, { recursive: true, filter: (source) => !source.includes(`${coupon}/output`) });
   await Promise.all(['010.wav', '010.json'].map((file) => rm(join(folder, 'voice', file), { force: true })));
   const script = JSON.parse(await readFile(join(folder, 'script.json'), 'utf8'));
@@ -122,9 +122,9 @@ async function render({ page, shoot, home }: Context, folder: string): Promise<v
   await page.untilText('[data-testid="video-render"] .status', /Preparando|Renderizando/);
   await page.until('[data-testid="video-render"] .render-actions button:not(.primary)');
   await shoot(page, 's5-fix-01-render-de-volta');
-  const status = (await page.evaluate('window.giz.video.status()')) as { value: { folder: string; aspect: string } | null };
+  const status = (await page.evaluate('window.gizzy.video.status()')) as { value: { folder: string; aspect: string } | null };
   assert.deepEqual([status.value?.folder, status.value?.aspect], [folder, '16:9']);
-  const voices = (await page.evaluate(`window.giz.voices.generate(${JSON.stringify(folder)})`)) as { failure?: { code: string } };
+  const voices = (await page.evaluate(`window.gizzy.voices.generate(${JSON.stringify(folder)})`)) as { failure?: { code: string } };
   assert.equal(voices.failure?.code, 'busy', 'no voices are made while that project renders');
   await page.click('[data-testid="video-render"] .render-actions button:not(.primary)');
   await page.untilText('[data-testid="video-render"] .status', /Render cancelado/);
@@ -154,9 +154,9 @@ async function outputs({ page, shoot, home }: Context, folder: string): Promise<
   assert.equal(log[0]?.open, join(folder, 'output'));
   assert.match(log[1]?.copied ?? '', /-->/);
   assert.ok((await stat(join(home, 'exported', `${SLUG}.srt`))).size > 10);
-  const unsafe = (await page.evaluate(`window.giz.video.copyCaptions(${JSON.stringify(folder)}, '4:3')`)) as { failure: { code: string } };
+  const unsafe = (await page.evaluate(`window.gizzy.video.copyCaptions(${JSON.stringify(folder)}, '4:3')`)) as { failure: { code: string } };
   assert.equal(unsafe.failure.code, 'invalid-request');
-  const ungranted = (await page.evaluate(`window.giz.video.preview('/etc')`)) as { failure: { code: string } };
+  const ungranted = (await page.evaluate(`window.gizzy.video.preview('/etc')`)) as { failure: { code: string } };
   assert.equal(ungranted.failure.code, 'invalid-request');
   await shoot(page, 's5-09-legenda-exportada');
 }

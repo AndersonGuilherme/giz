@@ -1,4 +1,4 @@
-import type { VoiceProvider } from 'giz-core/src/application/ports/VoiceProvider.ts';
+import type { VoiceProvider } from 'gizzycera-core/src/application/ports/VoiceProvider.ts';
 import type { SampleVoice, SpokenSample, VoiceJob } from '../../ports/MediaCore.ts';
 import type { SampleRequest, VoiceWork } from '../../ports/VoiceWork.ts';
 import { voiceKeys } from './coreJobs.ts';

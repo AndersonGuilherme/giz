@@ -23,7 +23,7 @@ function sceneOf(idea: IdeaFields, stage: readonly string[]): Line {
 }
 
 /**
- * The answer a pretend text AI gives in rehearsal mode (`GIZ_STUDIO_REHEARSAL=1`): a short valid script for the idea,
+ * The answer a pretend text AI gives in rehearsal mode (`GIZZY_STUDIO_REHEARSAL=1`): a short valid script for the idea,
  * with its chosen cast and a narrator. `broken` gives a pose that does not exist, which core sends back for repair.
  */
 export function rehearsalAnswer(idea: IdeaFields, broken: boolean): unknown {

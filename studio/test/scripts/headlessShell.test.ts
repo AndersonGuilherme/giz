@@ -25,7 +25,7 @@ test('Chrome Headless Shell is pinned to the version the installed Remotion was 
 });
 
 test('the archive is downloaded once and kept only when its sha256 is the pinned one', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-shell-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-shell-'));
   const pinned = { url: 'https://example.invalid/shell.zip', sha256: sha256('shell bytes') };
   const path = await ensureHeadlessShellArchive(join(folder, 'shell.zip'), pinned, serving('shell bytes'));
   assert.equal(readFileSync(path, 'utf8'), 'shell bytes');
@@ -34,7 +34,7 @@ test('the archive is downloaded once and kept only when its sha256 is the pinned
 });
 
 test('an archive that is not the pinned one is refused and not kept', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-shell-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-shell-'));
   const pinned = { url: 'https://example.invalid/shell.zip', sha256: sha256('the real one') };
   await assert.rejects(ensureHeadlessShellArchive(join(folder, 'shell.zip'), pinned, serving('something else')), /sha256/);
   assert.equal(existsSync(join(folder, 'shell.zip')), false);

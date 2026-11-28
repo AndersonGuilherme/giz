@@ -42,7 +42,7 @@ test('without a system keychain the key goes to the CLI file (ruling S2) and the
   assert.equal(vault.writes, 0);
   const status = await keys.status();
   assert.equal(status.secure, false);
-  assert.equal(status.fileFolder, '/home/ana/.config/giz');
+  assert.equal(status.fileFolder, '/home/ana/.config/gizzycera');
   assert.equal(status.keys.elevenlabs, 'file');
   assert.equal(status.keys.openai, null);
   assert.deepEqual(status.testable, ['anthropic', 'openai', 'gemini']);
@@ -115,7 +115,21 @@ test("with the keychain in use, remove forgets the Studio's key but never delete
   assert.equal(await keys.remove('openai'), true);
   assert.deepEqual(vault.keys, {});
   assert.equal(files.files.get('openai'), 'from-the-cli');
-  assert.equal((await keys.status()).keys.openai, 'file', 'the CLI key is still there for the giz command');
+  assert.equal((await keys.status()).keys.openai, 'file', 'the CLI key is still there for the gizzy command');
   assert.equal(await keys.remove('openai'), false, 'a CLI file is not the Studio\'s to remove while it has a keychain');
   assert.equal(files.files.get('openai'), 'from-the-cli');
+});
+
+// A vault copied from giz Estúdio (before the rename): on macOS and Linux the keychain item is named after the app,
+// so Gizzycera may not be able to open it. Such a key counts as missing (the CLI file, if any, still serves).
+test('a sealed key this app cannot open (sealed under the old name) counts as missing; a CLI file key still serves', async () => {
+  const vault = new InMemoryVault();
+  vault.keys = { anthropic: 'not-sealed-here', openai: 'not-sealed-here' };
+  const { service: keys, files } = keyService({ vault });
+  files.files.set('openai', 'from-the-file');
+  assert.equal(await keys.keyOf('anthropic'), undefined);
+  assert.equal(await keys.keyOf('openai'), 'from-the-file');
+  await assert.rejects(keys.test('anthropic'), { code: 'invalid-request' });
+  assert.equal(await keys.set('anthropic', SECRET), 'keychain', 'setting it again replaces the unreadable one');
+  assert.equal(await keys.keyOf('anthropic'), SECRET);
 });

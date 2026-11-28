@@ -3,7 +3,7 @@ import { Brand } from './Brand.tsx';
 
 type Props = Readonly<{ atHome: boolean; onHome: () => void; onSettings: () => void }>;
 
-/** The giz mark, the way back to the projects and Settings. */
+/** The Gizzycera mark, the way back to the projects and Settings. */
 export function Header({ atHome, onHome, onSettings }: Props) {
   const translate = useTranslate();
   return (

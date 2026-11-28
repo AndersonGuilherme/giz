@@ -23,7 +23,7 @@ function TestButton({ provider }: Readonly<{ provider: KeyProvider }>) {
   return <button type="button" className="chalk-button small" data-testid={`test-${provider}`} disabled={busy} onClick={() => void accounts.test(provider)}>{translate(busy ? 'accounts.testing' : 'accounts.test')}</button>;
 }
 
-// With a keychain, a key file is the giz command's (the Studio writes none then): it is shown, never removed here.
+// With a keychain, a key file is the gizzy command's (the Studio writes none then): it is shown, never removed here.
 function CliFile({ provider }: Readonly<{ provider: KeyProvider }>) {
   const translate = useTranslate();
   const folder = useSetup().accounts.status?.fileFolder ?? '';

@@ -1,18 +1,18 @@
 import type { SharedConfigStore, SharedSettings } from '../ports/SettingsStores.ts';
 import { coreInstall } from './coreModules.ts';
 
-type GizConfig = ReturnType<Awaited<ReturnType<typeof coreInstall>>['defaults']>;
+type GizzyConfig = ReturnType<Awaited<ReturnType<typeof coreInstall>>['defaults']>;
 
-const sharedOf = ({ modelsDir, device, model, remotionLicense }: GizConfig): SharedSettings => ({ modelsDir, device, model, remotionLicense });
+const sharedOf = ({ modelsDir, device, model, remotionLicense }: GizzyConfig): SharedSettings => ({ modelsDir, device, model, remotionLicense });
 
 /**
- * The repository's giz.config.json through core's own config (the same file and merge rules as `giz setup`): the
+ * The repository's gizzycera.config.json through core's own config (the same file and merge rules as `gizzy setup`): the
  * Studio reads and writes only the keys it shares with the CLI, every other key stays as it was.
  */
-export class GizConfigStore implements SharedConfigStore {
+export class GizzyConfigStore implements SharedConfigStore {
   readonly #path: string | undefined;
 
-  /** `path`: another giz.config.json (an isolated Studio home); by default core's, at the repository root. */
+  /** `path`: another gizzycera.config.json (an isolated Studio home); by default core's, at the repository root. */
   constructor(path?: string) {
     this.#path = path;
   }

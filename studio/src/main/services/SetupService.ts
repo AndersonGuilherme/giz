@@ -21,7 +21,7 @@ export function progressSteps(task: SetupTask, send: (progress: TaskProgress) =>
   };
 }
 
-// What each finished task changes in giz.config.json: a ready GPU becomes the voice device (the CLI's setup does so).
+// What each finished task changes in gizzycera.config.json: a ready GPU becomes the voice device (the CLI's setup does so).
 const AFTER: Readonly<Partial<Record<SetupTask, (shared: SharedConfigStore) => Promise<unknown>>>> = {
   gpu: (shared) => shared.write({ device: 'cuda' }),
 };
@@ -45,7 +45,7 @@ export class SetupService {
     return tools.models((await shared.read()).modelsDir);
   }
 
-  /** Whether the local voice of that size (none named: the one giz.config.json names) is downloaded. */
+  /** Whether the local voice of that size (none named: the one gizzycera.config.json names) is downloaded. */
   async localVoiceReady(model?: VoiceModel): Promise<boolean> {
     const { tools, shared } = this.#dependencies;
     const settings = await shared.read();

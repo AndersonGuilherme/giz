@@ -17,8 +17,11 @@ export class FakeCipher implements Cipher {
     return Buffer.from(`sealed:${text}`).toString('base64');
   }
 
+  // Like safeStorage: what this cipher did not seal (another app's keychain key) cannot be opened.
   decrypt(sealed: string): string {
-    return Buffer.from(sealed, 'base64').toString().replace(/^sealed:/, '');
+    const text = Buffer.from(sealed, 'base64').toString();
+    if (!text.startsWith('sealed:')) throw new Error('Error while decrypting the ciphertext provided to safeStorage.decryptString.');
+    return text.slice('sealed:'.length);
   }
 }
 

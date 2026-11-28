@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { ConfigFolderKeyFiles } from '../../../src/main/adapters/ConfigFolderKeyFiles.ts';
 
 async function inTemp(run: (home: string) => Promise<void>): Promise<void> {
-  const home = await mkdtemp(join(tmpdir(), 'giz-keyfiles-'));
+  const home = await mkdtemp(join(tmpdir(), 'gizzy-keyfiles-'));
   try {
     await run(home);
   } finally {
@@ -15,7 +15,7 @@ async function inTemp(run: (home: string) => Promise<void>): Promise<void> {
 }
 
 test('a key goes to <folder>/<service>.key, mode 600, in a 700 folder the Studio created; no draft is left; remove deletes it', () => inTemp(async (home) => {
-  const folder = join(home, '.config', 'giz');
+  const folder = join(home, '.config', 'gizzycera');
   const warnings: string[] = [];
   const files = new ConfigFolderKeyFiles(folder, (message) => void warnings.push(message));
   assert.equal(await files.read('fish'), undefined);
@@ -45,7 +45,7 @@ test('an older, readable key file is replaced by a 600 one with the new key; a b
 }));
 
 test("an existing folder others can read is the person's: left as it is, with a warning", () => inTemp(async (home) => {
-  const folder = join(home, 'giz');
+  const folder = join(home, 'gizzycera');
   await mkdir(folder);
   await chmod(folder, 0o755);
   const warnings: string[] = [];

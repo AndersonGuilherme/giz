@@ -28,7 +28,7 @@ function listen(child: Electron.UtilityProcess, job: SetupJob, settle: Settle): 
 
 function fork(task: SetupTask, job: SetupJob, settle: Settle): void {
   const env = { ...process.env, [JOB_VARIABLE]: JSON.stringify({ task, modelsDir: job.modelsDir }) };
-  const child = utilityProcess.fork(WORKER(), [], { env, serviceName: `giz setup: ${task}`, stdio: 'inherit' });
+  const child = utilityProcess.fork(WORKER(), [], { env, serviceName: `gizzy setup: ${task}`, stdio: 'inherit' });
   const onAbort = () => void stop(child);
   job.signal.addEventListener('abort', onAbort, { once: true });
   child.once('exit', () => job.signal.removeEventListener('abort', onAbort));

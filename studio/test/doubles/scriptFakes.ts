@@ -127,7 +127,7 @@ export class FakeScriptCore implements ScriptCore {
   }
 
   async presets(): Promise<Presets> {
-    return { cast: [{ id: 'bia', name: 'Bia', personality: 'streamer', rig: 'giz' }], scenes: [{ id: 'castle-rain', name: 'Castelo', description: 'chuva' }], backgrounds: ['room'] };
+    return { cast: [{ id: 'bia', name: 'Bia', personality: 'streamer', rig: 'gizzy' }], scenes: [{ id: 'castle-rain', name: 'Castelo', description: 'chuva' }], backgrounds: ['room'] };
   }
 
   async portraits(folder: string): Promise<Portraits> {

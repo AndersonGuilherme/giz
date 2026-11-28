@@ -95,7 +95,7 @@ export class ScenarioService {
     return this.#job.stop(milliseconds);
   }
 
-  /** "Usar a gerada": back to scenes/<id>.png when giz made it; otherwise no picture, so the image AI makes it. */
+  /** "Usar a gerada": back to scenes/<id>.png when Gizzycera made it; otherwise no picture, so the image AI makes it. */
   useGenerated(folder: string, lineId: string): Promise<ScenariosDocument> {
     return this.#change(folder, lineId, async (path, { background }) => {
       const made = await this.#dependencies.files.exists(path, generatedFile(lineId));

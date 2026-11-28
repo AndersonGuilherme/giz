@@ -1,6 +1,7 @@
+import './formerEnvironment.ts';
 import { app, BrowserWindow, ipcMain, session } from 'electron';
 import started from 'electron-squirrel-startup';
-import { createServices, preparePaths, STUDIO_PATHS } from './composition.ts';
+import { createServices, formerUserData, preparePaths, STUDIO_PATHS } from './composition.ts';
 import { afterReady } from './ipc/afterReady.ts';
 import { handlersOf } from './ipc/handlers.ts';
 import { registerChannels } from './ipc/registry.ts';
@@ -25,7 +26,7 @@ const slot = new WindowSlot<BrowserWindow>();
 const STOP_WAIT = 5000;
 preparePaths();
 // Before core is first loaded (and before any worker starts): where its writable files go in this run.
-Object.assign(process.env, coreEnvironmentOf(STUDIO_PATHS, { packaged: app.isPackaged, userData: app.getPath('userData'), env: process.env }));
+Object.assign(process.env, coreEnvironmentOf(STUDIO_PATHS, { packaged: app.isPackaged, userData: app.getPath('userData'), env: process.env, former: formerUserData() }));
 registerMediaScheme();
 
 // A later launch's project, once the services exist: granted, made the launched one, and the window told.
@@ -38,7 +39,7 @@ function register(): void {
   const services = createServices(slot);
   serveMedia((path) => services.served.allows(path));
   // The saved language and projects folder take effect before any channel answers (see afterReady).
-  const restored = services.settings.restore().catch((error: unknown) => console.error('giz: the saved settings could not be restored:', error));
+  const restored = services.settings.restore().catch((error: unknown) => console.error('Gizzycera: the saved settings could not be restored:', error));
   const handlers = afterReady(handlersOf(services), restored);
   registerChannels(ipcMain, { schemas: REQUEST_SCHEMAS, handlers, trusts: (event) => isTrustedSender(event, rules) });
   relaunch = (folder) => {

@@ -9,13 +9,13 @@ import { fileURLToPath } from 'node:url';
 
 const STUDIO = fileURLToPath(new URL('..', import.meta.url));
 const OUT = join(STUDIO, 'out');
-const PROGRAM: Readonly<Record<string, string>> = { linux: 'giz-estudio', win32: 'giz-estudio.exe', darwin: 'Contents/MacOS/giz-estudio' };
+const PROGRAM: Readonly<Record<string, string>> = { linux: 'gizzycera', win32: 'gizzycera.exe', darwin: 'Contents/MacOS/gizzycera' };
 
 const suffix = `-${process.platform}-${process.arch}`;
 const folder = readdirSync(OUT).find((name) => name.endsWith(suffix));
 if (!folder) throw new Error(`no packaged app in ${OUT} (run electron-forge package first)`);
 const inside = process.platform === 'darwin' ? (readdirSync(join(OUT, folder)).find((name) => name.endsWith('.app')) ?? '') : '';
-const program = join(OUT, folder, inside, PROGRAM[process.platform] ?? 'giz-estudio');
+const program = join(OUT, folder, inside, PROGRAM[process.platform] ?? 'gizzycera');
 const env = { ...process.env, SMOKE_APP: program };
 const smoke = ['node', join(STUDIO, 'smoke', 'run.ts')];
 const me = `${process.getuid?.() ?? 1000}`;

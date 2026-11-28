@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useEditor, type Editor } from '../../state/useEditor.ts';
 import { useTour, type TourControl } from '../../state/useTour.ts';
@@ -16,7 +16,7 @@ import { ProblemsPanel } from './ProblemsPanel.tsx';
 import { useFocusLine, useScriptFolding, useTourLine } from './useScriptFolding.ts';
 import { useUndoKeys } from './useUndoKeys.ts';
 
-type Props = Readonly<{ api: GizApi; folder: string; focus?: string }>;
+type Props = Readonly<{ api: GizzyApi; folder: string; focus?: string }>;
 
 type Local = Pick<EditorTools, 'selected' | 'select' | 'unsaved' | 'markDraft'>;
 
@@ -33,7 +33,7 @@ function useLocal(): Local {
 
 const NO_PROBLEMS = { errors: [], warnings: [] } as const;
 
-function useTools(api: GizApi, editor: Editor, selection: Local): EditorTools | null {
+function useTools(api: GizzyApi, editor: Editor, selection: Local): EditorTools | null {
   const { loaded, history, report, edit } = editor;
   return useMemo(() => {
     if (!loaded || !history) return null;

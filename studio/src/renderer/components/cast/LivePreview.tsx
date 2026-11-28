@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode, type SyntheticEvent } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
-import { CharacterPreview, speechFromText, type PreviewSpeech } from 'giz-core/src/presentation/studio/index.ts';
+import { CharacterPreview, speechFromText, type PreviewSpeech } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { ParameterValue } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
 import { labelOf } from '../../labels.ts';

@@ -8,7 +8,7 @@ const CHECKABLE = ['anthropic', 'openai', 'gemini'] as const;
 type Checkable = (typeof CHECKABLE)[number];
 const isCheckable = (provider: KeyProvider): provider is Checkable => (CHECKABLE as readonly string[]).includes(provider);
 
-// The same smallest real call as `giz keys test`: a few tokens in and out (a fraction of a cent).
+// The same smallest real call as `gizzy keys test`: a few tokens in and out (a fraction of a cent).
 const PING = { system: 'Reply with the single word: ok', prompt: 'ok', maxTokens: 64 };
 
 /** core's single-attempt key check, given only this one key (never the CLI's environment). */

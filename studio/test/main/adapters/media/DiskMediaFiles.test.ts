@@ -6,7 +6,7 @@ import { join } from 'node:path';
 import { DiskMediaFiles } from '../../../../src/main/adapters/media/DiskMediaFiles.ts';
 
 test('a write makes its folder and leaves no draft; read, exists, modified and remove follow it', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-media-files-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-media-files-'));
   const files = new DiskMediaFiles();
   await files.write(folder, 'recordings/1.wav', new Uint8Array([1, 2, 3]));
   assert.deepEqual([...(await readFile(join(folder, 'recordings', '1.wav')))], [1, 2, 3]);
@@ -20,7 +20,7 @@ test('a write makes its folder and leaves no draft; read, exists, modified and r
 });
 
 test('a file named outside the project (../) is never read nor written', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-media-files-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-media-files-'));
   const files = new DiskMediaFiles();
   await assert.rejects(files.write(folder, '../escape.png', new Uint8Array([1])), /fora da pasta do projeto/);
   assert.equal(await files.read(folder, '../../etc/passwd'), undefined);
@@ -29,7 +29,7 @@ test('a file named outside the project (../) is never read nor written', async (
 
 test('a link inside the project that points outside is never followed: no write, read, exists nor remove through it', async () => {
   const { mkdir, symlink, writeFile, access } = await import('node:fs/promises');
-  const root = await mkdtemp(join(tmpdir(), 'giz-media-links-'));
+  const root = await mkdtemp(join(tmpdir(), 'gizzy-media-links-'));
   const [folder, outside] = [join(root, 'project'), join(root, 'outside')];
   await Promise.all([mkdir(join(folder, 'scenes'), { recursive: true }), mkdir(outside)]);
   await writeFile(join(outside, 'secret.png'), 'segredo');
@@ -48,7 +48,7 @@ test('a link inside the project that points outside is never followed: no write,
 });
 
 test('entries: the files right inside a folder with their last change (not its subfolders); none for a missing folder', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-media-entries-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-media-entries-'));
   const files = new DiskMediaFiles();
   await files.write(folder, 'a.wav', new Uint8Array([1]));
   await files.write(folder, 'sub/b.wav', new Uint8Array([2]));
@@ -60,7 +60,7 @@ test('entries: the files right inside a folder with their last change (not its s
 
 test('isFolder: a folder inside the project; never a file, a missing name nor a link leading out', async () => {
   const { mkdir, symlink, writeFile } = await import('node:fs/promises');
-  const root = await mkdtemp(join(tmpdir(), 'giz-media-folders-'));
+  const root = await mkdtemp(join(tmpdir(), 'gizzy-media-folders-'));
   const [folder, outside] = [join(root, 'project'), join(root, 'outside')];
   await Promise.all([mkdir(join(folder, 'output'), { recursive: true }), mkdir(outside)]);
   await writeFile(join(folder, 'script.json'), '{}');

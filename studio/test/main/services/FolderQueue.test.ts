@@ -64,7 +64,7 @@ test('settled also waits for a write asked while it was waiting (it ends only wh
 });
 
 test('a folder reached through a link shares the queue of its real folder', async () => {
-  const real = await mkdtemp(join(tmpdir(), 'giz-queue-'));
+  const real = await mkdtemp(join(tmpdir(), 'gizzy-queue-'));
   const alias = `${real}-alias`;
   await symlink(real, alias);
   const queue = new FolderQueue();

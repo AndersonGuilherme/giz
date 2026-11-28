@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import type { Failure } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { ImageEstimate, ImageStyle, ScenariosDocument, SceneCard } from '../../shared/scenarios.ts';
 
 /** `edit` the prompt, see the `estimate` and confirm, `running` (cancellable), then `failed` or done (the dialog closes). */
@@ -10,7 +10,7 @@ export type ImageStep =
   | Readonly<{ step: 'running'; calling: boolean }>
   | Readonly<{ step: 'failed'; failure: Failure }>;
 
-type Job = Readonly<{ api: GizApi; folder: string; card: SceneCard; onDone: (document: ScenariosDocument) => void }>;
+type Job = Readonly<{ api: GizzyApi; folder: string; card: SceneCard; onDone: (document: ScenariosDocument) => void }>;
 
 /** The steps of making one scene's image: save the prompt, ask the price, then make it (or make it again). */
 export function useImageJob({ api, folder, card, onDone }: Job) {

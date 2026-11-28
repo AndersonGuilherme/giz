@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { fromWav } from 'giz-core/src/infrastructure/voice/wav.ts';
+import { fromWav } from 'gizzycera-core/src/infrastructure/voice/wav.ts';
 import { mixedDown, wavOf } from '../../src/renderer/media/wavEncoding.ts';
 
 test('a take becomes a 16-bit mono WAV that core reads back with the same samples and rate', () => {

@@ -75,7 +75,7 @@ export async function cropPicture({ page, shoot }: Context, folder: string): Pro
 
 /** While the voice worker makes every line, the window answers its main process at once (a round trip, measured). */
 export async function answersDuringJob({ page, shoot }: Context): Promise<void> {
-  const round = await page.evaluate(`(async () => { const times = []; for (let i = 0; i < 10; i++) { const start = performance.now(); await window.giz.cast.catalog(); times.push(performance.now() - start); } return Math.max(...times); })()`);
+  const round = await page.evaluate(`(async () => { const times = []; for (let i = 0; i < 10; i++) { const start = performance.now(); await window.gizzy.cast.catalog(); times.push(performance.now() - start); } return Math.max(...times); })()`);
   console.log(`smoke: during the voice job, the slowest of 10 round trips to main took ${Number(round).toFixed(1)} ms`);
   assert.ok(Number(round) < 500, 'the main process answers while voices are made');
   await shoot(page, 's4b-04-vozes-durante-o-trabalho');

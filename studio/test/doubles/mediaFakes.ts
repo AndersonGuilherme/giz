@@ -4,7 +4,7 @@ import type { ImageCost, ImageJob, MediaCore, MediaFiles, SampleVoice, SpokenSam
 import { STAGES } from './scriptFakes.ts';
 
 export const CATALOG: CastCatalog = {
-  rigs: [{ id: 'giz', name: { 'pt-BR': 'Giz', en: 'Giz' }, parameters: { skin: { type: 'option', defaultValue: 'light', options: ['light', 'deep'] }, glasses: { type: 'boolean', defaultValue: false } } }],
+  rigs: [{ id: 'gizzy', name: { 'pt-BR': 'Gizzy', en: 'Gizzy' }, parameters: { skin: { type: 'option', defaultValue: 'light', options: ['light', 'deep'] }, glasses: { type: 'boolean', defaultValue: false } } }],
   qwenVoices: ['vivian', 'ryan'],
   styles: { 'pt-BR': 'Fale em português do Brasil', en: 'Speak in English' },
 };
@@ -33,7 +33,7 @@ export class FakeMediaCore implements MediaCore {
   }
 
   async presetFiles() {
-    return [{ id: 'bia', name: 'Bia', personality: 'streamer', json: { id: 'bia', name: 'Bia', rig: 'giz', parameters: { skin: 'deep' }, voice: { id: 'vivian' }, defaultExpression: 'excited' } }];
+    return [{ id: 'bia', name: 'Bia', personality: 'streamer', json: { id: 'bia', name: 'Bia', rig: 'gizzy', parameters: { skin: 'deep' }, voice: { id: 'vivian' }, defaultExpression: 'excited' } }];
   }
 
   async sample(voice: SampleVoice, request: CharacterVoice & { text: string; language: 'pt-BR' | 'en' }): Promise<SpokenSample> {

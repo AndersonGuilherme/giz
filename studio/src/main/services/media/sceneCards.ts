@@ -70,7 +70,7 @@ async function backgroundOf(scene: ScenarioLine, view: FileView): Promise<SceneB
   return { kind: 'image', image, url: await view.url(image), own, ...(warning ? { aspectWarning: warning } : {}), ...(crop ? { crop } : {}) };
 }
 
-/** One card: what the scene shows, its prompt, the image giz made for it and that image's state (stages, item by item). */
+/** One card: what the scene shows, its prompt, the image Gizzycera made for it and that image's state (stages, item by item). */
 export async function cardOf(scene: ScenarioLine, items: StageItems['scenarios'], view: FileView): Promise<SceneCard> {
   const { line, number } = scene;
   const generate = generateOf(scene.background);

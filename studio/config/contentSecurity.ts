@@ -8,14 +8,14 @@ const STRICT: Directives = {
   'default-src': ["'self'"],
   'script-src': ["'self'"],
   'style-src': ["'self'"],
-  // giz-media: the projects' pictures and audio, served by the main process from the granted folders only;
+  // gizzy-media: the projects' pictures and audio, served by the main process from the granted folders only;
   // blob: a take just recorded, played before it is saved; data: the Remotion Player's silent shared audio (a tiny
   // mp3 it plays to unlock sound before the real one).
-  'img-src': ["'self'", 'data:', 'giz-media:'],
-  'media-src': ["'self'", 'giz-media:', 'blob:', 'data:'],
+  'img-src': ["'self'", 'data:', 'gizzy-media:'],
+  'media-src': ["'self'", 'gizzy-media:', 'blob:', 'data:'],
   // The video preview's fonts (Nunito, JetBrains Mono) are bundled with core and served from its fonts folder; the
   // window's own Nunito is in the page's files. No network origin anywhere.
-  'font-src': ["'self'", 'giz-media:'],
+  'font-src': ["'self'", 'gizzy-media:'],
   'connect-src': ["'self'"],
   'object-src': ["'none'"],
   'base-uri': ["'none'"],
@@ -40,7 +40,7 @@ export function contentSecurityPolicy(serving: boolean, styleHashes: readonly st
 export function contentSecurityPlugin(): Plugin {
   let serving = false;
   return {
-    name: 'giz-content-security',
+    name: 'gizzy-content-security',
     configResolved: (config) => void (serving = config.command === 'serve'),
     transformIndexHtml: async () => {
       const content = contentSecurityPolicy(serving, [await playerStyleHash()]);

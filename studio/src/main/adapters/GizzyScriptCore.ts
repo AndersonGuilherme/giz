@@ -26,8 +26,8 @@ async function generatorOf(idea: IdeaFields, provider: TextProviderName, options
 const isGenerationError = (error: unknown): error is Error & { problems: readonly string[]; draft: string } =>
   error instanceof Error && error.name === 'ScriptGenerationError';
 
-/** Core's script stage, through core's composition point (loaded on first use, like GizCore). */
-export class GizScriptCore implements ScriptCore {
+/** Core's script stage, through core's composition point (loaded on first use, like GizzyCore). */
+export class GizzyScriptCore implements ScriptCore {
   readonly #rehearsal: boolean;
 
   constructor(options: Readonly<{ rehearsal: boolean }>) {

@@ -1,4 +1,4 @@
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { draftProblems } from '../../idea/ideaDraft.ts';
 import { useSetup } from '../../state/SetupContext.ts';
@@ -10,7 +10,7 @@ import { IdeaActions } from './IdeaActions.tsx';
 import { IdeaForm } from './IdeaForm.tsx';
 import { ScenePicker } from './ScenePicker.tsx';
 
-type Props = Readonly<{ api: GizApi; onCreated: (folder: string) => void; onCancel: () => void }>;
+type Props = Readonly<{ api: GizzyApi; onCreated: (folder: string) => void; onCancel: () => void }>;
 
 function Top({ onCancel }: Readonly<{ onCancel: () => void }>) {
   const translate = useTranslate();

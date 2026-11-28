@@ -50,7 +50,7 @@ export type CharacterProblem = Readonly<{ path: string; message: string }>;
 /** After a save: nothing is written while there are problems. */
 export type CharacterSaved = Readonly<{ saved: boolean; problems: readonly CharacterProblem[]; document: CastDocument }>;
 
-/** "Ouvir amostra": the sample's audio (a giz-media URL), its length and its mouth per frame (for the live preview). */
+/** "Ouvir amostra": the sample's audio (a gizzy-media URL), its length and its mouth per frame (for the live preview). */
 export type VoiceSample = Readonly<{ audio: string; seconds: number; envelope: readonly number[]; visemes: string }>;
 export type SampleRequest = Readonly<{ folder: string; voice: CharacterVoice; text: string }>;
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { KeyProvider, KeysStatus } from '../../shared/accounts.ts';
 import type { Failure, Result } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 
 /** The last answer of a key row: a test that worked (with its numbers) or a failure to show. */
 export type KeyOutcome = Readonly<{ ok: true; model: string; inputTokens: number; outputTokens: number }> | Readonly<{ ok: false; failure: Failure }>;
@@ -16,7 +16,7 @@ function useRows() {
 }
 
 /** The AI accounts: where each key is (never its value) and the save / test / remove of each row. */
-export function useAccounts(api: GizApi) {
+export function useAccounts(api: GizzyApi) {
   const [status, setStatus] = useState<KeysStatus | null>(null);
   const { rows, begin, settle } = useRows();
   const refresh = useCallback(() => void api.keys.status().then((result) => result.ok && setStatus(result.value)), [api]);

@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { Failure } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { EditorReport, ScriptJson } from '../../shared/script.ts';
 import { ScriptSaver, type SaveAnswer, type SaveStatus } from '../editor/scriptSaver.ts';
 import { onLeaving } from './leaving.ts';
@@ -34,7 +34,7 @@ export function guardClose(saver: Pick<ScriptSaver, 'hasPending' | 'flush'>): ()
 }
 
 /** The script saved a moment after it stops changing, and flushed when the editor goes away or the window closes. */
-export function useAutosave(api: GizApi, folder: string, { script, opened }: Shown): Answer {
+export function useAutosave(api: GizzyApi, folder: string, { script, opened }: Shown): Answer {
   const [answer, setAnswer] = useState<Answer>(SAVED);
   const saver = useMemo(() => {
     if (opened === null) return null;

@@ -4,17 +4,17 @@ import { access, cp, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { GizMediaCore } from '../../../../src/main/adapters/media/GizMediaCore.ts';
+import { GizzyMediaCore } from '../../../../src/main/adapters/media/GizzyMediaCore.ts';
 import { RehearsalPainter } from '../../../../src/main/adapters/media/rehearsal/RehearsalPainter.ts';
 import { RehearsalVoice } from '../../../../src/main/adapters/media/rehearsal/RehearsalVoice.ts';
 
 // The real core (its use cases, stores, stages and checks) with rehearsal mode's painter and voice: no network, no key.
 const FIXTURE = fileURLToPath(new URL('../../../../../core/test/fixtures/minimal-project', import.meta.url));
 const voice = new RehearsalVoice();
-const core = new GizMediaCore({ painter: (real) => new RehearsalPainter(real), voice });
+const core = new GizzyMediaCore({ painter: (real) => new RehearsalPainter(real), voice });
 
 async function withProject(use: (folder: string) => Promise<void>): Promise<void> {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-media-core-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-media-core-'));
   const folder = join(parent, 'project');
   await cp(FIXTURE, folder, { recursive: true, filter: (path) => !path.includes('/voice') && !path.includes('/output') });
   const script = JSON.parse(await readFile(join(folder, 'script.json'), 'utf8'));
@@ -29,9 +29,9 @@ async function withProject(use: (folder: string) => Promise<void>): Promise<void
 
 test('the catalog and the character check come from core\'s real rigs', async () => {
   const catalog = await core.catalog();
-  assert.deepEqual(catalog.rigs.map(({ id }) => id), ['giz', 'lia-style']);
+  assert.deepEqual(catalog.rigs.map(({ id }) => id), ['gizzy', 'lia-style']);
   assert.ok(catalog.qwenVoices.includes('vivian'));
-  const problems = await core.checkCharacter({ id: 'ana', name: 'Ana', rig: 'giz', parameters: { outfit: 'tuxedo' }, voice: { id: 'vivian' }, defaultExpression: 'happy' });
+  const problems = await core.checkCharacter({ id: 'ana', name: 'Ana', rig: 'gizzy', parameters: { outfit: 'tuxedo' }, voice: { id: 'vivian' }, defaultExpression: 'happy' });
   assert.equal(problems[0]!.path, 'parameters.outfit');
 });
 

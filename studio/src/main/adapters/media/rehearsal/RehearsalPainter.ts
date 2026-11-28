@@ -1,4 +1,4 @@
-import type { GeneratedImage, ImageCallOptions, ImageModel, ImageProvider, ImageRequest } from 'giz-core/src/application/ports/ImageProvider.ts';
+import type { GeneratedImage, ImageCallOptions, ImageModel, ImageProvider, ImageRequest } from 'gizzycera-core/src/application/ports/ImageProvider.ts';
 import { fadedPng } from './solidPng.ts';
 
 const PAUSE = 900;

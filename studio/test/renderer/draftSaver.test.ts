@@ -4,7 +4,7 @@ import { DraftSaver, type DraftAnswer } from '../../src/renderer/editor/draftSav
 import type { CharacterFile, CharacterSaved } from '../../src/shared/cast.ts';
 import type { Result } from '../../src/shared/contract.ts';
 
-const ANA: CharacterFile = { id: 'ana', name: 'Ana', rig: 'giz', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' };
+const ANA: CharacterFile = { id: 'ana', name: 'Ana', rig: 'gizzy', parameters: {}, voice: { id: 'vivian' }, defaultExpression: 'neutral' };
 const SAVED = (file: CharacterFile): Result<CharacterSaved> => ({ ok: true, value: { saved: true, problems: [], document: { file } as never } });
 
 function saver(send: (file: CharacterFile) => Promise<Result<CharacterSaved>>) {

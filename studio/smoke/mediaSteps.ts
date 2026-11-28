@@ -55,7 +55,7 @@ const scene = (background: object) => ({ type: 'scenario', background, character
 /** A story with Bia and Caio, made through the bridge, with three scenario scenes; it opens on its Cast stage. */
 export async function storyProject({ page }: Context): Promise<string> {
   const idea = { format: 'story', aspect: '9:16', targetSeconds: 30, theme: 'Um gato detetive na cidade', audience: 'crianças', tone: 'leve', language: 'pt-BR', cast: ['bia', 'caio'], scenes: ['street'] };
-  const folder = await call<string>(page, `window.giz.projects.create(${JSON.stringify(idea)})`);
+  const folder = await call<string>(page, `window.gizzy.projects.create(${JSON.stringify(idea)})`);
   const script = await jsonOf(folder, 'script.json');
   const line = (id: string, said: readonly [string, string], extra: object = {}) => ({ id, chapter: 1, speaker: said[0], text: said[1], ...extra });
   script.lines = [
@@ -93,7 +93,7 @@ export async function castStage({ page, shoot }: Context, folder: string): Promi
   await page.click('[data-testid="preview-poses"] [data-value="celebrate"]');
   await shoot(page, 's4-03-amostra-e-pose');
   const bia = await jsonOf(folder, 'cast/bia.json');
-  const refused = await call<{ saved: boolean; problems: Array<{ path: string }> }>(page, `window.giz.cast.save(${JSON.stringify(folder)}, ${JSON.stringify({ ...bia, parameters: { skin: 'roxo' } })})`);
+  const refused = await call<{ saved: boolean; problems: Array<{ path: string }> }>(page, `window.gizzy.cast.save(${JSON.stringify(folder)}, ${JSON.stringify({ ...bia, parameters: { skin: 'roxo' } })})`);
   assert.deepEqual([refused.saved, refused.problems[0]?.path], [false, 'parameters.skin'], 'core refuses an invalid parameter; nothing is written');
   assert.equal((await jsonOf(folder, 'cast/bia.json')).parameters.outfit, 'lab-coat');
   await headwearGrid(page, shoot);

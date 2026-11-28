@@ -30,4 +30,4 @@ export const fromVoiceWorker = z.discriminatedUnion('type', [line, ended, failed
 export type FromVoiceWorker = z.infer<typeof fromVoiceWorker>;
 
 /** Set to `1` in the worker's environment in rehearsal mode: it speaks with the rehearsal voice (no model). */
-export const VOICE_REHEARSAL_VARIABLE = 'GIZ_VOICE_REHEARSAL';
+export const VOICE_REHEARSAL_VARIABLE = 'GIZZY_VOICE_REHEARSAL';

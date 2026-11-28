@@ -1,4 +1,4 @@
-import { outputFilesOf } from 'giz-core/src/application/use-cases/RenderVideo.ts';
+import { outputFilesOf } from 'gizzycera-core/src/application/use-cases/RenderVideo.ts';
 import type { Aspect, CheckReport, RenderedFiles } from '../../src/shared/contract.ts';
 import type { DesktopShell } from '../../src/main/ports/DesktopShell.ts';
 import type { StageItems } from '../../src/main/ports/MediaCore.ts';

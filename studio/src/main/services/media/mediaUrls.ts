@@ -1,7 +1,7 @@
 import { extname, isAbsolute, normalize } from 'node:path';
 
 /** The scheme the window loads the projects' pictures and audio from (the main process serves only granted folders). */
-export const MEDIA_SCHEME = 'giz-media';
+export const MEDIA_SCHEME = 'gizzy-media';
 const PREFIX = `${MEDIA_SCHEME}://file/`;
 /** The only files the scheme serves: pictures, the lines' audio, the rendered videos and core's bundled fonts. */
 export const MEDIA_TYPES: Readonly<Record<string, string>> = { '.png': 'image/png', '.jpg': 'image/jpeg', '.jpeg': 'image/jpeg', '.webp': 'image/webp', '.wav': 'audio/wav', '.mp4': 'video/mp4', '.ttf': 'font/ttf' };

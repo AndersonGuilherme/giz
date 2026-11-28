@@ -1,10 +1,10 @@
 import { createContext, useContext } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import type { EditorProblem, ScriptDocument, ScriptJson, Vocabulary } from '../../../shared/script.ts';
 
 /** What every part of the editor reads and how it changes the script (`key`: what is typed, for one undo step). */
 export type EditorTools = Readonly<{
-  api: GizApi;
+  api: GizzyApi;
   document: ScriptDocument;
   script: ScriptJson;
   vocabulary: Vocabulary;

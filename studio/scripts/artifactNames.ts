@@ -1,15 +1,15 @@
-// The installers' file names in ASCII (giz-estudio-…): the product name "giz Estúdio" has a space and an accent,
-// which break download links, shells and some file systems. The deb, rpm and the Squirrel feed (RELEASES, .nupkg)
-// already have ASCII names and must keep them.
+// The installers' file names in lowercase ASCII (gizzycera-…), like the deb, rpm and the Squirrel feed (RELEASES,
+// .nupkg), which keep theirs: the makers name the others after the product name "Gizzycera", and a space (the
+// Squirrel "Setup.exe") or an accent breaks download links, shells and some file systems.
 import { rename } from 'node:fs/promises';
 import { basename, dirname, join } from 'node:path';
 
-const PRODUCT = /^giz[ -]estudio/i;
+const PRODUCT = /^Gizzycera(?=[- ])/;
 
-/** `name` without accents or spaces, the product part as giz-estudio. */
+/** `name` without accents or spaces, the product part in lowercase (gizzycera). */
 export function asciiArtifactName(name: string): string {
   const plain = name.normalize('NFD').replace(/[̀-ͯ]/g, '').replace(/ +/g, '-');
-  return plain.replace(PRODUCT, 'giz-estudio');
+  return plain.replace(PRODUCT, 'gizzycera');
 }
 
 type MakeResult = Readonly<{ artifacts: string[] }>;

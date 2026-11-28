@@ -6,7 +6,7 @@ export const VOICE_MODELS = ['0.6b', '1.7b'] as const;
 export type VoiceModel = (typeof VOICE_MODELS)[number];
 export const DEVICES = ['cpu', 'cuda'] as const;
 export type Device = (typeof DEVICES)[number];
-/** Who uses giz (core's `remotionLicense`): Remotion is free for individuals and companies of up to 3 people. */
+/** Who uses Gizzycera (core's `remotionLicense`): Remotion is free for individuals and companies of up to 3 people. */
 export const REMOTION_LICENSES = ['pessoa-fisica', 'empresa-ate-3', 'empresa-com-licenca', 'nao-informado'] as const;
 export type RemotionLicense = (typeof REMOTION_LICENSES)[number];
 
@@ -26,7 +26,7 @@ export type ProviderChoices = Readonly<{
 
 /**
  * Everything the screens show. The Studio's own choices live in its userData (`studio.json`); `modelsDir`, `device`,
- * `model` and `remotionLicense` live in the repository's giz.config.json, shared with the `giz` CLI.
+ * `model` and `remotionLicense` live in the repository's gizzycera.config.json, shared with the `gizzy` CLI.
  */
 export type Settings = Readonly<{
   /** True until the person finishes the first-run wizard. */

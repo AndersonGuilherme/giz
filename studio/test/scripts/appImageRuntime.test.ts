@@ -16,7 +16,7 @@ test('the AppImage runtime is a fixed release of AppImage/type2-runtime, by arch
 });
 
 test('it is downloaded once and kept only when its sha256 is the pinned one', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-runtime-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-runtime-'));
   const pinned = { url: 'https://example.invalid/runtime', sha256: sha256('runtime bytes') };
   const path = await ensureAppImageRuntime(join(folder, 'runtime'), pinned, serving('runtime bytes'));
   assert.equal(readFileSync(path, 'utf8'), 'runtime bytes');
@@ -25,7 +25,7 @@ test('it is downloaded once and kept only when its sha256 is the pinned one', as
 });
 
 test('a runtime that is not the pinned one is refused and not kept', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-runtime-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-runtime-'));
   const pinned = { url: 'https://example.invalid/runtime', sha256: sha256('the real one') };
   await assert.rejects(ensureAppImageRuntime(join(folder, 'runtime'), pinned, serving('something else')), /sha256/);
   assert.equal(existsSync(join(folder, 'runtime')), false);

@@ -19,7 +19,7 @@ export type VideoMissing = Readonly<{
   blockedImages: readonly string[];
 }>;
 
-/** The montage: core's video props, and the URL (giz-media) of each file they ask for, by its path in the project. */
+/** The montage: core's video props, and the URL (gizzy-media) of each file they ask for, by its path in the project. */
 export type VideoMontage = Readonly<{ video: unknown; files: Readonly<Record<string, string>>; seconds: number }>;
 
 /** Why the montage could not be made: `voices` lists the lines without audio when that is the reason. */
@@ -28,7 +28,7 @@ export type MontageFailure = Readonly<{ message: string; details: readonly strin
 /** One finished render: when, in which aspect, how long the video is and its files. */
 export type RenderRecord = Readonly<{ at: string; aspect: Aspect; seconds: number; video: string; captions: string }>;
 
-/** The last video rendered in an aspect, to play in the window (a giz-media URL), and whether its captions exist. */
+/** The last video rendered in an aspect, to play in the window (a gizzy-media URL), and whether its captions exist. */
 export type RenderedVideo = Readonly<{ aspect: Aspect; url: string; captions: boolean }>;
 
 export type VideoDocument = Readonly<{

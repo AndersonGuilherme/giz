@@ -58,7 +58,7 @@ export interface MediaFiles {
   exists(folder: string, file: string): Promise<boolean>;
   /** Whether that name is a folder inside the project (a link leading out of it is not). */
   isFolder(folder: string, file: string): Promise<boolean>;
-  /** Last change in milliseconds (the version of a giz-media URL), or undefined when there is no such file. */
+  /** Last change in milliseconds (the version of a gizzy-media URL), or undefined when there is no such file. */
   modified(folder: string, file: string): Promise<number | undefined>;
   remove(folder: string, file: string): Promise<void>;
   /** The files right inside the folder (not its subfolders), with their last change; none when it does not exist. */

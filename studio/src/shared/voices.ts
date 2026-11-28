@@ -13,7 +13,7 @@ export type VoiceLine = Readonly<{
   state: VoiceState;
   /** The person recorded this line (recordings/<id>.wav): the take is used instead of the project voice. */
   recorded: boolean;
-  /** The line's audio to play (a giz-media URL), when there is one. */
+  /** The line's audio to play (a gizzy-media URL), when there is one. */
   audio: string | null;
 }>;
 

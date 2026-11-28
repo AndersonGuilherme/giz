@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { Failure, Result } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { ProjectListing } from '../../shared/projects.ts';
 
 /** The home screen's list (null while it loads) and what its buttons do; each change reloads the list. */
-export function useProjects(api: GizApi, onOpen: (folder: string) => void) {
+export function useProjects(api: GizzyApi, onOpen: (folder: string) => void) {
   const [projects, setProjects] = useState<readonly ProjectListing[] | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const reload = useCallback(() => void api.projects.list().then((listed) => (listed.ok ? setProjects(listed.value) : setFailure(listed.failure))), [api]);

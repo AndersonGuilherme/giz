@@ -92,7 +92,7 @@ test("a voice call refused at once (another folder's job is busy, an unknown lin
 });
 
 test('a folder reached through a link is the same folder: a render there clashes with voices through the link', async () => {
-  const real = await mkdtemp(join(tmpdir(), 'giz-jobs-'));
+  const real = await mkdtemp(join(tmpdir(), 'gizzy-jobs-'));
   const alias = `${real}-alias`;
   await symlink(real, alias);
   const jobs = new FolderJobs();

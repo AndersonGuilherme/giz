@@ -7,12 +7,12 @@ import { coreAspect, coreMain } from '../media/mediaModules.ts';
 import { StudioError } from '../../services/StudioError.ts';
 import { translate } from '../../text.ts';
 
-type CoreVideo = typeof import('giz-core/src/presentation/cli/composition/video.ts');
-type CoreClock = typeof import('giz-core/src/domain/video/VideoClock.ts');
+type CoreVideo = typeof import('gizzycera-core/src/presentation/cli/composition/video.ts');
+type CoreClock = typeof import('gizzycera-core/src/domain/video/VideoClock.ts');
 type Project = Awaited<ReturnType<CoreVideo['projectInAspect']>>;
 
-const coreVideo = (): Promise<CoreVideo> => import('giz-core/src/presentation/cli/composition/video.ts');
-const coreClock = (): Promise<CoreClock> => import('giz-core/src/domain/video/VideoClock.ts');
+const coreVideo = (): Promise<CoreVideo> => import('gizzycera-core/src/presentation/cli/composition/video.ts');
+const coreClock = (): Promise<CoreClock> => import('gizzycera-core/src/domain/video/VideoClock.ts');
 
 function linesOf(project: Project): VideoInspection['lines'] {
   const cast = project.cast();
@@ -39,7 +39,7 @@ function checkFailure(error: unknown, aspect: Aspect): unknown {
  * Core's Video stage through its composition point (loaded on first use). `frames`: renders only the first frames
  * (the rehearsal mode's short real render); none: the whole video.
  */
-export class GizVideoCore implements VideoCore {
+export class GizzyVideoCore implements VideoCore {
   readonly #frames: number | undefined;
 
   constructor(options: Readonly<{ frames?: number }> = {}) {

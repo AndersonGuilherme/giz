@@ -7,7 +7,7 @@ import { FakeMediaCore, MemoryMediaFiles } from '../../../doubles/mediaFakes.ts'
 import { MemoryDisk } from '../../../doubles/scriptFakes.ts';
 
 const FOLDER = '/projects/cats';
-const ANA = { id: 'ana', name: 'Ana', rig: 'giz', parameters: { skin: 'light' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
+const ANA = { id: 'ana', name: 'Ana', rig: 'gizzy', parameters: { skin: 'light' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
 
 function build(voicesBusy = () => false, ready = true) {
   const disk = new MemoryDisk();
@@ -28,7 +28,7 @@ function build(voicesBusy = () => false, ready = true) {
 test('read: every member with its file and how many lines it says; the narrator has no body; presets get the language style', async () => {
   const { service } = build();
   const document = await service.read(FOLDER);
-  assert.deepEqual(document.members.map(({ file, lines }) => [file.id, file.rig ?? null, lines]), [['ana', 'giz', 2], ['narrator', null, 0]]);
+  assert.deepEqual(document.members.map(({ file, lines }) => [file.id, file.rig ?? null, lines]), [['ana', 'gizzy', 2], ['narrator', null, 0]]);
   assert.deepEqual(document.voice, { provider: 'qwen', model: '0.6b' });
   assert.equal(document.presets[0]!.file.voice.style, 'Fale em português do Brasil');
 });
@@ -42,7 +42,16 @@ test('save: core checks the file first; with a problem nothing is written', asyn
   core.problems = [];
   const saved = await service.save(FOLDER, { ...ANA, name: 'Ana Lu', personality: '  ', voice: { id: 'vivian', style: ' calma ' } });
   assert.equal(saved.saved, true);
-  assert.deepEqual(await disk.readJson(FOLDER, 'cast/ana.json'), { id: 'ana', name: 'Ana Lu', rig: 'giz', parameters: { skin: 'light' }, voice: { id: 'vivian', style: 'calma' }, defaultExpression: 'happy' });
+  assert.deepEqual(await disk.readJson(FOLDER, 'cast/ana.json'), { id: 'ana', name: 'Ana Lu', rig: 'gizzy', parameters: { skin: 'light' }, voice: { id: 'vivian', style: 'calma' }, defaultExpression: 'happy' });
+});
+
+test('a character written before the rename (rig "giz") opens as gizzy, and its next save writes gizzy', async () => {
+  const { service, disk } = build();
+  disk.put(FOLDER, 'cast/ana.json', { ...ANA, rig: 'giz' });
+  const ana = (await service.read(FOLDER)).members.find(({ file }) => file.id === 'ana')!.file;
+  assert.equal(ana.rig, 'gizzy');
+  await service.save(FOLDER, ana);
+  assert.equal(((await disk.readJson(FOLDER, 'cast/ana.json')) as { rig: string }).rig, 'gizzy');
 });
 
 test('save refuses a character that is not in the project, and any folder the person did not give', async () => {
@@ -51,14 +60,14 @@ test('save refuses a character that is not in the project, and any folder the pe
   await assert.rejects(service.read('/etc'), { code: 'invalid-request' });
 });
 
-test('add a preset (its file copied, with the style) or a new one (giz rig, first voice); the same id twice is refused', async () => {
+test('add a preset (its file copied, with the style) or a new one (gizzy rig, first voice); the same id twice is refused', async () => {
   const { service, disk } = build();
   const withBia = await service.add(FOLDER, { preset: 'bia' });
   assert.deepEqual(withBia.members.map(({ file }) => file.id), ['ana', 'narrator', 'bia']);
   assert.equal(((await disk.readJson(FOLDER, 'cast/bia.json')) as { voice: { style: string } }).voice.style, 'Fale em português do Brasil');
   const withRui = await service.add(FOLDER, { id: 'Rui', name: 'Prof. Rui' });
   const rui = withRui.members.find(({ file }) => file.id === 'rui')!.file;
-  assert.deepEqual([rui.name, rui.rig, rui.voice.id], ['Prof. Rui', 'giz', 'vivian']);
+  assert.deepEqual([rui.name, rui.rig, rui.voice.id], ['Prof. Rui', 'gizzy', 'vivian']);
   await assert.rejects(service.add(FOLDER, { preset: 'bia' }), { code: 'invalid-request' });
   await assert.rejects(service.add(FOLDER, { id: '../x' }), { code: 'invalid-request' });
 });
@@ -81,7 +90,7 @@ test('the project voice: provider and model (the model only for the local voice)
 test('a sample: said with the project voice, kept and served from the samples folder; the same one again calls nothing', async () => {
   const { service, core, files } = build();
   const sample = await service.sample(FOLDER, { id: 'vivian', style: 'calma' }, 'Olá!');
-  assert.match(sample.audio, /^giz-media:\/\/file\/%2Fuser%2Fsamples%2F[0-9a-f]{40}\.wav\?v=\d+$/);
+  assert.match(sample.audio, /^gizzy-media:\/\/file\/%2Fuser%2Fsamples%2F[0-9a-f]{40}\.wav\?v=\d+$/);
   assert.deepEqual([sample.seconds, sample.visemes], [1.5, 'XA']);
   assert.deepEqual(core.samples[0]!.voice, { provider: 'qwen', model: '0.6b' });
   await service.sample(FOLDER, { id: 'vivian', style: 'calma' }, 'Olá!');

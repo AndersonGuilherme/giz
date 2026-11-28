@@ -11,7 +11,7 @@ function setupService(tools: FakeSetupTools) {
   return { service, shared, sent };
 }
 
-test('the status asks the tools about the models folder of giz.config.json', async () => {
+test('the status asks the tools about the models folder of gizzycera.config.json', async () => {
   const { service, shared } = setupService(new FakeSetupTools());
   shared.values = { ...shared.values, modelsDir: '/m/ready' };
   assert.equal((await service.gpu()).ready, true);
@@ -25,7 +25,7 @@ test('a task runs with the models folder and streams its progress, tagged with t
   });
   const { service, sent } = setupService(tools);
   assert.equal(await service.run('voice-0.6b'), true);
-  assert.deepEqual(tools.runs, [['voice-0.6b', '/home/ana/.cache/giz']]);
+  assert.deepEqual(tools.runs, [['voice-0.6b', '/home/ana/.cache/gizzycera']]);
   assert.deepEqual(sent.map(({ task, receivedBytes }) => [task, receivedBytes]), [['voice-0.6b', 0], ['voice-0.6b', 100]]);
 });
 
@@ -39,7 +39,7 @@ test('stop aborts the running task, which answers cancelled; stopping a task tha
   assert.equal(service.stop('voice-1.7b'), false, 'the stopped task is no longer running');
 });
 
-test('a finished GPU install makes the GPU the voice device in giz.config.json; a failed one changes nothing', async () => {
+test('a finished GPU install makes the GPU the voice device in gizzycera.config.json; a failed one changes nothing', async () => {
   const done = setupService(new FakeSetupTools());
   await done.service.run('gpu');
   assert.deepEqual(done.shared.writes, [{ device: 'cuda' }]);

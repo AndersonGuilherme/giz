@@ -1,4 +1,4 @@
-import { CROP_LIMITS } from 'giz-core/src/domain/scenario/ImageCrop.ts';
+import { CROP_LIMITS } from 'gizzycera-core/src/domain/scenario/ImageCrop.ts';
 import { z } from 'zod';
 import { CAST_VOICE_PROVIDERS, QWEN_MODELS, type CharacterFile } from '../../shared/cast.ts';
 import type { ChannelName, RequestOf } from '../../shared/contract.ts';

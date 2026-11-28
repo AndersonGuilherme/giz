@@ -1,6 +1,6 @@
 import { useCallback } from 'react';
 import { ASPECTS } from '../../../shared/contract.ts';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import type { VideoDocument } from '../../../shared/video.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useVideoDocument } from '../../state/useVideoDocument.ts';
@@ -14,7 +14,7 @@ import { PreviewPlayer } from './PreviewPlayer.tsx';
 import { RenderCard } from './RenderCard.tsx';
 import { VideoCheck } from './VideoCheck.tsx';
 
-type Loaded = Readonly<{ api: GizApi; document: VideoDocument; load: (aspect?: VideoDocument['aspect']) => Promise<void> }> & Pick<StageProps, 'onStage'>;
+type Loaded = Readonly<{ api: GizzyApi; document: VideoDocument; load: (aspect?: VideoDocument['aspect']) => Promise<void> }> & Pick<StageProps, 'onStage'>;
 
 function AspectChoice({ document, load }: Pick<Loaded, 'document' | 'load'>) {
   const translate = useTranslate();

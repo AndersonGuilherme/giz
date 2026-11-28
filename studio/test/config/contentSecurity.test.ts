@@ -23,7 +23,7 @@ test('the packaged page names no network origin: no https:, no http:, no Google 
 });
 
 test("the video's bundled fonts load from the page itself or the media scheme (core's fonts folder, served)", () => {
-  assert.match(contentSecurityPolicy(false), /font-src 'self' giz-media:;/);
+  assert.match(contentSecurityPolicy(false), /font-src 'self' gizzy-media:;/);
 });
 
 test("the Remotion Player's own <style> (its box sizing and full-screen rules) is allowed by its hash, never by unsafe-inline", async () => {
@@ -39,7 +39,7 @@ test("the Remotion Player's own <style> (its box sizing and full-screen rules) i
 
 test("the Player's silent shared audio (a data: mp3 it plays to unlock sound) may load; nothing else gains data:", () => {
   const policy = contentSecurityPolicy(false);
-  assert.match(policy, /media-src 'self' giz-media: blob: data:;/);
+  assert.match(policy, /media-src 'self' gizzy-media: blob: data:;/);
   assert.match(policy, /script-src 'self';/);
 });
 

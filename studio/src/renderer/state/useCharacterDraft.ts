@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react';
 import type { CastDocument, CharacterFile, CharacterSaved, CharacterVoice, VoiceSample } from '../../shared/cast.ts';
 import type { Failure } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import { shownAfter, type Shown } from '../cast/characterSaves.ts';
 import { DraftSaver } from '../editor/draftSaver.ts';
 import { onLeaving } from './leaving.ts';
@@ -10,7 +10,7 @@ import { guardClose } from './useAutosave.ts';
 const DELAY = 500;
 export type { SaveState } from '../cast/characterSaves.ts';
 
-type Editing = Readonly<{ api: GizApi; folder: string; onSaved: (document: CastDocument) => void }>;
+type Editing = Readonly<{ api: GizzyApi; folder: string; onSaved: (document: CastDocument) => void }>;
 
 // Each change is saved half a second after the last one (only when core finds no problem); the pending one is sent
 // when the editor goes away (another character, another tab, Settings) or the window closes, so none is lost.

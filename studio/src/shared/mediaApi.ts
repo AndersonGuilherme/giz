@@ -1,4 +1,4 @@
-// The part of `window.giz` for the Cast, Scenarios and Voices stages (see GizApi.ts).
+// The part of `window.gizzy` for the Cast, Scenarios and Voices stages (see GizzyApi.ts).
 import type { CastCatalog, CastDocument, CharacterFile, CharacterProblem, CharacterSaved, CharacterVoice, ProjectVoice, VoiceSample } from './cast.ts';
 import type { Result } from './contract.ts';
 import type { ImageCrop, ImageEstimate, ImageProgress, ImageStyle, ScenariosDocument, SceneImageProvider } from './scenarios.ts';

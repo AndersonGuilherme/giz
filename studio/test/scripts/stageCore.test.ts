@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { coreOutsideTheBundle } from '../../config/coreLocation.ts';
+import { coreIsExternal, coreOutsideTheBundle } from '../../config/coreLocation.ts';
 import { leftOut, moduleLeftOut } from '../../scripts/stage/pruning.ts';
 import { productionModules } from '../../scripts/stage/productionModules.ts';
 
@@ -13,12 +13,21 @@ function module(root: string, path: string, manifest: object = {}): void {
 }
 
 test('the built main process reaches core by a path from .vite/build that is right in a checkout and in resources/', () => {
-  assert.equal(coreOutsideTheBundle('giz-core/src/presentation/cli/composition.ts'), '../../../core/src/presentation/cli/composition.ts');
-  assert.equal(coreOutsideTheBundle('giz-core-other/x.ts'), 'giz-core-other/x.ts');
+  assert.equal(coreOutsideTheBundle('gizzycera-core/src/presentation/cli/composition.ts'), '../../../core/src/presentation/cli/composition.ts');
+  assert.equal(coreOutsideTheBundle('gizzycera-core-other/x.ts'), 'gizzycera-core-other/x.ts');
+});
+
+test("core stays outside the bundle, except the two small pieces main needs before core first loads (the former names)", () => {
+  assert.equal(coreIsExternal('gizzycera-core/src/presentation/cli/composition.ts'), true);
+  assert.equal(coreIsExternal('gizzycera-core'), true);
+  assert.equal(coreIsExternal('gizzycera-core/src/infrastructure/config/formerNames.ts'), false);
+  assert.equal(coreIsExternal('gizzycera-core/src/domain/cast/formerRigIds.ts'), false);
+  assert.equal(coreIsExternal('gizzycera-core-other/x.ts'), false);
+  assert.equal(coreIsExternal('react'), false);
 });
 
 test('the staged modules are what the production dependencies reach, as Node finds them, without the build-only roots', () => {
-  const root = mkdtempSync(join(tmpdir(), 'giz-stage-'));
+  const root = mkdtempSync(join(tmpdir(), 'gizzy-stage-'));
   module(root, '.', { dependencies: { renderer: '1', '@remotion/bundler': '1', sharp: '1' } });
   module(root, 'node_modules/renderer', { dependencies: { ws: '1' }, optionalDependencies: { 'compositor-linux': '1', 'compositor-win32': '1' } });
   module(root, 'node_modules/ws');

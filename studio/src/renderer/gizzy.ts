@@ -1,10 +1,10 @@
-import type { GizApi } from '../shared/GizApi.ts';
+import type { GizzyApi } from '../shared/GizzyApi.ts';
 
 declare global {
   interface Window {
-    readonly giz: GizApi;
+    readonly gizzy: GizzyApi;
   }
 }
 
 /** The bridge the preload exposes: the only way the window reaches files, keys and renders. */
-export const giz = (): GizApi => window.giz;
+export const gizzy = (): GizzyApi => window.gizzy;

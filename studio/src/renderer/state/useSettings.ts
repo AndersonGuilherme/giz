@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { Failure, Result } from '../../shared/contract.ts';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import type { FolderSource, Settings, SettingsPatch, TourId } from '../../shared/settings.ts';
 import { serially } from './serially.ts';
 
@@ -8,7 +8,7 @@ import { serially } from './serially.ts';
  * The settings, loaded once and replaced by each answer of the main process (which owns them). The calls go one at a
  * time, so the last answer shown is always the one of the last change.
  */
-export function useSettings(api: GizApi) {
+export function useSettings(api: GizzyApi) {
   const [settings, setSettings] = useState<Settings | null>(null);
   const [failure, setFailure] = useState<Failure | null>(null);
   const take = useCallback((result: Result<Settings>) => {

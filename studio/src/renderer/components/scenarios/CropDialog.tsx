@@ -1,4 +1,4 @@
-import { CROP_LIMITS } from 'giz-core/src/presentation/studio/index.ts';
+import { CROP_LIMITS } from 'gizzycera-core/src/presentation/studio/index.ts';
 import { useRef, useState, type PointerEvent } from 'react';
 import type { ImageCrop, SceneCard } from '../../../shared/scenarios.ts';
 import { useTranslate } from '../../i18n.ts';

@@ -1,7 +1,7 @@
 import type { GpuStatus, ModelsStatus, SetupTask } from '../../../shared/setup.ts';
 import type { SetupJob, SetupTools } from '../../ports/SetupTools.ts';
 
-// The rehearsal machine (GIZ_STUDIO_REHEARSAL=1, used by the smoke test): an NVIDIA GPU, nothing installed yet, and
+// The rehearsal machine (GIZZY_STUDIO_REHEARSAL=1, used by the smoke test): an NVIDIA GPU, nothing installed yet, and
 // downloads that only pretend, a few seconds each, so the whole first run can be walked without the network.
 const GIGABYTE = 1e9;
 const SIZES: Readonly<Record<SetupTask, number>> = { gpu: 2.1 * GIGABYTE, 'voice-0.6b': 5.9 * GIGABYTE, 'voice-1.7b': 13.4 * GIGABYTE, whisper: 0.24 * GIGABYTE };

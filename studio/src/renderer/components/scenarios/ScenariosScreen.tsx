@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { IMAGE_STYLES, SCENE_IMAGE_PROVIDERS, type ImageCrop, type ScenariosDocument, type SceneCard } from '../../../shared/scenarios.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useStageDocument } from '../../state/useStageDocument.ts';
@@ -10,10 +10,10 @@ import { CropDialog } from './CropDialog.tsx';
 import { GenerateImageDialog } from './GenerateImageDialog.tsx';
 import { SceneTile, type SceneActions } from './SceneTile.tsx';
 
-type Props = Readonly<{ api: GizApi; folder: string }>;
+type Props = Readonly<{ api: GizzyApi; folder: string }>;
 type Apply = ReturnType<typeof useStageDocument<ScenariosDocument>>['apply'];
 
-function Settings({ document, api, apply }: Readonly<{ document: ScenariosDocument; api: GizApi; apply: Apply }>) {
+function Settings({ document, api, apply }: Readonly<{ document: ScenariosDocument; api: GizzyApi; apply: Apply }>) {
   const translate = useTranslate();
   const folder = document.folder;
   return (
@@ -26,7 +26,7 @@ function Settings({ document, api, apply }: Readonly<{ document: ScenariosDocume
 
 type Open = Readonly<{ generate: (card: SceneCard) => void; crop: (card: SceneCard) => void }>;
 
-function actionsOf({ api, document, apply }: Readonly<{ api: GizApi; document: ScenariosDocument; apply: Apply }>, open: Open): SceneActions {
+function actionsOf({ api, document, apply }: Readonly<{ api: GizzyApi; document: ScenariosDocument; apply: Apply }>, open: Open): SceneActions {
   const folder = document.folder;
   return {
     vector: (card, vector) => void apply(api.scenarios.vector(folder, card.lineId, vector)),
@@ -36,14 +36,14 @@ function actionsOf({ api, document, apply }: Readonly<{ api: GizApi; document: S
   };
 }
 
-function Cropping({ api, document, card, apply, onClose }: Readonly<{ api: GizApi; document: ScenariosDocument; card: SceneCard; apply: Apply; onClose: () => void }>) {
+function Cropping({ api, document, card, apply, onClose }: Readonly<{ api: GizzyApi; document: ScenariosDocument; card: SceneCard; apply: Apply; onClose: () => void }>) {
   const url = card.background.kind === 'image' ? card.background.url : null;
   if (!url) return null;
   const save = (crop: ImageCrop | null) => void apply(api.scenarios.crop(document.folder, card.lineId, crop)).then((ok) => ok && onClose());
   return <CropDialog card={card} url={url} aspect={document.aspect} onSave={save} onClose={onClose} />;
 }
 
-function Generating({ api, document, card, apply, onClose }: Readonly<{ api: GizApi; document: ScenariosDocument; card: SceneCard; apply: Apply; onClose: () => void }>) {
+function Generating({ api, document, card, apply, onClose }: Readonly<{ api: GizzyApi; document: ScenariosDocument; card: SceneCard; apply: Apply; onClose: () => void }>) {
   return <GenerateImageDialog api={api} document={document} card={card} onClose={onClose} onDone={(next) => void apply(Promise.resolve({ ok: true, value: next }))} />;
 }
 

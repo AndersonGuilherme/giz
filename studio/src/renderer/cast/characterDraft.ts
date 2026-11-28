@@ -27,7 +27,7 @@ const CHECKS: Readonly<Record<ParameterInfo['type'], Check>> = {
 export const accepts = (info: ParameterInfo | undefined, value: ParameterValue): boolean => info !== undefined && CHECKS[info.type](value, info);
 
 /**
- * Another rig: a parameter is kept only when the new rig has it and accepts its value (Lia's skin is a color, Giz's a
+ * Another rig: a parameter is kept only when the new rig has it and accepts its value (Lia's skin is a color, Gizzy's a
  * named tone: the same name, other values); the others go back to the new rig's default.
  */
 export function withRig(file: CharacterFile, rig: RigInfo): CharacterFile {

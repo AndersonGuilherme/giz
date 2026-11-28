@@ -1,5 +1,5 @@
 import { useMemo, useState } from 'react';
-import type { GizApi } from '../../shared/GizApi.ts';
+import type { GizzyApi } from '../../shared/GizzyApi.ts';
 import { translator } from '../../shared/i18n/translate.ts';
 import type { Settings } from '../../shared/settings.ts';
 import type { Failure } from '../../shared/contract.ts';
@@ -15,7 +15,7 @@ import { Studio, type View } from './Studio.tsx';
 import { FirstRunWizard } from './wizard/FirstRunWizard.tsx';
 
 // The Studio's own screen survives a visit to Settings: closing it goes back where the person was.
-function Screen({ api, settings }: Readonly<{ api: GizApi; settings: Settings }>) {
+function Screen({ api, settings }: Readonly<{ api: GizzyApi; settings: Settings }>) {
   const [inSettings, setInSettings] = useState(false);
   const [view, setView] = useState<View>({ name: 'home' });
   if (settings.firstRun) return <FirstRunWizard />;
@@ -30,7 +30,7 @@ function Loading({ failure }: Readonly<{ failure: Failure | null }>) {
 }
 
 /** The whole window: the first-run wizard until it is finished, then the Studio, with Settings any time; a render outlives them all. */
-export function Root({ api }: Readonly<{ api: GizApi }>) {
+export function Root({ api }: Readonly<{ api: GizzyApi }>) {
   const { settings, failure, ...actions } = useSettings(api);
   const jobs = useSetupJobs(api, settings?.modelsDir, actions.reload);
   const accounts = useAccounts(api);

@@ -6,7 +6,7 @@ import { SCENARIOS_PROGRESS_EVENT } from '../../shared/scenarios.ts';
 import { VOICES_PROGRESS_EVENT } from '../../shared/voices.ts';
 import { coreEditing } from '../adapters/coreModules.ts';
 import { DiskMediaFiles } from '../adapters/media/DiskMediaFiles.ts';
-import { GizMediaCore } from '../adapters/media/GizMediaCore.ts';
+import { GizzyMediaCore } from '../adapters/media/GizzyMediaCore.ts';
 import { RehearsalPainter } from '../adapters/media/rehearsal/RehearsalPainter.ts';
 import { RehearsalVoice } from '../adapters/media/rehearsal/RehearsalVoice.ts';
 import { voiceWorkerChannel } from '../adapters/media/voiceWorkerChannel.ts';
@@ -43,7 +43,7 @@ const standInsOf = (rehearsal: boolean) => (rehearsal ? { painter: (real: Constr
  * granted (no channel can open or write it as a project). The lines and samples are made in the voice worker.
  */
 export function mediaServicesOf({ grants, settings, keys, slot, saves, voices, localVoiceReady, rehearsal }: Parts) {
-  const core = new GizMediaCore(standInsOf(rehearsal), voices);
+  const core = new GizzyMediaCore(standInsOf(rehearsal), voices);
   const [disk, files] = [new DiskProjects(), new DiskMediaFiles()];
   const served = new ServedFolders(grants);
   const samples = served.serve(join(app.getPath('userData'), 'samples'));

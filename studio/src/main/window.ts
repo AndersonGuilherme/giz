@@ -26,7 +26,7 @@ function lockNavigation(window: BrowserWindow): void {
 
 // What goes wrong in the page is written to the main process output (the terminal, the smoke test's log): a preload
 // that failed, a renderer that died, a page that did not load, and the page's own warnings and errors.
-const PAGE_LOG = 'giz page:';
+const PAGE_LOG = 'Gizzycera page:';
 function logPageProblems(window: BrowserWindow): void {
   const contents = window.webContents;
   contents.on('preload-error', (_event, path, error) => console.error(PAGE_LOG, 'preload-error', path, error.message));
@@ -37,7 +37,7 @@ function logPageProblems(window: BrowserWindow): void {
   });
 }
 
-/** The Studio window, with the slate background already painted while the page loads and the giz icon. */
+/** The Studio window, with the slate background already painted while the page loads and the Gizzycera icon. */
 export function createMainWindow(title: string): BrowserWindow {
   const preload = join(__dirname, 'preload.cjs');
   // The window icon (taskbar, title bar) on Linux and Windows; macOS takes the app bundle's icon.icns instead.

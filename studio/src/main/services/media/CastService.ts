@@ -121,11 +121,11 @@ export class CastService {
     return this.#blank(language, { id: (choice.id ?? '').trim().toLowerCase(), name: (choice.name ?? '').trim() });
   }
 
-  // A new character: the giz rig with its defaults, the first local voice and the language's style.
+  // A new character: the gizzy rig with its defaults, the first local voice and the language's style.
   async #blank(language: 'pt-BR' | 'en', { id, name }: Readonly<{ id: string; name: string }>): Promise<CharacterFile> {
     if (!PLAIN_ID.test(id)) throw new StudioError('invalid-request', translate('cast.badId'));
     const { qwenVoices, styles } = await this.#dependencies.core.catalog();
-    return { id, name: name || id, rig: 'giz', parameters: {}, voice: { id: qwenVoices[0] ?? 'vivian', style: styles[language] }, defaultExpression: 'neutral' };
+    return { id, name: name || id, rig: 'gizzy', parameters: {}, voice: { id: qwenVoices[0] ?? 'vivian', style: styles[language] }, defaultExpression: 'neutral' };
   }
 
   // A character file already in cast/ (taken out of the project before) comes back as it was.

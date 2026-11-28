@@ -1,3 +1,4 @@
+import { currentRigId } from 'gizzycera-core/src/domain/cast/formerRigIds.ts';
 import type { CastMember, CastPreset, CharacterFile, ProjectVoice } from '../../../shared/cast.ts';
 import type { MediaCore } from '../../ports/MediaCore.ts';
 import type { ProjectDisk } from '../../ports/ProjectDisk.ts';
@@ -24,12 +25,15 @@ export function projectVoiceOf(project: Json): ProjectVoice {
 const textField = (json: Json, field: string): Json => (typeof json[field] === 'string' ? { [field]: json[field] } : {});
 const objectIn = (json: Json, field: string): Json => (isObject(json[field]) ? json[field] : {});
 
+// The rig as it is called today: a file written before the rename to Gizzycera says "giz" (core's alias), saved as gizzy.
+const rigField = (json: Json): Json => (typeof json.rig === 'string' ? { rig: currentRigId(json.rig) } : {});
+
 /** A character file in the editor's shape: the fields it knows, with what the file has (a broken file still opens). */
 export function characterOf(id: string, json: unknown): CharacterFile {
   const file = isObject(json) ? json : {};
   const voice = objectIn(file, 'voice');
   const parameters = objectIn(file, 'parameters') as CharacterFile['parameters'];
-  const optional = { ...textField(file, 'rig'), ...textField(file, 'personality') };
+  const optional = { ...rigField(file), ...textField(file, 'personality') };
   return { id, name: textOf(file.name) || id, ...optional, parameters, voice: { id: textOf(voice.id), ...textField(voice, 'style') }, defaultExpression: textOf(file.defaultExpression) || 'neutral' };
 }
 

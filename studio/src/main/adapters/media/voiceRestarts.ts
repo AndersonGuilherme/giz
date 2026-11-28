@@ -18,7 +18,7 @@ export function restartingAfterSetup(tools: SetupTools, restart: Restart): Setup
   };
 }
 
-/** giz.config.json; a write of what the voices read (model, device, models folder) closes the voice worker. */
+/** gizzycera.config.json; a write of what the voices read (model, device, models folder) closes the voice worker. */
 export function restartingAfterConfig(store: SharedConfigStore, restart: Restart): SharedConfigStore {
   return {
     read: () => store.read(),

@@ -6,7 +6,7 @@ import { CoreVoiceWork } from './CoreVoiceWork.ts';
 import { coreAspect, coreCasting, coreImageFiles, coreScriptMaterials, coreWav } from './mediaModules.ts';
 
 /** Core's cast, scenarios and voices stages, through core's composition point (loaded on first use). */
-export class GizMediaCore implements MediaCore {
+export class GizzyMediaCore implements MediaCore {
   readonly #standIns: StandIns | undefined;
   readonly #voices: VoiceWork;
 

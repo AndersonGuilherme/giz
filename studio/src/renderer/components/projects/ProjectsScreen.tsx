@@ -1,6 +1,6 @@
 import { Icon } from '../common/Icon.tsx';
 import { useState } from 'react';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import type { ProjectListing } from '../../../shared/projects.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useProjects } from '../../state/useProjects.ts';
@@ -8,7 +8,7 @@ import { ConfirmDialog } from '../common/ConfirmDialog.tsx';
 import { FailurePanel } from '../FailurePanel.tsx';
 import { ProjectTile } from './ProjectTile.tsx';
 
-type Props = Readonly<{ api: GizApi; onOpen: (folder: string) => void; onNew: () => void }>;
+type Props = Readonly<{ api: GizzyApi; onOpen: (folder: string) => void; onNew: () => void }>;
 
 function Empty({ onNew }: Readonly<{ onNew: () => void }>) {
   const translate = useTranslate();

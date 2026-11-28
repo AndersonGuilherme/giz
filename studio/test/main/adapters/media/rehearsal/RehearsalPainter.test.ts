@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import type { ImageProvider } from 'giz-core/src/application/ports/ImageProvider.ts';
+import type { ImageProvider } from 'gizzycera-core/src/application/ports/ImageProvider.ts';
 import { RehearsalPainter } from '../../../../../src/main/adapters/media/rehearsal/RehearsalPainter.ts';
 import { voiceKeys } from '../../../../../src/main/adapters/media/coreJobs.ts';
 

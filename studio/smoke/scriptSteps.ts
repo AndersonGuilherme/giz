@@ -8,7 +8,7 @@ import type { Page } from './devtools.ts';
 type Shoot = (page: Page, name: string) => Promise<void>;
 export type Context = Readonly<{ page: Page; shoot: Shoot; home: string }>;
 
-const PROJECTS = (home: string) => join(home, 'giz', 'projetos');
+const PROJECTS = (home: string) => join(home, 'Gizzycera', 'projetos');
 const scriptOf = async (folder: string) => JSON.parse(await readFile(join(folder, 'script.json'), 'utf8'));
 const count = (page: Page, selector: string) => page.evaluate(`document.querySelectorAll(${JSON.stringify(selector)}).length`) as Promise<number>;
 const until = async (check: () => Promise<boolean>, what: string, deadline = Date.now() + 60_000): Promise<void> => {

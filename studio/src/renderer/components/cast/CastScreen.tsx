@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useState } from 'react';
 import type { CastCatalog, CastDocument, CastMember } from '../../../shared/cast.ts';
-import type { GizApi } from '../../../shared/GizApi.ts';
+import type { GizzyApi } from '../../../shared/GizzyApi.ts';
 import { voicesBusyAfter } from '../../cast/sampleLabel.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useStageDocument } from '../../state/useStageDocument.ts';
@@ -13,11 +13,11 @@ import type { Gestures } from './LivePreview.tsx';
 import { ProjectVoicePanel } from './ProjectVoicePanel.tsx';
 import { RemoveMemberDialog } from './RemoveMemberDialog.tsx';
 
-type Props = Readonly<{ api: GizApi; folder: string }>;
+type Props = Readonly<{ api: GizzyApi; folder: string }>;
 type Tools = Readonly<{ catalog: CastCatalog; gestures: Gestures }>;
 
 // The rigs and voices (core's catalog) and the poses and expressions (core's script lists), read once.
-function useTools(api: GizApi): Tools | null {
+function useTools(api: GizzyApi): Tools | null {
   const [tools, setTools] = useState<Tools | null>(null);
   useEffect(() => void Promise.all([api.cast.catalog(), api.script.vocabulary()]).then(([catalog, vocabulary]) => {
     if (catalog.ok && vocabulary.ok) setTools({ catalog: catalog.value, gestures: vocabulary.value });
@@ -25,10 +25,10 @@ function useTools(api: GizApi): Tools | null {
   return tools;
 }
 
-type BodyProps = Readonly<{ api: GizApi; document: CastDocument; tools: Tools; selected: string; select: (id: string) => void; set: (document: CastDocument) => void; remove: (member: CastMember) => void }>;
+type BodyProps = Readonly<{ api: GizzyApi; document: CastDocument; tools: Tools; selected: string; select: (id: string) => void; set: (document: CastDocument) => void; remove: (member: CastMember) => void }>;
 
 // Busy while a voice job runs: from the document when the screen opens, then from the job's progress.
-function useVoicesBusy(api: GizApi, opened: boolean): boolean {
+function useVoicesBusy(api: GizzyApi, opened: boolean): boolean {
   const [busy, setBusy] = useState(opened);
   useEffect(() => api.voices.onProgress((progress) => setBusy(voicesBusyAfter(progress))), [api]);
   return busy;
@@ -45,7 +45,7 @@ function Body({ api, document, tools, selected, select, set, remove }: BodyProps
   );
 }
 
-type Loaded = Readonly<{ api: GizApi; folder: string; document: CastDocument; tools: Tools; failure: ReturnType<typeof useStageDocument>['failure']; apply: ReturnType<typeof useStageDocument<CastDocument>>['apply'] }>;
+type Loaded = Readonly<{ api: GizzyApi; folder: string; document: CastDocument; tools: Tools; failure: ReturnType<typeof useStageDocument>['failure']; apply: ReturnType<typeof useStageDocument<CastDocument>>['apply'] }>;
 
 function CastBoard({ api, folder, document, tools, failure, apply }: Loaded) {
   const translate = useTranslate();

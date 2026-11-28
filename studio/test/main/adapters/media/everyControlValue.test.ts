@@ -1,12 +1,12 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { GizMediaCore } from '../../../../src/main/adapters/media/GizMediaCore.ts';
+import { GizzyMediaCore } from '../../../../src/main/adapters/media/GizzyMediaCore.ts';
 import { numberStep, withParameter, withRig } from '../../../../src/renderer/cast/characterDraft.ts';
 import type { CharacterFile, ParameterInfo, ParameterValue, RigInfo } from '../../../../src/shared/cast.ts';
 
 // User bugs #1: every value a cast editor control can produce, on every parameter of every rig, passes core's check,
-// also after a switch to every other rig (Lia's skin is a color, Giz's a named tone: a switch once kept "#ffffff").
-const core = new GizMediaCore();
+// also after a switch to every other rig (Lia's skin is a color, Gizzy's a named tone: a switch once kept "#ffffff").
+const core = new GizzyMediaCore();
 
 // What each control writes: an option grid or list its options; the color input a lowercase #rrggbb, and its
 // "automática" box the default word or a grey; the slider min to max by its step; the switch true or false.

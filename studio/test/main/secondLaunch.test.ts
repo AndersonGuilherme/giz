@@ -23,7 +23,7 @@ function steps(window?: ReturnType<typeof fakeWindow>['window']) {
 test('a second launch brings the window back (restored when minimized, focused) and opens nothing new', () => {
   const { window, calls } = fakeWindow(true);
   const { done, handle } = steps(window);
-  handle(['giz-estudio'], '/home/ana');
+  handle(['gizzycera'], '/home/ana');
   assert.deepEqual(calls, ['restore', 'focus']);
   assert.deepEqual(done, []);
 });
@@ -31,13 +31,13 @@ test('a second launch brings the window back (restored when minimized, focused) 
 test('with --project= the folder (read from where it was launched) is handed over to be granted and opened', () => {
   const { window, calls } = fakeWindow();
   const { done, handle } = steps(window);
-  handle(['giz-estudio', '--project=cupom'], '/home/ana/giz');
+  handle(['gizzycera', '--project=cupom'], '/home/ana/Gizzycera');
   assert.deepEqual(calls, ['focus']);
-  assert.deepEqual(done, ['relaunch /home/ana/giz/cupom']);
+  assert.deepEqual(done, ['relaunch /home/ana/Gizzycera/cupom']);
 });
 
 test('with no window left (macOS keeps the app running), a second launch opens one', () => {
   const { done, handle } = steps(undefined);
-  handle(['giz-estudio', '--project=/p/x'], '/');
+  handle(['gizzycera', '--project=/p/x'], '/');
   assert.deepEqual(done, ['relaunch /p/x', 'open']);
 });

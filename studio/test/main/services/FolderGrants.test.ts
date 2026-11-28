@@ -8,7 +8,7 @@ test('only granted folders (and folders inside them) are allowed', () => {
   grants.grant('/p/cupom/');
   assert.equal(grants.require('/p/cupom'), '/p/cupom');
   assert.equal(grants.require('/p/cupom/sub'), '/p/cupom/sub');
-  assert.throws(() => grants.require('/p/cupom-2'), { code: 'invalid-request', message: 'Esta pasta não foi aberta pelo Estúdio: /p/cupom-2' });
+  assert.throws(() => grants.require('/p/cupom-2'), { code: 'invalid-request', message: 'Esta pasta não foi aberta pelo Gizzycera: /p/cupom-2' });
   assert.throws(() => grants.require('/p/cupom/../outra'), { code: 'invalid-request' });
   assert.throws(() => grants.require('/p'), { code: 'invalid-request' });
 });
@@ -17,7 +17,7 @@ test('allows compares real paths: a link inside a granted folder that points out
   const { mkdtemp, mkdir, symlink, writeFile } = await import('node:fs/promises');
   const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
-  const root = await mkdtemp(join(tmpdir(), 'giz-grants-'));
+  const root = await mkdtemp(join(tmpdir(), 'gizzy-grants-'));
   const [project, outside] = [join(root, 'project'), join(root, 'outside')];
   await Promise.all([mkdir(join(project, 'scenes'), { recursive: true }), mkdir(outside)]);
   await writeFile(join(outside, 'secret.png'), 'x');

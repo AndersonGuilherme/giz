@@ -37,7 +37,7 @@ function build(options: Readonly<{ key?: string; needsKey?: boolean }> = {}) {
 
 const lineOf = async (disk: MemoryDisk, id: string) => ((await disk.readJson(FOLDER, 'script.json')) as { lines: Array<{ id: string; scene: { background: Record<string, unknown> } }> }).lines.find((line) => line.id === id)!;
 
-test('one card per scenario scene: its background, the prompt, the image giz made and its state from the stages', async () => {
+test('one card per scenario scene: its background, the prompt, the image Gizzycera made and its state from the stages', async () => {
   const { service, core, files } = build();
   await files.write(FOLDER, 'scenes/3.png', PNG);
   core.items_ = { ...core.items_, scenarios: { stale: ['3'], missing: [], blocked: [], problems: [] } };
@@ -47,7 +47,7 @@ test('one card per scenario scene: its background, the prompt, the image giz mad
   const lab = document.cards[1]!;
   assert.equal(lab.background.kind === 'image' && lab.background.own, false);
   assert.deepEqual([lab.generate, lab.state], [{ prompt: 'um laboratório', style: 'chalk' }, 'stale']);
-  assert.match(lab.generated!, /^giz-media:\/\/file\/%2Fprojects%2Fcats%2Fscenes%2F3\.png\?v=/);
+  assert.match(lab.generated!, /^gizzy-media:\/\/file\/%2Fprojects%2Fcats%2Fscenes%2F3\.png\?v=/);
   assert.equal(document.provider, 'gemini');
 });
 
@@ -146,7 +146,7 @@ test("the scenario writes wait for the folder's other writes (one queue with the
   assert.equal(((await lineOf(disk, '3')).scene.background.generate as { prompt: string }).prompt, 'outro', 'each write saw the one before it');
 });
 
-test('"usar a gerada": back to scenes/<id>.png when giz made it, otherwise no image (so the image AI makes it)', async () => {
+test('"usar a gerada": back to scenes/<id>.png when Gizzycera made it, otherwise no image (so the image AI makes it)', async () => {
   const { service, disk, files } = build();
   await service.upload(FOLDER, '3', PNG);
   await service.useGenerated(FOLDER, '3');

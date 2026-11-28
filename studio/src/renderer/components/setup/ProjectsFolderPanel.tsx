@@ -2,7 +2,7 @@ import { useTranslate } from '../../i18n.ts';
 import { useSetup } from '../../state/SetupContext.ts';
 import { Notice } from './Notice.tsx';
 
-/** Where the projects go: the suggested ~/giz/projetos, or a folder picked in the system dialog. */
+/** Where the projects go: the suggested ~/Gizzycera/projetos (projects in English), or a folder picked in the system dialog. */
 export function ProjectsFolderPanel() {
   const translate = useTranslate();
   const { settings, actions } = useSetup();

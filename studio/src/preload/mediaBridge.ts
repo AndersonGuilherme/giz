@@ -6,7 +6,7 @@ import { VOICES_PROGRESS_EVENT } from '../shared/voices.ts';
 type Call = <Name extends ChannelName>(name: Name, request: RequestOf<Name>) => Promise<Result<ResponseOf<Name>>>;
 type Listen = <Payload>(event: string) => (listener: (payload: Payload) => void) => () => void;
 
-/** The Cast, Scenarios and Voices part of `window.giz`: each call invokes one channel (main validates it). */
+/** The Cast, Scenarios and Voices part of `window.gizzy`: each call invokes one channel (main validates it). */
 export function mediaBridge(call: Call, listen: Listen): MediaApi {
   return { cast: castBridge(call), scenarios: scenarioBridge(call, listen), voices: voiceBridge(call, listen) };
 }

@@ -1,6 +1,6 @@
 /**
  * Layer rules of the Studio. The renderer is a web page: no Node, no Electron, no main-process code; it reaches the
- * machine only through `window.giz`. The preload only relays IPC. The main-process services depend on ports, never on
+ * machine only through `window.gizzy`. The preload only relays IPC. The main-process services depend on ports, never on
  * Electron or the adapters; only src/main/composition.ts wires the adapters in.
  */
 const MAIN = '^src/main/';
@@ -9,7 +9,7 @@ const RENDERER = '^src/renderer/';
 const SHARED = '^src/shared/';
 const SERVICES = '^src/main/(services|ports|ipc)/';
 const ADAPTERS = '^src/main/adapters/';
-const CORE_DRAWINGS = '^(\\.\\./core|node_modules/giz-core)/src/presentation/studio/index\\.ts$';
+const CORE_DRAWINGS = '^(\\.\\./core|node_modules/gizzycera-core)/src/presentation/studio/index\\.ts$';
 const COMPOSITION = '^src/main/composition(\\.ts|/[^/]+\\.ts)$';
 // A worker process's entry is that process's own composition point (it wires the adapters it runs).
 const WORKER_ENTRY = '^src/main/worker/[a-zA-Z]+Worker\\.ts$';
@@ -29,9 +29,9 @@ module.exports = {
       comment: "Of core, the renderer imports only its web drawings (src/presentation/studio/index.ts, kept free of Node by core's own rules).",
       severity: 'error',
       from: { path: RENDERER },
-      to: { path: [MAIN, PRELOAD, 'giz-core', '^\\.\\./core/'], pathNot: CORE_DRAWINGS },
+      to: { path: [MAIN, PRELOAD, 'gizzycera-core', '^\\.\\./core/'], pathNot: CORE_DRAWINGS },
     },
-    { name: 'preload-only-shared', severity: 'error', from: { path: PRELOAD }, to: { path: [MAIN, RENDERER, 'giz-core', '^\\.\\./core/', 'zod'] } },
+    { name: 'preload-only-shared', severity: 'error', from: { path: PRELOAD }, to: { path: [MAIN, RENDERER, 'gizzycera-core', '^\\.\\./core/', 'zod'] } },
     { name: 'main-not-renderer-nor-preload', severity: 'error', from: { path: MAIN }, to: { path: [RENDERER, PRELOAD] } },
     {
       name: 'shared-is-plain',

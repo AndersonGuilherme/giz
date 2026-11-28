@@ -1,4 +1,4 @@
-import type { TextAnswer, TextCallOptions, TextProvider, TextRequest } from 'giz-core/src/application/ports/TextProvider.ts';
+import type { TextAnswer, TextCallOptions, TextProvider, TextRequest } from 'gizzycera-core/src/application/ports/TextProvider.ts';
 import type { CoreCost } from '../coreModules.ts';
 import type { IdeaFields } from '../../../shared/projects.ts';
 import { rehearsalAnswer } from './rehearsalAnswer.ts';

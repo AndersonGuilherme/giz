@@ -1,7 +1,7 @@
 import type { SetupTask } from '../../shared/setup.ts';
 import type { ByteProgress } from '../ports/SetupTools.ts';
 
-type CoreTools = typeof import('giz-core/src/presentation/cli/composition/tools.ts');
+type CoreTools = typeof import('gizzycera-core/src/presentation/cli/composition/tools.ts');
 /** The part of core's setup tools the worker calls (tests pass a fake). */
 export type WorkerTools = Pick<CoreTools, 'gpu' | 'downloadVoiceModelWithProgress' | 'downloadWhisper'>;
 type Report = (progress: ByteProgress) => void;
@@ -21,7 +21,7 @@ const gpu: Run = (tools, modelsDir, report) => {
   return tools.gpu.install(modelsDir, quiet, report);
 };
 
-/** Each setup task, as one call of core's tools (`giz gpu install`, `giz models`, `giz models --whisper`). */
+/** Each setup task, as one call of core's tools (`gizzy gpu install`, `gizzy models`, `gizzy models --whisper`). */
 export const SETUP_TASK_RUNS: Readonly<Record<SetupTask, Run>> = {
   gpu,
   'voice-0.6b': voiceModel('0.6b'),

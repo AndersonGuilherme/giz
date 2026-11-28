@@ -13,7 +13,7 @@ const WAV = new Uint8Array([82, 73, 70, 70, 0, 0, 0, 0, 87, 65, 86, 69]);
 function build(provider = 'qwen', key?: string, ready = true) {
   const disk = new MemoryDisk();
   disk.put(FOLDER, 'project.json', { version: 2, aspect: '9:16', cast: ['ana', 'narrator'], voice: { provider } });
-  disk.put(FOLDER, 'cast/ana.json', { id: 'ana', name: 'Ana', rig: 'giz', voice: { id: 'vivian' } });
+  disk.put(FOLDER, 'cast/ana.json', { id: 'ana', name: 'Ana', rig: 'gizzy', voice: { id: 'vivian' } });
   disk.put(FOLDER, 'script.json', { chapters: ['A'], lines: [
     { id: '1', chapter: 1, speaker: 'ana', text: 'Oi.' },
     { id: '2', chapter: 1, speaker: 'narrator', text: 'Era uma vez.' },
@@ -40,7 +40,7 @@ test('every line with its speaker, its state (done, stale, missing), its audio a
   assert.deepEqual(document.lines.map(({ lineId, speakerName, state, recorded }) => [lineId, speakerName, state, recorded]), [
     ['1', 'Ana', 'done', true], ['2', 'narrator', 'stale', false], ['3', 'Ana', 'missing', false],
   ]);
-  assert.match(document.lines[0]!.audio!, /^giz-media:\/\/file\/%2Fprojects%2Fcats%2Fvoice%2F1\.wav\?v=/);
+  assert.match(document.lines[0]!.audio!, /^gizzy-media:\/\/file\/%2Fprojects%2Fcats%2Fvoice%2F1\.wav\?v=/);
   assert.equal(document.lines[1]!.audio, null);
   assert.deepEqual([document.pending, document.dollars, document.provider], [2, 0.004, 'qwen']);
 });

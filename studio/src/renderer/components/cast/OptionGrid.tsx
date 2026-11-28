@@ -1,5 +1,5 @@
 import { memo, useState } from 'react';
-import { RigStill } from 'giz-core/src/presentation/studio/index.ts';
+import { RigStill } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { ParameterValue } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
 import { labelOf } from '../../labels.ts';

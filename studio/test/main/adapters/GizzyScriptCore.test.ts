@@ -3,17 +3,17 @@ import assert from 'node:assert/strict';
 import { access, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
-import { GizScriptCore } from '../../../src/main/adapters/GizScriptCore.ts';
+import { GizzyScriptCore } from '../../../src/main/adapters/GizzyScriptCore.ts';
 import { REHEARSAL_FAILURE } from '../../../src/main/adapters/rehearsal/RehearsalTextProvider.ts';
 import { GenerationFailure } from '../../../src/main/ports/ScriptCore.ts';
 import type { IdeaFields } from '../../../src/shared/projects.ts';
 
 // The real core (its use cases, schemas and check) with rehearsal mode's pretend text AI: no network, no key.
-const core = new GizScriptCore({ rehearsal: true });
+const core = new GizzyScriptCore({ rehearsal: true });
 const IDEA: IdeaFields = { format: 'story', aspect: '9:16', targetSeconds: 30, theme: 'E se os gatos falassem?', audience: 'jovens', tone: 'leve', language: 'pt-BR', cast: ['bia', 'caio'] };
 
 async function withFolder(use: (folder: string) => Promise<void>): Promise<void> {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-script-core-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-script-core-'));
   try {
     await use(join(parent, 'projeto'));
   } finally {
@@ -74,7 +74,7 @@ test('a generation that never becomes valid is a GenerationFailure with its draf
 
 test('presets, estimate, vocabulary and the scene check come from core', async () => {
   const presets = await core.presets();
-  assert.ok(presets.cast.some(({ id, rig }) => id === 'bia' && rig === 'giz'));
+  assert.ok(presets.cast.some(({ id, rig }) => id === 'bia' && rig === 'gizzy'));
   assert.ok(presets.scenes.some(({ id }) => id === 'castle-rain'));
   assert.ok(presets.backgrounds.includes('street'));
   const estimate = await core.estimate(IDEA, 'openai');

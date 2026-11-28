@@ -9,7 +9,7 @@ const tell = (message: WorkerMessage) => port.postMessage(message);
 
 async function work(): Promise<void> {
   const job = JSON.parse(process.env[JOB_VARIABLE] ?? '{}') as WorkerJob;
-  const tools = await import('giz-core/src/presentation/cli/composition/tools.ts');
+  const tools = await import('gizzycera-core/src/presentation/cli/composition/tools.ts');
   await SETUP_TASK_RUNS[job.task](tools, job.modelsDir, (progress) => tell({ type: 'progress', progress }));
   tell({ type: 'done' });
 }

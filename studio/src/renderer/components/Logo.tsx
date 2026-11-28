@@ -1,6 +1,6 @@
 import { useId } from 'react';
 
-// The giz mark: a yellow chalk speech bubble with a friendly face (the same drawing as assets/icon/icon.svg).
+// The Gizzycera mark: a yellow chalk speech bubble with a friendly face (the same drawing as assets/icon/icon.svg).
 const BUBBLE = 'M64 9 C93 8.5 117 28 117.5 57 C118 86 95 105 65 105.5 C56 105.6 48 104 41 101 L19 115 C17 116.2 15 114.5 15.8 112.4 L23.5 91 C15 82 10.5 70.5 10.5 57.5 C10 29 34 9.5 64 9 Z';
 const SLATE = '#26302d';
 const CHALK = '#f3efe2';

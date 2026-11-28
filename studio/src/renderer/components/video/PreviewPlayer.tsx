@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { Player, type PlayerRef } from '@remotion/player';
-import { VideoPreview, videoMarks, type VideoMarks, type VideoPreviewProps } from 'giz-core/src/presentation/studio/index.ts';
+import { VideoPreview, videoMarks, type VideoMarks, type VideoPreviewProps } from 'gizzycera-core/src/presentation/studio/index.ts';
 import type { VideoLine, VideoMontage } from '../../../shared/video.ts';
 import { useTranslate } from '../../i18n.ts';
 import { clockText, markAt } from '../../video/playhead.ts';

@@ -72,16 +72,25 @@ export class KeyService {
     return (await files.read(provider)) === undefined ? null : 'file';
   }
 
-  // The keychain first (decrypted only when the system can), then the CLI file.
+  // The keychain first (decrypted only when the system can), then the CLI file. A key the keychain cannot open (sealed
+  // by giz Estúdio, before the rename: the keychain item is named after the app) counts as missing.
   async #read(provider: KeyProvider): Promise<string | undefined> {
     const { cipher, vault, files } = this.#dependencies;
     const sealed = (await vault.read())[provider];
-    if (sealed !== undefined && cipher.available()) return cipher.decrypt(sealed);
-    return files.read(provider);
+    const opened = sealed !== undefined && cipher.available() ? this.#opened(sealed) : undefined;
+    return opened ?? files.read(provider);
+  }
+
+  #opened(sealed: string): string | undefined {
+    try {
+      return this.#dependencies.cipher.decrypt(sealed);
+    } catch {
+      return undefined;
+    }
   }
 
   // Forgets the key where the Studio keeps it: the keychain vault, or (without a keychain) the file it wrote there. With
-  // a keychain, a ~/.config/giz file is the CLI's (the Studio never writes one then): it stays for the giz command.
+  // a keychain, a ~/.config/gizzycera file is the CLI's (the Studio never writes one then): it stays for the gizzy command.
   async #forget(provider: KeyProvider): Promise<boolean> {
     const { cipher, vault, files } = this.#dependencies;
     if (!cipher.available()) return files.remove(provider);
