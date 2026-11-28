@@ -1,5 +1,6 @@
 // Gizzycera landing page: language toggle (pt-BR in the HTML, English here), the visitor's installer in the hero,
-// the latest release's version and file sizes from the GitHub API, and the example clip's play/pause.
+// the latest release's version and file sizes from the GitHub API, and the videos (the cartoon in the page
+// language, muted until the visitor asks for sound).
 // No dependencies, no trackers; the page works without this file (pt-BR, every download link in place).
 'use strict';
 
@@ -27,8 +28,10 @@ const EN = {
   'hero.chip.free': 'Free',
   'hero.chip.offline': 'Works offline',
   'hero.chip.os': 'Windows · macOS · Linux',
-  'video.title': 'A video made with Gizzycera',
-  'video.caption': 'Made with Gizzycera: <b>“24 hours without internet”</b>, a 9:16 story with word-by-word captions.',
+  'video.title': 'A cartoon made with Gizzycera',
+  'video.caption': 'Made with Gizzycera: <b>“Fofo’s Big Sneeze”</b>, an 85-second cartoon with three characters, voices and word-by-word captions.',
+  'video.transcript': 'Read the video’s script',
+  'video.lines': '<li>This is Fofo. He has a secret.</li><li><b>Fofo:</b> Shhh! My sneezes are so strong, they knock everything over.</li><li>One day, at the market, he sneezed... and the apples went flying!</li><li><b>Fofo:</b> So now I hold in every sneeze. Every single one.</li><li>Today is Kite Day. But there’s a tiny problem.</li><li><b>Pino:</b> Measuring the wind... Wind: zero. No kite will fly today.</li><li><b>Nina:</b> Zero? But I worked on my kite all week long!</li><li><b>Fofo:</b> I could help... but what if I knock everything over?</li><li><b>Nina:</b> Fofo, what if your sneeze is a superpower?</li><li>Nina picked a tiny flower and tickled Fofo’s nose.</li><li><b>Fofo:</b> Oh no... oh no... here it comes!</li><li><b>Fofo:</b> ACHOOO!</li><li>Then came a great big gust of wind, and every kite flew up at once!</li><li><b>Pino:</b> Wind: tons! A brand new Kite Day record!</li><li><b>Nina:</b> See, Fofo? Nobody in the world sneezes like you.</li><li>That night, the kites were still dancing, way up near the stars.</li><li><b>Nina:</b> Will you play with us again tomorrow?</li><li><b>Fofo:</b> Sure! But can somebody lend me a tissue?</li>',
   'flow.title': 'From script to video',
   'flow.sub': 'Six steps along the top bar. Every change is checked and saved on its own, and the animation follows the audio: nothing is timed by hand.',
   'flow.idea': 'Idea',
@@ -93,7 +96,7 @@ const EN = {
   'fmt.title': 'Vertical or horizontal',
   'fmt.916': 'Reels, Shorts, TikTok',
   'fmt.169': 'YouTube and lessons',
-  'fmt.916.alt': 'A vertical frame of a story.',
+  'fmt.916.alt': 'A clip of a vertical story, “24 hours without internet”, without sound.',
   'fmt.169.alt': 'A horizontal frame of a lesson, with two presenters and a code snippet.',
   'fmt.srt': 'SRT captions',
   'fmt.langs': 'Portuguese and English',
@@ -144,6 +147,8 @@ const DYN = {
     unknown: 'Os links baixam a versão mais recente. Veja também ',
     pause: 'Pausar o vídeo',
     play: 'Tocar o vídeo',
+    soundOn: 'Ativar som',
+    soundOff: 'Desativar som',
     toggle: 'Read in English',
     toggleShort: 'EN',
     toggleLang: 'en',
@@ -161,6 +166,8 @@ const DYN = {
     unknown: 'The links download the latest version. See also ',
     pause: 'Pause the video',
     play: 'Play the video',
+    soundOn: 'Sound on',
+    soundOff: 'Sound off',
     toggle: 'Ler em português',
     toggleShort: 'PT',
     toggleLang: 'pt-BR',
@@ -217,7 +224,8 @@ function applyLanguage(lang) {
   toggle.setAttribute('lang', t.toggleLang);
   renderHero();
   renderRelease();
-  renderVideoToggle();
+  setCartoonLanguage(lang);
+  renderPlayer();
 }
 
 // ---------- Operating system ----------
@@ -347,60 +355,137 @@ function renderRelease() {
   }
 }
 
-// ---------- Example clip ----------
+// ---------- Videos ----------
+// The hero cartoon (16:9, one file per language, muted until the visitor turns the sound on) and the 9:16 loop in
+// the formats tile. Both play muted only while on screen, never with prefers-reduced-motion, and each has a pause button.
 const motion = window.matchMedia('(prefers-reduced-motion: reduce)');
-let userPaused = false;
-let inView = true;
+const CARTOON_ID = 'cartoon';
+const videos = new Map(); // id -> { el, userPaused, inView, engaged (sound turned on: the visitor drives it now), resumeAt }
 
-function renderVideoToggle() {
-  const video = document.getElementById('story-loop');
-  const toggle = document.getElementById('video-toggle');
-  if (!video || !toggle) return;
-  const paused = video.paused;
+const cartoonFiles = (lang) => ({
+  webm: `assets/video/sneeze-kite-${lang}.webm`,
+  mp4: `assets/video/sneeze-kite-${lang}.mp4`,
+  poster: `assets/img/cartoon-poster-${lang}.webp`,
+});
+
+function playVideo(video) {
+  const p = video.play();
+  if (p && p.catch) p.catch(() => renderPlayer());
+}
+
+function syncVideo(v) {
+  if (v.engaged) return;
+  const shouldPlay = !motion.matches && !v.userPaused && v.inView && !document.hidden;
+  if (shouldPlay && v.el.paused) playVideo(v.el);
+  else if (!shouldPlay && !v.el.paused) v.el.pause();
+}
+
+const syncVideos = () => videos.forEach(syncVideo);
+
+function renderPlayer() {
   const t = DYN[state.lang];
-  toggle.setAttribute('aria-pressed', String(paused));
-  document.getElementById('video-toggle-label').textContent = paused ? t.play : t.pause;
-}
-
-function syncVideo() {
-  const video = document.getElementById('story-loop');
-  if (!video) return;
-  const shouldPlay = !motion.matches && !userPaused && inView && !document.hidden;
-  if (shouldPlay && video.paused) {
-    const p = video.play();
-    if (p && p.catch) p.catch(() => renderVideoToggle());
-  } else if (!shouldPlay && !video.paused) {
-    video.pause();
-  }
-}
-
-function setupVideo() {
-  const video = document.getElementById('story-loop');
-  const toggle = document.getElementById('video-toggle');
-  if (!video || !toggle) return;
-  toggle.hidden = false;
-  video.addEventListener('play', renderVideoToggle);
-  video.addEventListener('pause', renderVideoToggle);
-  toggle.addEventListener('click', () => {
-    if (video.paused) {
-      userPaused = false;
-      const p = video.play();
-      if (p && p.catch) p.catch(() => {});
-    } else {
-      userPaused = true;
-      video.pause();
-    }
+  document.querySelectorAll('.video-toggle[data-video]').forEach((toggle) => {
+    const v = videos.get(toggle.dataset.video);
+    if (!v) return;
+    const paused = v.el.paused;
+    toggle.setAttribute('aria-pressed', String(paused));
+    toggle.querySelector('.video-toggle-label').textContent = paused ? t.play : t.pause;
   });
-  if (motion.addEventListener) motion.addEventListener('change', syncVideo);
-  document.addEventListener('visibilitychange', syncVideo);
+  const cartoon = videos.get(CARTOON_ID);
+  const sound = document.getElementById('sound-toggle');
+  if (!cartoon || !sound) return;
+  const on = !cartoon.el.muted;
+  sound.setAttribute('aria-pressed', String(on));
+  document.getElementById('sound-toggle-label').textContent = on ? t.soundOff : t.soundOn;
+}
+
+// Shows the cartoon in the page language. Only that language's file is fetched (metadata first); switching keeps
+// the time and whether it was playing.
+function setCartoonLanguage(lang) {
+  const v = videos.get(CARTOON_ID);
+  if (!v || v.el.dataset.lang === lang) return;
+  const video = v.el;
+  const first = !video.dataset.lang;
+  const at = video.currentTime;
+  const wasPlaying = !video.paused;
+  const files = cartoonFiles(lang);
+  video.dataset.lang = lang;
+  video.poster = files.poster;
+  const [webm, mp4] = video.querySelectorAll('source');
+  webm.src = files.webm;
+  mp4.src = files.mp4;
+  video.load(); // before raising preload: raising it first would resume the file chosen at parse time
+  video.preload = 'metadata';
+  v.resumeAt = first ? 0 : at;
+  if (v.resumeAt > 0) {
+    video.addEventListener('loadedmetadata', () => {
+      if (v.resumeAt > 0) video.currentTime = Math.min(v.resumeAt, Math.max(0, video.duration - 1));
+      v.resumeAt = 0;
+    }, { once: true });
+  }
+  if (wasPlaying) playVideo(video);
+  else syncVideo(v);
+}
+
+function toggleSound() {
+  const v = videos.get(CARTOON_ID);
+  const video = v.el;
+  if (!video.muted) {
+    video.muted = true;
+    return;
+  }
+  // The first time the sound comes on, the story starts over and the native controls appear (seek, volume, fullscreen).
+  if (!v.engaged) {
+    v.engaged = true;
+    video.loop = false;
+    video.controls = true;
+    v.resumeAt = 0; // a language switch still loading must not jump back to where it was
+    video.currentTime = 0;
+  }
+  video.muted = false;
+  v.userPaused = false;
+  playVideo(video);
+}
+
+function manageVideo(id) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const v = { el, userPaused: false, inView: false, engaged: false, resumeAt: 0 };
+  videos.set(id, v);
+  el.addEventListener('play', renderPlayer);
+  el.addEventListener('pause', renderPlayer);
+  el.addEventListener('volumechange', renderPlayer);
   if ('IntersectionObserver' in window) {
     new IntersectionObserver((entries) => {
-      inView = entries.some((e) => e.isIntersecting);
-      syncVideo();
-    }, { threshold: 0.15 }).observe(video);
+      v.inView = entries.some((e) => e.isIntersecting);
+      syncVideo(v);
+    }, { threshold: 0.25 }).observe(el);
+  } else {
+    v.inView = true;
   }
-  syncVideo();
-  renderVideoToggle();
+  return v;
+}
+
+function setupVideos() {
+  const cartoon = manageVideo(CARTOON_ID);
+  manageVideo('story-loop');
+  if (cartoon) {
+    cartoon.el.controls = false; // the page's own buttons until the sound comes on
+    document.getElementById('player-bar').hidden = false;
+    document.getElementById('sound-toggle').addEventListener('click', toggleSound);
+  }
+  document.querySelectorAll('.video-toggle[data-video]').forEach((toggle) => {
+    const v = videos.get(toggle.dataset.video);
+    if (!v) return;
+    toggle.hidden = false;
+    toggle.addEventListener('click', () => {
+      v.userPaused = !v.el.paused;
+      if (v.userPaused) v.el.pause();
+      else playVideo(v.el);
+    });
+  });
+  if (motion.addEventListener) motion.addEventListener('change', syncVideos);
+  document.addEventListener('visibilitychange', syncVideos);
 }
 
 // ---------- Start ----------
@@ -416,7 +501,7 @@ function start() {
   capturePortuguese();
   state.os = detectOS();
   markYourCard();
-  setupVideo();
+  setupVideos();
   applyLanguage(initialLanguage());
   document.getElementById('lang-toggle').addEventListener('click', () => {
     const next = state.lang === 'en' ? 'pt-BR' : 'en';

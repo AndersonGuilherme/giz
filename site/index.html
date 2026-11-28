@@ -95,23 +95,54 @@
         </ul>
       </section>
 
-      <!-- 2. Example clip -->
+      <!-- 2. Example cartoon (16:9, one file per language; main.js swaps it with the page language) -->
       <section class="tile tile-video" aria-labelledby="video-title">
-        <h2 id="video-title" class="sr-only" data-i18n="video.title">Um vídeo feito no Gizzycera</h2>
-        <div class="phone">
-          <video id="story-loop" muted loop playsinline preload="metadata" poster="assets/img/story-poster.webp"
-                 width="540" height="960" aria-describedby="video-caption">
-            <source src="assets/video/story-loop.webm" type="video/webm">
-            <source src="assets/video/story-loop.mp4" type="video/mp4">
+        <h2 id="video-title" class="eyebrow video-title" data-i18n="video.title">Um desenho feito no Gizzycera</h2>
+        <div class="screen">
+          <!-- Without JavaScript: native controls, pt-BR, nothing downloaded until play. main.js removes the controls,
+               picks the page language, loads only its metadata and plays muted. -->
+          <video id="cartoon" controls muted loop playsinline preload="none" poster="assets/img/cartoon-poster-pt-BR.webp"
+                 width="1280" height="720" aria-describedby="video-caption">
+            <source src="assets/video/sneeze-kite-pt-BR.webm" type="video/webm">
+            <source src="assets/video/sneeze-kite-pt-BR.mp4" type="video/mp4">
           </video>
-          <button class="video-toggle" type="button" id="video-toggle" hidden aria-pressed="false"
-                  data-label-pause="Pausar o vídeo" data-label-play="Tocar o vídeo">
+        </div>
+        <div class="player-bar" id="player-bar" hidden>
+          <button class="btn btn-sound" type="button" id="sound-toggle" aria-pressed="false">
+            <svg class="i-sound-off" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="m16 9.5 5 5m0-5-5 5" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <svg class="i-sound-on" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" fill="currentColor"/><path d="M15.5 9a4.2 4.2 0 0 1 0 6M18.2 6.5a8 8 0 0 1 0 11" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"/></svg>
+            <span id="sound-toggle-label">Ativar som</span>
+          </button>
+          <button class="video-toggle" type="button" data-video="cartoon" aria-pressed="false" hidden>
             <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
             <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>
-            <span class="sr-only" id="video-toggle-label">Pausar o vídeo</span>
+            <span class="sr-only video-toggle-label">Pausar o vídeo</span>
           </button>
         </div>
-        <p class="video-caption" id="video-caption" data-i18n-html="video.caption">Feito no Gizzycera: <b>“24 horas sem internet”</b>, uma história em 9:16 com legenda palavra a palavra.</p>
+        <p class="video-caption" id="video-caption" data-i18n-html="video.caption">Feito no Gizzycera: <b>“O Atchim do Fofo”</b>, um desenho de 85 segundos com três personagens, vozes e legenda palavra a palavra.</p>
+        <details class="transcript">
+          <summary data-i18n="video.transcript">Ler o texto do vídeo</summary>
+          <ol data-i18n-html="video.lines">
+            <li>O Fofo tem um segredo.</li>
+            <li><b>Fofo:</b> Psiu! O meu espirro é tão forte que derruba tudo.</li>
+            <li>Uma vez, ele espirrou na feira, e as frutas voaram longe!</li>
+            <li><b>Fofo:</b> Desde aquele dia, eu prendo todos os espirros. Todos mesmo.</li>
+            <li>Hoje é a Festa das Pipas. Mas tem um probleminha.</li>
+            <li><b>Pino:</b> Medindo o vento... Vento: zero. Nenhuma pipa vai subir.</li>
+            <li><b>Nina:</b> Zero? Mas eu passei a semana inteira fazendo a minha pipa!</li>
+            <li><b>Fofo:</b> Eu até podia ajudar... mas e se eu derrubar tudo?</li>
+            <li><b>Nina:</b> Fofo, e se esse espirro for um superpoder?</li>
+            <li>A Nina pegou uma florzinha e fez cosquinha no nariz dele.</li>
+            <li><b>Fofo:</b> Ai, ai, ai... não aguento!</li>
+            <li><b>Fofo:</b> ATCHIIIM!</li>
+            <li>Aí veio um ventão! E todas as pipas subiram de uma vez só!</li>
+            <li><b>Pino:</b> Vento: muitíssimo! É o recorde da festa!</li>
+            <li><b>Nina:</b> Viu, Fofo? Ninguém no mundo espirra igual a você.</li>
+            <li>De noite, as pipas ainda dançavam no céu, pertinho das estrelas.</li>
+            <li><b>Nina:</b> Amanhã você brinca com a gente de novo?</li>
+            <li><b>Fofo:</b> Claro! Mas antes... alguém aí tem um lencinho?</li>
+          </ol>
+        </details>
       </section>
 
       <!-- 3. Script to video -->
@@ -225,7 +256,19 @@
         <h2 id="fmt-title" data-i18n="fmt.title">Vertical ou horizontal</h2>
         <div class="frames">
           <figure class="frame frame-916">
-            <img src="assets/img/story-poster.webp" width="540" height="960" loading="lazy" decoding="async" alt="Quadro vertical de uma história." data-i18n-attr="alt:fmt.916.alt">
+            <!-- A silent loop of a 9:16 story; main.js plays it only while it is on screen. -->
+            <div class="frame-media">
+              <video id="story-loop" class="ambient" muted loop playsinline preload="none" poster="assets/img/story-poster.webp"
+                     width="540" height="960" aria-label="Trecho de uma história vertical, “24 horas sem internet”, sem som." data-i18n-attr="aria-label:fmt.916.alt">
+                <source src="assets/video/story-loop.webm" type="video/webm">
+                <source src="assets/video/story-loop.mp4" type="video/mp4">
+              </video>
+              <button class="video-toggle video-toggle-overlay" type="button" data-video="story-loop" aria-pressed="false" hidden>
+                <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+                <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>
+                <span class="sr-only video-toggle-label">Pausar o vídeo</span>
+              </button>
+            </div>
             <figcaption><b>9:16</b> <span data-i18n="fmt.916">Reels, Shorts, TikTok</span></figcaption>
           </figure>
           <figure class="frame frame-169">
