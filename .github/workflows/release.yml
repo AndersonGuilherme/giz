@@ -1,4 +1,4 @@
-# Builds the giz Estúdio installers on each OS (the packages are not signed: see the README, "Instalar") and puts them
+# Builds the Gizzycera installers on each OS (the packages are not signed: see the README, "Instalar") and puts them
 # in a draft GitHub release. Runs on a v* tag or by hand (then it only keeps the files as workflow artifacts).
 # Verify runs once, on Linux, before any installer is made; the Linux make also runs the packaged smoke with no network.
 name: release
@@ -82,7 +82,7 @@ jobs:
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
-          name: giz-estudio-${{ runner.os }}
+          name: gizzycera-${{ runner.os }}
           path: |
             studio/out/make/**/*.deb
             studio/out/make/**/*.rpm

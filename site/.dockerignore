@@ -1,0 +1,6 @@
+# Not part of the page served by the image.
+Dockerfile
+.dockerignore
+CNAME
+README*
+**/README*

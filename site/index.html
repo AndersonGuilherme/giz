@@ -11,8 +11,10 @@
   <meta property="og:type" content="website">
   <meta property="og:title" content="Gizzycera">
   <meta property="og:description" content="Vídeos animados a partir de um roteiro. Grátis, de código aberto, para Windows, macOS e Linux.">
-  <meta property="og:image" content="https://andersonguilherme.github.io/gizzycera/assets/img/og.jpg">
+  <meta property="og:url" content="https://gizzycera.com/">
+  <meta property="og:image" content="https://gizzycera.com/assets/img/og.jpg">
   <meta name="twitter:card" content="summary_large_image">
+  <link rel="canonical" href="https://gizzycera.com/">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
   <link rel="stylesheet" href="styles.css">
@@ -252,9 +254,9 @@
           </div>
         </div>
         <pre class="terminal" aria-label="Comandos para instalar pela linha de comando" data-i18n-attr="aria-label:oss.term"><code><span class="prompt" aria-hidden="true">$ </span>git clone https://github.com/AndersonGuilherme/gizzycera.git
-<span class="prompt" aria-hidden="true">$ </span>cd gizzycera/motor
-<span class="prompt" aria-hidden="true">$ </span>ONNXRUNTIME_NODE_INSTALL=skip npm install
-<span class="prompt" aria-hidden="true">$ </span>npm run setup
+<span class="prompt" aria-hidden="true">$ </span>cd gizzycera/core
+<span class="prompt" aria-hidden="true">$ </span>ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm ci
+<span class="prompt" aria-hidden="true">$ </span>npx gizzy setup
 <span class="prompt" aria-hidden="true">$ </span>npx gizzy --help</code></pre>
       </section>
     </div>
