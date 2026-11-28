@@ -1,5 +1,5 @@
-import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, readdirSync, renameSync, rmSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { chmodSync, copyFileSync, cpSync, existsSync, lstatSync, mkdirSync, readdirSync, writeFileSync } from 'node:fs';
+import { join } from 'node:path';
 import type { Environment } from './GizzyConfig.ts';
 
 // Before the rename to Gizzycera the project was "giz": its variables were GIZ_*, its config ~/.config/giz with
@@ -23,9 +23,9 @@ const FORMER_CONFIG = 'giz.config.json';
 const CONFIG = 'gizzycera.config.json';
 
 /**
- * The first run after the rename: copies ~/.config/giz to ~/.config/gizzycera (giz.config.json renamed, the keys mode
- * 600, linked keys kept as links) and the repository's giz.config.json to gizzycera.config.json, each only when the
- * new one does not exist yet. Returns what was copied ("old → new").
+ * The first run after the rename: copies ~/.config/giz into ~/.config/gizzycera (giz.config.json renamed, the keys
+ * mode 600, linked keys kept as links), once, and the repository's giz.config.json to gizzycera.config.json when that
+ * one does not exist yet. Nothing that already exists is overwritten. Returns what was copied ("old → new").
  */
 export function migrateFormerSetup({ home, repository }: FormerPlaces): string[] {
   const folders = { former: join(home, '.config', 'giz'), now: join(home, '.config', 'gizzycera') };
@@ -43,22 +43,26 @@ function copiedFile(copy: Copy): string | undefined {
   return done(copy);
 }
 
-// Copied into a draft beside it and renamed into place: a copy stopped halfway never counts as done.
+// On Linux the Studio's own data folder is ~/.config/gizzycera too, so the folder may exist already: each old entry is
+// copied only where the new folder lacks it, and a marker records that the copy was made (a file deleted since stays
+// deleted). A copy stopped halfway has no marker yet and goes on at the next run.
+const COPIED_MARKER = '.copied-from-giz';
+
+const present = (path: string) => lstatSync(path, { throwIfNoEntry: false }) !== undefined;
+
 function copiedFolder(copy: Copy): string | undefined {
-  if (!pending(copy) || !lstatSync(copy.former).isDirectory()) return undefined;
-  const draft = `${copy.now}.copying-${process.pid}`;
-  rmSync(draft, { recursive: true, force: true });
-  mkdirSync(dirname(copy.now), { recursive: true });
-  cpSync(copy.former, draft, { recursive: true, verbatimSymlinks: true, preserveTimestamps: true });
-  renamedConfig(draft);
-  chmodSync(draft, 0o700);
-  keysOnlyForTheOwner(draft);
-  renameSync(draft, copy.now);
+  if (!existsSync(copy.former) || !lstatSync(copy.former).isDirectory() || present(join(copy.now, COPIED_MARKER))) return undefined;
+  mkdirSync(copy.now, { recursive: true, mode: 0o700 });
+  readdirSync(copy.former).forEach((name) => copiedEntry(copy, name));
+  keysOnlyForTheOwner(copy.now);
+  writeFileSync(join(copy.now, COPIED_MARKER), `${copy.former}\n`);
   return done(copy);
 }
 
-function renamedConfig(folder: string): void {
-  if (existsSync(join(folder, FORMER_CONFIG))) renameSync(join(folder, FORMER_CONFIG), join(folder, CONFIG));
+function copiedEntry({ former, now }: Copy, name: string): void {
+  const target = join(now, name === FORMER_CONFIG ? CONFIG : name);
+  if (present(target)) return;
+  cpSync(join(former, name), target, { recursive: true, verbatimSymlinks: true, preserveTimestamps: true });
 }
 
 // A key file (not a link: its target is the person's own file) is readable by its owner only, as the CLI writes it.

@@ -121,7 +121,7 @@ escolher.
 | Modelos de voz e GPU | `~/.cache/gizzycera` (dá para mudar em Configurações) |
 | Configuração compartilhada com a linha de comando | `~/.config/gizzycera/gizzycera.config.json` (a linha de comando também a usa quando o repositório não tem o seu `gizzycera.config.json`) |
 | Chaves de API | no chaveiro do sistema (cifradas, no arquivo `keys.json` dos dados do app); sem chaveiro, em `~/.config/gizzycera/<serviço>.key` (só você lê) |
-| Dados do app (preferências, Whisper, suporte à GPU, retratos) | Linux: `~/.config/gizzycera` · Windows: `%APPDATA%\gizzycera` · macOS: `~/Library/Application Support/gizzycera` |
+| Dados do app (preferências, Whisper, suporte à GPU, retratos) | Linux: `~/.config/gizzycera` (a mesma pasta da configuração e das chaves) · Windows: `%APPDATA%\gizzycera` · macOS: `~/Library/Application Support/gizzycera` |
 
 ### Desinstalar
 

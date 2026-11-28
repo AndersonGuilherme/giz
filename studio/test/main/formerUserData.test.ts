@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { existsSync, mkdirSync, mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, readFileSync, rmSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { formerUserDataIn, migrateFormerUserData } from '../../src/main/formerUserData.ts';
@@ -46,13 +46,26 @@ test('first run of Gizzycera: the settings, sealed keys, opened projects and por
   assert.ok(existsSync(join(former, 'studio.json')) && existsSync(join(former, 'keys.json')), 'nothing old is deleted');
 });
 
-test('the copy happens once: an existing new userData is never touched; without an old one there is nothing to do', () => {
+test('on Linux ~/.config/gizzycera may exist already (the CLI copied ~/.config/giz there): the kept files it lacks are added, none overwritten', () => {
   const appData = scratch();
   const former = oldUserData(appData);
   const now = join(appData, 'gizzycera');
   mkdirSync(now);
-  writeFileSync(join(now, 'studio.json'), '{"firstRunDone":false}');
+  writeFileSync(join(now, 'gizzycera.config.json'), '{"brand":"canal"}');
+  writeFileSync(join(now, 'projects.json'), '["/home/ana/novo"]');
+  assert.deepEqual(migrateFormerUserData({ former, now }), [`${former} → ${now}`]);
+  assert.equal(readFileSync(join(now, 'studio.json'), 'utf8'), '{"projectsFolder":"/home/ana/giz/projetos","firstRunDone":true}');
+  assert.equal(readFileSync(join(now, 'projects.json'), 'utf8'), '["/home/ana/novo"]', 'never overwritten');
+  assert.equal(readFileSync(join(now, 'gizzycera.config.json'), 'utf8'), '{"brand":"canal"}');
+});
+
+test('the copy happens once: a file deleted since is not brought back; without an old userData there is nothing to do', () => {
+  const appData = scratch();
+  const former = oldUserData(appData);
+  const now = join(appData, 'gizzycera');
+  assert.equal(migrateFormerUserData({ former, now }).length, 1);
+  rmSync(join(now, 'keys.json'));
   assert.deepEqual(migrateFormerUserData({ former, now }), []);
-  assert.equal(readFileSync(join(now, 'studio.json'), 'utf8'), '{"firstRunDone":false}');
+  assert.equal(existsSync(join(now, 'keys.json')), false);
   assert.deepEqual(migrateFormerUserData({ former: undefined, now: join(scratch(), 'gizzycera') }), []);
 });

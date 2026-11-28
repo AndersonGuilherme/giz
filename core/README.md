@@ -184,6 +184,8 @@ vírgula: `GIZZY_COMMA_PAUSE`, 0 por padrão). O modelo: `GIZZY_ELEVENLABS_MODEL
 palavra é trocada inteira, sem diferenciar maiúsculas, só no que a voz fala; a legenda mantém o roteiro. As grafias
 feitas para o Qwen ("gê pê tê") confundem vozes que já leem nomes em inglês, por isso cada serviço tem o seu arquivo.
 Mudar o dicionário gera de novo só as falas que ele afeta.
+Para o Qwen dizer o nome do projeto, use `{"Gizzycera": "giz de céra"}` num vídeo em português e
+`{"Gizzycera": "Jizzy-sera"}` num em inglês (as grafias que o Whisper reconheceu no `gizzy qa lexicon`).
 
 ## 5. Personagens (`cast/<id>.json`)
 
@@ -234,7 +236,7 @@ arquivo, o campo e o valor. Veja um rig desenhado com `gizzy sheet <rig>`.
 O visual próprio do Gizzycera: cabeça colorida com tom de pele, contorno de giz (um traço esbranquiçado levemente
 irregular, igual em todo quadro), olhos arredondados com íris colorida, pupila e brilho, um pontinho de nariz e, se
 quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vira sorriso fechado). Um personagem de
-antes da mudança de nome, com `"rig": "giz"`, continua funcionando: é lido como `gizzy` (e o Estúdio grava `gizzy`).
+antes da mudança de nome, com `"rig": "giz"`, continua funcionando: é lido como `gizzy` (e o app grava `gizzy`).
 
 | Parâmetro | Tipo | Padrão | Valores |
 |---|---|---|---|

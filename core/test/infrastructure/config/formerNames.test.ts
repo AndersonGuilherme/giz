@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { chmodSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
+import { chmodSync, existsSync, lstatSync, mkdirSync, mkdtempSync, readFileSync, readlinkSync, rmSync, statSync, symlinkSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { formerEnvironment, migrateFormerSetup } from '../../../src/infrastructure/config/formerNames.ts';
@@ -45,14 +45,28 @@ test('first run after the rename: ~/.config/giz is COPIED to ~/.config/gizzycera
   assert.ok(existsSync(join(old, 'giz.config.json')) && existsSync(join(old, 'anthropic.key')), 'the old folder is never deleted');
 });
 
-test('the migration runs once: an existing ~/.config/gizzycera is never touched, and nothing old means nothing to do', () => {
+test('on Linux the app data folder IS ~/.config/gizzycera: an existing folder gets the old files it lacks, never overwriting one', () => {
   const home = scratch();
   oldSetup(home);
   const now = join(home, '.config', 'gizzycera');
-  mkdirSync(now, { recursive: true });
-  writeFileSync(join(now, 'gizzycera.config.json'), '{"brand":"novo"}');
+  mkdirSync(join(now, 'Cache'), { recursive: true });
+  writeFileSync(join(now, 'studio.json'), '{}');
+  writeFileSync(join(now, 'anthropic.key'), 'sk-ant-novo', { mode: 0o600 });
+  const copied = migrateFormerSetup({ home, repository: join(home, 'repo') });
+  assert.equal(copied.length, 1);
+  assert.equal(readFileSync(join(now, 'anthropic.key'), 'utf8'), 'sk-ant-novo', 'a key set since stays');
+  assert.equal(JSON.parse(readFileSync(join(now, 'gizzycera.config.json'), 'utf8')).brand, 'canal');
+  assert.ok(lstatSync(join(now, 'fish.key')).isSymbolicLink());
+  assert.equal(readFileSync(join(now, 'studio.json'), 'utf8'), '{}');
+});
+
+test('the copy from ~/.config/giz happens once: a file deleted since is not brought back; nothing old means nothing to do', () => {
+  const home = scratch();
+  oldSetup(home);
+  const now = join(home, '.config', 'gizzycera');
+  assert.equal(migrateFormerSetup({ home, repository: join(home, 'repo') }).length, 1);
+  rmSync(join(now, 'anthropic.key'));
   assert.deepEqual(migrateFormerSetup({ home, repository: join(home, 'repo') }), []);
-  assert.equal(readFileSync(join(now, 'gizzycera.config.json'), 'utf8'), '{"brand":"novo"}');
   assert.equal(existsSync(join(now, 'anthropic.key')), false);
   assert.deepEqual(migrateFormerSetup({ home: scratch(), repository: scratch() }), []);
 });
