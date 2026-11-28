@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import { join } from 'node:path';
 
 // The INDIVIDUAL configuration of each Gizzycera install (GPU, voices, folders...), in gizzycera.config.json at the repository
@@ -29,13 +30,20 @@ export type GizzyConfig = {
 
 export type Environment = Readonly<Record<string, string | undefined>>;
 
+/** ~/.cache/gizzycera; the cache from before the rename (~/.cache/giz) when only that one exists, so nothing is downloaded again. */
+export function modelsFolderIn(home: string, exists: (path: string) => boolean = existsSync): string {
+  const now = join(home, '.cache', 'gizzycera');
+  const former = join(home, '.cache', 'giz');
+  return !exists(now) && exists(former) ? former : now;
+}
+
 export function defaultConfig(home: string): GizzyConfig {
   return {
     brand: 'gizzycera',
     model: '0.6b',
     device: 'cpu',
     threads: 0,
-    modelsDir: join(home, '.cache', 'gizzycera'),
+    modelsDir: modelsFolderIn(home),
     language: 'portuguese',
     voices: { lia: 'vivian', teo: 'dylan' },
     styles: { lia: '', teo: '' },

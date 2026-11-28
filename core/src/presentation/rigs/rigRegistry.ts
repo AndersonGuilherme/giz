@@ -1,3 +1,4 @@
+import { currentRigId } from '../../domain/cast/formerRigIds.ts';
 import { gizzyDefinition } from './gizzy/parameters.ts';
 import { liaStyleDefinition } from './lia-style/parameters.ts';
 import type { RigDefinition } from './RigModel.ts';
@@ -19,8 +20,9 @@ export class RigRegistry<Rig extends RigDefinition> {
     this.#byId.set(rig.id, rig);
   }
 
+  /** By id; a former id (from before the rename to Gizzycera) gives the rig it is now. */
   get(id: string): Rig {
-    const rig = this.#byId.get(id);
+    const rig = this.#byId.get(currentRigId(id));
     if (!rig) throw new Error(`rig "${id}" desconhecido (use ${[...this.#byId.keys()].join(', ')})`);
     return rig;
   }

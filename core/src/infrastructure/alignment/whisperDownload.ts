@@ -10,6 +10,8 @@ import { loadRecognizer, whisperCacheOf, WHISPER_HASHES, WHISPER_MODEL, WHISPER_
 // folder, and only a model that loaded and whose weights match the pinned hashes is moved into the cache, with a
 // marker that says it is whole. With a pinned revision, transformers keeps the files in <model>/<revision>/.
 const DONE_MARKER = '.gizzy-complete';
+// The marker of a download made before the rename to Gizzycera: that model is whole too (never downloaded again).
+const FORMER_DONE_MARKER = '.giz-complete';
 const PARTIAL = '.gizzy-partial';
 const WHISPER_FILES = ['config.json', 'onnx/encoder_model_quantized.onnx', 'onnx/decoder_model_merged_quantized.onnx'];
 
@@ -22,7 +24,8 @@ const transformersCache = () => whisperCacheOf(process.env) ?? packageCache();
 /** Whether Whisper (q8) was downloaded whole into the cache: its files and the done marker (checked without loading transformers). */
 export function whisperDownloaded(cache: string = transformersCache()): boolean {
   const folder = join(cache, WHISPER_MODEL, WHISPER_REVISION);
-  return existsSync(join(folder, DONE_MARKER)) && WHISPER_FILES.every((file) => existsSync(join(folder, file)));
+  const marked = [DONE_MARKER, FORMER_DONE_MARKER].some((marker) => existsSync(join(folder, marker)));
+  return marked && WHISPER_FILES.every((file) => existsSync(join(folder, file)));
 }
 
 type Load = (options: RecognizerOptions) => Promise<unknown>;

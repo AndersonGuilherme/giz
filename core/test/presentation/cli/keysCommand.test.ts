@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { spawnSync } from 'node:child_process';
-import { mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, mkdtempSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -72,3 +72,26 @@ test('keys test makes a single attempt: a 503 is not retried', async () => {
   assert.equal(count, 1);
 });
 
+test('a home set up before the rename (~/.config/giz) keeps its keys: the first run copies it to ~/.config/gizzycera and says so', () => {
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-keys-former-'));
+  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
+  writeFileSync(join(home, '.config', 'giz', 'gemini.key'), 'gemini-antiga-777\n', { mode: 0o600 });
+  const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !KEY_VARIABLES.test(name) && !name.startsWith('GIZ')));
+  const run = spawnSync(process.execPath, ['src/presentation/cli/gizzy.ts', 'keys', 'list'], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
+  assert.equal(run.status, 0);
+  assert.match(run.stdout, /gemini: chave configurada/);
+  assert.match(run.stderr, /configuração de antes do Gizzycera copiada: .*\.config\/giz → .*\.config\/gizzycera/);
+  assert.ok(existsSync(join(home, '.config', 'gizzycera', 'gemini.key')));
+  assert.ok(existsSync(join(home, '.config', 'giz', 'gemini.key')), 'the old one stays');
+  const again = spawnSync(process.execPath, ['src/presentation/cli/gizzy.ts', 'keys', 'list'], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
+  assert.doesNotMatch(again.stderr, /copiada/, 'only once');
+});
+
+test('a GIZ_* variable from before the rename still works where its GIZZY_* name is not set (GIZ_CONFIG names the config)', () => {
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-keys-env-'));
+  writeFileSync(join(home, 'antiga.json'), JSON.stringify({ brand: 'marca-antiga-9' }));
+  const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !KEY_VARIABLES.test(name) && !name.startsWith('GIZ')));
+  const run = spawnSync(process.execPath, ['src/presentation/cli/gizzy.ts', 'setup', '--defaults', '--dry-run'], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home, GIZ_CONFIG: join(home, 'antiga.json') } });
+  assert.equal(run.status, 0);
+  assert.match(run.stdout, /"brand": "marca-antiga-9"/);
+});

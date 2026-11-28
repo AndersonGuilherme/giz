@@ -77,3 +77,19 @@ test('the example cast (Lia and Téo, lia-style) loads with the production catal
     await rm(folder, { recursive: true, force: true });
   }
 });
+
+test('a cast written before the rename (rig "giz") loads as gizzy: the alias resolves its definition and stance, and ids lists only gizzy', async () => {
+  const catalog = new RigCatalogFromRegistry(rigRegistry);
+  assert.deepEqual(catalog.definition('giz'), catalog.definition('gizzy'));
+  assert.deepEqual(catalog.stance('giz', {}), catalog.stance('gizzy', {}));
+  assert.ok(!catalog.ids().includes('giz'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-former-rig-'));
+  await cp(fileURLToPath(new URL('../../fixtures/minimal-project', import.meta.url)), folder, { recursive: true });
+  const file = join(folder, 'cast', 'ana.json');
+  const { readFile } = await import('node:fs/promises');
+  const json = JSON.parse(await readFile(file, 'utf8')) as Record<string, unknown>;
+  await writeFile(file, JSON.stringify({ ...json, rig: 'giz' }));
+  const project = await new DiskProjectRepository({ catalog }).load(folder);
+  assert.equal(project.cast().character(CharacterId.of('ana')).rig(), 'gizzy');
+  await rm(folder, { recursive: true, force: true });
+});

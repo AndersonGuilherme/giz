@@ -98,3 +98,8 @@ test('the catalog gives each Gizzy character its reach: tall hats and a floating
   assert.equal(catalog.stance('lia-style', {})!.top, undefined, 'lia-style keeps its view box');
   assert.equal(catalog.stance('nope', {}), undefined);
 });
+
+test('the registry gives the gizzy rig for its former id (giz), so a cast or sheet written before the rename still draws', () => {
+  assert.equal(rigRegistry.get('giz'), rigRegistry.get('gizzy'));
+  assert.deepEqual(rigRegistry.all().map(({ id }) => id), ['gizzy', 'lia-style']);
+});

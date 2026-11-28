@@ -12,6 +12,7 @@ import { qaCommand } from './commands/qaCommands.ts';
 import { newCommand, scriptCommand } from './commands/scriptCommands.ts';
 import { gpuCommand, modelsCommand, soundsCommand } from './commands/toolCommands.ts';
 import { statusCommand } from './commands/statusCommand.ts';
+import { adoptFormerNames } from './composition/install.ts';
 import { setupCommand } from './setup/setupCommand.ts';
 import { UsageError } from './usage.ts';
 
@@ -104,6 +105,7 @@ async function main([name = '', ...args]: readonly string[]): Promise<void> {
 
 // Errors become a readable message, without a stack trace; a usage error exits with 2, the others with 1.
 try {
+  adoptFormerNames();
   await main(process.argv.slice(2));
 } catch (error) {
   console.error(error instanceof Error ? error.message : String(error));

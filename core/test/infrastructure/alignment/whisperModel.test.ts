@@ -27,6 +27,13 @@ test('Whisper counts as downloaded only with its files AND the done marker (file
   assert.equal(whisperDownloaded(cache), true);
 });
 
+test('a download marked whole before the rename (.giz-complete) still counts: it is not downloaded again', () => {
+  const cache = mkdtempSync(join(tmpdir(), 'gizzy-whisper-'));
+  writeModel(join(cache, MODEL));
+  writeFileSync(join(cache, MODEL, '.giz-complete'), 'x');
+  assert.equal(whisperDownloaded(cache), true);
+});
+
 test('the download goes to a partial folder and only a model that loaded moves into the cache, replacing a broken one', async () => {
   const cache = mkdtempSync(join(tmpdir(), 'gizzy-whisper-'));
   writeModel(join(cache, WHISPER_MODEL), 'old layout of main');
@@ -40,6 +47,7 @@ test('the download goes to a partial folder and only a model that loaded moves i
   assert.equal(readFileSync(join(cache, MODEL, 'config.json'), 'utf8'), 'whole');
   assert.equal(existsSync(join(cache, WHISPER_MODEL, 'config.json')), false, 'the unpinned files are gone');
   assert.equal(whisperDownloaded(cache), true);
+  assert.ok(existsSync(join(cache, MODEL, '.gizzy-complete')), 'a new download gets the new marker');
   assert.equal(existsSync(join(cache, '.gizzy-partial')), false);
 });
 
