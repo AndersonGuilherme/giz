@@ -1,0 +1,349 @@
+<!doctype html>
+<html lang="pt-BR" class="no-js">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; font-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
+  <meta name="referrer" content="strict-origin-when-cross-origin">
+  <title>giz Estúdio — vídeos animados a partir de um roteiro</title>
+  <meta name="description" content="giz Estúdio: aplicativo grátis e de código aberto que transforma um roteiro em vídeo animado, com personagens que falam, cenários, vozes e legendas. Windows, macOS e Linux.">
+  <meta name="theme-color" content="#1d2523">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="giz Estúdio">
+  <meta property="og:description" content="Vídeos animados a partir de um roteiro. Grátis, de código aberto, para Windows, macOS e Linux.">
+  <meta property="og:image" content="https://andersonguilherme.github.io/giz/assets/img/og.jpg">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
+  <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
+  <link rel="stylesheet" href="styles.css">
+  <script src="main.js" defer></script>
+</head>
+<body>
+  <!-- Shared drawing defs: the chalk edge (a little noise nudges each stroke) and the giz mark. -->
+  <svg class="defs" aria-hidden="true" focusable="false">
+    <defs>
+      <filter id="chalk" x="-10%" y="-10%" width="120%" height="120%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="3" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="2.6" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <filter id="rough" x="-2%" y="-2%" width="104%" height="104%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.02" numOctaves="2" seed="7" result="noise"/>
+        <feDisplacementMap in="SourceGraphic" in2="noise" scale="3.5" xChannelSelector="R" yChannelSelector="G"/>
+      </filter>
+      <symbol id="mark" viewBox="0 0 128 128">
+        <g filter="url(#chalk)" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M64 9 C93 8.5 117 28 117.5 57 C118 86 95 105 65 105.5 C56 105.6 48 104 41 101 L19 115 C17 116.2 15 114.5 15.8 112.4 L23.5 91 C15 82 10.5 70.5 10.5 57.5 C10 29 34 9.5 64 9 Z" fill="#f2c14e" stroke="#f3efe2" stroke-width="6.5"/>
+          <ellipse cx="46" cy="51" rx="7" ry="9" fill="#26302d"/>
+          <ellipse cx="82" cy="51" rx="7" ry="9" fill="#26302d"/>
+          <circle cx="48.5" cy="47.5" r="2.4" fill="#f3efe2"/>
+          <circle cx="84.5" cy="47.5" r="2.4" fill="#f3efe2"/>
+          <ellipse cx="34" cy="68" rx="6.5" ry="4.5" fill="#e8735a" opacity="0.85"/>
+          <ellipse cx="94" cy="68" rx="6.5" ry="4.5" fill="#e8735a" opacity="0.85"/>
+          <path d="M50 70 C56 81 72 81.5 78 70" fill="none" stroke="#26302d" stroke-width="6.5"/>
+        </g>
+      </symbol>
+    </defs>
+  </svg>
+
+  <a class="skip" href="#main" data-i18n="skip">Pular para o conteúdo</a>
+
+  <header class="topbar">
+    <div class="wrap topbar-inner">
+      <a class="brand" href="#top" aria-label="giz Estúdio">
+        <svg class="brand-mark" width="36" height="36" aria-hidden="true"><use href="#mark"/></svg>
+        <span class="brand-name">giz</span>
+      </a>
+      <nav class="topnav" aria-label="Seções" data-i18n-attr="aria-label:nav.label">
+        <a href="#flow" data-i18n="nav.flow">Como funciona</a>
+        <a href="#cast" data-i18n="nav.cast">Personagens</a>
+        <a href="https://github.com/AndersonGuilherme/giz" rel="noopener">GitHub</a>
+        <a class="topnav-download" href="#download" data-i18n="nav.download">Baixar</a>
+      </nav>
+      <button class="lang" type="button" id="lang-toggle" lang="en" aria-label="Read in English">EN</button>
+    </div>
+  </header>
+
+  <main id="main">
+    <div class="wrap bento" id="top">
+
+      <!-- 1. Hero -->
+      <section class="tile tile-hero" aria-labelledby="hero-title">
+        <div class="hero-head">
+          <svg class="hero-mark" width="96" height="96" aria-hidden="true"><use href="#mark"/></svg>
+          <p class="eyebrow" data-i18n="hero.eyebrow">Aplicativo grátis e de código aberto</p>
+        </div>
+        <h1 id="hero-title">giz <span class="accent">Estúdio</span></h1>
+        <p class="tagline" data-i18n="hero.tagline">Vídeos animados a partir de um roteiro</p>
+        <p class="lead" data-i18n="hero.lead">Escreva uma história ou uma aula, escolha quem fala e onde, e o giz anima tudo no ritmo das vozes: boca, gestos, cenas e legendas.</p>
+        <div class="hero-cta">
+          <a class="btn btn-primary" id="hero-download" href="#download">
+            <svg class="btn-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.5v11.5m0 0-4.5-4.5M12 15l4.5-4.5M4.5 19.5h15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <span id="hero-download-label" data-i18n="hero.download">Baixar o giz Estúdio</span>
+          </a>
+          <div class="hero-cta-meta">
+            <span id="hero-download-file" class="mono">Windows · macOS · Linux</span>
+            <a href="#download" class="link" data-i18n="hero.other">Outras plataformas</a>
+          </div>
+        </div>
+        <ul class="chips" aria-label="Destaques" data-i18n-attr="aria-label:hero.highlights">
+          <li data-i18n="hero.chip.free">Grátis</li>
+          <li data-i18n="hero.chip.offline">Funciona sem internet</li>
+          <li data-i18n="hero.chip.os">Windows · macOS · Linux</li>
+        </ul>
+      </section>
+
+      <!-- 2. Example clip -->
+      <section class="tile tile-video" aria-labelledby="video-title">
+        <h2 id="video-title" class="sr-only" data-i18n="video.title">Um vídeo feito no giz</h2>
+        <div class="phone">
+          <video id="story-loop" muted loop playsinline preload="metadata" poster="assets/img/story-poster.webp"
+                 width="540" height="960" aria-describedby="video-caption">
+            <source src="assets/video/story-loop.webm" type="video/webm">
+            <source src="assets/video/story-loop.mp4" type="video/mp4">
+          </video>
+          <button class="video-toggle" type="button" id="video-toggle" hidden aria-pressed="false"
+                  data-label-pause="Pausar o vídeo" data-label-play="Tocar o vídeo">
+            <svg class="i-pause" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5v14M16 5v14" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+            <svg class="i-play" viewBox="0 0 24 24" width="18" height="18" aria-hidden="true"><path d="M8 5.5v13l10-6.5z" fill="currentColor"/></svg>
+            <span class="sr-only" id="video-toggle-label">Pausar o vídeo</span>
+          </button>
+        </div>
+        <p class="video-caption" id="video-caption" data-i18n-html="video.caption">Feito no giz: <b>“24 horas sem internet”</b>, uma história em 9:16 com legenda palavra a palavra.</p>
+      </section>
+
+      <!-- 3. Script to video -->
+      <section class="tile tile-flow" id="flow" aria-labelledby="flow-title">
+        <h2 id="flow-title" data-i18n="flow.title">Do roteiro ao vídeo</h2>
+        <p class="sub" data-i18n="flow.sub">Seis etapas na barra do alto. Cada mudança é verificada e salva sozinha, e a animação segue o áudio: nada é cronometrado à mão.</p>
+        <ol class="stages">
+          <li class="stage">
+            <img src="assets/img/stage-idea.webp" width="560" height="350" loading="lazy" decoding="async" alt="Tela Novo projeto: formato história, proporção 9:16, tema e tom." data-i18n-attr="alt:flow.idea.alt">
+            <span class="stage-name"><span class="num" aria-hidden="true">1</span><span data-i18n="flow.idea">Ideia</span></span>
+            <span class="stage-text" data-i18n="flow.idea.text">Formato, proporção, tema e tom.</span>
+          </li>
+          <li class="stage">
+            <img src="assets/img/stage-script.webp" width="560" height="350" loading="lazy" decoding="async" alt="Editor de roteiro com as falas recolhidas, uma por linha." data-i18n-attr="alt:flow.script.alt">
+            <span class="stage-name"><span class="num" aria-hidden="true">2</span><span data-i18n="flow.script">Roteiro</span></span>
+            <span class="stage-text" data-i18n="flow.script.text">Falas com pose, expressão e cena; à mão ou com IA.</span>
+          </li>
+          <li class="stage">
+            <img src="assets/img/stage-cast.webp" width="560" height="350" loading="lazy" decoding="async" alt="Etapa Elenco: ficha da personagem Bia com a prévia animada ao lado." data-i18n-attr="alt:flow.cast.alt">
+            <span class="stage-name"><span class="num" aria-hidden="true">3</span><span data-i18n="flow.cast">Elenco</span></span>
+            <span class="stage-text" data-i18n="flow.cast.text">Quem fala, com que cara e que voz.</span>
+          </li>
+          <li class="stage">
+            <img src="assets/img/stage-scenarios.webp" width="560" height="350" loading="lazy" decoding="async" alt="Etapa Cenários: um cartão por cena, com fundo vetorial, imagem enviada ou gerada." data-i18n-attr="alt:flow.scen.alt">
+            <span class="stage-name"><span class="num" aria-hidden="true">4</span><span data-i18n="flow.scen">Cenários</span></span>
+            <span class="stage-text" data-i18n="flow.scen.text">Um fundo para cada cena.</span>
+          </li>
+          <li class="stage">
+            <img src="assets/img/stage-voices.webp" width="560" height="350" loading="lazy" decoding="async" alt="Etapa Vozes: lista de falas com os botões Gerar e Gravar minha voz." data-i18n-attr="alt:flow.voice.alt">
+            <span class="stage-name"><span class="num" aria-hidden="true">5</span><span data-i18n="flow.voice">Vozes</span></span>
+            <span class="stage-text" data-i18n="flow.voice.text">Cada fala vira áudio; só o que mudou é refeito.</span>
+          </li>
+          <li class="stage">
+            <img src="assets/img/stage-video.webp" width="560" height="350" loading="lazy" decoding="async" alt="Etapa Vídeo: prévia do vídeo inteiro e o render pronto." data-i18n-attr="alt:flow.video.alt">
+            <span class="stage-name"><span class="num" aria-hidden="true">6</span><span data-i18n="flow.video">Vídeo</span></span>
+            <span class="stage-text" data-i18n="flow.video.text">Prévia, render em MP4 e legenda.</span>
+          </li>
+        </ol>
+      </section>
+
+      <!-- 4. Characters -->
+      <section class="tile tile-cast" id="cast" aria-labelledby="cast-title">
+        <h2 id="cast-title" data-i18n="cast.title">Um elenco para cada história</h2>
+        <p class="sub" data-i18n="cast.sub">Monte personagens do zero (corpo, cores, roupa, expressão e voz) ou comece de um elenco pronto. Eles falam, gesticulam e reagem.</p>
+        <ul class="cast-grid">
+          <li><img src="assets/img/char-sigrid.webp" width="220" height="220" loading="lazy" decoding="async" alt="Sigrid, navegadora viking de capacete com chifres" data-i18n-attr="alt:cast.sigrid"><span class="era" data-i18n="cast.past">Passado</span></li>
+          <li><img src="assets/img/char-marina.webp" width="220" height="220" loading="lazy" decoding="async" alt="Marina, capitã pirata de chapéu" data-i18n-attr="alt:cast.marina"><span class="era" data-i18n="cast.past">Passado</span></li>
+          <li><img src="assets/img/char-bia.webp" width="220" height="220" loading="lazy" decoding="async" alt="Bia, streamer de moletom roxo e fones de ouvido" data-i18n-attr="alt:cast.bia"><span class="era" data-i18n="cast.present">Presente</span></li>
+          <li><img src="assets/img/char-helena.webp" width="220" height="220" loading="lazy" decoding="async" alt="Helena, cientista de jaleco e óculos" data-i18n-attr="alt:cast.helena"><span class="era" data-i18n="cast.present">Presente</span></li>
+          <li><img src="assets/img/char-nova.webp" width="220" height="220" loading="lazy" decoding="async" alt="Nova, astronauta de traje espacial" data-i18n-attr="alt:cast.nova"><span class="era" data-i18n="cast.future">Futuro</span></li>
+          <li><img src="assets/img/char-kai.webp" width="220" height="220" loading="lazy" decoding="async" alt="Kai, hacker de visor e cabelo moicano" data-i18n-attr="alt:cast.kai"><span class="era" data-i18n="cast.future">Futuro</span></li>
+          <li><img src="assets/img/char-lua.webp" width="220" height="220" loading="lazy" decoding="async" alt="Lua, uma vampira de capa" data-i18n-attr="alt:cast.lua"><span class="era" data-i18n="cast.creature">Criatura</span></li>
+          <li><img src="assets/img/char-bip.webp" width="220" height="220" loading="lazy" decoding="async" alt="Bip, um robô com antena" data-i18n-attr="alt:cast.bip"><span class="era" data-i18n="cast.creature">Criatura</span></li>
+        </ul>
+      </section>
+
+      <!-- 5. Scenarios -->
+      <section class="tile tile-scen" aria-labelledby="scen-title">
+        <h2 id="scen-title" data-i18n="scen.title">Cenários do seu jeito</h2>
+        <ul class="ticks">
+          <li data-i18n-html="scen.vector"><b>20 fundos vetoriais</b> prontos, do Egito antigo à estação espacial.</li>
+          <li data-i18n-html="scen.photo"><b>Uma foto sua</b>, recortada no enquadramento da cena.</li>
+          <li data-i18n-html="scen.ai"><b>Ou gerada por IA</b>, com o custo antes de confirmar.</li>
+        </ul>
+        <div class="scen-visual">
+          <ul class="scen-thumbs" aria-label="Alguns fundos prontos" data-i18n-attr="aria-label:scen.thumbs">
+            <li><img src="assets/img/bg-medieval-castle.webp" width="320" height="180" loading="lazy" decoding="async" alt="Castelo medieval" data-i18n-attr="alt:scen.castle"></li>
+            <li><img src="assets/img/bg-space-station.webp" width="320" height="180" loading="lazy" decoding="async" alt="Estação espacial" data-i18n-attr="alt:scen.station"></li>
+            <li><img src="assets/img/bg-fifties-diner.webp" width="320" height="180" loading="lazy" decoding="async" alt="Lanchonete dos anos 50" data-i18n-attr="alt:scen.diner"></li>
+            <li><img src="assets/img/bg-ancient-egypt.webp" width="320" height="180" loading="lazy" decoding="async" alt="Egito antigo" data-i18n-attr="alt:scen.egypt"></li>
+            <li><img src="assets/img/bg-pirate-ship.webp" width="320" height="180" loading="lazy" decoding="async" alt="Navio pirata" data-i18n-attr="alt:scen.ship"></li>
+            <li><img src="assets/img/bg-night-sky.webp" width="320" height="180" loading="lazy" decoding="async" alt="Céu noturno" data-i18n-attr="alt:scen.sky"></li>
+          </ul>
+          <figure class="scen-crop">
+            <img src="assets/img/app-crop.webp" width="420" height="469" loading="lazy" decoding="async" alt="Janela Enquadramento da cena: a imagem enviada com o retângulo do recorte e o zoom." data-i18n-attr="alt:scen.crop.alt">
+          </figure>
+        </div>
+      </section>
+
+      <!-- 6. Voices -->
+      <section class="tile tile-voice" aria-labelledby="voice-title">
+        <h2 id="voice-title" data-i18n="voice.title">Vozes</h2>
+        <svg class="wave" viewBox="0 0 240 48" aria-hidden="true" focusable="false"><path filter="url(#chalk)" d="M4 24h16l5-10 6 22 6-30 6 34 6-26 6 18 5-10 6 6h14l5-14 6 26 6-36 6 40 6-30 6 20 5-8h18l5-8 6 16 6-20 6 22 6-12 5 2h20" fill="none" stroke="#f2c14e" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <ul class="options">
+          <li>
+            <span class="tag tag-free" data-i18n="tag.free">grátis</span>
+            <span><b data-i18n="voice.local">Local</b> <span data-i18n="voice.local.text">Qwen3-TTS no seu computador, na GPU ou na CPU.</span></span>
+          </li>
+          <li>
+            <span class="tag tag-paid" data-i18n="tag.paid">opcional</span>
+            <span><b data-i18n="voice.paid">Paga</b> <span data-i18n="voice.paid.text">ElevenLabs ou Fish Audio, com a sua chave.</span></span>
+          </li>
+          <li>
+            <span class="tag tag-mic" data-i18n="tag.mic">microfone</span>
+            <span><b data-i18n="voice.rec">Sua voz</b> <span data-i18n="voice.rec.text">Grave cada fala direto no Estúdio.</span></span>
+          </li>
+        </ul>
+        <img class="shot" src="assets/img/app-voices.webp" width="760" height="258" loading="lazy" decoding="async" alt="Etapa Vozes: falas pendentes com os botões Gerar e Gravar minha voz, e Gerar todas as pendentes." data-i18n-attr="alt:voice.alt">
+      </section>
+
+      <!-- 7. Optional AI -->
+      <section class="tile tile-ai" aria-labelledby="ai-title">
+        <h2 id="ai-title" data-i18n="ai.title">IA é opcional</h2>
+        <p class="sub" data-i18n="ai.sub">Traga a sua chave (Claude, OpenAI, Gemini ou fal) para rascunhar roteiros e gerar cenários. Antes de cada gasto, o Estúdio mostra a estimativa e pede confirmação.</p>
+        <img class="shot" src="assets/img/app-estimate.webp" width="640" height="330" loading="lazy" decoding="async" alt="Janela Gerar o roteiro com IA: estimativa de até US$ 0,30 na primeira chamada, com os botões Cancelar e Gerar roteiro." data-i18n-attr="alt:ai.alt">
+        <p class="stamp" data-i18n="ai.free">Tudo grátis e local é possível.</p>
+      </section>
+
+      <!-- 8. Formats -->
+      <section class="tile tile-fmt" aria-labelledby="fmt-title">
+        <h2 id="fmt-title" data-i18n="fmt.title">Vertical ou horizontal</h2>
+        <div class="frames">
+          <figure class="frame frame-916">
+            <img src="assets/img/story-poster.webp" width="540" height="960" loading="lazy" decoding="async" alt="Quadro vertical de uma história." data-i18n-attr="alt:fmt.916.alt">
+            <figcaption><b>9:16</b> <span data-i18n="fmt.916">Reels, Shorts, TikTok</span></figcaption>
+          </figure>
+          <figure class="frame frame-169">
+            <img src="assets/img/format-lesson.webp" width="640" height="360" loading="lazy" decoding="async" alt="Quadro horizontal de uma aula, com dois apresentadores e um trecho de código." data-i18n-attr="alt:fmt.169.alt">
+            <figcaption><b>16:9</b> <span data-i18n="fmt.169">YouTube e aulas</span></figcaption>
+          </figure>
+        </div>
+        <ul class="chips chips-small">
+          <li data-i18n="fmt.srt">Legendas SRT</li>
+          <li data-i18n="fmt.langs">Português e inglês</li>
+          <li data-i18n="fmt.same">Um projeto, as duas proporções</li>
+        </ul>
+      </section>
+
+      <!-- 9. Open source -->
+      <section class="tile tile-oss" aria-labelledby="oss-title">
+        <div class="oss-text">
+          <h2 id="oss-title" data-i18n="oss.title">Código aberto, licença MIT</h2>
+          <p class="sub" data-i18n="oss.sub">Leia, mude e compartilhe. O mesmo motor também roda pela linha de comando, para quem prefere o terminal.</p>
+          <div class="oss-links">
+            <a class="btn btn-ghost" href="https://github.com/AndersonGuilherme/giz" rel="noopener">
+              <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              <span data-i18n="oss.repo">Ver o código no GitHub</span>
+            </a>
+            <a class="link" href="https://github.com/AndersonGuilherme/giz#requisitos-linha-de-comando" rel="noopener" data-i18n="oss.cli">Guia da linha de comando</a>
+          </div>
+        </div>
+        <pre class="terminal" aria-label="Comandos para instalar pela linha de comando" data-i18n-attr="aria-label:oss.term"><code><span class="prompt" aria-hidden="true">$ </span>git clone https://github.com/AndersonGuilherme/giz.git
+<span class="prompt" aria-hidden="true">$ </span>cd giz/motor
+<span class="prompt" aria-hidden="true">$ </span>ONNXRUNTIME_NODE_INSTALL=skip npm install
+<span class="prompt" aria-hidden="true">$ </span>npm run setup</code></pre>
+      </section>
+    </div>
+
+    <!-- 10. Downloads -->
+    <section class="downloads" id="download" aria-labelledby="download-title">
+      <div class="wrap">
+        <div class="downloads-head">
+          <h2 id="download-title" data-i18n="dl.title">Baixar o giz Estúdio</h2>
+          <p class="sub" data-i18n="dl.sub">Escolha o arquivo do seu sistema. Na primeira execução, um assistente baixa o modelo de voz (5,9 GB, uma vez só); depois tudo funciona sem internet.</p>
+          <p class="release-status" id="release-status" role="status" aria-live="polite"></p>
+        </div>
+
+        <ul class="dl-grid">
+          <li class="dl-card" data-os="windows" data-file="giz-estudio-windows-x64-setup.exe">
+            <div class="dl-top">
+              <span class="dl-ext mono">.exe</span>
+              <span class="dl-recommended" data-i18n="dl.yours">Seu sistema</span>
+            </div>
+            <h3>Windows</h3>
+            <p class="dl-req" data-i18n="dl.win.req">Windows 10 ou 11, 64 bits</p>
+            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-windows-x64-setup.exe">
+              <span data-i18n="dl.win.btn">Baixar o instalador</span> <span class="dl-size"></span>
+            </a>
+            <p class="dl-note" data-i18n-html="dl.win.note">Na tela “O Windows protegeu o computador”, clique em <b>Mais informações → Executar assim mesmo</b>.</p>
+          </li>
+          <li class="dl-card" data-os="macos" data-file="giz-estudio-macos-arm64.dmg">
+            <div class="dl-top">
+              <span class="dl-ext mono">.dmg</span>
+              <span class="dl-recommended" data-i18n="dl.yours">Seu sistema</span>
+            </div>
+            <h3>macOS</h3>
+            <p class="dl-req" data-i18n="dl.mac.req">Apple Silicon (M1 ou mais novo)</p>
+            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-macos-arm64.dmg">
+              <span data-i18n="dl.mac.btn">Baixar o .dmg</span> <span class="dl-size"></span>
+            </a>
+            <p class="dl-note" data-i18n-html="dl.mac.note">Arraste para Aplicativos. No macOS 15 (Sequoia), se ele não abrir: <b>Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim</b>.</p>
+          </li>
+          <li class="dl-card" data-os="linux" data-file="giz-estudio-linux-amd64.deb">
+            <div class="dl-top">
+              <span class="dl-ext mono">.deb</span>
+              <span class="dl-recommended" data-i18n="dl.yours">Seu sistema</span>
+            </div>
+            <h3>Linux <span class="h3-sub">Ubuntu · Debian</span></h3>
+            <p class="dl-req" data-i18n="dl.deb.req">64 bits (amd64)</p>
+            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-linux-amd64.deb">
+              <span data-i18n="dl.deb.btn">Baixar o .deb</span> <span class="dl-size"></span>
+            </a>
+            <p class="dl-note" data-i18n-html="dl.deb.note">Instale com <code>sudo apt install ./giz-estudio-linux-amd64.deb</code>. No Ubuntu 24.04 ou mais novo, <b>use o .deb</b>.</p>
+          </li>
+          <li class="dl-card" data-os="linux-other" data-file="giz-estudio-linux-x64.AppImage">
+            <div class="dl-top"><span class="dl-ext mono">AppImage</span></div>
+            <h3>Linux <span class="h3-sub" data-i18n="dl.app.distros">outras distribuições</span></h3>
+            <p class="dl-req" data-i18n="dl.app.req">64 bits (x64), com FUSE</p>
+            <a class="btn btn-secondary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-linux-x64.AppImage">
+              <span data-i18n="dl.app.btn">Baixar o AppImage</span> <span class="dl-size"></span>
+            </a>
+            <p class="dl-note" data-i18n-html="dl.app.note">Dê <code>chmod +x</code> e abra. Precisa de <code>libfuse2</code>. No Ubuntu 24.04 ou mais novo, use o .deb.</p>
+          </li>
+          <li class="dl-card" data-os="linux-zip" data-file="giz-estudio-linux-x64.zip">
+            <div class="dl-top"><span class="dl-ext mono">.zip</span></div>
+            <h3>Linux <span class="h3-sub" data-i18n="dl.zip.sub">sem instalar</span></h3>
+            <p class="dl-req" data-i18n="dl.zip.req">64 bits (x64), portátil</p>
+            <a class="btn btn-secondary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-linux-x64.zip">
+              <span data-i18n="dl.zip.btn">Baixar o .zip</span> <span class="dl-size"></span>
+            </a>
+            <p class="dl-note" data-i18n-html="dl.zip.note">Descompacte numa pasta sua e abra o programa <code>giz-estudio</code>.</p>
+          </li>
+        </ul>
+
+        <div class="dl-foot">
+          <p data-i18n-html="dl.unsigned">Os instaladores <b>ainda não são assinados</b>, então o sistema avisa na primeira vez. É esperado.</p>
+          <p>
+            <a class="link" href="https://github.com/AndersonGuilherme/giz#instalar" rel="noopener" data-i18n="dl.readme">Passo a passo no README, seção Instalar</a>
+            <span aria-hidden="true">·</span>
+            <a class="link" href="https://github.com/AndersonGuilherme/giz/releases" rel="noopener" data-i18n="dl.all">Todas as versões</a>
+          </p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <a class="brand" href="#top" aria-label="giz Estúdio">
+        <svg class="brand-mark" width="28" height="28" aria-hidden="true"><use href="#mark"/></svg>
+        <span class="brand-name">giz</span>
+      </a>
+      <p data-i18n-html="footer.text">Código aberto sob a licença MIT. Os vídeos são renderizados com o <a class="link" href="https://www.remotion.dev/license" rel="noopener">Remotion</a>, grátis para pessoas e empresas de até 3 pessoas.</p>
+      <p><a class="link" href="https://github.com/AndersonGuilherme/giz" rel="noopener">github.com/AndersonGuilherme/giz</a></p>
+    </div>
+  </footer>
+</body>
+</html>

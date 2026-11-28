@@ -2,7 +2,7 @@
 
 **Transforme uma ideia em vídeo animado: uma história ou uma aula.** O **giz Estúdio** é um aplicativo de
 computador que leva você da ideia ao vídeo pronto, com personagens 2D que falam, gesticulam e reagem, legendas,
-cenários e efeitos sonoros.
+cenários e efeitos sonoros. **[Conheça e baixe no site](https://andersonguilherme.github.io/giz/)**.
 
 - **História ou aula**, em **9:16** (vertical, para Reels, Shorts e TikTok) ou **16:9** (horizontal, para o YouTube);
   o mesmo projeto renderiza nas duas proporções.
@@ -57,7 +57,8 @@ O resto deste README (a partir de *Requisitos*) é para quem prefere usar o giz 
 
 ### Baixar
 
-Na página de **Releases** do repositório, baixe o arquivo do seu sistema:
+No site do giz, **[andersonguilherme.github.io/giz](https://andersonguilherme.github.io/giz/#download)**, o botão já
+escolhe o instalador do seu sistema. Ou, na página de **Releases** do repositório, baixe o arquivo do seu sistema:
 
 | Sistema | Arquivo | Como instalar |
 |---|---|---|

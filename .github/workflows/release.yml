@@ -106,7 +106,37 @@ jobs:
           path: installers
           merge-multiple: true
 
+      # Version-less copies of each installer, next to the versioned ones: the site links to
+      # releases/latest/download/<stable name>, which keeps working on every release (once the draft is published).
+      - name: Stable file names
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p stable
+          # copy <required|optional> <find -iname pattern> <stable name>
+          copy() {
+            mapfile -t found < <(find installers -type f -iname "$2")
+            if [ "${#found[@]}" -eq 1 ]; then
+              cp "${found[0]}" "stable/$3"
+              echo "$3 <- ${found[0]}"
+            elif [ "${#found[@]}" -eq 0 ] && [ "$1" = optional ]; then
+              echo "no $2: $3 skipped"
+            else
+              echo "::error::expected one file for $2, found ${#found[@]}: ${found[*]:-none}"
+              exit 1
+            fi
+          }
+          copy required '*setup.exe' giz-estudio-windows-x64-setup.exe
+          copy required '*-arm64.dmg' giz-estudio-macos-arm64.dmg
+          copy required '*_amd64.deb' giz-estudio-linux-amd64.deb
+          copy required '*-x64.AppImage' giz-estudio-linux-x64.AppImage
+          copy required 'giz-estudio-linux-x64-*.zip' giz-estudio-linux-x64.zip
+          copy optional 'giz-estudio-darwin-arm64-*.zip' giz-estudio-macos-arm64.zip
+          copy optional 'giz-estudio-win32-x64-*.zip' giz-estudio-windows-x64.zip
+
       - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:
           draft: true
-          files: installers/**/*
+          files: |
+            installers/**/*
+            stable/*
