@@ -24,7 +24,7 @@ class PaidVoice extends FakeVoice {
 }
 
 async function folderWithTake(lineId: string, samples: number[]): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-own-take-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-own-take-'));
   await mkdir(join(folder, 'recordings'));
   await writeFile(join(folder, 'recordings', `${lineId}.wav`), toWav(Audio.of(Float32Array.from(samples), 24000)));
   return folder;
@@ -53,7 +53,7 @@ test('the fingerprint: the inner one without a take (hashes unchanged), the take
 });
 
 test('an inner voice without fingerprint nor estimate stays that way for lines without a take (a free local voice)', async () => {
-  const voice = new OwnRecordingFirst({ generate: async () => Audio.of(new Float32Array(1), 24000) }, await mkdtemp(join(tmpdir(), 'giz-own-')));
+  const voice = new OwnRecordingFirst({ generate: async () => Audio.of(new Float32Array(1), 24000) }, await mkdtemp(join(tmpdir(), 'gizzy-own-')));
   assert.equal(await voice.fingerprint(request('1')), '');
   assert.equal(voice.estimate(request('1')).dollars(), 0);
 });

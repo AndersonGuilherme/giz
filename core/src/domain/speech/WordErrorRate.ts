@@ -1,4 +1,4 @@
-// The automatic ear (`giz qa asr`): how many words Whisper heard differently from the script. Port of the motor's
+// The automatic ear (`gizzy qa asr`): how many words Whisper heard differently from the script. Port of the motor's
 // scripts/asr-check.ts (norm and wer).
 const NUMBER_WORDS = new Set(
   ('zero um uma dois duas tres quatro cinco seis sete oito nove dez onze doze treze quatorze catorze quinze dezesseis ' +

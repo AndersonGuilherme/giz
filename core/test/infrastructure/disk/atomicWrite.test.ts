@@ -5,7 +5,7 @@ import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { writeAtomic, writeAtomicSync, writeInside } from '../../../src/infrastructure/disk/atomicWrite.ts';
 
-const folder = () => mkdtempSync(join(tmpdir(), 'giz-atomic-'));
+const folder = () => mkdtempSync(join(tmpdir(), 'gizzy-atomic-'));
 
 test('a write goes to a temp file next to the target and is renamed over it: nothing else is left', async () => {
   const where = folder();

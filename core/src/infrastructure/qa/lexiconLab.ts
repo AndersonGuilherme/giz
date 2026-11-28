@@ -4,7 +4,7 @@ import type { Qwen3Tts } from '../voice/qwen/Qwen3Tts.ts';
 import { QWEN_RATE } from '../voice/qwen/qwenModels.ts';
 import type { Transcriber } from './WhisperTranscriber.ts';
 
-// The pronunciation lab (`giz qa lexicon`): says each candidate spelling inside a sentence and asks Whisper what it
+// The pronunciation lab (`gizzy qa lexicon`): says each candidate spelling inside a sentence and asks Whisper what it
 // heard. The winning spelling goes to the project pronunciation.json. Port of the motor's scripts/lexicon-lab.ts.
 /** `frame` holds an X where the candidate goes: "Fiz o X ontem.". */
 export type SpellingTest = Readonly<{ word: string; frame: string; candidates: readonly string[] }>;

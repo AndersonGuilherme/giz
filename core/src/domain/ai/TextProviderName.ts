@@ -1,4 +1,4 @@
-/** The text AI services giz can call. */
+/** The text AI services Gizzycera can call. */
 export const TEXT_PROVIDERS = ['anthropic', 'openai', 'gemini'] as const;
 export type TextProviderName = (typeof TEXT_PROVIDERS)[number];
 

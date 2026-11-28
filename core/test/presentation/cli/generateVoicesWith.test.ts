@@ -9,7 +9,7 @@ import { generateVoicesWith, projectRepository } from '../../../src/presentation
 import { FakeVoice } from '../../doubles/FakeVoice.ts';
 
 async function copyOfFixture(): Promise<string> {
-  const folder = join(await mkdtemp(join(tmpdir(), 'giz-voices-with-')), 'project');
+  const folder = join(await mkdtemp(join(tmpdir(), 'gizzy-voices-with-')), 'project');
   await cp('test/fixtures/minimal-project', folder, { recursive: true });
   await rm(join(folder, 'voice'), { recursive: true });
   return folder;

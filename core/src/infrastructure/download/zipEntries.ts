@@ -32,7 +32,7 @@ async function directoryOf(path: string): Promise<Buffer> {
   const end = tail.lastIndexOf(Buffer.from([0x50, 0x4b, 0x05, 0x06]));
   if (end < 0 || tail.readUInt32LE(end) !== END_OF_DIRECTORY) throw new Error(`${path} não é um arquivo zip`);
   const [length, offset] = [tail.readUInt32LE(end + 12), tail.readUInt32LE(end + 16)];
-  if (offset === ZIP64) throw new Error(`${path} é um zip64, que o giz não lê`);
+  if (offset === ZIP64) throw new Error(`${path} é um zip64, que o Gizzycera não lê`);
   return readAt(path, offset, length);
 }
 

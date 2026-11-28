@@ -1,5 +1,5 @@
-// Part of the composition point (see composition.ts): the install tools behind `giz setup`, `giz models`, `giz gpu`
-// and `giz sounds`. The heavy modules (onnxruntime, transformers) are imported only by the tool that needs them.
+// Part of the composition point (see composition.ts): the install tools behind `gizzy setup`, `gizzy models`, `gizzy gpu`
+// and `gizzy sounds`. The heavy modules (onnxruntime, transformers) are imported only by the tool that needs them.
 import { fileURLToPath } from 'node:url';
 import { Audio } from '../../../domain/speech/Audio.ts';
 import { downloadWhisperModel, whisperDownloaded } from '../../../infrastructure/alignment/whisperDownload.ts';
@@ -12,7 +12,7 @@ import { downloadModel, ensureModel, modelReady } from '../../../infrastructure/
 import { modelFolder } from '../../../infrastructure/voice/qwen/qwenModels.ts';
 import { QWEN_MODELS, QWEN_RATE, repositoryOf } from '../../../infrastructure/voice/qwen/qwenModels.ts';
 import { toWav } from '../../../infrastructure/voice/wav.ts';
-import type { GizConfig } from './install.ts';
+import type { GizzyConfig } from './install.ts';
 
 export type { GpuInfo } from '../../../infrastructure/gpu/nvidiaGpu.ts';
 export type { DownloadProgress } from '../../../infrastructure/download/resumableDownload.ts';
@@ -37,29 +37,29 @@ export const gpu = {
 };
 
 /** Downloads the configured voice model (once); returns its folder. */
-export function downloadVoiceModel(config: GizConfig, log: Log): Promise<string> {
+export function downloadVoiceModel(config: GizzyConfig, log: Log): Promise<string> {
   return ensureModel(repositoryOf(config.model), config.modelsDir, log);
 }
 
 /** Whether a voice model was downloaded to the end into `modelsDir`. */
-export const voiceModelReady = (model: GizConfig['model'], modelsDir: string): boolean => modelReady(repositoryOf(model), modelsDir);
+export const voiceModelReady = (model: GizzyConfig['model'], modelsDir: string): boolean => modelReady(repositoryOf(model), modelsDir);
 
 /** The folder of a voice model in `modelsDir` (the Studio counts the bytes already there). */
-export const voiceModelFolder = (model: GizConfig['model'], modelsDir: string): string => modelFolder(repositoryOf(model), modelsDir);
+export const voiceModelFolder = (model: GizzyConfig['model'], modelsDir: string): string => modelFolder(repositoryOf(model), modelsDir);
 
 /** The same download with the bytes of the whole model (the Studio's progress bar). */
-export function downloadVoiceModelWithProgress(config: Pick<GizConfig, 'model' | 'modelsDir'>, onProgress: (receivedBytes: number, totalBytes: number) => void): Promise<string> {
+export function downloadVoiceModelWithProgress(config: Pick<GizzyConfig, 'model' | 'modelsDir'>, onProgress: (receivedBytes: number, totalBytes: number) => void): Promise<string> {
   return downloadModel(repositoryOf(config.model), config.modelsDir, { log: () => undefined, onProgress });
 }
 
-export async function openLocalVoice(config: GizConfig): Promise<LocalVoice> {
+export async function openLocalVoice(config: GizzyConfig): Promise<LocalVoice> {
   const { loadQwen } = await import('../../../infrastructure/voice/QwenVoice.ts');
   return loadQwen(config);
 }
 
 export const wavOf = (samples: Float32Array): Buffer => toWav(Audio.of(samples, QWEN_RATE));
 export const secondsOf = (samples: Float32Array): number => samples.length / QWEN_RATE;
-export const modelGigabytes = (model: GizConfig['model']): number => QWEN_MODELS[model].gigabytes;
+export const modelGigabytes = (model: GizzyConfig['model']): number => QWEN_MODELS[model].gigabytes;
 
 /**
  * Downloads Whisper (~250 MB, the pronunciation check) into the transformers cache; `onProgress`: each file's bytes.

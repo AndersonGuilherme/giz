@@ -4,7 +4,7 @@ import type { ColorsOf } from './VectorBackgroundModel.ts';
 
 type Colors = ColorsOf<'village'>;
 
-// Pieces of the giz village, in units, standing on (0, 0): white houses with tiled roofs on a hill, a round tower,
+// Pieces of the Gizzy village, in units, standing on (0, 0): white houses with tiled roofs on a hill, a round tower,
 // a windmill, a stone well and a fruit stall. Every main shape carries a chalk line.
 
 type Piece = FC<Readonly<{ colors: Colors; seed: string }>>;

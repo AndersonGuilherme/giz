@@ -62,7 +62,7 @@ export function buildTimeline(folder: string): BuildTimeline {
 }
 
 // The Remotion entry point (the compositions), the package public folder (the sound effects) and the package's Chrome
-// Headless Shell: all resolved from the package, so `giz` works from any working directory (and from Electron). The
+// Headless Shell: all resolved from the package, so `gizzy` works from any working directory (and from Electron). The
 // installed Studio's package also has the compositions bundled at package time (no webpack at run time).
 const PACKAGE_FOLDER = fileURLToPath(new URL('../../..', import.meta.url));
 const REMOTION = {

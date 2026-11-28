@@ -24,7 +24,7 @@ const repository = () => new DiskProjectRepository({ catalog: new FakeRigCatalog
 
 // The minimal project on the test rig, its first scene asking for a generated image (and `change` applied to project.json).
 async function projectFolder(background: Json = { generate: { prompt: 'uma praça' } }, project: Json = {}): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-scenes-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-scenes-'));
   tempFolders.push(folder);
   await cp(FIXTURE, folder, { recursive: true });
   const ana = await readJson(join(folder, 'cast/ana.json'));
@@ -68,11 +68,11 @@ test('link sets background.image to the generated file, keeping the rest of the 
   assert.equal((await stat(join(folder, 'script.json'))).mtimeMs, before);
 });
 
-test('end to end: the "not generated" warning, then giz images, then a clean load with the image in place', async () => {
+test('end to end: the "not generated" warning, then gizzy images, then a clean load with the image in place', async () => {
   const folder = await projectFolder({ generate: { prompt: 'uma praça' } }, { style: 'watercolor', imageProvider: 'fal' });
   const before = await repository().load(folder);
   assert.equal(before.warnings().length, 1);
-  assert.match(before.warnings()[0]!, /lines\[0\]\.scene\.background\.generate: cenário ainda não gerado \(fala 1\).*giz images/);
+  assert.match(before.warnings()[0]!, /lines\[0\]\.scene\.background\.generate: cenário ainda não gerado \(fala 1\).*gizzy images/);
   assert.equal(before.imageStyle(), 'watercolor');
   assert.equal(before.imageProvider(), 'fal');
   const images = new FakeImageProvider();
@@ -86,10 +86,10 @@ test('end to end: the "not generated" warning, then giz images, then a clean loa
   assert.deepEqual(again, { generated: [], kept: ['1'], own: [] });
 });
 
-test('a generated image that went missing warns with the giz images hint', async () => {
+test('a generated image that went missing warns with the gizzy images hint', async () => {
   const folder = await projectFolder({ generate: { prompt: 'uma praça' }, image: 'scenes/1.png' });
   const [warning] = (await repository().load(folder)).warnings();
-  assert.match(warning!, /scenes\/1\.png não encontrada \(fala 1\); o render usa o fundo vetorial padrão \(rode giz images/);
+  assert.match(warning!, /scenes\/1\.png não encontrada \(fala 1\); o render usa o fundo vetorial padrão \(rode gizzy images/);
 });
 
 async function problems(folder: string): Promise<string[]> {
@@ -123,7 +123,7 @@ test('save never overwrites a scenes/<id>.png it did not write: no record, or by
   await writeFile(join(folder, 'scenes/1.png'), mine);
   assert.equal(await store.foreignFile('1'), true);
   await assert.rejects(store.save({ lineId: '1', image, hash: 'abc', madeBy }), (error: Error) =>
-    error instanceof ScenarioImageError && /scenes\/1\.png já existe e não foi feito pelo giz images: o arquivo não foi sobrescrito/.test(error.message));
+    error instanceof ScenarioImageError && /scenes\/1\.png já existe e não foi feito pelo gizzy images: o arquivo não foi sobrescrito/.test(error.message));
   assert.deepEqual(await readFile(join(folder, 'scenes/1.png')), mine);
   await rm(join(folder, 'scenes/1.png'));
   await store.save({ lineId: '1', image, hash: 'abc', madeBy });
@@ -154,7 +154,7 @@ test('link rewrites script.json through a temp file, and never through a link th
   await store.save({ lineId: '1', image, hash: 'abc', madeBy });
   await store.link(['1']);
   assert.deepEqual((await readdir(join(folder, 'scenes'))).sort(), ['1.json', '1.png'], 'no temp file left');
-  const outside = await mkdtemp(join(tmpdir(), 'giz-outside-'));
+  const outside = await mkdtemp(join(tmpdir(), 'gizzy-outside-'));
   tempFolders.push(outside);
   const script = await readJson(join(folder, 'script.json'));
   ((script.lines as Json[])[0]!.scene as Json).background = { generate: { prompt: 'outra' } };

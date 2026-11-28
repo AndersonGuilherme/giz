@@ -20,7 +20,7 @@ export type Background = Readonly<{
   image?: string;
   vector?: string;
   colors?: Readonly<Record<string, string>>;
-  /** Only on a scene (not on a beat): `giz images` makes the image and points `image` to it. */
+  /** Only on a scene (not on a beat): `gizzy images` makes the image and points `image` to it. */
   generate?: BackgroundRequest;
   /** The part of the image shown (the Studio's "recortar enquadramento"); the file itself is never changed. */
   crop?: ImageCropJson;

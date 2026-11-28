@@ -7,7 +7,7 @@ import { QWEN_RATE } from '../voice/qwen/qwenModels.ts';
 import { toWav } from '../voice/wav.ts';
 import type { Transcriber } from './WhisperTranscriber.ts';
 
-// The voice lab (`giz qa voices`): the same sentences with each Qwen3-TTS voice, and how many words the local
+// The voice lab (`gizzy qa voices`): the same sentences with each Qwen3-TTS voice, and how many words the local
 // Whisper understands (lower WER = clearer pt-BR), plus the generation time. Port of the motor's scripts/voice-lab.ts.
 const SENTENCES = [
   'Três mil clientes receberam uma confirmação de compra, sem comprar absolutamente nada.',

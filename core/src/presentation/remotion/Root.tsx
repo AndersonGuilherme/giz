@@ -26,7 +26,7 @@ const SheetComposition: FC = () => (
     height={1080}
     fps={30}
     durationInFrames={1}
-    defaultProps={{ rig: 'giz' }}
+    defaultProps={{ rig: 'gizzy' }}
     calculateMetadata={readCharacter}
   />
 );
@@ -59,7 +59,7 @@ const CatalogComposition: FC = () => (
   />
 );
 
-// The video of a project: `--props` (or `renderMedia`'s `inputProps`) is the VideoProps that `giz build` writes to
+// The video of a project: `--props` (or `renderMedia`'s `inputProps`) is the VideoProps that `gizzy build` writes to
 // `output/props.json`; the audio paths in it are relative to the public folder.
 const VideoComposition: FC = () => (
   <Composition id="Video" component={Video} width={1080} height={1920} fps={30} durationInFrames={1} defaultProps={EMPTY_VIDEO} calculateMetadata={videoMetadata} />

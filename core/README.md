@@ -1,6 +1,6 @@
-# giz core
+# Gizzycera core
 
-Motor de vídeos animados: você escreve um roteiro em JSON e o `giz` gera as vozes, anima os personagens, monta as
+Motor de vídeos animados: você escreve um roteiro em JSON e o `gizzy` gera as vozes, anima os personagens, monta as
 cenas e grava um MP4 com legendas. Este guia mostra como criar um projeto, explica cada campo do roteiro e dá um
 exemplo de cada recurso. Os nomes dos campos e os valores fixos dos JSON ficam em inglês. Os textos que aparecem no
 vídeo seguem o idioma do projeto.
@@ -9,8 +9,8 @@ Os exemplos completos estão em [`examples/`](examples/):
 
 | Pasta | O que é |
 |---|---|
-| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador e cinco personagens prontos do estilo giz (`casts/presets/present/`), 5 fundos vetoriais (quarto, rua, lanchonete, sala de aula e cidade à noite, três deles a partir de `presets/scenes/`), 6 movimentos de câmera, chuva, HUD com barra e texto grande |
-| `examples/sneeze-kite/pt-BR` e `en` | História infantil 16:9 de ~80 s, "O Atchim do Fofo" ("Fofo's Big Sneeze"), com narradora e três personagens novos do estilo giz (um monstrinho peludo, uma menina e um robô juiz de cartola), 4 fundos vetoriais (quarto, vila, campo e céu estrelado), câmera que segue, treme e afasta, partículas, fogueira, HUD com barra e texto grande no espirro |
+| `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador e cinco personagens prontos do estilo Gizzy (`casts/presets/present/`), 5 fundos vetoriais (quarto, rua, lanchonete, sala de aula e cidade à noite, três deles a partir de `presets/scenes/`), 6 movimentos de câmera, chuva, HUD com barra e texto grande |
+| `examples/sneeze-kite/pt-BR` e `en` | História infantil 16:9 de ~80 s, "O Atchim do Fofo" ("Fofo's Big Sneeze"), com narradora e três personagens novos do estilo Gizzy (um monstrinho peludo, uma menina e um robô juiz de cartola), 4 fundos vetoriais (quarto, vila, campo e céu estrelado), câmera que segue, treme e afasta, partículas, fogueira, HUD com barra e texto grande no espirro |
 | `examples/coupon-lesson/pt-BR` e `en` | Aula 16:9 sobre um bug de cupom de desconto, com Lia e Téo, escritório e sala de aula na abertura e no fim, cartão, título, código, terminal, pausa "Ache o bug" com contagem, citação e desafio |
 
 Use qualquer uma dessas pastas como ponto de partida: copie a pasta, troque os textos e rode `produce`.
@@ -29,17 +29,17 @@ ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install
 Depois, a configuração guiada desta máquina (uma vez; pode rodar de novo quando quiser mudar algo):
 
 ```bash
-npx giz setup             # pergunta e grava o giz.config.json na raiz do repositório (fora do git)
-npx giz setup --dry-run   # só mostra as perguntas e a configuração que resultaria
+npx gizzy setup             # pergunta e grava o gizzycera.config.json na raiz do repositório (fora do git)
+npx gizzy setup --dry-run   # só mostra as perguntas e a configuração que resultaria
 ```
 
-O `setup` escolhe a pasta dos modelos (`~/.cache/giz` por padrão), CPU ou GPU NVIDIA, o modelo de voz Qwen3-TTS
+O `setup` escolhe a pasta dos modelos (`~/.cache/gizzycera` por padrão), CPU ou GPU NVIDIA, o modelo de voz Qwen3-TTS
 (`0.6b` ou `1.7b`), baixa o modelo e testa a voz. Com GPU, baixa o provider CUDA do ONNX Runtime e as bibliotecas da
 NVIDIA em `<pasta-dos-modelos>/cuda/<versão>/lib`, sem sudo (só o driver precisa estar instalado; no WSL ele vem do
-Windows). Sem o `giz.config.json`, a voz roda na CPU com os padrões. Um `giz.config.json` feito pelo antigo
+Windows). Sem o `gizzycera.config.json`, a voz roda na CPU com os padrões. Um `gizzycera.config.json` feito pelo antigo
 `motor/` continua valendo: as chaves são as mesmas.
 
-A voz local baixa o modelo sozinha na primeira fala gerada; `npx giz models` (com `--whisper`, também o Whisper)
+A voz local baixa o modelo sozinha na primeira fala gerada; `npx gizzy models` (com `--whisper`, também o Whisper)
 adianta o download. `check`, `build`, `render`, `sheet` e os projetos com `"provider": "recording"` não carregam a
 voz.
 
@@ -56,7 +56,7 @@ meu-video/
     └── bia.json
 ```
 
-O `giz` cria sozinho, dentro da pasta:
+O `gizzy` cria sozinho, dentro da pasta:
 
 - `voice/`: as vozes geradas, uma por fala (`<id>.wav` e as palavras com tempo). Só as falas que mudaram são geradas de novo.
 - `output/`: `video.mp4`, `captions.srt` e, com `build`, `props.json`.
@@ -64,17 +64,17 @@ O `giz` cria sozinho, dentro da pasta:
 
 `voice/` e `output/` não vão para o git.
 
-Passo a passo (os projetos ficam fora do repositório, em `~/giz/projetos/<nome>`):
+Passo a passo (os projetos ficam fora do repositório, em `~/Gizzycera/projetos/<nome>`):
 
-1. Copie um exemplo: `mkdir -p ~/giz/projetos && cp -r examples/internet-story/pt-BR ~/giz/projetos/meu-video`.
+1. Copie um exemplo: `mkdir -p ~/Gizzycera/projetos && cp -r examples/internet-story/pt-BR ~/Gizzycera/projetos/meu-video`.
 2. Edite `project.json`, os personagens em `cast/` e as falas em `script.json`.
-3. Rode `npx giz check ~/giz/projetos/meu-video` até dar `0 erro(s)`.
-4. Rode `npx giz produce ~/giz/projetos/meu-video`.
+3. Rode `npx gizzy check ~/Gizzycera/projetos/meu-video` até dar `0 erro(s)`.
+4. Rode `npx gizzy produce ~/Gizzycera/projetos/meu-video`.
 
 ## 3. Comandos
 
-Todos rodam dentro de `core/`: `npx giz <comando> <pasta-do-projeto>` (o mesmo que `npm run giz -- <comando> ...`
-ou `node src/presentation/cli/giz.ts <comando> ...`).
+Todos rodam dentro de `core/`: `npx gizzy <comando> <pasta-do-projeto>` (o mesmo que `npm run gizzy -- <comando> ...`
+ou `node src/presentation/cli/gizzy.ts <comando> ...`).
 
 | Comando | O que faz |
 |---|---|
@@ -85,7 +85,7 @@ ou `node src/presentation/cli/giz.ts <comando> ...`).
 | `produce <pasta>` | Faz tudo em ordem: `check`, vozes, linha do tempo, render e legendas. Para no primeiro erro do `check`. |
 | `sheet <rig> [personagem.json]` | Desenha a ficha de um rig (poses, expressões, bocas) em `output/sheet-<nome>.png`. |
 | `setup [--defaults] [--dry-run]` | A configuração guiada desta máquina (seção 1). `--defaults` aceita todas as respostas padrão. |
-| `models [--whisper]` | Baixa agora o modelo de voz do `giz.config.json` (e o Whisper, com `--whisper`). |
+| `models [--whisper]` | Baixa agora o modelo de voz do `gizzycera.config.json` (e o Whisper, com `--whisper`). |
 | `gpu info \| install` | Mostra o que a configuração da GPU vê, ou instala o provider CUDA e as bibliotecas da NVIDIA. |
 | `qa asr <pasta>` | O "ouvido" automático: o Whisper transcreve cada voz e conta as palavras erradas contra a legenda; grava `output/asr.txt` e `output/asr.json`. |
 | `qa asr-aggregate <pasta>` | Junta os `output/asr.json` dos projetos de uma pasta (as aulas de um curso) e lista as palavras erradas em duas ou mais. |
@@ -101,11 +101,11 @@ ou `node src/presentation/cli/giz.ts <comando> ...`).
 | `keys test <anthropic\|openai\|gemini>` | Faz **uma** chamada real e mínima (frações de centavo) para conferir a chave e responde `ok` ou o erro. |
 
 As chaves das IAs de texto vêm de `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` e `GEMINI_API_KEY`, ou de
-`~/.config/giz/<serviço>.key`. O modelo de cada uma muda com `GIZ_ANTHROPIC_MODEL`, `GIZ_OPENAI_MODEL` e
-`GIZ_GEMINI_MODEL` (padrões: `claude-sonnet-5-5`, `gpt-6.2-astra` e `gemini-3.8-flash`).
+`~/.config/gizzycera/<serviço>.key`. O modelo de cada uma muda com `GIZZY_ANTHROPIC_MODEL`, `GIZZY_OPENAI_MODEL` e
+`GIZZY_GEMINI_MODEL` (padrões: `claude-sonnet-5-5`, `gpt-6.2-astra` e `gemini-3.8-flash`).
 
-As IAs de imagem usam `OPENAI_API_KEY`, `GEMINI_API_KEY` e `FAL_KEY` (ou `~/.config/giz/fal.key`). O modelo muda com
-`GIZ_OPENAI_IMAGE_MODEL`, `GIZ_GEMINI_IMAGE_MODEL` e `GIZ_FAL_IMAGE_MODEL` (padrões: `gpt-image-2.6-sunburst`,
+As IAs de imagem usam `OPENAI_API_KEY`, `GEMINI_API_KEY` e `FAL_KEY` (ou `~/.config/gizzycera/fal.key`). O modelo muda com
+`GIZZY_OPENAI_IMAGE_MODEL`, `GIZZY_GEMINI_IMAGE_MODEL` e `GIZZY_FAL_IMAGE_MODEL` (padrões: `gpt-image-2.6-sunburst`,
 `gemini-nano-banana-2.1` e `fal-ai/flux-2-pro`). O custo estimado é por imagem, na tabela de preços de cada serviço;
 o do GPT Image é uma aproximação (a OpenAI não publica os tokens por imagem dos modelos atuais).
 
@@ -128,9 +128,9 @@ em `<pasta>.draft/` (`answer.json` e `problems.txt`), para corrigir à mão. Nen
 Exemplos:
 
 ```bash
-npx giz check examples/coupon-lesson/pt-BR
-npx giz produce examples/internet-story/en
-npx giz sheet giz examples/internet-story/pt-BR/cast/bia.json
+npx gizzy check examples/coupon-lesson/pt-BR
+npx gizzy produce examples/internet-story/en
+npx gizzy sheet gizzy examples/internet-story/pt-BR/cast/bia.json
 ```
 
 Para ver um quadro só, sem renderizar o vídeo inteiro, rode `build` e depois:
@@ -167,16 +167,16 @@ npx remotion still src/presentation/remotion/index.ts Video quadro.png \
 | `brand` | não | texto | Uma marca no canto superior esquerdo. Só aparece em aula 16:9. |
 | `cast` | sim | lista de ids | Quem participa. Cada id precisa de um `cast/<id>.json`. |
 | `voice.provider` | sim | `qwen`, `recording`, `elevenlabs`, `fish` | `qwen`: voz local gerada na GPU (ou CPU). `recording`: você grava cada fala em `recordings/<id-da-fala>.wav` (WAV PCM de 16 bits); o `check` avisa sobre gravação ausente ou inválida, e uma gravação refeita gera a fala de novo. `elevenlabs` e `fish`: os serviços pagos (veja abaixo). |
-| `style` | não | `painted-2d`, `flat-vector`, `watercolor`, `chalk` | O estilo dos cenários gerados por IA (`giz images`), igual em todas as cenas. Sem ele, `painted-2d`. |
-| `imageProvider` | não | `openai`, `gemini`, `fal` | A IA de imagem do projeto, para o `giz images`. |
-| `voice.model` | não | `0.6b`, `1.7b` | O modelo Qwen. O `1.7b` é mais natural e é o único que segue o `style` da voz. Sem ele, vale o `giz.config.json`. Trocar o modelo aqui gera as vozes de novo. |
+| `style` | não | `painted-2d`, `flat-vector`, `watercolor`, `chalk` | O estilo dos cenários gerados por IA (`gizzy images`), igual em todas as cenas. Sem ele, `painted-2d`. |
+| `imageProvider` | não | `openai`, `gemini`, `fal` | A IA de imagem do projeto, para o `gizzy images`. |
+| `voice.model` | não | `0.6b`, `1.7b` | O modelo Qwen. O `1.7b` é mais natural e é o único que segue o `style` da voz. Sem ele, vale o `gizzycera.config.json`. Trocar o modelo aqui gera as vozes de novo. |
 
 **Serviços de voz pagos.** Com `elevenlabs` ou `fish`, o `voice.id` de cada personagem é o id da voz no serviço. A
-chave vem de `ELEVENLABS_API_KEY` / `FISH_API_KEY` ou de `~/.config/giz/elevenlabs.key` / `~/.config/giz/fish.key`
-(fora do repositório; o giz nunca a mostra). Falhas de rede são tentadas de novo até 4 vezes, e respostas 429 e 5xx
-até 3. Na ElevenLabs, cada fim de frase e dois-pontos ganha uma pausa `<break>` de 0,15 s (`GIZ_SENTENCE_PAUSE`;
-vírgula: `GIZ_COMMA_PAUSE`, 0 por padrão). O modelo: `GIZ_ELEVENLABS_MODEL` (padrão `eleven_multilingual_v2`) e
-`GIZ_FISH_MODEL` (padrão `s1`). Os nomes antigos do motor (`ELEVEN_MODEL`, `FISH_MODEL`, `PAUSA_PONTO`,
+chave vem de `ELEVENLABS_API_KEY` / `FISH_API_KEY` ou de `~/.config/gizzycera/elevenlabs.key` / `~/.config/gizzycera/fish.key`
+(fora do repositório; o Gizzycera nunca a mostra). Falhas de rede são tentadas de novo até 4 vezes, e respostas 429 e 5xx
+até 3. Na ElevenLabs, cada fim de frase e dois-pontos ganha uma pausa `<break>` de 0,15 s (`GIZZY_SENTENCE_PAUSE`;
+vírgula: `GIZZY_COMMA_PAUSE`, 0 por padrão). O modelo: `GIZZY_ELEVENLABS_MODEL` (padrão `eleven_multilingual_v2`) e
+`GIZZY_FISH_MODEL` (padrão `s1`). Os nomes antigos do motor (`ELEVEN_MODEL`, `FISH_MODEL`, `PAUSA_PONTO`,
 `PAUSA_VIRGULA`) também valem. Trocar modelo ou pausa gera as vozes de novo.
 
 **Dicionário de pronúncia.** Cada serviço tem o seu, na pasta do projeto: `pronunciation.json` (Qwen),
@@ -191,7 +191,7 @@ Mudar o dicionário gera de novo só as falas que ele afeta.
 {
   "id": "bia",
   "name": "Bia",
-  "rig": "giz",
+  "rig": "gizzy",
   "parameters": { "outfit": "hoodie", "outfitColor": "#8b5fbf", "headwear": "headphones", "skin": "deep", "hair": "afro" },
   "voice": {
     "id": "vivian",
@@ -227,13 +227,14 @@ Um narrador, só voz:
 ## 6. Rigs e parâmetros
 
 O `check` recusa um parâmetro que o rig não tem, um valor fora da lista ou uma cor que não é `#rrggbb`, e diz o
-arquivo, o campo e o valor. Veja um rig desenhado com `giz sheet <rig>`.
+arquivo, o campo e o valor. Veja um rig desenhado com `gizzy sheet <rig>`.
 
-### `giz` (estilo giz, o padrão da casa)
+### `gizzy` (estilo Gizzy, o padrão da casa)
 
-O visual próprio do giz: cabeça colorida com tom de pele, contorno de giz (um traço esbranquiçado levemente
+O visual próprio do Gizzycera: cabeça colorida com tom de pele, contorno de giz (um traço esbranquiçado levemente
 irregular, igual em todo quadro), olhos arredondados com íris colorida, pupila e brilho, um pontinho de nariz e, se
-quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vira sorriso fechado).
+quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vira sorriso fechado). Um personagem de
+antes da mudança de nome, com `"rig": "giz"`, continua funcionando: é lido como `gizzy` (e o Estúdio grava `gizzy`).
 
 | Parâmetro | Tipo | Padrão | Valores |
 |---|---|---|---|
@@ -256,7 +257,7 @@ quiser, bochechas e sardas. Quem só escuta fica de boca fechada (um sorriso vir
 | `eyeScale` | número | `1` | de `0.8` a `1.4` |
 
 ```json
-{ "rig": "giz", "parameters": { "skin": "tan", "headShape": "soft-square", "eyeColor": "#4c9a5a", "outfit": "hoodie", "hair": "short", "glasses": true } }
+{ "rig": "gizzy", "parameters": { "skin": "tan", "headShape": "soft-square", "eyeColor": "#4c9a5a", "outfit": "hoodie", "hair": "short", "glasses": true } }
 ```
 
 Roupas (`outfit`), cada uma com a sua paleta:
@@ -484,7 +485,7 @@ de 5% de diferença) gera um aviso, porque o render corta as bordas para cobrir 
 { "background": { "image": "images/praia.png", "vector": "field" } }
 ```
 
-**Cenário gerado por IA.** Com `generate`, o `giz images` cria a imagem a partir do `prompt` (no estilo do projeto, ou
+**Cenário gerado por IA.** Com `generate`, o `gizzy images` cria a imagem a partir do `prompt` (no estilo do projeto, ou
 no `style` da cena) e grava `scenes/<id-da-fala>.png`, já na proporção do vídeo e 12% maior que o quadro (a folga da
 câmera). O pedido à IA deixa livre o lugar onde os personagens ficam, sem texto, marcas ou lugares reais. Até a imagem
 existir, o `check` avisa e o vídeo usa o fundo vetorial. Só a cena de uma fala aceita `generate` (não um `beat`):
@@ -749,7 +750,7 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
 - O código fica em inglês (identificadores, arquivos, chaves dos JSON do projeto, subcomandos). Os textos que a pessoa
   usuária vê ficam em pt-BR.
 - Render: `@remotion/bundler` e `@remotion/renderer` chamados direto (sem `npx`). A pasta pública do render é
-  temporária: os sons de `public/sounds/` (sintetizados por `giz sounds`) mais as vozes e as imagens de cenário do
+  temporária: os sons de `public/sounds/` (sintetizados por `gizzy sounds`) mais as vozes e as imagens de cenário do
   projeto, no mesmo caminho relativo.
 - A voz Qwen3-TTS fica em `src/infrastructure/voice/qwen/` (tokenizador, embeddings, sessões ONNX, talker, code
   predictor). `QwenVoice` é carregada com `import()` só quando uma fala é gerada (`composition/voices.ts`): os outros
@@ -757,14 +758,14 @@ O texto da legenda é sempre o `text` da fala, com os colchetes removidos. Não 
   `process.dlopen`; o ONNX Runtime 1.31.1 pede CUDA 13. O vocoder tenta a GPU e, na falha conhecida do nó `Pad` do
   export, passa para a CPU e fica lá.
 - O pacote instala com `ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm install` (sem o provider CUDA, ~270 MB); o
-  `giz setup` (ou `giz gpu install`) baixa o provider quando a GPU é escolhida.
-- Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-giz.png --props='{"rig":"giz"}'`.
+  `gizzy setup` (ou `gizzy gpu install`) baixa o provider quando a GPU é escolhida.
+- Ficha de um rig pelo Remotion: `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-gizzy.png --props='{"rig":"gizzy"}'`.
   Acrescente `"character":"cast/<id>.json"` e `--public-dir=<projeto>` para usar os parâmetros de um personagem.
 - Galeria de elencos prontos (uma por época), com os presets como pasta pública:
   `npx remotion still src/presentation/remotion/index.ts PresetSheet output/presets-past.png --props=casts/presets/sheets/past.json --public-dir=casts/presets`
   (troque `past` por `present`, `future` ou `creatures`). A composição `PresetSheet` lê os arquivos listados em `characters`.
   A ficha de uma criatura:
-  `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-zombie.png --props='{"rig":"giz","character":"creatures/zuzu.json"}' --public-dir=casts/presets`.
+  `npx remotion still src/presentation/remotion/index.ts CharacterSheet output/sheet-zombie.png --props='{"rig":"gizzy","character":"creatures/zuzu.json"}' --public-dir=casts/presets`.
 - Galeria de fundos (todos os fundos vetoriais em miniatura, uma folha por proporção):
   `npx remotion still src/presentation/remotion/index.ts BackgroundGallery output/backgrounds-16x9.png --props='{"aspect":"16:9"}'` e
   `npx remotion still src/presentation/remotion/index.ts BackgroundGallery output/backgrounds-9x16.png --props='{"aspect":"9:16"}'`.

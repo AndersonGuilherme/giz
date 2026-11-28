@@ -4,7 +4,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'field'>;
 
-// An open field on a warm afternoon, giz style: teal sky with chalk clouds, layered hills with chalk ridges, a meadow
+// An open field on a warm afternoon, Gizzy style: teal sky with chalk clouds, layered hills with chalk ridges, a meadow
 // with a lone tree, a fence and flowers.
 
 const Cloud: FC<Readonly<{ color: string; seed: string }>> = ({ color, seed }) => (

@@ -16,7 +16,7 @@ const props: VideoProps = {
 };
 
 test('writeSrt saves the srt with the times of the words, creating the folder', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-srt-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-srt-'));
   try {
     const file = join(folder, 'render', 'captions.srt');
     await writeSrt(props, file);

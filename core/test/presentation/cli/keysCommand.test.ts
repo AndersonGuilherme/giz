@@ -10,16 +10,16 @@ const CORE = fileURLToPath(new URL('../../../', import.meta.url));
 const KEY_VARIABLES = /^(ANTHROPIC|OPENAI|GEMINI|ELEVENLABS|FISH)_API_KEY$/;
 
 // A clean environment: a temporary HOME and none of the real key variables.
-function giz(args: string[], extra: Record<string, string> = {}) {
-  const home = mkdtempSync(join(tmpdir(), 'giz-keys-home-'));
-  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
-  writeFileSync(join(home, '.config', 'giz', 'fish.key'), 'fish-do-arquivo-555\n');
+function gizzy(args: string[], extra: Record<string, string> = {}) {
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-keys-home-'));
+  mkdirSync(join(home, '.config', 'gizzycera'), { recursive: true });
+  writeFileSync(join(home, '.config', 'gizzycera', 'fish.key'), 'fish-do-arquivo-555\n');
   const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !KEY_VARIABLES.test(name)));
-  return spawnSync(process.execPath, ['src/presentation/cli/giz.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home, ...extra } });
+  return spawnSync(process.execPath, ['src/presentation/cli/gizzy.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home, ...extra } });
 }
 
 test('keys list shows which services have a key and where to put the missing ones, never the values', () => {
-  const run = giz(['keys', 'list'], { ANTHROPIC_API_KEY: 'sk-ant-secreta-111' });
+  const run = gizzy(['keys', 'list'], { ANTHROPIC_API_KEY: 'sk-ant-secreta-111' });
   assert.equal(run.status, 0);
   assert.match(run.stdout, /anthropic: chave configurada/);
   assert.match(run.stdout, /fish: chave configurada/);
@@ -30,7 +30,7 @@ test('keys list shows which services have a key and where to put the missing one
 });
 
 test('keys test without a key fails readably (exit 1) before any call', () => {
-  const run = giz(['keys', 'test', 'gemini']);
+  const run = gizzy(['keys', 'test', 'gemini']);
   assert.equal(run.status, 1);
   assert.match(run.stderr, /chave da gemini não encontrada: defina GEMINI_API_KEY/);
   assert.doesNotMatch(run.stderr, /at .*\.ts:\d+/);
@@ -38,9 +38,9 @@ test('keys test without a key fails readably (exit 1) before any call', () => {
 
 test('keys with a wrong action or provider prints the usage and exits with 2', () => {
   for (const args of [['keys'], ['keys', 'test'], ['keys', 'test', 'fish'], ['keys', 'apagar']]) {
-    const run = giz(args);
+    const run = gizzy(args);
     assert.equal(run.status, 2, args.join(' '));
-    assert.match(run.stderr, /uso: giz keys list \| test <anthropic\|openai\|gemini>/);
+    assert.match(run.stderr, /uso: gizzy keys list \| test <anthropic\|openai\|gemini>/);
   }
 });
 
@@ -71,3 +71,4 @@ test('keys test makes a single attempt: a 503 is not retried', async () => {
   await assert.rejects(keysCommand(['test', 'gemini'], { fetch, keys: { get: () => 'k', hint: () => '' } }), /Google Gemini: serviço indisponível \(503\)/);
   assert.equal(count, 1);
 });
+

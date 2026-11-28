@@ -18,7 +18,7 @@ function npy(values: number[], shape: number[]): Buffer {
 }
 
 test('a float32 .npy file: data and shape', () => {
-  const path = join(mkdtempSync(join(tmpdir(), 'giz-npy-')), 'a.npy');
+  const path = join(mkdtempSync(join(tmpdir(), 'gizzy-npy-')), 'a.npy');
   writeFileSync(path, npy([1, 2, 3, 4, 5, 6], [2, 3]));
   const array = readNpy(path);
   assert.deepEqual(array.shape, [2, 3]);
@@ -26,7 +26,7 @@ test('a float32 .npy file: data and shape', () => {
 });
 
 test('the tokenizer: special tokens as one id, BPE merges by rank, bytes mapped as GPT-2 (space is Ġ)', () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-bpe-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-bpe-'));
   writeFileSync(join(folder, 'vocab.json'), JSON.stringify({ o: 0, i: 1, oi: 2, 'Ġ': 3, a: 4, 'Ġa': 5, '!': 6 }));
   writeFileSync(join(folder, 'merges.txt'), '#version: 0.2\no i\nĠ a\n');
   const tokenizer = new BpeTokenizer(folder);

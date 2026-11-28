@@ -11,7 +11,7 @@ type Zip = { addFile(name: string, data: Buffer): void; writeZip(path: string): 
 const AdmZip = ortRequire('adm-zip') as new () => Zip;
 
 test('the entries of a zip are read from its central directory and one is streamed out whole (deflated or stored)', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-zip-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-zip-'));
   const zip = new AdmZip();
   const big = Buffer.alloc(200_000, 'abc');
   zip.addFile('a/big.bin', big);
@@ -26,7 +26,7 @@ test('the entries of a zip are read from its central directory and one is stream
 });
 
 test('a file that is not a zip fails readably', async () => {
-  const path = join(mkdtempSync(join(tmpdir(), 'giz-zip-')), 'no.zip');
+  const path = join(mkdtempSync(join(tmpdir(), 'gizzy-zip-')), 'no.zip');
   writeFileSync(path, 'not a zip at all');
   await assert.rejects(zipEntriesOf(path), /não é um arquivo zip/);
 });

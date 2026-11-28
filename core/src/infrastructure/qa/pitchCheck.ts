@@ -3,7 +3,7 @@ import type { Line } from '../../domain/script/Line.ts';
 import { endRise } from '../../domain/speech/Pitch.ts';
 import { lineAudio } from './lineAudio.ts';
 
-// `giz qa pitch`: how much the end of each question goes up (+) or down (−), in semitones. Port of the motor's
+// `gizzy qa pitch`: how much the end of each question goes up (+) or down (−), in semitones. Port of the motor's
 // scripts/pitch-check.ts.
 async function questionRow(folder: string, line: Line): Promise<string | undefined> {
   const spoken = line.pronunciation();

@@ -10,7 +10,7 @@ import { voiceWorkshop } from '../../../src/presentation/cli/composition/voiceWo
 import { FakeVoice } from '../../doubles/FakeVoice.ts';
 
 async function copyOfFixture(): Promise<string> {
-  const folder = join(await mkdtemp(join(tmpdir(), 'giz-workshop-')), 'project');
+  const folder = join(await mkdtemp(join(tmpdir(), 'gizzy-workshop-')), 'project');
   await cp('test/fixtures/minimal-project', folder, { recursive: true });
   await rm(join(folder, 'voice'), { recursive: true });
   return folder;
@@ -94,7 +94,7 @@ test('without Whisper downloaded the lines are aligned by the envelope, with the
 test('the real local voice of the workshop opens only a model already downloaded (no implicit download)', async (context) => {
   const { localQwen } = await import('../../../src/presentation/cli/composition/voiceWorkshop.ts');
   context.mock.method(globalThis, 'fetch', async () => assert.fail('no download'));
-  const modelsDir = await mkdtemp(join(tmpdir(), 'giz-no-model-'));
+  const modelsDir = await mkdtemp(join(tmpdir(), 'gizzy-no-model-'));
   const voice = localQwen('0.6b', { model: '1.7b', device: 'cpu', threads: 1, modelsDir });
   const request = { lineId: '1', text: 'Oi.', voice: 'vivian', style: '', language: Language.PORTUGUESE };
   await assert.rejects(voice.generate(request), /modelo de voz .*0\.6B.* não foi baixado: baixe-o em Configurações/);

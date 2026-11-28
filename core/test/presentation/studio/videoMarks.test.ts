@@ -19,7 +19,7 @@ test('a chapter without lines has no mark', () => {
 });
 
 test("the window's media source gives each file of the video its URL, and nothing for any other file", () => {
-  const source = mediaSourceOf({ 'voice/1.wav': 'giz-media://file/a/voice/1.wav' });
-  assert.equal(source('voice/1.wav'), 'giz-media://file/a/voice/1.wav');
+  const source = mediaSourceOf({ 'voice/1.wav': 'gizzy-media://file/a/voice/1.wav' });
+  assert.equal(source('voice/1.wav'), 'gizzy-media://file/a/voice/1.wav');
   assert.equal(source('scenes/9.png'), '');
 });

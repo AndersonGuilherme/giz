@@ -1,8 +1,8 @@
 import { join } from 'node:path';
 
-// The INDIVIDUAL configuration of each giz install (GPU, voices, folders...), in giz.config.json at the repository
-// root. `giz setup` creates it and it stays out of git. The keys are the motor's, so existing installs keep working.
-export type GizConfig = {
+// The INDIVIDUAL configuration of each Gizzycera install (GPU, voices, folders...), in gizzycera.config.json at the repository
+// root. `gizzy setup` creates it and it stays out of git. The keys are the motor's, so existing installs keep working.
+export type GizzyConfig = {
   /** The channel or brand name shown in the corner of the videos. */
   brand: string;
   /** Voice model: '0.6b' (5.9 GB, lighter) or '1.7b' (13.4 GB, better, follows style instructions). */
@@ -29,13 +29,13 @@ export type GizConfig = {
 
 export type Environment = Readonly<Record<string, string | undefined>>;
 
-export function defaultConfig(home: string): GizConfig {
+export function defaultConfig(home: string): GizzyConfig {
   return {
-    brand: 'giz',
+    brand: 'gizzycera',
     model: '0.6b',
     device: 'cpu',
     threads: 0,
-    modelsDir: join(home, '.cache', 'giz'),
+    modelsDir: join(home, '.cache', 'gizzycera'),
     language: 'portuguese',
     voices: { lia: 'vivian', teo: 'dylan' },
     styles: { lia: '', teo: '' },
@@ -45,14 +45,14 @@ export function defaultConfig(home: string): GizConfig {
   };
 }
 
-// Environment variables win (handy for one-off tests): GIZ_MODELS_DIR and GIZ_DEVICE=cpu|cuda.
-function withEnvironment(config: GizConfig, env: Environment): GizConfig {
-  const device = env.GIZ_DEVICE === 'cpu' || env.GIZ_DEVICE === 'cuda' ? env.GIZ_DEVICE : config.device;
-  return { ...config, device, modelsDir: env.GIZ_MODELS_DIR ?? config.modelsDir };
+// Environment variables win (handy for one-off tests): GIZZY_MODELS_DIR and GIZZY_DEVICE=cpu|cuda.
+function withEnvironment(config: GizzyConfig, env: Environment): GizzyConfig {
+  const device = env.GIZZY_DEVICE === 'cpu' || env.GIZZY_DEVICE === 'cuda' ? env.GIZZY_DEVICE : config.device;
+  return { ...config, device, modelsDir: env.GIZZY_MODELS_DIR ?? config.modelsDir };
 }
 
 /** The defaults, then the file keys (nested objects merged key by key), then the environment. */
-export function mergedConfig(file: Partial<GizConfig>, sources: Readonly<{ env: Environment; home: string }>): GizConfig {
+export function mergedConfig(file: Partial<GizzyConfig>, sources: Readonly<{ env: Environment; home: string }>): GizzyConfig {
   const defaults = defaultConfig(sources.home);
   const merged = {
     ...defaults,

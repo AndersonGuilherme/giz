@@ -18,7 +18,7 @@ function fakeFetch(respond: (call: Call) => Response) {
   return { calls, fetch: fetch as typeof globalThis.fetch };
 }
 
-const folder = () => mkdtempSync(join(tmpdir(), 'giz-download-'));
+const folder = () => mkdtempSync(join(tmpdir(), 'gizzy-download-'));
 
 test('downloads into a .part file and renames it when complete; a nested folder is created', async () => {
   const destination = join(folder(), 'a', 'b', 'model.onnx');

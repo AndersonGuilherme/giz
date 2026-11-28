@@ -4,7 +4,7 @@ import type { SetupContext } from './setupContext.ts';
 import { TOTAL_STEPS } from './setupContext.ts';
 import { green, step, yellow } from './prompts.ts';
 
-// Steps 1–3 of `giz setup`: Node, the models folder and the hardware (CPU or NVIDIA GPU).
+// Steps 1–3 of `gizzy setup`: Node, the models folder and the hardware (CPU or NVIDIA GPU).
 const tools = () => import('../composition/tools.ts');
 
 function freeGigabytes(folder: string): number {
@@ -53,7 +53,7 @@ async function offerGpu(context: SetupContext): Promise<void> {
     await installGpu(context);
     context.config.device = 'cuda';
   } catch (error) {
-    console.log(yellow(`⚠ não consegui preparar a GPU: ${(error as Error).message}\n  Seguindo com CPU. Você pode tentar de novo depois com npx giz setup.`));
+    console.log(yellow(`⚠ não consegui preparar a GPU: ${(error as Error).message}\n  Seguindo com CPU. Você pode tentar de novo depois com npx gizzy setup.`));
   }
 }
 

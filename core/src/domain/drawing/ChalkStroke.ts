@@ -31,7 +31,7 @@ function normalAt(points: readonly Point[], index: number): Point {
 }
 
 /**
- * The giz chalk line: an outline redrawn by hand, each point pushed across the outline by a slow seeded wobble of up
+ * The Gizzy chalk line: an outline redrawn by hand, each point pushed across the outline by a slow seeded wobble of up
  * to `amplitude` (in the outline's own units). The same seed always draws the same line, frame after frame.
  */
 export class ChalkStroke {

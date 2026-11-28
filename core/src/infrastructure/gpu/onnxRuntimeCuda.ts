@@ -23,7 +23,7 @@ export const requiredCudaMajor = (): number => cudaMajorIn(readFileSync(provider
 
 /**
  * Downloads the ONNX Runtime CUDA provider (resumable, `onProgress`: its bytes) next to ONNX Runtime, if it is not
- * there yet; with a writable copy (GIZ_ORT_DIR), the library is copied there first.
+ * there yet; with a writable copy (GIZZY_ORT_DIR), the library is copied there first.
  */
 export async function ensureOrtCuda(modelsDir: string, log: (message: string) => void, onProgress: OrtCudaReport['onProgress']): Promise<void> {
   if (ortHasCuda()) return;

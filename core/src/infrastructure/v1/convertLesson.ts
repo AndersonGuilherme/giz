@@ -6,7 +6,7 @@ import { withStartChanges } from './v1SetBeat.ts';
 type Fields = Readonly<Record<string, unknown>>;
 type VoiceModel = '0.6b' | '1.7b';
 
-/** The voice of each presenter (giz.config.json `voices`, `styles` and `model`, as the motor used them). */
+/** The voice of each presenter (gizzycera.config.json `voices`, `styles` and `model`, as the motor used them). */
 export type V1VoiceSettings = Readonly<{
   voices: Readonly<Record<V1Speaker, string>>;
   styles: Readonly<Record<V1Speaker, string>>;

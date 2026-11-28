@@ -8,7 +8,7 @@ import { covers, onEveryHead, EYES_AND_BROWS, pointsOf } from '../headGeometry.t
 const front = (hair: (typeof HAIRS)[number], shape: (typeof HEAD_SHAPES)[number]) =>
   HairStyle.parts(hair, shape).filter(({ layer }) => layer === 'front');
 
-test('the giz hair styles, bald first, short by default', () => {
+test('the Gizzy hair styles, bald first, short by default', () => {
   assert.deepEqual(HAIRS, ['bald', 'short', 'long', 'curly', 'afro', 'braids', 'bun', 'ponytail', 'mohawk']);
   assert.equal(HairStyle.DEFAULT, 'short');
   assert.deepEqual(HairStyle.parts('bald', 'round'), []);

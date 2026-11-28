@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'victorian-street'>;
 
-// A street of the 1800s at dusk, giz style: narrow row houses with bay windows and chimneys, a gable with a round
+// A street of the 1800s at dusk, Gizzy style: narrow row houses with bay windows and chimneys, a gable with a round
 // clock behind the characters, gas lamps, a cobbled street; chalk lines on the houses. A made-up street.
 
 // A house front `wide` × `tall` units standing on (0, 0): roof, chimney, two rows of windows, a door.

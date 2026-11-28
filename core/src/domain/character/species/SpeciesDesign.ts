@@ -12,7 +12,7 @@ export type EyeDesign = Readonly<{ style: EyeStyle; scale: number; droop: number
 export type FloatDesign = Readonly<{ height: number; bob: number; period: number }>;
 
 /**
- * One species of the giz rig, drawn on the same body, so every pose, expression and viseme keeps working.
+ * One species of the gizzy rig, drawn on the same body, so every pose, expression and viseme keeps working.
  * `tone`: its own skin (none: the chosen skin); `legs` false = no legs; `clothed` false = no outfit (the species draws
  * its own body); `fangs`: two small fangs on the mouth; `opacity` < 1 = see-through; `wraps`: the spacing of bandage
  * wraps round the arms and legs (0 = none); `parts`: features on the head.

@@ -5,7 +5,7 @@ import type { ProjectFiles, ProjectFolder } from '../../ports/ProjectFolder.ts';
 import type { ProjectRepository } from '../../ports/ProjectRepository.ts';
 import type { CheckProject } from '../CheckProject.ts';
 
-/** What reviews a draft as `giz check` would: the real loader (schemas, cast, rigs) and the check. */
+/** What reviews a draft as `gizzy check` would: the real loader (schemas, cast, rigs) and the check. */
 export type Reviewers = Readonly<{ folder: ProjectFolder; repository: ProjectRepository; check: CheckProject }>;
 
 // A refused load lists every problem (file › field: message); anything else is a bug and goes up.

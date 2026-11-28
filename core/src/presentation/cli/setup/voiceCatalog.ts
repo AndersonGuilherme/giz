@@ -1,6 +1,6 @@
 import type { Option } from './prompts.ts';
 
-// pt-BR pronunciation error measured with Whisper (`giz qa voices`, 4 sentences): lower = clearer.
+// pt-BR pronunciation error measured with Whisper (`gizzy qa voices`, 4 sentences): lower = clearer.
 export const VOICES: ReadonlyArray<Option<string> & Readonly<{ gender: 'f' | 'm' }>> = [
   { value: 'vivian', label: 'vivian   — feminina, jovem e marcante · pt-BR muito claro (erro 2,6%)', gender: 'f' },
   { value: 'ono_anna', label: 'ono_anna — feminina, leve e brincalhona · pt-BR muito claro (erro 2,6%)', gender: 'f' },

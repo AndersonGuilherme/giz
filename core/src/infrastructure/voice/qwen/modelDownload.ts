@@ -44,7 +44,7 @@ export const modelReady = (repository: string, modelsDir: string): boolean => ex
 
 /** The folder of a model already downloaded; never downloads: without it, a readable error. */
 export function openDownloadedModel(repository: string, modelsDir: string): string {
-  if (!modelReady(repository, modelsDir)) throw new Error(`o modelo de voz ${repository} não foi baixado: baixe-o em Configurações (ou \`giz models\`)`);
+  if (!modelReady(repository, modelsDir)) throw new Error(`o modelo de voz ${repository} não foi baixado: baixe-o em Configurações (ou \`gizzy models\`)`);
   return modelFolder(repository, modelsDir);
 }
 

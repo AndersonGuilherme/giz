@@ -26,7 +26,7 @@ const isInside = (folder: string, path: string): boolean => {
 
 // The safety net under the schema: nothing is copied from outside its project nor to outside the public folder.
 function refuseEscape(file: StagedFile): void {
-  const publicFolder = resolve('/giz-public');
+  const publicFolder = resolve('/gizzy-public');
   if (!isInside(publicFolder, resolve(publicFolder, file.at))) throw new Error(`"${file.at}" sai da pasta pública do render`);
   if (file.project && !isInside(resolve(file.project), resolve(file.from))) throw new Error(`${file.from} está fora da pasta do projeto (${file.project})`);
 }
@@ -50,7 +50,7 @@ async function copyInto(folder: string, sources: RemotionSources, files: readonl
  */
 export async function withPublicDir<T>(sources: RemotionSources, files: readonly StagedFile[], use: (publicDir: string) => Promise<T>): Promise<T> {
   files.forEach(refuseEscape);
-  const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'giz-public-'));
+  const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'gizzy-public-'));
   try {
     await copyInto(folder, sources, files);
     return await use(folder);
@@ -78,7 +78,7 @@ const neededByRender = (path: string): boolean => !path.endsWith('.map') || base
 // A copy of the prebuilt bundle with the staged files in its public folder (where `staticFile` asks for them).
 async function withPrebuilt<T>(sources: RemotionSources & { prebuilt: string }, files: readonly StagedFile[], use: (serveUrl: string) => Promise<T>): Promise<T> {
   files.forEach(refuseEscape);
-  const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'giz-bundle-'));
+  const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'gizzy-bundle-'));
   try {
     await cp(sources.prebuilt, folder, { recursive: true, filter: neededByRender });
     await writable(folder);

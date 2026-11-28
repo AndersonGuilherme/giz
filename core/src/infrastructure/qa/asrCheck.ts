@@ -8,9 +8,9 @@ import { WHISPER_LANGUAGES } from '../alignment/whisperModel.ts';
 import type { Transcriber } from './WhisperTranscriber.ts';
 import { lineAudio } from './lineAudio.ts';
 
-// The automatic ear (`giz qa asr`): transcribes each line with Whisper and counts the words it gets wrong; the most
+// The automatic ear (`gizzy qa asr`): transcribes each line with Whisper and counts the words it gets wrong; the most
 // missed words are candidates for the pronunciation dictionary. Port of the motor's scripts/asr-check.ts.
-/** One heard line in output/asr.json (read by `giz qa asr-aggregate`). */
+/** One heard line in output/asr.json (read by `gizzy qa asr-aggregate`). */
 export type HeardLine = Readonly<{ line: string; reference: string; heard: string; errors: number; words: number }>;
 type Check = Readonly<{ folder: string; project: Project; transcriber: Transcriber }>;
 type Totals = { errors: number; words: number; questions: number; heardQuestions: number; missed: Map<string, number>; report: string[] };

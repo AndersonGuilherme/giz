@@ -85,7 +85,7 @@ test('a fresh script: voices and images are ready (all missing), the video is re
   assert.deepEqual(status.stages.of('scenarios').missing, ['1', '3']);
 });
 
-test('after the voices and images are made (the same hashes as giz voice and giz images), they are done', async () => {
+test('after the voices and images are made (the same hashes as gizzy voice and gizzy images), they are done', async () => {
   const { stages, makeAll, reader } = build();
   await makeAll();
   reader.rendered = { made: true, olderThanInputs: false };
@@ -197,13 +197,13 @@ test('a scene pointing to the person own image counts as done, not pending, and 
   assert.equal(status.pending?.images.length, 1);
 });
 
-test('a scenes/<id>.png that giz images did not make blocks only that scene, with the readable reason; status does not fail', async () => {
+test('a scenes/<id>.png that gizzy images did not make blocks only that scene, with the readable reason; status does not fail', async () => {
   const { stages, scenarioImages } = build();
   scenarioImages.foreign.add('3');
   const status = await stages.run('/p');
   const scenarios = status.stages.of('scenarios');
   assert.deepEqual([scenarios.state, scenarios.blocked, scenarios.missing], ['stale', ['3'], ['1']]);
-  assert.match(scenarios.problems[0]!, /^cena da fala 3: scenes\/3\.png já existe\(m\) e não foi\(ram\) feito\(s\) pelo giz images/);
-  assert.equal(status.pending?.images.length, 1, 'the blocked scene is not priced: giz images will not make it as it is');
+  assert.match(scenarios.problems[0]!, /^cena da fala 3: scenes\/3\.png já existe\(m\) e não foi\(ram\) feito\(s\) pelo gizzy images/);
+  assert.equal(status.pending?.images.length, 1, 'the blocked scene is not priced: gizzy images will not make it as it is');
   assert.equal(status.stages.of('voices').state, 'ready');
 });

@@ -17,7 +17,7 @@ const SETUP = {
 // A lesson still in the v1 format (roteiro.ts) is converted into a temporary folder first; a converted one is checked as it is.
 async function projectFolder(lesson: string): Promise<string> {
   if (!existsSync(join(lesson, 'roteiro.ts'))) return lesson;
-  const output = mkdtempSync(join(tmpdir(), 'giz-solid-'));
+  const output = mkdtempSync(join(tmpdir(), 'gizzy-solid-'));
   await convertLessonFolder({ lesson, output }, SETUP);
   return output;
 }

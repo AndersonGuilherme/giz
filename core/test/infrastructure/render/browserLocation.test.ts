@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { join } from 'node:path';
 import { headlessShellIn } from '../../../src/infrastructure/render/browserLocation.ts';
 
-const PACKAGE = '/opt/giz/core';
+const PACKAGE = '/opt/gizzycera/core';
 const shells = (platform: string) => join(PACKAGE, 'node_modules', '.remotion', 'chrome-headless-shell', platform, `chrome-headless-shell-${platform}`);
 
 test('the Chrome Headless Shell is looked up in the package folder, not in the working directory', () => {

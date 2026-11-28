@@ -9,11 +9,11 @@ import type { AiOverrides } from '../composition/aiOverrides.ts';
 import { dollars } from '../dollars.ts';
 import { UsageError } from '../usage.ts';
 
-// `giz new` and `giz script`: the script written by a text AI. The composition part loads on demand.
+// `gizzy new` and `gizzy script`: the script written by a text AI. The composition part loads on demand.
 const script = () => import('../composition/script.ts');
 const OPTIONS_USAGE = `[--provider ${TEXT_PROVIDERS.join('|')}] [--estimate]`;
-const NEW_USAGE = `uso: giz new --idea <ideia.json> <pasta> ${OPTIONS_USAGE}`;
-const SCRIPT_USAGE = `uso: giz script <pasta> ${OPTIONS_USAGE}`;
+const NEW_USAGE = `uso: gizzy new --idea <ideia.json> <pasta> ${OPTIONS_USAGE}`;
+const SCRIPT_USAGE = `uso: gizzy script <pasta> ${OPTIONS_USAGE}`;
 const OPTIONS = { idea: { type: 'string' }, provider: { type: 'string' }, estimate: { type: 'boolean' } } as const;
 
 type Options = Readonly<{ folder: string; idea?: string; provider?: string; estimate: boolean }>;
@@ -76,7 +76,7 @@ function report(folder: string, { files, repairs, usage }: ScriptResult): void {
   const lines = (files.script as { lines?: unknown[] }).lines?.length ?? 0;
   console.log(`roteiro: ${lines} fala(s), ${files.cast.length} personagem(ns), ${repairs} rodada(s) de correção → ${folder}`);
   console.log(`uso: ${usage.calls} chamada(s), ${usage.inputTokens} tokens de entrada, ${usage.outputTokens} de saída`);
-  console.log(`próximo passo: giz check ${folder}`);
+  console.log(`próximo passo: gizzy check ${folder}`);
 }
 
 // The estimate always comes first; with --estimate nothing is called.
@@ -93,16 +93,16 @@ async function generated(idea: Idea, target: ScriptTarget, options: Options & { 
 
 const exists = (path: string) => access(path).then(() => true, () => false);
 
-/** `giz new --idea <idea.json> <folder>`: a new project written by the text AI; the idea is kept as idea.json. */
+/** `gizzy new --idea <idea.json> <folder>`: a new project written by the text AI; the idea is kept as idea.json. */
 export async function newCommand(args: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const options = optionsOf(args, NEW_USAGE);
   if (!options.idea) throw new UsageError(NEW_USAGE);
-  if (await exists(join(options.folder, 'project.json'))) throw new Error(`já existe um projeto em ${options.folder} (para refazer o roteiro: giz script ${options.folder})`);
+  if (await exists(join(options.folder, 'project.json'))) throw new Error(`já existe um projeto em ${options.folder} (para refazer o roteiro: gizzy script ${options.folder})`);
   const idea = await ideaFile(resolve(options.idea));
   await generated(idea, { folder: options.folder }, { ...options, overrides });
 }
 
-/** `giz script <folder>`: the script of an existing project written again from its idea.json, keeping its voice. */
+/** `gizzy script <folder>`: the script of an existing project written again from its idea.json, keeping its voice. */
 export async function scriptCommand(args: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const options = optionsOf(args, SCRIPT_USAGE);
   if (options.idea) throw new UsageError(SCRIPT_USAGE);

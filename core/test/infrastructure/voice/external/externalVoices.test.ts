@@ -48,15 +48,15 @@ test('the settings come from the environment, with the motor defaults and the mo
   assert.deepEqual(settings, { elevenLabsModel: 'eleven_multilingual_v2', fishModel: 's1', pauses: { sentence: 0.15, comma: 0 } });
   const legacy = externalSettings({ ELEVEN_MODEL: 'eleven_v3', FISH_MODEL: 's2', PAUSA_PONTO: '0.3', PAUSA_VIRGULA: '0.05' });
   assert.deepEqual(legacy, { elevenLabsModel: 'eleven_v3', fishModel: 's2', pauses: { sentence: 0.3, comma: 0.05 } });
-  const english = externalSettings({ GIZ_ELEVENLABS_MODEL: 'a', ELEVEN_MODEL: 'b', GIZ_SENTENCE_PAUSE: '0.2', PAUSA_PONTO: '0.3' });
+  const english = externalSettings({ GIZZY_ELEVENLABS_MODEL: 'a', ELEVEN_MODEL: 'b', GIZZY_SENTENCE_PAUSE: '0.2', PAUSA_PONTO: '0.3' });
   assert.equal(english.elevenLabsModel, 'a');
   assert.equal(english.pauses.sentence, 0.2);
 });
 
-test('the key comes from the environment first, then from ~/.config/giz/<service>.key (trimmed)', () => {
-  const home = mkdtempSync(join(tmpdir(), 'giz-home-'));
-  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
-  writeFileSync(join(home, '.config', 'giz', 'fish.key'), `  ${KEY}\n`);
+test('the key comes from the environment first, then from ~/.config/gizzycera/<service>.key (trimmed)', () => {
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-home-'));
+  mkdirSync(join(home, '.config', 'gizzycera'), { recursive: true });
+  writeFileSync(join(home, '.config', 'gizzycera', 'fish.key'), `  ${KEY}\n`);
   assert.equal(apiKeyOf('fish', { env: {}, home }), KEY);
   assert.equal(apiKeyOf('fish', { env: { FISH_API_KEY: 'da-env' }, home }), 'da-env');
   assert.throws(() => apiKeyOf('elevenlabs', { env: {}, home }), /ELEVENLABS_API_KEY.*elevenlabs\.key/);
@@ -133,9 +133,9 @@ test('a missing key fails at once, without retrying or calling the service', asy
 });
 
 test('an empty or blank key file is a missing key, with the same readable error', () => {
-  const home = mkdtempSync(join(tmpdir(), 'giz-home-'));
-  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
-  writeFileSync(join(home, '.config', 'giz', 'elevenlabs.key'), '  \n');
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-home-'));
+  mkdirSync(join(home, '.config', 'gizzycera'), { recursive: true });
+  writeFileSync(join(home, '.config', 'gizzycera', 'elevenlabs.key'), '  \n');
   assert.throws(() => apiKeyOf('elevenlabs', { env: { ELEVENLABS_API_KEY: '  ' }, home }), /chave da elevenlabs não encontrada: defina ELEVENLABS_API_KEY ou crie .*elevenlabs\.key/);
 });
 
@@ -151,10 +151,10 @@ test('the final network failure names the real cause (code or message of error.c
 
 test('a pause that is not a number keeps the default and warns', () => {
   const warnings: string[] = [];
-  const result = externalSettings({ GIZ_SENTENCE_PAUSE: 'meio', PAUSA_VIRGULA: '' }, (message) => warnings.push(message));
+  const result = externalSettings({ GIZZY_SENTENCE_PAUSE: 'meio', PAUSA_VIRGULA: '' }, (message) => warnings.push(message));
   assert.deepEqual(result.pauses, { sentence: 0.15, comma: 0 });
   assert.equal(warnings.length, 2);
-  assert.match(warnings[0]!, /GIZ_SENTENCE_PAUSE="meio" não é um número de segundos; usando 0\.15/);
+  assert.match(warnings[0]!, /GIZZY_SENTENCE_PAUSE="meio" não é um número de segundos; usando 0\.15/);
 });
 
 test('the estimate prices the text the service bills, with the model of the settings, and reads no key nor calls anything', () => {

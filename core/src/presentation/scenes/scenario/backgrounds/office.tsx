@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'office'>;
 
-// A modern office, giz style: a wide window on a made-up skyline behind the characters, a board of sticky notes, desks
+// A modern office, Gizzy style: a wide window on a made-up skyline behind the characters, a board of sticky notes, desks
 // with screens on the sides, pendant lamps and a carpet floor; chalk lines on the furniture.
 
 // The window: glass, a skyline of plain towers and the mullions, `wide` × 300 units centered on (0, 0); the scene gives

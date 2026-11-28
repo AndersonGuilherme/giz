@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'graveyard'>;
 
-// An old churchyard at night, spooky but cute, giz style: a big moon clear of the HUD, a little chapel with warm
+// An old churchyard at night, spooky but cute, Gizzy style: a big moon clear of the HUD, a little chapel with warm
 // windows behind the characters, a curly bare tree, two friendly bats, rounded headstones with a flower carved on
 // them, smiling pumpkin lanterns and bands of fog. No skulls, no bones, nothing gory.
 

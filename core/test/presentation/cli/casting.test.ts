@@ -5,19 +5,19 @@ import { Language } from '../../../src/domain/values/Language.ts';
 import { fromWav } from '../../../src/infrastructure/voice/wav.ts';
 import { FakeVoice } from '../../doubles/FakeVoice.ts';
 
-test('the rig catalog: giz and lia-style with every parameter definition', () => {
+test('the rig catalog: gizzy and lia-style with every parameter definition', () => {
   const rigs = rigCatalog();
-  assert.deepEqual(rigs.map(({ id }) => id), ['giz', 'lia-style']);
-  const giz = rigs[0]!;
-  assert.equal(giz.parameters.species!.type, 'option');
-  assert.ok(giz.parameters.outfit!.options!.includes('hoodie'));
-  assert.deepEqual([giz.parameters.eyeScale!.min, giz.parameters.eyeScale!.max], [0.8, 1.4]);
+  assert.deepEqual(rigs.map(({ id }) => id), ['gizzy', 'lia-style']);
+  const gizzy = rigs[0]!;
+  assert.equal(gizzy.parameters.species!.type, 'option');
+  assert.ok(gizzy.parameters.outfit!.options!.includes('hoodie'));
+  assert.deepEqual([gizzy.parameters.eyeScale!.min, gizzy.parameters.eyeScale!.max], [0.8, 1.4]);
 });
 
-test('a character is checked against the real rigs (a "roxo" skin color on lia-style, an unknown outfit on giz)', () => {
+test('a character is checked against the real rigs (a "roxo" skin color on lia-style, an unknown outfit on gizzy)', () => {
   const base = { id: 'ana', name: 'Ana', voice: { id: 'vivian' }, defaultExpression: 'neutral' };
-  assert.deepEqual(checkCharacter({ ...base, rig: 'giz', parameters: { outfit: 'hoodie', species: 'robot' } }), []);
-  const [outfit] = checkCharacter({ ...base, rig: 'giz', parameters: { outfit: 'tuxedo' } });
+  assert.deepEqual(checkCharacter({ ...base, rig: 'gizzy', parameters: { outfit: 'hoodie', species: 'robot' } }), []);
+  const [outfit] = checkCharacter({ ...base, rig: 'gizzy', parameters: { outfit: 'tuxedo' } });
   assert.equal(outfit!.path, 'parameters.outfit');
   const [skin] = checkCharacter({ ...base, rig: 'lia-style', parameters: { skin: 'roxo' } });
   assert.equal(skin!.path, 'parameters.skin');

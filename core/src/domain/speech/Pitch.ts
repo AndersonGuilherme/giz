@@ -1,4 +1,4 @@
-// Intonation check (`giz qa pitch`): how many semitones the END of a question is above (+) or below (−) the line
+// Intonation check (`gizzy qa pitch`): how many semitones the END of a question is above (+) or below (−) the line
 // average. A yes/no question in pt-BR has to end going UP. Port of the motor's scripts/pitch-check.ts.
 const WINDOW_IN_SECONDS = 0.04;
 const HOP_IN_SECONDS = 0.01;

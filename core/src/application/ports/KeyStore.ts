@@ -5,7 +5,7 @@ import type { TextProviderName } from '../../domain/ai/TextProviderName.ts';
 export type KeyedService = TextProviderName | ImageProviderName | 'elevenlabs' | 'fish';
 export const KEYED_SERVICES: readonly KeyedService[] = ['anthropic', 'openai', 'gemini', 'fal', 'elevenlabs', 'fish'];
 
-/** Where the keys live (the CLI: environment or ~/.config/giz; the studio: encrypted storage). Never logs them. */
+/** Where the keys live (the CLI: environment or ~/.config/gizzycera; the studio: encrypted storage). Never logs them. */
 export interface KeyStore {
   /** The key, or undefined when there is none; it never throws. */
   get(service: KeyedService): string | undefined;

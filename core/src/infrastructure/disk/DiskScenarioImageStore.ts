@@ -54,7 +54,7 @@ export class DiskScenarioImageStore implements ScenarioImageStore {
 
   async save({ lineId, image, hash, madeBy }: SavedScenarioImage): Promise<void> {
     const file = scenarioImageFile(lineId);
-    if (await this.foreignFile(lineId)) throw new ScenarioImageError(`${file} já existe e não foi feito pelo giz images: o arquivo não foi sobrescrito`);
+    if (await this.foreignFile(lineId)) throw new ScenarioImageError(`${file} já existe e não foi feito pelo gizzy images: o arquivo não foi sobrescrito`);
     await mkdir(join(this.#folder, 'scenes'), { recursive: true });
     await writeInside(this.#folder, file, image.bytes);
     const record: ImageRecord = { file, hash, fileHash: await hexDigest('SHA-256', image.bytes), provider: madeBy.provider, model: madeBy.model };

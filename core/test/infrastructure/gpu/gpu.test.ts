@@ -17,7 +17,7 @@ test('the CUDA major version is read from the provider binary', () => {
 });
 
 test('the libraries live in <modelsDir>/cuda/<major>/lib', () => {
-  assert.equal(cudaLibraryFolder('/home/x/.cache/giz', 13), '/home/x/.cache/giz/cuda/13/lib');
+  assert.equal(cudaLibraryFolder('/home/x/.cache/gizzycera', 13), '/home/x/.cache/gizzycera/cuda/13/lib');
 });
 
 test('CUDA 12 uses the fixed 12.9.1 manifest; 13 the last 13.0.x patch listed by NVIDIA', async () => {
@@ -43,7 +43,7 @@ test('cuda without the ONNX Runtime CUDA provider runs on the CPU with a readabl
   const warnings: string[] = [];
   const warn = (message: string) => warnings.push(message);
   assert.equal(usableDevice('cuda', () => false, warn), 'cpu');
-  assert.deepEqual(warnings, ['GPU não configurada: rodando na CPU (rode `giz gpu install`)']);
+  assert.deepEqual(warnings, ['GPU não configurada: rodando na CPU (rode `gizzy gpu install`)']);
   assert.equal(usableDevice('cuda', () => true, warn), 'cuda');
   assert.equal(usableDevice('cpu', () => assert.fail('not asked'), warn), 'cpu');
   assert.equal(warnings.length, 1);
@@ -54,7 +54,7 @@ test('the CUDA libraries are ready only once their done marker exists', async ()
   const { tmpdir } = await import('node:os');
   const { join } = await import('node:path');
   const { cudaLibrariesReady } = await import('../../../src/infrastructure/gpu/cudaLibraries.ts');
-  const modelsDir = mkdtempSync(join(tmpdir(), 'giz-cuda-'));
+  const modelsDir = mkdtempSync(join(tmpdir(), 'gizzy-cuda-'));
   assert.equal(cudaLibrariesReady(modelsDir, () => 13), false);
   mkdirSync(join(modelsDir, 'cuda', '13'), { recursive: true });
   writeFileSync(join(modelsDir, 'cuda', '13', '.completo'), 'x');

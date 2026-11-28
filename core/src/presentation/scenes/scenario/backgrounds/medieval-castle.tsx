@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'medieval-castle'>;
 
-// A castle on a hill, giz style: a keep with two round towers and pennants behind the characters, stone walls on the
+// A castle on a hill, Gizzy style: a keep with two round towers and pennants behind the characters, stone walls on the
 // sides, a grassy yard with a dirt path; chalk lines on the stones. A made-up castle.
 
 // Battlements along the top of a wall from `left` to `right` (units), at `top`.

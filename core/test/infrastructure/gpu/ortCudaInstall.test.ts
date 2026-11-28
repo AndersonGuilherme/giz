@@ -28,7 +28,7 @@ const realPackage = (path: string) => fakePackage(path, {
 });
 
 function folders() {
-  const root = mkdtempSync(join(tmpdir(), 'giz-ort-cuda-'));
+  const root = mkdtempSync(join(tmpdir(), 'gizzy-ort-cuda-'));
   const binFolder = join(root, 'bin');
   mkdirSync(binFolder);
   return { modelsDir: join(root, 'models'), binFolder, version: '9.9.9' };
@@ -39,7 +39,7 @@ const sha512Of = (path: string) => createHash('sha512').update(readFileSync(path
 // A download that writes `make`'s package and a table that knows it (or a wrong hash for it).
 function fakeNuget(make: (path: string) => void, wrongHash = false) {
   const asked: Array<{ download: Download; options: DownloadOptions }> = [];
-  const sample = join(mkdtempSync(join(tmpdir(), 'giz-nupkg-')), 'p.nupkg');
+  const sample = join(mkdtempSync(join(tmpdir(), 'gizzy-nupkg-')), 'p.nupkg');
   make(sample);
   const known = { sha512: wrongHash ? createHash('sha512').update('other').digest('base64') : sha512Of(sample), bytes: statSync(sample).size };
   const download = async (wanted: Download, options: DownloadOptions = {}) => {

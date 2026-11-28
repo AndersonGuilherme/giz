@@ -8,9 +8,9 @@ import type { AiOverrides } from '../composition/aiOverrides.ts';
 import { dollars } from '../dollars.ts';
 import { UsageError } from '../usage.ts';
 
-// `giz images`: the scenario images made by an image AI. The composition part loads on demand.
+// `gizzy images`: the scenario images made by an image AI. The composition part loads on demand.
 const images = () => import('../composition/images.ts');
-const USAGE = `uso: giz images <pasta> [--provider ${IMAGE_PROVIDERS.join('|')}] [--estimate] [--only <fala>] [--force <fala>]`;
+const USAGE = `uso: gizzy images <pasta> [--provider ${IMAGE_PROVIDERS.join('|')}] [--estimate] [--only <fala>] [--force <fala>]`;
 const OPTIONS = { provider: { type: 'string' }, estimate: { type: 'boolean' }, only: { type: 'string' }, force: { type: 'string' } } as const;
 
 type Options = Readonly<{ folder: string; provider?: string; estimate: boolean; selection: ImageSelection }>;
@@ -42,9 +42,9 @@ const showProgress = ({ done, total, lineId, status }: ImageProgress) => console
 const ownText = (own: number) => (own > 0 ? `, ${own} usa(m) imagem própria` : '');
 
 const report = (folder: string, { generated, kept, own }: ImageReport) =>
-  console.log(`${generated.length} gerada(s), ${kept.length} já em dia${ownText(own.length)} → ${resolve(folder, 'scenes')}\npróximo passo: giz check ${folder}`);
+  console.log(`${generated.length} gerada(s), ${kept.length} já em dia${ownText(own.length)} → ${resolve(folder, 'scenes')}\npróximo passo: gizzy check ${folder}`);
 
-/** `giz images <folder>`: the estimate first; with --estimate nothing is called, otherwise the images are made. */
+/** `gizzy images <folder>`: the estimate first; with --estimate nothing is called, otherwise the images are made. */
 export async function imagesCommand(args: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const options = optionsOf(args);
   const project = await projectRepository().load(options.folder);

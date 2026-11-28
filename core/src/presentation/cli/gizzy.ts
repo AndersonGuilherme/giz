@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Usage: npx giz <subcommand> [arguments] (or node src/presentation/cli/giz.ts <subcommand> [arguments])
+// Usage: npx gizzy <subcommand> [arguments] (or node src/presentation/cli/gizzy.ts <subcommand> [arguments])
 import { mkdir, writeFile } from 'node:fs/promises';
 import { basename, extname, join, resolve } from 'node:path';
 import type { Progress } from '../../application/use-cases/GenerateVoices.ts';
@@ -18,7 +18,7 @@ import { UsageError } from './usage.ts';
 type Subcommand = (args: readonly string[]) => Promise<void>;
 
 function folderOf(folder: string | undefined, subcommand: string): string {
-  if (!folder) throw new UsageError(`uso: giz ${subcommand} <pasta-do-projeto>`);
+  if (!folder) throw new UsageError(`uso: gizzy ${subcommand} <pasta-do-projeto>`);
   return resolve(folder);
 }
 
@@ -82,7 +82,7 @@ async function produce([folder]: readonly string[]): Promise<void> {
 
 // Without a cast JSON the sheet uses the rig defaults; the PNG goes to output/ in the current folder.
 async function sheet([rig, character]: readonly string[]): Promise<void> {
-  if (!rig) throw new UsageError('uso: giz sheet <rig> [personagem.json]');
+  if (!rig) throw new UsageError('uso: gizzy sheet <rig> [personagem.json]');
   const name = character ? basename(character, extname(character)) : rig;
   const output = resolve('output', `sheet-${name}.png`);
   await characterSheet().render(rig, character && resolve(character), output);
@@ -98,7 +98,7 @@ const SUBCOMMANDS: Readonly<Record<string, Subcommand>> = {
 
 async function main([name = '', ...args]: readonly string[]): Promise<void> {
   const subcommand = SUBCOMMANDS[name];
-  if (!subcommand) throw new UsageError(`uso: giz <${Object.keys(SUBCOMMANDS).join(' | ')}> [argumentos]`);
+  if (!subcommand) throw new UsageError(`uso: gizzy <${Object.keys(SUBCOMMANDS).join(' | ')}> [argumentos]`);
   await subcommand(args);
 }
 

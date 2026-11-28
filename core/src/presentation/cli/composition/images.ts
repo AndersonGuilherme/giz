@@ -17,14 +17,14 @@ import { cliKeyStore } from './text.ts';
 const APIS: Readonly<Record<ImageProviderName, ImageApi>> = { openai: OPENAI_IMAGE_API, gemini: GEMINI_IMAGE_API, fal: FAL_IMAGE_API };
 // The model of each image provider can be changed without touching the code; empty means the default.
 const MODEL_VARIABLES: Readonly<Record<ImageProviderName, string>> = {
-  openai: 'GIZ_OPENAI_IMAGE_MODEL',
-  gemini: 'GIZ_GEMINI_IMAGE_MODEL',
-  fal: 'GIZ_FAL_IMAGE_MODEL',
+  openai: 'GIZZY_OPENAI_IMAGE_MODEL',
+  gemini: 'GIZZY_GEMINI_IMAGE_MODEL',
+  fal: 'GIZZY_FAL_IMAGE_MODEL',
 };
 
 const modelOf = (name: ImageProviderName) => process.env[MODEL_VARIABLES[name]]?.trim() || undefined;
 
-/** The image provider, with the model of GIZ_<PROVIDER>_IMAGE_MODEL or the default; the key is read only when called. */
+/** The image provider, with the model of GIZZY_<PROVIDER>_IMAGE_MODEL or the default; the key is read only when called. */
 export function imageProviderOf(name: ImageProviderName, overrides: AiOverrides = {}): HttpImageProvider {
   return new HttpImageProvider(APIS[name], { fetch, keys: cliKeyStore(), wait, ...overrides }, modelOf(name));
 }

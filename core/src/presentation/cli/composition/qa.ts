@@ -1,4 +1,4 @@
-// Part of the composition point (see composition.ts): the quality tools behind `giz qa`.
+// Part of the composition point (see composition.ts): the quality tools behind `gizzy qa`.
 import { aggregatePronunciation } from '../../../infrastructure/qa/asrAggregate.ts';
 import { checkPronunciation } from '../../../infrastructure/qa/asrCheck.ts';
 import { compareSpellings, DEFAULT_SPELLING_TESTS, type SpellingTest } from '../../../infrastructure/qa/lexiconLab.ts';

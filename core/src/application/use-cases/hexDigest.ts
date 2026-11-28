@@ -1,4 +1,4 @@
-/** The digests giz keys its caches by (the voices use SHA-1, the scenario images SHA-256). */
+/** The digests gizzy keys its caches by (the voices use SHA-1, the scenario images SHA-256). */
 export type DigestAlgorithm = 'SHA-1' | 'SHA-256';
 
 // Web Crypto (a Node and browser global): the application does not import node:crypto.

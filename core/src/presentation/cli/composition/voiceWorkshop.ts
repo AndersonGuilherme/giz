@@ -13,7 +13,7 @@ import { installConfig } from './install.ts';
 
 /**
  * `qwen`, `listener`, `configured` and `whisperReady`: other makers (tests); by default the real local voice and
- * Whisper, each loaded on first use, the model size of giz.config.json and whether Whisper is downloaded.
+ * Whisper, each loaded on first use, the model size of gizzycera.config.json and whether Whisper is downloaded.
  */
 export type WorkshopParts = Readonly<{ qwen?: (model: QwenModel) => VoiceProvider; listener?: Listener; configured?: () => QwenModel; whisperReady?: () => boolean }>;
 
@@ -39,7 +39,7 @@ const notDownloaded: Listener = { listen: async () => { throw new Error('o Whisp
 /** Lines (`lines`, as generateVoicesWith) and samples (`sampler`, as voiceSampler) sharing the loaded models. */
 export function voiceWorkshop({ qwen = realQwen, listener = new WhisperListener(), configured = configuredModel, whisperReady = whisperDownloaded }: WorkshopParts = {}) {
   const local = new Map<QwenModel, VoiceProvider>();
-  // One voice per real size: no model named is the size giz.config.json names (read once per process, like the CLI).
+  // One voice per real size: no model named is the size gizzycera.config.json names (read once per process, like the CLI).
   const localVoice = (named: QwenModel | undefined): VoiceProvider => {
     const model = named ?? configured();
     const voice = local.get(model) ?? qwen(model);

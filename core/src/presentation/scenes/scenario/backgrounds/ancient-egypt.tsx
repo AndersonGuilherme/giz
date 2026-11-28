@@ -7,7 +7,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'ancient-egypt'>;
 
-// A desert by the river in ancient times, giz style: a big hazy pyramid behind the characters, two small ones, an
+// A desert by the river in ancient times, Gizzy style: a big hazy pyramid behind the characters, two small ones, an
 // obelisk with made-up signs, palm trees and dunes; chalk lines on the monuments. Generic archetypes, no real landmark.
 
 type Pyramid = Readonly<{ x: number; base: number; apex: number; seed: string }>;

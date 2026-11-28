@@ -21,7 +21,7 @@ const readJson = async (path: string) => JSON.parse(await readFile(path, 'utf8')
 
 // The minimal project (production rig: the CLI uses the real catalog) with both lines on generated scenarios.
 async function projectFolder(project: Json = {}): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-images-cli-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-images-cli-'));
   tempFolders.push(folder);
   await cp(FIXTURE, folder, { recursive: true });
   const script = await readJson(join(folder, 'script.json'));
@@ -33,42 +33,42 @@ async function projectFolder(project: Json = {}): Promise<string> {
   return folder;
 }
 
-function giz(args: string[]) {
-  const home = mkdtempSync(join(tmpdir(), 'giz-images-home-'));
-  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
+function gizzy(args: string[]) {
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-images-home-'));
+  mkdirSync(join(home, '.config', 'gizzycera'), { recursive: true });
   const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !KEY_VARIABLES.test(name)));
-  return spawnSync(process.execPath, ['src/presentation/cli/giz.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
+  return spawnSync(process.execPath, ['src/presentation/cli/gizzy.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
 }
 
-test('giz images --estimate prints only the cost (the project provider, its default model) and calls nothing', async () => {
+test('gizzy images --estimate prints only the cost (the project provider, its default model) and calls nothing', async () => {
   const folder = await projectFolder({ imageProvider: 'gemini' });
-  const run = giz(['images', folder, '--estimate']);
+  const run = gizzy(['images', folder, '--estimate']);
   assert.equal(run.status, 0, run.stderr);
   assert.equal(run.stdout.trim(), 'custo estimado (gemini, modelo gemini-nano-banana-2.1): 2 imagem(ns) a gerar, até US$ 0,1008; 0 já em dia');
 });
 
-test('giz images: a wrong option, both --only and --force, or a wrong provider exit with 2', async () => {
+test('gizzy images: a wrong option, both --only and --force, or a wrong provider exit with 2', async () => {
   const folder = await projectFolder();
   for (const args of [['images'], ['images', folder, '--tamanho', '3'], ['images', folder, '--only', '1', '--force', '2']]) {
-    const run = giz(args);
+    const run = gizzy(args);
     assert.equal(run.status, 2, args.join(' '));
-    assert.match(run.stderr, /uso: giz images <pasta> \[--provider openai\|gemini\|fal\] \[--estimate\] \[--only <fala>\] \[--force <fala>\]/);
+    assert.match(run.stderr, /uso: gizzy images <pasta> \[--provider openai\|gemini\|fal\] \[--estimate\] \[--only <fala>\] \[--force <fala>\]/);
   }
-  const wrong = giz(['images', folder, '--provider', 'dalle', '--estimate']);
+  const wrong = gizzy(['images', folder, '--provider', 'dalle', '--estimate']);
   assert.equal(wrong.status, 2);
   assert.match(wrong.stderr, /provedor "dalle" inválido \(use openai, gemini, fal\)/);
 });
 
-test('giz images without a key fails readably (exit 1) after the estimate, before any call', async () => {
+test('gizzy images without a key fails readably (exit 1) after the estimate, before any call', async () => {
   const folder = await projectFolder();
-  const run = giz(['images', folder, '--provider', 'fal']);
+  const run = gizzy(['images', folder, '--provider', 'fal']);
   assert.equal(run.status, 1);
   assert.match(run.stdout, /custo estimado \(fal, modelo fal-ai\/flux-2-pro\): 2 imagem\(ns\) a gerar/);
   assert.match(run.stderr, /chave da fal não encontrada: defina FAL_KEY/);
   assert.doesNotMatch(run.stderr, /at .*\.ts:\d+/);
 });
 
-test('giz images --only: one call (injected fetch), the PNG saved, the script pointed to it; a second run calls nothing', async () => {
+test('gizzy images --only: one call (injected fetch), the PNG saved, the script pointed to it; a second run calls nothing', async () => {
   const { imagesCommand } = await import('../../../src/presentation/cli/commands/imagesCommand.ts');
   const folder = await projectFolder({ imageProvider: 'fal' });
   const calls: string[] = [];
@@ -94,14 +94,14 @@ test('giz images --only: one call (injected fetch), the PNG saved, the script po
   assert.equal(((lines[0]!.scene as Json).background as Json).image, undefined);
   assert.match(logs[0]!, /custo estimado \(fal, modelo fal-ai\/flux-2-pro\): 1 imagem\(ns\) a gerar, até US\$ 0,165; 0 já em dia/);
   assert.equal(logs[1], 'cena da fala 2 (1/1): imagem gerada');
-  assert.match(logs[2]!, /^1 gerada\(s\), 0 já em dia → .*scenes\npróximo passo: giz check /);
+  assert.match(logs[2]!, /^1 gerada\(s\), 0 já em dia → .*scenes\npróximo passo: gizzy check /);
   assert.match(logs[3]!, /0 imagem\(ns\) a gerar, até US\$ 0,00; 1 já em dia/);
   assert.equal(logs[4], 'cena da fala 2 (1/1): já em dia');
   assert.match(logs[5]!, /^0 gerada\(s\), 1 já em dia/);
   assert.doesNotMatch(logs.join('\n'), /fal-secreta-1/);
 });
 
-test('giz images: a scene on the person\'s own image is left alone, with the "usa imagem própria" note', async () => {
+test('gizzy images: a scene on the person\'s own image is left alone, with the "usa imagem própria" note', async () => {
   const { imagesCommand } = await import('../../../src/presentation/cli/commands/imagesCommand.ts');
   const folder = await projectFolder({ imageProvider: 'fal' });
   const script = await readJson(join(folder, 'script.json'));

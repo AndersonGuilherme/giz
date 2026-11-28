@@ -4,7 +4,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'lab'>;
 
-// A science lab, giz style: lilac tiled wall, shelves of glowing flasks, a molecule poster, a bench with a microscope;
+// A science lab, Gizzy style: lilac tiled wall, shelves of glowing flasks, a molecule poster, a bench with a microscope;
 // chalk lines on the furniture and the glass.
 
 const Flask: FC<Readonly<{ x: number; liquid: string; colors: Colors; tall?: number }>> = ({ x, liquid, colors, tall = 70 }) => (

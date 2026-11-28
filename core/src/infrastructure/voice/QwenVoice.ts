@@ -1,7 +1,7 @@
 import { createHash } from 'node:crypto';
 import type { VoiceRequest, VoiceProvider } from '../../application/ports/VoiceProvider.ts';
 import { Audio } from '../../domain/speech/Audio.ts';
-import type { GizConfig } from '../config/GizConfig.ts';
+import type { GizzyConfig } from '../config/GizzyConfig.ts';
 import { ensureModel, openDownloadedModel } from './qwen/modelDownload.ts';
 import { Qwen3Tts } from './qwen/Qwen3Tts.ts';
 import { QWEN_RATE, repositoryOf, type QwenModel } from './qwen/qwenModels.ts';
@@ -10,7 +10,7 @@ const QWEN_LANGUAGES: Readonly<Record<string, string>> = { 'pt-BR': 'portuguese'
 // 0.9 varied the intonation too much; 0.7 was picked by ear in the motor (2026-11-19).
 const TEMPERATURE = 0.7;
 
-type Install = Pick<GizConfig, 'model' | 'device' | 'threads' | 'modelsDir'>;
+type Install = Pick<GizzyConfig, 'model' | 'device' | 'threads' | 'modelsDir'>;
 type Speaker = Pick<Qwen3Tts, 'generate'>;
 type Load = (install: Install, model?: QwenModel) => Promise<Speaker>;
 
@@ -32,7 +32,7 @@ export async function loadDownloadedQwen(install: Install, model: QwenModel = in
   return Qwen3Tts.load(folder, { device: install.device, threads: install.threads, modelsDir: install.modelsDir });
 }
 
-/** Local and free voice (Qwen3-TTS). The project `model` wins; without it, the one in giz.config.json applies. */
+/** Local and free voice (Qwen3-TTS). The project `model` wins; without it, the one in gizzycera.config.json applies. */
 export class QwenVoice implements VoiceProvider {
   readonly #install: Install;
   readonly #model: QwenModel | undefined;

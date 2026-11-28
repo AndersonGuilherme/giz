@@ -25,7 +25,7 @@ function props(segments: SegmentJson[]): VideoProps {
 const scenario = (image?: string) => ({ type: 'scenario' as const, background: { image, vector: 'room' }, characters: [] });
 
 async function projectWith(files: string[]): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-files-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-files-'));
   for (const file of files) {
     await mkdir(join(folder, file, '..'), { recursive: true });
     await writeFile(join(folder, file), 'x');

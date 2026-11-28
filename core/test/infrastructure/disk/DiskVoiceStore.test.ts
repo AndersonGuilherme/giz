@@ -8,7 +8,7 @@ import { Audio } from '../../../src/domain/speech/Audio.ts';
 import { DiskVoiceStore } from '../../../src/infrastructure/disk/DiskVoiceStore.ts';
 import { fromWav } from '../../../src/infrastructure/voice/wav.ts';
 
-const folder = await mkdtemp(join(tmpdir(), 'giz-voices-'));
+const folder = await mkdtemp(join(tmpdir(), 'gizzy-voices-'));
 after(() => rm(folder, { recursive: true, force: true }));
 const record: RecordedVoice = { file: 'voice/1.wav', hash: 'abc', durationSeconds: 0.5, envelope: [0, 1], visemes: 'XA' };
 
@@ -33,7 +33,7 @@ test('without the wav, the record does not count', async () => {
 
 test('a saved line replaces its files whole (temp file, then rename) and leaves only its wav and json', { skip: process.platform === 'win32' }, async () => {
   const { chmod, mkdir, mkdtemp: fresh, readdir, writeFile } = await import('node:fs/promises');
-  const project = await fresh(join(tmpdir(), 'giz-voices-'));
+  const project = await fresh(join(tmpdir(), 'gizzy-voices-'));
   await mkdir(join(project, 'voice'));
   await writeFile(join(project, 'voice', '7.wav'), 'old take');
   await chmod(join(project, 'voice', '7.wav'), 0o444);

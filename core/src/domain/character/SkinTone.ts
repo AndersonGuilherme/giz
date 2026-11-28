@@ -8,7 +8,7 @@ export type SkinToneName = HumanToneName | CreatureToneName;
 /** `base` fills the skin, `shade` the side away from the light, `line` the closed mouth, nose and eye rims, `blush` the cheeks. */
 export type SkinColors = Readonly<{ base: string; shade: string; line: string; blush: string }>;
 
-// The giz palette, light to deep, then the creature skins. Every line color keeps a clear contrast with its base, and
+// The Gizzy palette, light to deep, then the creature skins. Every line color keeps a clear contrast with its base, and
 // no tone is black.
 const TONES: Readonly<Record<SkinToneName, SkinColors>> = {
   light: { base: '#f8dcc8', shade: '#ebc2a8', line: '#7a3f33', blush: '#f2a08f' },
@@ -31,7 +31,7 @@ const TONES: Readonly<Record<SkinToneName, SkinColors>> = {
 
 const CREATURES: ReadonlySet<string> = new Set(CREATURE_TONES);
 
-/** The giz skin palette: the default characters have a skin tone, from light to deep; creatures have fantasy skins. */
+/** The Gizzy skin palette: the default characters have a skin tone, from light to deep; creatures have fantasy skins. */
 export class SkinTone {
   static readonly DEFAULT: SkinToneName = 'medium';
   static readonly ALL: readonly SkinToneName[] = [...SKIN_TONES, ...CREATURE_TONES];

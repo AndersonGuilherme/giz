@@ -18,9 +18,9 @@ async function presetsOf(era: string): Promise<string[]> {
   return (await readdir(join(PRESETS, era))).filter((file) => file.endsWith('.json')).map((file) => file.replace(/\.json$/, ''));
 }
 
-// Each era's presets as the cast of one project, loaded with the production catalog (as `giz check` does).
+// Each era's presets as the cast of one project, loaded with the production catalog (as `gizzy check` does).
 async function loadEra(era: string) {
-  const folder = await mkdtemp(join(tmpdir(), `giz-presets-${era}-`));
+  const folder = await mkdtemp(join(tmpdir(), `gizzy-presets-${era}-`));
   try {
     const ids = await presetsOf(era);
     await cp(join(PRESETS, era), join(folder, 'cast'), { recursive: true });
@@ -42,11 +42,11 @@ test('every era (and the creatures) has at least 3 presets and each one loads wi
   }
 });
 
-test('every preset is a giz character with a name, a short personality and a Qwen voice', async () => {
+test('every preset is a Gizzy character with a name, a short personality and a Qwen voice', async () => {
   const files = (await Promise.all(FOLDERS.map(async (era) => (await presetsOf(era)).map((id) => join(PRESETS, era, `${id}.json`))))).flat();
   for (const file of files) {
     const json = JSON.parse(await readFile(file, 'utf8'));
-    assert.equal(json.rig, 'giz', file);
+    assert.equal(json.rig, 'gizzy', file);
     assert.ok(json.name.length > 0 && json.personality.length > 10 && json.personality.length < 90, file);
     assert.ok(isQwenVoice(json.voice.id), `${file}: ${json.voice.id}`);
   }

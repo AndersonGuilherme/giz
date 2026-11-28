@@ -1,11 +1,11 @@
 import type { GeneratedImage } from '../../../application/ports/ImageProvider.ts';
 import { imageFormatOf } from '../../disk/imageSize.ts';
 
-/** The largest image giz takes from a service (a 4K PNG is far below it). */
+/** The largest image Gizzycera takes from a service (a 4K PNG is far below it). */
 export const MAXIMUM_IMAGE_BYTES = 50 * 1024 * 1024;
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/webp'];
 
-/** An answer giz refuses to save: the reason, in pt-BR, without the address's path or query. */
+/** An answer Gizzycera refuses to save: the reason, in pt-BR, without the address's path or query. */
 export class RejectedImage extends Error {}
 
 const TOO_LARGE = `maior que ${MAXIMUM_IMAGE_BYTES / 1024 / 1024} MB`;

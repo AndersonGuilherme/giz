@@ -1,5 +1,5 @@
 // The sound effects of the scripts, synthesized (no third-party file, no license to check). Port of the motor's
-// scripts/sfx.ts: the same arithmetic in the same order, so `giz sounds` writes the committed files byte for byte.
+// scripts/sfx.ts: the same arithmetic in the same order, so `gizzy sounds` writes the committed files byte for byte.
 export const SOUND_RATE = 48000;
 
 type Shape = 'sine' | 'triangle';

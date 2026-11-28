@@ -27,7 +27,7 @@ const STORY = { format: 'story', aspect: '9:16', targetSeconds: 30, theme: 'E se
 const LESSON = { format: 'lesson', aspect: '16:9', targetSeconds: 120, theme: 'Testes automatizados', audience: 'devs', tone: 'leve', language: 'en', cast: ['lia', 'teo'] };
 
 async function withFolder(use: (folder: string) => Promise<void>): Promise<void> {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-start-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-start-'));
   try {
     await use(join(parent, 'projeto'));
   } finally {

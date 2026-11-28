@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'village'>;
 
-// A hill village in the morning, giz style: a teal sky with chalk clouds and the sun rising behind a cluster of
+// A hill village in the morning, Gizzy style: a teal sky with chalk clouds and the sun rising behind a cluster of
 // white houses on the central hill, a windmill on the far left, a road winding up to the houses, a stone well on the
 // left and a fruit stall on the right.
 

@@ -1,7 +1,7 @@
 import { join } from 'node:path';
 import * as ort from 'onnxruntime-node';
 
-/** Where the voice runs (giz.config.json): `threads` 0 lets ONNX Runtime choose. */
+/** Where the voice runs (gizzycera.config.json): `threads` 0 lets ONNX Runtime choose. */
 export type DeviceSettings = Readonly<{ device: 'cpu' | 'cuda'; threads: number }>;
 
 function sessionOptions({ device, threads }: DeviceSettings): ort.InferenceSession.SessionOptions {

@@ -17,7 +17,7 @@ const folder = new DiskProjectFolder();
 const exists = (path: string) => access(path).then(() => true, () => false);
 
 test('save writes idea.json, project.json, script.json and cast/<id>.json, creating the folder', async () => {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-folder-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-folder-'));
   try {
     const target = join(parent, 'novo');
     await folder.save(target, FILES);
@@ -47,7 +47,7 @@ test('a draft is staged in a scratch folder that is removed afterwards, even whe
 });
 
 test('reading the idea of a folder without one, or with broken JSON, is a readable error', async () => {
-  const empty = await mkdtemp(join(tmpdir(), 'giz-folder-'));
+  const empty = await mkdtemp(join(tmpdir(), 'gizzy-folder-'));
   try {
     await assert.rejects(folder.readIdea(empty), { message: `${join(empty, 'idea.json')}: arquivo não encontrado` });
     await writeFile(join(empty, 'idea.json'), '{ nada');
@@ -58,7 +58,7 @@ test('reading the idea of a folder without one, or with broken JSON, is a readab
 });
 
 test('a cast id that is not a valid character id is refused before anything is written (no path escapes)', async () => {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-folder-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-folder-'));
   try {
     const target = join(parent, 'novo');
     const escaping = { ...FILES, cast: [{ id: '../../fora', name: 'Fora' }] };
@@ -72,7 +72,7 @@ test('a cast id that is not a valid character id is refused before anything is w
 });
 
 test('a failed draft goes beside the folder: the JSON answer indented, or the text as it came, and the problems', async () => {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-folder-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-folder-'));
   try {
     const target = join(parent, 'projeto');
     const path = await folder.keepFailed(`${target}/`, { answer: '{"a":1}', problems: ['p1', 'p2'] });

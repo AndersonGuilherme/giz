@@ -40,7 +40,7 @@ const scriptWith = (images: string[]) =>
   }) as unknown as ScriptJson;
 
 async function folderWith(files: Record<string, Buffer>): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-images-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-images-'));
   for (const [name, bytes] of Object.entries(files)) await writeFile(join(folder, name), bytes);
   return folder;
 }

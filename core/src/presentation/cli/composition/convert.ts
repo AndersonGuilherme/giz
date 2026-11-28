@@ -3,7 +3,7 @@ import { fileURLToPath } from 'node:url';
 import { convertLessonFolder, type ConversionReport, type ConversionTarget } from '../../../infrastructure/v1/lessonFolder.ts';
 import { installConfig } from './install.ts';
 
-// Lia and Téo as the package ships them; the voices, styles and model come from giz.config.json, as in the motor.
+// Lia and Téo as the package ships them; the voices, styles and model come from gizzycera.config.json, as in the motor.
 const CAST_FOLDER = fileURLToPath(new URL('../../../../casts/example', import.meta.url));
 
 export function convertV1Lesson(target: ConversionTarget): Promise<ConversionReport> {

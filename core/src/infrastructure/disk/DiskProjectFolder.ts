@@ -54,7 +54,7 @@ export class DiskProjectFolder implements ProjectFolder {
   }
 
   async staged<T>(files: ProjectFiles, use: (folder: string) => Promise<T>): Promise<T> {
-    const folder = await mkdtemp(join(tmpdir(), 'giz-draft-'));
+    const folder = await mkdtemp(join(tmpdir(), 'gizzy-draft-'));
     try {
       await writeFiles(folder, files);
       return await use(folder);

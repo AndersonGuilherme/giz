@@ -1,7 +1,7 @@
 {
   "id": "ana",
   "name": "Ana",
-  "rig": "giz",
+  "rig": "gizzy",
   "parameters": { "skin": "tan", "headShape": "oval", "outfit": "hoodie", "outfitColor": "#e8735a", "hair": "bun" },
   "voice": { "id": "vivian" },
   "defaultExpression": "neutral"

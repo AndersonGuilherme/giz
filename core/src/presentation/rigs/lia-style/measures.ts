@@ -1,5 +1,5 @@
 // Drawing measures, in the old motor's 400 × 600 coordinates (feet on the ground at y = 570).
-/** The same frame as the giz rig, so the character sheet places both rigs alike. */
+/** The same frame as the gizzy rig, so the character sheet places both rigs alike. */
 export const VIEW_BOX = { x: -60, y: -30, width: 520, height: 630 } as const;
 export const HEAD = { x: 200, y: 180, radiusX: 114, radiusY: 116 } as const;
 export const EARS = { left: 92, right: 308, y: 200 } as const;

@@ -4,8 +4,8 @@ import type { ValidatedParameters } from '../rigs/RigModel.ts';
 // `head`: the label without the skin, for creatures (they keep their own skin whatever the variation chooses).
 type Variation = Readonly<{ label: string; head?: string; parameters: ValidatedParameters; pose: Pose; expression: Expression; side: -1 | 1 }>;
 
-/** Giz variations: skin tones, head shapes and eye colors, with other outfits and hair. */
-const GIZ: readonly Variation[] = [
+/** Gizzy variations: skin tones, head shapes and eye colors, with other outfits and hair. */
+const GIZZY: readonly Variation[] = [
   {
     label: 'oval · clara', head: 'oval', pose: 'explain', expression: 'happy', side: 1,
     parameters: { skin: 'light', headShape: 'oval', eyeColor: '#3f7fc4', hairColor: '#b4532a', freckles: true, outfit: 'hoodie', outfitColor: '#e8735a', accessoryColor: '#f6e7c8' },
@@ -45,4 +45,4 @@ const LIA_STYLE: readonly Variation[] = [
 ];
 
 /** Parameter variations shown on the sheet, per rig (each rig has its own parameters). */
-export const VARIATIONS: Readonly<Record<string, readonly Variation[]>> = { giz: GIZ, 'lia-style': LIA_STYLE };
+export const VARIATIONS: Readonly<Record<string, readonly Variation[]>> = { gizzy: GIZZY, 'lia-style': LIA_STYLE };

@@ -42,7 +42,7 @@ function generator(answers: readonly unknown[], cut: readonly number[] = []) {
 }
 
 async function withFolder(use: (folder: string) => Promise<void>): Promise<void> {
-  const parent = await mkdtemp(join(tmpdir(), 'giz-generate-'));
+  const parent = await mkdtemp(join(tmpdir(), 'gizzy-generate-'));
   try {
     await use(join(parent, 'projeto'));
   } finally {
@@ -154,9 +154,9 @@ test('the prompt carries the rules, the idea, the format guide, the answer schem
     assert.match(prompt, /1,8 palavras por segundo/);
     assert.match(prompt, /\{"type":"object","properties":\{"project":/);
     assert.match(prompt, /"defaultExpression":\{"type":"string","enum":\["neutral","happy"/);
-    assert.match(prompt, /- bia: Bia, streamer animada que narra a própria vida em voz alta \(rig giz, voice vivian\)/);
+    assert.match(prompt, /- bia: Bia, streamer animada que narra a própria vida em voz alta \(rig gizzy, voice vivian\)/);
     assert.match(prompt, /- lia: Lia, mentora de tecnologia \(rig lia-style, voice vivian\)/);
-    assert.match(prompt, /## rig "giz"\n- species: human \| zombie/);
+    assert.match(prompt, /## rig "gizzy"\n- species: human \| zombie/);
     assert.match(prompt, /- eyeScale: number from 0\.8 to 1\.4 \(default 1\)/);
     assert.match(prompt, /# Voices: serena, vivian, uncle_fu/);
     assert.match(prompt, /# Vector backgrounds: room, street, field/);
@@ -224,7 +224,7 @@ test('a character id that is not a valid id never becomes a path: it is a proble
 
 test('a new rigged character with a parameter the rig does not have is a readable problem from the real loader', async () => {
   await withFolder(async (folder) => {
-    const zeca = { id: 'zeca', name: 'Zeca', rig: 'giz', parameters: { outfit: 'pijama', skin: 'roxo' }, voice: { id: 'eric' }, defaultExpression: 'happy' };
+    const zeca = { id: 'zeca', name: 'Zeca', rig: 'gizzy', parameters: { outfit: 'pijama', skin: 'roxo' }, voice: { id: 'eric' }, defaultExpression: 'happy' };
     const answer = structuredClone(VALID);
     answer.cast.push(zeca);
     const { text, generate } = generator([answer, VALID]);

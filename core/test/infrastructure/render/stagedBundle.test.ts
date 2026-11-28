@@ -8,7 +8,7 @@ import { withBundle, withPublicDir } from '../../../src/infrastructure/render/st
 
 // A package public folder with one sound, a project voice and an empty scratch folder for the temporary public dir.
 async function setup() {
-  const root = await mkdtemp(join(tmpdir(), 'giz-staged-test-'));
+  const root = await mkdtemp(join(tmpdir(), 'gizzy-staged-test-'));
   const publicFolder = join(root, 'public');
   await mkdir(join(publicFolder, 'sounds'), { recursive: true });
   await writeFile(join(publicFolder, 'sounds', 'pop.wav'), 'pop');

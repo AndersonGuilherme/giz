@@ -9,7 +9,7 @@ import { vampire } from './vampire.tsx';
 import { werewolf } from './werewolf.tsx';
 import { zombie } from './zombie.tsx';
 
-/** What each species draws over the giz body, by name (a human draws nothing extra). */
+/** What each species draws over the Gizzy body, by name (a human draws nothing extra). */
 export const SPECIES_OVERLAYS: Readonly<Record<SpeciesName, SpeciesOverlay>> = {
   human: {},
   zombie,

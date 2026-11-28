@@ -4,9 +4,9 @@ import type { AiOverrides } from '../composition/aiOverrides.ts';
 import { UsageError } from '../usage.ts';
 import { costLines, stageLines } from './statusLines.ts';
 
-// `giz status`: what each stage has, what is out of date and what the rest costs. The composition loads on demand.
+// `gizzy status`: what each stage has, what is out of date and what the rest costs. The composition loads on demand.
 const status = () => import('../composition/status.ts');
-const USAGE = 'uso: giz status <pasta> [--regenerate-script]';
+const USAGE = 'uso: gizzy status <pasta> [--regenerate-script]';
 const OPTIONS = { 'regenerate-script': { type: 'boolean' } } as const;
 
 function parsed(args: readonly string[]) {
@@ -23,7 +23,7 @@ function optionsOf(args: readonly string[]): Readonly<{ folder: string; regenera
   return { folder: resolve(positionals[0]!), regenerateScript: values['regenerate-script'] ?? false };
 }
 
-/** `giz status <folder>`: the stages (idea → video) and the cost of the pending paid steps; nothing is called. */
+/** `gizzy status <folder>`: the stages (idea → video) and the cost of the pending paid steps; nothing is called. */
 export async function statusCommand(args: readonly string[], overrides: AiOverrides = {}): Promise<void> {
   const { folder, regenerateScript } = optionsOf(args);
   const { projectStages, estimateCosts, imageServiceOf, voiceServiceOf } = await status();

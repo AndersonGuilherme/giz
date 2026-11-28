@@ -18,7 +18,7 @@ const LANGUAGE_NAMES = { 'pt-BR': 'Brazilian Portuguese (pt-BR)', en: 'English (
 
 function system(idea: Idea): string {
   return [
-    'You write scripts for giz, an engine that turns a JSON script into an animated video with voices, characters and captions.',
+    'You write scripts for Gizzycera, an engine that turns a JSON script into an animated video with voices, characters and captions.',
     'Answer with a single JSON object and nothing else (no comments, no Markdown), following the answer schema you are given.',
     'Originality: everything must be original. Never imitate, copy or reference any specific existing video, channel, creator, show, film, game or character; create your own characters, plot, jokes and lines.',
     `Every text that is spoken or shown (lines, chapters, title, labels) is in ${LANGUAGE_NAMES[idea.language().code()]}.`,

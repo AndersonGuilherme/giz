@@ -34,8 +34,8 @@ export const PREVIEW_DEFAULTS: ScenePreviewProps = {
     },
   },
   cast: [
-    { id: 'ana', rig: 'giz', parameters: { skin: 'brown', headShape: 'bean', eyeColor: '#4c9a5a', hair: 'bun', hairColor: '#1f1410', outfit: 'hoodie', outfitColor: '#e8735a', accessoryColor: '#f6e7c8' } },
-    { id: 'beto', rig: 'giz', parameters: { skin: 'fair', headShape: 'soft-square', eyeColor: '#3f7fc4', hairColor: '#b4532a', freckles: true, glasses: true, outfitColor: '#3d6fb0', accessoryColor: '#f2b134' } },
+    { id: 'ana', rig: 'gizzy', parameters: { skin: 'brown', headShape: 'bean', eyeColor: '#4c9a5a', hair: 'bun', hairColor: '#1f1410', outfit: 'hoodie', outfitColor: '#e8735a', accessoryColor: '#f6e7c8' } },
+    { id: 'beto', rig: 'gizzy', parameters: { skin: 'fair', headShape: 'soft-square', eyeColor: '#3f7fc4', hairColor: '#b4532a', freckles: true, glasses: true, outfitColor: '#3d6fb0', accessoryColor: '#f2b134' } },
   ],
   states: { ana: { expression: 'happy', pose: 'explain' }, beto: { expression: 'skeptical', pose: 'think' } },
 };

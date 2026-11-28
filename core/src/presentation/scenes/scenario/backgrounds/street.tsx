@@ -4,7 +4,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'street'>;
 
-// A city street at dusk, giz style: a teal sky, a skyline with lit windows, two shops with striped awnings, a
+// A city street at dusk, Gizzy style: a teal sky, a skyline with lit windows, two shops with striped awnings, a
 // sidewalk and a street lamp; chalk lines on the buildings.
 
 // Towers of the skyline: [x as a fraction of the width, width and height in units].

@@ -18,7 +18,7 @@ async function file(folder: string, path: string, seconds: number): Promise<void
 }
 
 async function rendered(seconds = 100): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-state-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-state-'));
   folders.push(folder);
   for (const path of ['project.json', 'script.json', 'cast/ana.json', 'voice/1.wav']) await file(folder, path, 10);
   await file(folder, 'output/video.mp4', seconds);

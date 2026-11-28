@@ -22,7 +22,7 @@ function jpegSegment(bytes: Buffer, offset: number): ImageSize | undefined {
 
 const jpegSize = (bytes: Buffer): ImageSize | undefined => (bytes[0] === 0xff && bytes[1] === 0xd8 ? jpegSegment(bytes, 2) : undefined);
 
-/** The image formats giz takes from an image service. */
+/** The image formats Gizzycera takes from an image service. */
 export type ImageFormat = 'png' | 'jpeg' | 'webp';
 
 const ascii = (bytes: Buffer, start: number, end: number) => bytes.subarray(start, end).toString('latin1');

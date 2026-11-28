@@ -33,7 +33,7 @@ function fakeHub(entries: unknown[] = tree(), served: Record<string, string> = C
 }
 
 const options = (fetch: typeof globalThis.fetch, more = {}) => ({ fetch, log: () => undefined, revision: REVISION, ...more });
-const freshModels = () => mkdtempSync(join(tmpdir(), 'giz-models-'));
+const freshModels = () => mkdtempSync(join(tmpdir(), 'gizzy-models-'));
 
 test('downloadModel reads the tree and the files of one pinned commit, reports the bytes and writes the done marker', async () => {
   const modelsDir = freshModels();

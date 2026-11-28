@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'space-station'>;
 
-// Inside a space station, giz style: a round window on a ringed planet behind the characters, wall panels with light
+// Inside a space station, Gizzy style: a round window on a ringed planet behind the characters, wall panels with light
 // strips, consoles with screens on the sides, a grid floor and cargo crates; chalk lines on the hull.
 
 // The porthole: space with stars, a nebula and a ringed planet, inside a thick rim, 150 units in radius.

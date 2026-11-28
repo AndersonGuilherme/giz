@@ -35,7 +35,7 @@ export async function voiceItems(project: Project, tools: StatusTools): Promise<
   return itemsAndCosts(priced);
 }
 
-// A scene pointing to the person's own image has nothing for giz to make: it counts as current.
+// A scene pointing to the person's own image has nothing for Gizzycera to make: it counts as current.
 function imageItem(job: ImageJob, store: ScenarioImageStore): StageItem {
   if (job.status !== 'pending') return { id: job.lineId, freshness: 'current' };
   return { id: job.lineId, freshness: store.savedHash(job.lineId) === undefined ? 'missing' : 'stale' };
@@ -46,7 +46,7 @@ const generatedScenes = (project: Project): string[] => project.script().lines()
   return scene?.type === 'scenario' && scene.background.generate ? [line.id()] : [];
 });
 
-// A scene giz images refuses (a scenes/<id>.png it did not make is in the way) is blocked, with the reason; it costs
+// A scene gizzy images refuses (a scenes/<id>.png it did not make is in the way) is blocked, with the reason; it costs
 // nothing until the person moves the file. Any other failure is not hidden.
 function blockedScene(lineId: string, error: unknown): Priced {
   if (!(error instanceof ScenarioImageError)) throw error;

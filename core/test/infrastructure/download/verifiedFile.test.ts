@@ -7,7 +7,7 @@ import { join } from 'node:path';
 import { plainRelativePath, refuseAnotherFile, sha256Of } from '../../../src/infrastructure/download/verifiedFile.ts';
 
 const fileWith = (text: string) => {
-  const path = join(mkdtempSync(join(tmpdir(), 'giz-verified-')), 'file.bin');
+  const path = join(mkdtempSync(join(tmpdir(), 'gizzy-verified-')), 'file.bin');
   writeFileSync(path, text);
   return path;
 };

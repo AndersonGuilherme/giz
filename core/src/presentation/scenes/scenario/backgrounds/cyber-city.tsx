@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'cyber-city'>;
 
-// A future city at night, giz style: a violet haze, giant towers with neon edges, a hologram ring behind the
+// A future city at night, Gizzy style: a violet haze, giant towers with neon edges, a hologram ring behind the
 // characters, flying cars, near buildings with neon signs (shapes, no brands) and a wet street that reflects the neon.
 
 // Far towers: [x as a fraction of the width, width and height in units, neon color key].

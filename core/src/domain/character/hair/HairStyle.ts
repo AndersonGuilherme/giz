@@ -8,7 +8,7 @@ export const HAIRS = Object.keys(HAIR_DESIGNS) as HairName[];
 
 const BUILT = new Map<string, readonly HeadPart[]>();
 
-/** The hair styles of the giz rig: shapes in face units, built on the head shape (a cap hugs every head). */
+/** The hair styles of the gizzy rig: shapes in face units, built on the head shape (a cap hugs every head). */
 export class HairStyle {
   static readonly DEFAULT: HairName = 'short';
 

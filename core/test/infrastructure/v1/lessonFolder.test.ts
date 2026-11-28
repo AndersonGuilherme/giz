@@ -14,7 +14,7 @@ const SETUP: ConversionSetup = {
 };
 
 function courseCopy(): string {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-v1-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-v1-'));
   cpSync(join(CORE, 'test/fixtures/v1-course'), folder, { recursive: true });
   return folder;
 }

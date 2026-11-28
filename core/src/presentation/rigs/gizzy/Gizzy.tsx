@@ -56,11 +56,11 @@ const Body: FC<BodyProps> = ({ state, look }) => {
 };
 
 /**
- * The giz rig, the house style: colored head, chalk outline, big expressive eyes and a clothed body. The `species`
+ * The gizzy rig, the house style: colored head, chalk outline, big expressive eyes and a clothed body. The `species`
  * turns it into a creature on the same body; a floating one is lifted off the ground and its shadow shrinks, bobbing on
  * the video time (so the bob runs on across segments instead of restarting at each `Sequence`).
  */
-export const Giz: FC<RigProps> = ({ state, parameters, height, side, id }) => {
+export const Gizzy: FC<RigProps> = ({ state, parameters, height, side, id }) => {
   const look = lookOf(parameters, id);
   const lift = Species.lift(look.species, state.videoSeconds());
   const { y, rotation, scale } = state.bodyOffset();

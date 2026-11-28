@@ -6,7 +6,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'room'>;
 
-// A cozy room in the evening, giz style: sage wall with a night window, a shelf and a picture; wooden floor, a round
+// A cozy room in the evening, Gizzy style: sage wall with a night window, a shelf and a picture; wooden floor, a round
 // rug and a lamp; chalk lines on the furniture.
 // It is also the fallback when a scenario image does not load.
 

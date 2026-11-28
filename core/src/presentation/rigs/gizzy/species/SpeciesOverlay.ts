@@ -10,7 +10,7 @@ export type HandOverlayProps = Readonly<{ look: Look; side: -1 | 1; shape: Hand 
 export type MouthPaint = Readonly<{ inside: string; lips: string; teeth: string; tongue: string }>;
 
 /**
- * What a species draws on the giz body, all optional: how its head features are painted (by role), something behind
+ * What a species draws on the Gizzy body, all optional: how its head features are painted (by role), something behind
  * the body (a cape), something over the torso and legs or in their place (rips, wraps, a sheet, a blob), something on
  * each hand (claws, wraps) and the colors of its mouth.
  */

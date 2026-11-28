@@ -23,7 +23,7 @@ function fileContent(file: string): string {
   }
 }
 
-/** The CLI keys: the environment variable, or ~/.config/giz/<service>.key (outside any repository). */
+/** The CLI keys: the environment variable, or ~/.config/gizzycera/<service>.key (outside any repository). */
 export class EnvironmentKeyStore implements KeyStore {
   readonly #sources: KeySources;
 
@@ -41,6 +41,6 @@ export class EnvironmentKeyStore implements KeyStore {
   }
 
   #file(service: KeyedService): string {
-    return join(this.#sources.home, '.config', 'giz', `${service}.key`);
+    return join(this.#sources.home, '.config', 'gizzycera', `${service}.key`);
   }
 }

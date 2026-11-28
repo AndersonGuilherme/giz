@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { gizDefinition } from '../../../src/presentation/rigs/giz/parameters.ts';
+import { gizzyDefinition } from '../../../src/presentation/rigs/gizzy/parameters.ts';
 import { portraitFrame } from '../../../src/presentation/studio/portraitFrame.ts';
 
 const stance = { viewBox: { x: -60, y: -30, width: 520, height: 630 }, feet: { x: 200, y: 560 } };
@@ -20,11 +20,11 @@ test('a tall hat above the view box: the frame starts above the hat top and stil
   assert.equal(tall.x + tall.width / 2, 200);
 });
 
-test("the giz rig's real reach: the chef hat and the knight's plume reach above the view box, and the frame holds them", () => {
-  const top = (headwear: string) => gizDefinition.reach!({ headwear });
+test("the gizzy rig's real reach: the chef hat and the knight's plume reach above the view box, and the frame holds them", () => {
+  const top = (headwear: string) => gizzyDefinition.reach!({ headwear });
   for (const headwear of ['chef-hat', 'knight-helmet']) {
     const reach = top(headwear);
-    assert.ok(reach < gizDefinition.stance.viewBox.y, `${headwear} goes above the view box (${reach})`);
-    assert.ok(portraitFrame({ ...gizDefinition.stance, top: reach }).y < reach);
+    assert.ok(reach < gizzyDefinition.stance.viewBox.y, `${headwear} goes above the view box (${reach})`);
+    assert.ok(portraitFrame({ ...gizzyDefinition.stance, top: reach }).y < reach);
   }
 });

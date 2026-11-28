@@ -15,7 +15,7 @@ const THIS_MACHINE: Machine = { platform: process.platform, arch: process.arch, 
 
 /**
  * The Chrome Headless Shell Remotion downloaded into the package (`<package>/node_modules/.remotion`). Remotion looks for
- * it from the working directory, so `giz` run from another folder (or from Electron) would download it again there;
+ * it from the working directory, so `gizzy` run from another folder (or from Electron) would download it again there;
  * passing this path as `browserExecutable` avoids that. `undefined` when it is not downloaded yet.
  */
 export function headlessShellIn(packageFolder: string, machine: Machine = THIS_MACHINE): string | undefined {

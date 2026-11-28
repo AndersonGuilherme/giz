@@ -6,7 +6,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'ancient-rome'>;
 
-// A forum at noon, giz style: a small temple on a hill behind the characters, cypress trees, a colonnade on each side,
+// A forum at noon, Gizzy style: a small temple on a hill behind the characters, cypress trees, a colonnade on each side,
 // a paved square with a water basin; chalk lines on the marble. A generic ancient square, no real building.
 
 // A column `height` units tall standing on (0, 0): base, fluted shaft and capital.

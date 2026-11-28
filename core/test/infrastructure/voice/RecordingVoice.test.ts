@@ -9,7 +9,7 @@ import { Language } from '../../../src/domain/values/Language.ts';
 import { RecordingVoice } from '../../../src/infrastructure/voice/RecordingVoice.ts';
 import { toWav } from '../../../src/infrastructure/voice/wav.ts';
 
-const folder = await mkdtemp(join(tmpdir(), 'giz-recordings-'));
+const folder = await mkdtemp(join(tmpdir(), 'gizzy-recordings-'));
 after(() => rm(folder, { recursive: true, force: true }));
 const request = (lineId: string): VoiceRequest => ({ lineId, text: 'Oi', voice: 'eu', language: Language.PORTUGUESE });
 

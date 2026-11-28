@@ -12,9 +12,9 @@ import type { RigDefinition, ValidatedParameters } from '../RigModel.ts';
 import { HeadReach } from '../../../domain/character/HeadReach.ts';
 import { CHALK_WIDTH, FEET, HEAD, UNIT, VIEW_BOX } from './measures.ts';
 
-export const gizDefinition: RigDefinition = {
-  id: 'giz',
-  name: { 'pt-BR': 'Giz', en: 'Giz' },
+export const gizzyDefinition: RigDefinition = {
+  id: 'gizzy',
+  name: { 'pt-BR': 'Gizzy', en: 'Gizzy' },
   parameters: {
     species: { type: 'option', defaultValue: Species.DEFAULT, options: [...SPECIES] },
     skin: { type: 'option', defaultValue: SkinTone.DEFAULT, options: [...SkinTone.ALL] },
@@ -39,7 +39,7 @@ export const gizDefinition: RigDefinition = {
   reach: (parameters) => topOf(lookOf(parameters)),
 };
 
-/** The giz parameters, typed for drawing, plus the character's `id` (the seed of its chalk line). */
+/** The Gizzy parameters, typed for drawing, plus the character's `id` (the seed of its chalk line). */
 export type Look = Readonly<{
   id: string;
   species: SpeciesName;
@@ -61,10 +61,10 @@ export type Look = Readonly<{
   eyeScale: number;
 }>;
 
-const defaults = Object.fromEntries(Object.entries(gizDefinition.parameters).map(([name, { defaultValue }]) => [name, defaultValue]));
+const defaults = Object.fromEntries(Object.entries(gizzyDefinition.parameters).map(([name, { defaultValue }]) => [name, defaultValue]));
 
 /** Fills in the defaults: the sheet and the tests may pass only some of the parameters. */
-export function lookOf(parameters: ValidatedParameters, id = 'giz'): Look {
+export function lookOf(parameters: ValidatedParameters, id = 'gizzy'): Look {
   return { ...defaults, ...parameters, id } as Look;
 }
 

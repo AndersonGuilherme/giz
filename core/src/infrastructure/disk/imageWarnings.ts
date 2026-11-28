@@ -6,7 +6,7 @@ import type { LineJson, ScriptJson } from '../schema/scriptSchema.ts';
 import { imageSize } from './imageSize.ts';
 
 /**
- * `field` is where the image is declared: the line scene or one of its beats; `generated`: made by `giz images`;
+ * `field` is where the image is declared: the line scene or one of its beats; `generated`: made by `gizzy images`;
  * `framed`: the person chose the part shown (`background.crop`), so another aspect is no surprise.
  */
 type Image = Readonly<{ path: string; line: LineJson; field: string; generated?: boolean; framed?: boolean }>;
@@ -17,7 +17,7 @@ const kindOf = (path: string) => stat(path).then((found) => (found.isFile() ? 'f
 const warning = (image: Image, message: string): string =>
   problemLine({ file: 'script.json', path: image.field, message });
 
-const GENERATE_HINT = 'rode giz images <pasta> para gerar com a IA de imagem';
+const GENERATE_HINT = 'rode gizzy images <pasta> para gerar com a IA de imagem';
 
 // A missing image falls back to the vector background; one of another aspect is cropped to cover the frame.
 async function problemOf(folder: string, image: Image, aspect: AspectRatio): Promise<string | undefined> {
@@ -53,7 +53,7 @@ function imagesOfLine(line: LineJson, index: number): Image[] {
   return [sceneImage, ...beats].flatMap((image) => (image.path ? [{ ...image, path: image.path, line }] : []));
 }
 
-// A scene to generate that has no image yet: the render uses the vector background until `giz images` makes it.
+// A scene to generate that has no image yet: the render uses the vector background until `gizzy images` makes it.
 function notGenerated(line: LineJson, index: number): string[] {
   const background = line.scene?.type === 'scenario' ? line.scene.background : undefined;
   if (!background?.generate || background.image) return [];

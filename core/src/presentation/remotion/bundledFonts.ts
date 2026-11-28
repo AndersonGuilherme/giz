@@ -46,7 +46,7 @@ export function holdWhileLoading<Handle>(load: () => Promise<unknown>, hold: Ren
   return release;
 }
 
-const REMOTION_HOLD: RenderHold<number> = { delay: () => delayRender('giz: the bundled fonts'), release: continueRender };
+const REMOTION_HOLD: RenderHold<number> = { delay: () => delayRender('Gizzycera: the bundled fonts'), release: continueRender };
 
 /**
  * Loads the bundled fonts before the first frame is taken (the render waits through delayRender, asked during the
@@ -56,7 +56,7 @@ export function useBundledFonts(): void {
   const source = useMediaSource();
   useLayoutEffect(() => {
     const faces = fontFacesOf(source).filter(({ url }) => url !== '');
-    const load = () => Promise.all(faces.map(loaded)).catch((error: unknown) => console.error('giz: a bundled font did not load', error));
+    const load = () => Promise.all(faces.map(loaded)).catch((error: unknown) => console.error('Gizzycera: a bundled font did not load', error));
     return holdWhileLoading(load, REMOTION_HOLD);
   }, [source]);
 }

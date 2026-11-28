@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'city-night'>;
 
-// A city at night, giz style: stars and a chalk moon clear of the HUD, a skyline of lit towers with a tall antenna
+// A city at night, Gizzy style: stars and a chalk moon clear of the HUD, a skyline of lit towers with a tall antenna
 // tower behind the characters, near buildings with a glowing shop window on each side, a sidewalk and street lamps.
 
 // Far towers: [x as a fraction of the width, width and height in units].

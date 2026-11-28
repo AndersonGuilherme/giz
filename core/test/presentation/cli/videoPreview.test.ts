@@ -16,7 +16,7 @@ import { FakePhonemizer } from '../../doubles/FakePhonemizer.ts';
 const FIXTURE = fileURLToPath(new URL('../../fixtures/minimal-project', import.meta.url));
 
 async function withVoicedCopy(use: (folder: string) => Promise<void>): Promise<void> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-video-preview-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-video-preview-'));
   try {
     await cp(FIXTURE, folder, { recursive: true });
     const script = JSON.parse(await readFile(join(folder, 'script.json'), 'utf8'));

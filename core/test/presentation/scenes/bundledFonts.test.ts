@@ -30,10 +30,10 @@ test('the scenes draw with the bundled families', () => {
 });
 
 test('the font faces load each file through the media source (the render: staticFile; the Studio: its served URLs)', () => {
-  const faces = fontFacesOf((path) => `giz-media://file/core/public/${path}`);
+  const faces = fontFacesOf((path) => `gizzy-media://file/core/public/${path}`);
   assert.deepEqual(faces.map(({ family, url }) => [family, url]), [
-    ['Nunito', 'giz-media://file/core/public/fonts/Nunito.ttf'],
-    ['JetBrains Mono', 'giz-media://file/core/public/fonts/JetBrainsMono.ttf'],
+    ['Nunito', 'gizzy-media://file/core/public/fonts/Nunito.ttf'],
+    ['JetBrains Mono', 'gizzy-media://file/core/public/fonts/JetBrainsMono.ttf'],
   ]);
   for (const { weight } of faces) assert.match(weight, /^\d+ \d+$/);
 });

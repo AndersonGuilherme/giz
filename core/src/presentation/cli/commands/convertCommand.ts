@@ -1,6 +1,6 @@
 import { UsageError } from '../usage.ts';
 
-const USAGE = 'uso: giz convert <pasta-da-aula-v1> <pasta-de-saida> | giz convert --in-place <pasta-da-aula-v1>...';
+const USAGE = 'uso: gizzy convert <pasta-da-aula-v1> <pasta-de-saida> | gizzy convert --in-place <pasta-da-aula-v1>...';
 
 const inPlace = (lessons: readonly string[]) => lessons.map((lesson) => ({ lesson, output: lesson }));
 
@@ -11,7 +11,7 @@ function targetsOf(args: readonly string[]): { lesson: string; output: string }[
   return [{ lesson: args[0]!, output: args[1]! }];
 }
 
-/** `giz convert`: a lesson of the old motor (roteiro.ts + examples/) becomes a v2 project; `--in-place` replaces roteiro.ts. */
+/** `gizzy convert`: a lesson of the old motor (roteiro.ts + examples/) becomes a v2 project; `--in-place` replaces roteiro.ts. */
 export async function convertCommand(args: readonly string[]): Promise<void> {
   const targets = targetsOf(args);
   const { convertV1Lesson } = await import('../composition/convert.ts');

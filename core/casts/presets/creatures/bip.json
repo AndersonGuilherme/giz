@@ -1,7 +1,7 @@
 {
   "id": "bip",
   "name": "Bip",
-  "rig": "giz",
+  "rig": "gizzy",
   "parameters": {
     "species": "robot",
     "outfit": "robot-armor",

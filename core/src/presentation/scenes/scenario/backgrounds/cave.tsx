@@ -7,7 +7,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'cave'>;
 
-// A cave at dusk, giz style: plum rock walls with ochre paintings, stalactites, an opening on an orange sky, a sandy
+// A cave at dusk, Gizzy style: plum rock walls with ochre paintings, stalactites, an opening on an orange sky, a sandy
 // floor and a stone fire pit right where the `fire` effect burns by default; chalk lines on the rocks.
 
 const MOUTH = 'M -170 150 Q -175 -40 -80 -130 Q 0 -185 85 -125 Q 175 -45 165 150 Z';

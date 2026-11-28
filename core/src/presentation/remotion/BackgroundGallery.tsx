@@ -50,7 +50,7 @@ export const BackgroundGallery: FC<BackgroundGalleryProps> = (props) => {
   return (
     <AbsoluteFill style={{ background: BOARD, padding: `24px ${MARGIN.side}px ${MARGIN.bottom}px` }}>
       <div style={{ fontFamily: FONT, fontSize: 36, fontWeight: 700, color: INK, height: MARGIN.top - 24 }}>
-        Giz <span style={{ fontWeight: 400, color: MUTED }}>· fundos vetoriais · {props.aspect}</span>
+        Gizzycera <span style={{ fontWeight: 400, color: MUTED }}>· fundos vetoriais · {props.aspect}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, ${card.width}px)`, gap: GAP }}>
         {VECTOR_BACKGROUNDS.map((name) => <Thumbnail key={name} name={name} aspect={aspect} card={card} />)}

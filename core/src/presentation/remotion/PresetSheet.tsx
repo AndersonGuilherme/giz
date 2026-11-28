@@ -32,7 +32,7 @@ const text = (size: number, color: string): CSSProperties => ({ fontFamily: FONT
 type CardJson = Readonly<{ id: string; name: string; rig?: string; parameters?: ValidatedParameters; voice: { id: string }; personality?: string; defaultExpression: Expression }>;
 
 const toCard = (json: CardJson): PresetCard => ({
-  id: json.id, name: json.name, rig: json.rig ?? 'giz', parameters: json.parameters ?? {}, voice: json.voice.id, personality: json.personality ?? '', expression: json.defaultExpression,
+  id: json.id, name: json.name, rig: json.rig ?? 'gizzy', parameters: json.parameters ?? {}, voice: json.voice.id, personality: json.personality ?? '', expression: json.defaultExpression,
 });
 
 export const presetSheetMetadata: CalculateMetadataFunction<PresetSheetProps> = async ({ props }) => {
@@ -69,7 +69,7 @@ export const PresetSheet: FC<PresetSheetProps> = ({ title, cards = [] }) => {
   return (
     <AbsoluteFill style={{ background: BOARD, padding: `24px ${MARGIN.side}px ${MARGIN.bottom}px` }}>
       <div style={{ fontFamily: FONT, fontSize: 36, fontWeight: 700, color: INK, height: MARGIN.top - 24 }}>
-        Giz <span style={{ fontWeight: 400, color: MUTED }}>· elenco pronto · {title}</span>
+        Gizzycera <span style={{ fontWeight: 400, color: MUTED }}>· elenco pronto · {title}</span>
       </div>
       <div style={{ display: 'grid', gridTemplateColumns: `repeat(${columns}, ${card.width}px)`, gap: GAP }}>
         {cards.map((preset, index) => <Card key={preset.id} card={preset} index={index} size={card} />)}

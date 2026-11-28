@@ -78,7 +78,7 @@ export async function sendWithRetries(service: string, send: Send, wait: Wait): 
   return result;
 }
 
-/** One attempt, no retry (for a check the person runs by hand, such as `giz keys test`). */
+/** One attempt, no retry (for a check the person runs by hand, such as `gizzy keys test`). */
 export async function sendOnce(service: string, send: Send): Promise<Response> {
   const response = await send().catch((error: unknown) => {
     throw new Error(`${service}: falha de rede (${reasonOf(error)})`);

@@ -35,7 +35,7 @@ let preloaded = false;
 export function preloadCuda(modelsDir: string): void {
   if (preloaded) return;
   const lib = cudaLibraryFolder(modelsDir, requiredCudaMajor());
-  if (!existsSync(lib)) throw new Error('bibliotecas CUDA não instaladas; rode npx giz setup');
+  if (!existsSync(lib)) throw new Error('bibliotecas CUDA não instaladas; rode npx gizzy setup');
   preloadOrder(readdirSync(lib)).forEach((file) => load(join(lib, file)));
   preloaded = true;
 }

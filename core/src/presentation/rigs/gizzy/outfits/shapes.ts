@@ -1,4 +1,4 @@
-// Torso outlines in giz drawing units (shoulders at y 300, the center line at x 200).
+// Torso outlines in Gizzy drawing units (shoulders at y 300, the center line at x 200).
 
 /** A torso from the shoulders down to `hem`, `flare` units wider at the bottom on each side. */
 export const torso = (hem: number, flare: number) =>

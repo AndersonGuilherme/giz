@@ -9,16 +9,16 @@ import { copyOrtRuntime, ortPackageFolder, ortRuntimeFolder } from '../../../src
 
 const RUNTIME = fileURLToPath(new URL('../../../src/infrastructure/gpu/ortRuntime.ts', import.meta.url));
 
-test('without GIZ_ORT_DIR the runtime is the package\'s own folder; with it, a per-version, per-machine copy there', () => {
+test('without GIZZY_ORT_DIR the runtime is the package\'s own folder; with it, a per-version, per-machine copy there', () => {
   assert.equal(ortRuntimeFolder({}), ortPackageFolder());
-  const folder = ortRuntimeFolder({ GIZ_ORT_DIR: '/data/onnxruntime' });
+  const folder = ortRuntimeFolder({ GIZZY_ORT_DIR: '/data/onnxruntime' });
   assert.match(folder, new RegExp(`^${'/data/onnxruntime'.replace(/\//g, '[\\\\/]')}[\\\\/]\\d+\\.\\d+\\.\\d+[\\\\/]${process.platform}-${process.arch}$`));
 });
 
 test('the copy takes the library and the binding, never a CUDA provider, and lands whole', async () => {
-  const from = mkdtempSync(join(tmpdir(), 'giz-ort-from-'));
+  const from = mkdtempSync(join(tmpdir(), 'gizzy-ort-from-'));
   for (const name of ['libonnxruntime.so.1', 'onnxruntime_binding.node', 'libonnxruntime_providers_cuda.so', 'libonnxruntime_providers_shared.so']) writeFileSync(join(from, name), name);
-  const to = join(mkdtempSync(join(tmpdir(), 'giz-ort-to-')), '1.0.0', 'linux-x64');
+  const to = join(mkdtempSync(join(tmpdir(), 'gizzy-ort-to-')), '1.0.0', 'linux-x64');
   await copyOrtRuntime(from, to);
   assert.deepEqual(readdirSync(to).sort(), ['libonnxruntime.so.1', 'onnxruntime_binding.node']);
   await copyOrtRuntime(from, to);
@@ -28,8 +28,8 @@ test('the copy takes the library and the binding, never a CUDA provider, and lan
 // In a child process (the hook is for the whole process): a writable copy with a CUDA provider makes onnxruntime-node
 // load its binding from the copy; without the provider, nothing is redirected.
 function loadedBinding(withProvider: boolean): { used: boolean; binding: string; dir: string } {
-  const dir = mkdtempSync(join(tmpdir(), 'giz-ort-dir-'));
-  const env = { ...process.env, GIZ_ORT_DIR: dir };
+  const dir = mkdtempSync(join(tmpdir(), 'gizzy-ort-dir-'));
+  const env = { ...process.env, GIZZY_ORT_DIR: dir };
   const script = `
     import { createRequire } from 'node:module';
     import { copyOrtRuntime, ortPackageFolder, ortRuntimeFolder, useWritableOrt } from ${JSON.stringify(RUNTIME)};
@@ -49,7 +49,7 @@ function loadedBinding(withProvider: boolean): { used: boolean; binding: string;
 test('with the GPU installed in the copy, onnxruntime-node loads its binding (and so the provider) from the copy', () => {
   const { used, binding, dir } = loadedBinding(true);
   assert.equal(used, true);
-  assert.equal(binding, join(ortRuntimeFolder({ GIZ_ORT_DIR: dir }), 'onnxruntime_binding.node'), 'loaded from the copy, not the package');
+  assert.equal(binding, join(ortRuntimeFolder({ GIZZY_ORT_DIR: dir }), 'onnxruntime_binding.node'), 'loaded from the copy, not the package');
 });
 
 test('without a provider in the copy, onnxruntime-node keeps its own binding', () => {

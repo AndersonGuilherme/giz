@@ -51,7 +51,7 @@ test('a manifest entry without a path, hash or size, or with a path out of the f
 const report = { log: () => undefined, onProgress: () => undefined };
 
 test('an archive is downloaded with its expected size and kept when its sha256 matches', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-cuda-archive-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-cuda-archive-'));
   const archive = { name: 'cuda_cudart', url: 'https://x/cudart.tar.xz', sha256: sha256('cudart'), bytes: 6 };
   const send = (async () => new Response('cudart')) as typeof fetch;
   const file = await downloadArchive(archive, folder, { ...report, fetch: send });
@@ -60,7 +60,7 @@ test('an archive is downloaded with its expected size and kept when its sha256 m
 });
 
 test('an archive whose bytes do not match the manifest hash is deleted and nothing is extracted', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-cuda-archive-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-cuda-archive-'));
   const archive = { name: 'cuda_cudart', url: 'https://x/cudart.tar.xz', sha256: sha256('cudart'), bytes: 6 };
   const send = (async () => new Response('evil!!')) as typeof fetch;
   await assert.rejects(downloadArchive(archive, folder, { ...report, fetch: send }), /cuda_cudart baixado não confere/);
@@ -68,7 +68,7 @@ test('an archive whose bytes do not match the manifest hash is deleted and nothi
 });
 
 test('an archive of another size than the manifest says is not accepted', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-cuda-archive-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-cuda-archive-'));
   const archive = { name: 'libcurand', url: 'https://x/curand.tar.xz', sha256: sha256('curand'), bytes: 6 };
   const send = (async () => new Response('curand and more')) as typeof fetch;
   await assert.rejects(downloadArchive(archive, folder, { ...report, fetch: send }), /incompleto|não confere/);

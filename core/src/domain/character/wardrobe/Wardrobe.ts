@@ -16,7 +16,7 @@ export type OutfitChoice = Readonly<{ main: string; accent: string }>;
 // its middle; a long one goes past the elbow (so it joins the sleeve of the forearm).
 const SLEEVE_REACH: Readonly<Record<Sleeve, number>> = { bare: 0, short: 0.52, long: 1.14 };
 
-/** The giz wardrobe by era: each outfit has its sleeve length and a palette that fits it. */
+/** The Gizzy wardrobe by era: each outfit has its sleeve length and a palette that fits it. */
 export class Wardrobe {
   static readonly DEFAULT: OutfitName = 'casual';
 

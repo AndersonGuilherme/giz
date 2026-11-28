@@ -1,15 +1,15 @@
 import { mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { GizConfig } from '../composition/install.ts';
+import type { GizzyConfig } from '../composition/install.ts';
 import type { LocalVoice } from '../composition/tools.ts';
 import type { SetupContext } from './setupContext.ts';
 import { TOTAL_STEPS } from './setupContext.ts';
 import { green, step, yellow } from './prompts.ts';
 import { VOICES } from './voiceCatalog.ts';
 
-// Step 7 of `giz setup`: downloads the voice model and tests it ON THIS machine (GPU falls back to CPU), with samples.
-type Save = (config: GizConfig) => void;
+// Step 7 of `gizzy setup`: downloads the voice model and tests it ON THIS machine (GPU falls back to CPU), with samples.
+type Save = (config: GizzyConfig) => void;
 type Test = Readonly<{ voice: LocalVoice; samples: Float32Array; seconds: number }>;
 
 const tools = () => import('../composition/tools.ts');
@@ -17,7 +17,7 @@ const REPOSITORY = fileURLToPath(new URL('../../../../../', import.meta.url));
 /** voice-samples/ at the repository root (gitignored). */
 export const SAMPLES_FOLDER = join(REPOSITORY, 'voice-samples');
 
-async function testLine(config: GizConfig): Promise<Test> {
+async function testLine(config: GizzyConfig): Promise<Test> {
   const voice = await (await tools()).openLocalVoice(config);
   const started = performance.now();
   const samples = await voice.generate('Olá! Eu sou a Lia, e este é o Téo.', { speaker: config.voices.lia, language: config.language, instruct: config.styles.lia || undefined, seed: 7 });

@@ -3,7 +3,7 @@ import type { Expression, Pose } from '../../domain/cast/PoseAndExpression.ts';
 import type { Viseme } from '../../domain/speech/Visemes.ts';
 import { CharacterState } from '../../domain/character/CharacterState.ts';
 
-// The giz board: chalk-colored text on a slate background, the cards a lighter slate.
+// The Gizzycera board: chalk-colored text on a slate background, the cards a lighter slate.
 export const INK = '#f3efe2';
 export const BOARD = '#2a3634';
 const CARD = '#3a4a47';

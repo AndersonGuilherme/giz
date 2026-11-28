@@ -20,7 +20,7 @@ async function qwenVoice(project: Project): Promise<VoiceProvider> {
   return new QwenVoice(installConfig(), project.voice().model);
 }
 
-/** A paid voice's key (the Studio's own key store; absent: the environment or ~/.config/giz); throws a readable error without one. */
+/** A paid voice's key (the Studio's own key store; absent: the environment or ~/.config/gizzycera); throws a readable error without one. */
 export type VoiceKeys = (service: ExternalService) => string;
 
 const cliVoiceKeys: VoiceKeys = (name) => apiKeyOf(name, { env: process.env, home: homedir() });

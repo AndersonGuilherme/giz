@@ -6,7 +6,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'pirate-ship'>;
 
-// The deck of a sailing ship, giz style: the sea and a far island behind the rail, the mast with a big sail marked with
+// The deck of a sailing ship, Gizzy style: the sea and a far island behind the rail, the mast with a big sail marked with
 // a compass star behind the characters, rigging ropes, a plank deck and barrels; chalk lines on the wood and the sail.
 
 const Back: FC<LayerProps<Colors>> = (layer) => {

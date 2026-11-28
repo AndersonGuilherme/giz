@@ -1,6 +1,6 @@
 # Guia editorial — Lia e Téo
 
-A dupla que apresenta todas as aulas feitas com o giz, em qualquer curso. O aluno precisa reconhecê-los, gostar de
+A dupla que apresenta todas as aulas feitas com o Gizzycera, em qualquer curso. O aluno precisa reconhecê-los, gostar de
 acompanhá-los e querer encontrá-los na próxima aula. Ficha visual: [lia-teo-sheet.png](lia-teo-sheet.png).
 Configuração técnica (voz, ritmo, visual): [`motor/src/cast.ts`](../../../motor/src/cast.ts).
 

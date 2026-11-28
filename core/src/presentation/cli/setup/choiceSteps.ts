@@ -4,7 +4,7 @@ import { TOTAL_STEPS } from './setupContext.ts';
 import { dim, step } from './prompts.ts';
 import { DEFAULT_STYLES, LANGUAGES, LICENSES, VOICES } from './voiceCatalog.ts';
 
-// Steps 4–6 of `giz setup`: voice model, channel, language and voices; the pronunciation check; the Remotion license.
+// Steps 4–6 of `gizzy setup`: voice model, channel, language and voices; the pronunciation check; the Remotion license.
 const modelGigabytes = async (model: '0.6b' | '1.7b') => (await import('../composition/tools.ts')).modelGigabytes(model);
 
 // The 1.7B needs ~13 GB of video memory (GPU) or ~20 GB of RAM (CPU).
@@ -53,7 +53,7 @@ export async function remotionLicense({ prompter, previous, config }: SetupConte
   step(6, TOTAL_STEPS, 'Licença do Remotion (o programa que desenha o vídeo)');
   console.log('O Remotion é gratuito para pessoa física e para empresas de até 3 pessoas. Acima disso, a empresa precisa da licença paga (remotion.pro).');
   const declared = previous.remotionLicense === 'nao-informado' ? 'pessoa-fisica' : previous.remotionLicense;
-  config.remotionLicense = await prompter.choose('Quem vai usar o giz?', LICENSES, declared);
+  config.remotionLicense = await prompter.choose('Quem vai usar o Gizzycera?', LICENSES, declared);
   const parallel = await prompter.ask('Quadros renderizados em paralelo (vazio = automático)', previous.render.concurrency ? String(previous.render.concurrency) : 'auto');
   config.render.concurrency = Number(parallel) > 0 ? Number(parallel) : null;
 }

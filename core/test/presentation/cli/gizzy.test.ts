@@ -18,14 +18,14 @@ export async function resolve(specifier, context, next) {
 }`;
 const HOOK = `import { register } from 'node:module'; register('data:text/javascript,' + encodeURIComponent(${JSON.stringify(NO_MOTOR)}));`;
 
-function gizWithoutMotor(args: string[]) {
-  return spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(HOOK)}`, 'src/presentation/cli/giz.ts', ...args], {
+function gizzyWithoutMotor(args: string[]) {
+  return spawnSync(process.execPath, ['--import', `data:text/javascript,${encodeURIComponent(HOOK)}`, 'src/presentation/cli/gizzy.ts', ...args], {
     cwd: NUCLEO, encoding: 'utf8',
   });
 }
 
 test('check runs without loading anything from motor/ (the Qwen voice is imported only to generate a voice)', () => {
-  const run = gizWithoutMotor(['check', 'test/fixtures/minimal-project']);
+  const run = gizzyWithoutMotor(['check', 'test/fixtures/minimal-project']);
   assert.doesNotMatch(run.stderr, /motor carregado/);
   assert.match(run.stdout, /0 erro\(s\)/);
   assert.equal(run.status, 0);
@@ -34,27 +34,27 @@ test('check runs without loading anything from motor/ (the Qwen voice is importe
 // The fixture voices were recorded before project.json named the model (the hash of a line without a model leaves it
 // out), so the copy drops `voice.model`: then both lines are up to date and the voice never loads.
 test('voice runs without motor/: with every line up to date, no voice model is even loaded', () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-voice-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-voice-'));
   cpSync(join(NUCLEO, 'test/fixtures/minimal-project'), folder, { recursive: true });
   const project = JSON.parse(readFileSync(join(folder, 'project.json'), 'utf8'));
   writeFileSync(join(folder, 'project.json'), JSON.stringify({ ...project, voice: { provider: 'qwen' } }));
-  const run = gizWithoutMotor(['voice', folder]);
+  const run = gizzyWithoutMotor(['voice', folder]);
   assert.doesNotMatch(run.stderr, /motor carregado/);
   assert.match(run.stdout, /0 gerada\(s\), 2 já em dia/);
   assert.equal(run.status, 0);
 });
 
 test('setup --help, and the tool subcommands answer a wrong call with their usage (exit 2)', () => {
-  const help = gizWithoutMotor(['setup', '--help']);
-  assert.match(help.stdout, /uso: giz setup \[--defaults\] \[--dry-run\]/);
+  const help = gizzyWithoutMotor(['setup', '--help']);
+  assert.match(help.stdout, /uso: gizzy setup \[--defaults\] \[--dry-run\]/);
   assert.equal(help.status, 0);
-  const qa = gizWithoutMotor(['qa']);
-  assert.match(qa.stderr, /giz qa asr <pasta-do-projeto>/);
+  const qa = gizzyWithoutMotor(['qa']);
+  assert.match(qa.stderr, /gizzy qa asr <pasta-do-projeto>/);
   assert.equal(qa.status, 2);
-  const gpu = gizWithoutMotor(['gpu', 'nada']);
-  assert.match(gpu.stderr, /uso: giz gpu info \| install/);
+  const gpu = gizzyWithoutMotor(['gpu', 'nada']);
+  assert.match(gpu.stderr, /uso: gizzy gpu info \| install/);
   assert.equal(gpu.status, 2);
-  const usage = gizWithoutMotor(['nada']);
+  const usage = gizzyWithoutMotor(['nada']);
   assert.match(usage.stderr, /setup \| models \| gpu \| qa \| sounds/);
 });
 

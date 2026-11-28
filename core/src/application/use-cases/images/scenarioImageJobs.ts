@@ -36,7 +36,7 @@ function selected(requests: readonly SceneRequest[], selection: ImageSelection):
 }
 
 // The cache key holds what the person chose (prompt, style, aspect, service, model), not the composed prompt: a new
-// wording of the presets in giz does not pay for every image again.
+// wording of the presets in Gizzycera does not pay for every image again.
 async function jobOf(project: Project, scene: SceneRequest, dependencies: ImageDependencies): Promise<Omit<ImageJob, 'status'>> {
   const { provider, model } = dependencies.images.identity();
   const [aspect, style] = [project.aspect(), scene.background.generate.style ?? project.imageStyle()];
@@ -62,7 +62,7 @@ async function rejectForeignFiles(jobs: readonly ImageJob[], store: ScenarioImag
   const lineIds = pending.filter((_job, index) => foreign[index]).map((job) => job.lineId);
   if (lineIds.length === 0) return;
   const files = lineIds.map(scenarioImageFile).join(', ');
-  throw new ScenarioImageError(`${files} já existe(m) e não foi(ram) feito(s) pelo giz images (ou mudou/mudaram depois): `
+  throw new ScenarioImageError(`${files} já existe(m) e não foi(ram) feito(s) pelo gizzy images (ou mudou/mudaram depois): `
     + 'para usar o arquivo, aponte background.image para ele; para gerar de novo, mova ou apague o arquivo');
 }
 

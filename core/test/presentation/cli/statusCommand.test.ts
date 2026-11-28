@@ -13,7 +13,7 @@ import { voiceOf } from '../../../src/presentation/cli/composition/voices.ts';
 type Json = Record<string, unknown>;
 const CORE = fileURLToPath(new URL('../../../', import.meta.url));
 const FIXTURE = join(CORE, 'test/fixtures/minimal-project');
-const KEY_VARIABLES = /^(ANTHROPIC|OPENAI|GEMINI|ELEVENLABS|FISH)_API_KEY$|^FAL_KEY$|^GIZ_/;
+const KEY_VARIABLES = /^(ANTHROPIC|OPENAI|GEMINI|ELEVENLABS|FISH)_API_KEY$|^FAL_KEY$|^GIZZY_/;
 const tempFolders: string[] = [];
 after(() => Promise.all(tempFolders.map((folder) => rm(folder, { recursive: true, force: true }))));
 
@@ -21,7 +21,7 @@ const readJson = async (path: string) => JSON.parse(await readFile(path, 'utf8')
 
 // The minimal project with the ElevenLabs voice and line 1 on a generated scenario (no voice, image or video yet).
 async function projectFolder(): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-status-cli-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-status-cli-'));
   tempFolders.push(folder);
   for (const name of ['project.json', 'script.json', 'cast']) await cp(join(FIXTURE, name), join(folder, name), { recursive: true });
   const script = await readJson(join(folder, 'script.json'));
@@ -44,22 +44,22 @@ async function saveVoices(folder: string): Promise<void> {
   }
 }
 
-function giz(args: string[]) {
-  const home = mkdtempSync(join(tmpdir(), 'giz-status-home-'));
+function gizzy(args: string[]) {
+  const home = mkdtempSync(join(tmpdir(), 'gizzy-status-home-'));
   tempFolders.push(home);
-  mkdirSync(join(home, '.config', 'giz'), { recursive: true });
+  mkdirSync(join(home, '.config', 'gizzycera'), { recursive: true });
   const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !KEY_VARIABLES.test(name)));
-  return spawnSync(process.execPath, ['src/presentation/cli/giz.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
+  return spawnSync(process.execPath, ['src/presentation/cli/gizzy.ts', ...args], { cwd: CORE, encoding: 'utf8', env: { ...env, HOME: home } });
 }
 
-test('giz status: each stage with its symbol and label, the stale and missing line ids and the cost of what is pending', async () => {
+test('gizzy status: each stage with its symbol and label, the stale and missing line ids and the cost of what is pending', async () => {
   const folder = await projectFolder();
   await saveVoices(folder);
   await mkdir(join(folder, 'output'));
   await writeFile(join(folder, 'output', 'video.mp4'), '');
   const later = new Date(Date.now() + 60_000);
   await utimes(join(folder, 'output', 'video.mp4'), later, later);
-  const run = giz(['status', folder]);
+  const run = gizzy(['status', folder]);
   assert.equal(run.status, 0, run.stderr);
   assert.equal(run.stdout.trim(), [
     `etapas de ${folder}:`,
@@ -77,10 +77,10 @@ test('giz status: each stage with its symbol and label, the stale and missing li
   ].join('\n'));
 });
 
-test('giz status: script errors are listed under the script; without idea.json the script generation cost is unknown', async () => {
+test('gizzy status: script errors are listed under the script; without idea.json the script generation cost is unknown', async () => {
   const folder = await projectFolder();
   await rm(join(folder, 'script.json'));
-  const run = giz(['status', folder]);
+  const run = gizzy(['status', folder]);
   assert.equal(run.status, 0, run.stderr);
   assert.match(run.stdout, /^· roteiro: vazio$/m);
   assert.match(run.stdout, /^· vozes: vazio$/m);
@@ -88,24 +88,24 @@ test('giz status: script errors are listed under the script; without idea.json t
   assert.match(run.stdout, /^ {2}cenários: desconhecido \(o projeto não carrega\)$/m);
   assert.match(run.stdout, /^ {2}total: até desconhecido$/m);
   await writeFile(join(folder, 'script.json'), JSON.stringify({ chapters: ['A'], lines: [{ id: '1', chapter: 1, speaker: 'ana', text: 'Oi.', pose: 'dance' }] }));
-  const broken = giz(['status', folder]);
+  const broken = gizzy(['status', folder]);
   assert.match(broken.stdout, /^! roteiro: com erros\n {4}- script\.json › lines\[0\]\.pose: "dance" inválido/m);
   assert.doesNotMatch(broken.stdout + broken.stderr, /at .*\.ts:\d+/);
 });
 
-test('giz status: a wrong option or no folder exits with 2', () => {
+test('gizzy status: a wrong option or no folder exits with 2', () => {
   for (const args of [['status'], ['status', 'a', 'b'], ['status', 'a', '--tudo']]) {
-    const run = giz(args);
+    const run = gizzy(args);
     assert.equal(run.status, 2, args.join(' '));
-    assert.match(run.stderr, /uso: giz status <pasta> \[--regenerate-script\]/);
+    assert.match(run.stderr, /uso: gizzy status <pasta> \[--regenerate-script\]/);
   }
 });
 
-test('giz status: a scenes/<id>.png that giz images did not make is shown to be resolved, with the reason, and never crashes', async () => {
+test('gizzy status: a scenes/<id>.png that gizzy images did not make is shown to be resolved, with the reason, and never crashes', async () => {
   const folder = await projectFolder();
   await mkdir(join(folder, 'scenes'));
-  await writeFile(join(folder, 'scenes', '1.png'), 'not made by giz');
-  const run = giz(['status', folder]);
+  await writeFile(join(folder, 'scenes', '1.png'), 'not made by Gizzycera');
+  const run = gizzy(['status', folder]);
   assert.equal(run.status, 0, run.stderr);
   assert.match(run.stdout, /^! cenários: desatualizado — a resolver: cenas das falas 1\n {4}- cena da fala 1: scenes\/1\.png já existe/m);
   assert.match(run.stdout, /^ {2}cenários \([^)]+\): nada pendente$/m);

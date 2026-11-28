@@ -20,18 +20,18 @@ async function quietly<T>(run: () => Promise<T>): Promise<{ result: T; printed: 
 }
 
 test('setup --dry-run asks with the defaults, shows the result and writes nothing (no config, no folders)', async () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-setup-'));
-  const path = join(folder, 'giz.config.json');
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-setup-'));
+  const path = join(folder, 'gizzycera.config.json');
   const { printed } = await quietly(() => setupCommand(['--dry-run'], path));
   assert.equal(existsSync(path), false);
   assert.deepEqual(readdirSync(folder), []);
-  assert.match(printed, /\[7\/7\][\s\S]*\(simulação\) giz\.config\.json ficaria assim:/);
+  assert.match(printed, /\[7\/7\][\s\S]*\(simulação\) gizzycera\.config\.json ficaria assim:/);
   assert.doesNotMatch(printed, /NaN/);
 });
 
 test('the missing configuration warning goes to stderr (console.warn), not to the command output', async () => {
-  const path = join(mkdtempSync(join(tmpdir(), 'giz-config-')), 'giz.config.json');
+  const path = join(mkdtempSync(join(tmpdir(), 'gizzy-config-')), 'gizzycera.config.json');
   const { printed, warned } = await quietly(async () => configFile(path).load());
   assert.equal(printed, '');
-  assert.match(warned, /AVISO: giz\.config\.json não encontrado/);
+  assert.match(warned, /AVISO: gizzycera\.config\.json não encontrado/);
 });

@@ -3,7 +3,7 @@ import type { Audio } from '../../domain/speech/Audio.ts';
 import type { DownloadProgress } from '../download/resumableDownload.ts';
 
 // The motor whisper-small (scripts/asr-check.ts) was exported without the cross attentions and gives no per-word
-// time; this is the same network exported with them, used for the alignment and for `giz qa`. It downloads once
+// time; this is the same network exported with them, used for the alignment and for `gizzy qa`. It downloads once
 // (~250 MB, q8) into the transformers cache.
 export const WHISPER_MODEL = 'onnx-community/whisper-small_timestamped';
 /** The commit Whisper is downloaded from (the repository's HEAD on 2026-11-27): a later push never changes it. */
@@ -45,10 +45,10 @@ export function whisperProgressOf(event: TransformersEvent): DownloadProgress | 
 export type RecognizerOptions = Readonly<{ onProgress?: (progress: DownloadProgress) => void; cacheDir?: string }>;
 
 /**
- * GIZ_WHISPER_CACHE: another cache folder than the transformers package's own, which is read-only once the Studio is
+ * GIZZY_WHISPER_CACHE: another cache folder than the transformers package's own, which is read-only once the Studio is
  * installed (the Studio sets it); undefined keeps transformers' own.
  */
-export const whisperCacheOf = (env: Readonly<Record<string, string | undefined>>): string | undefined => env.GIZ_WHISPER_CACHE?.trim() || undefined;
+export const whisperCacheOf = (env: Readonly<Record<string, string | undefined>>): string | undefined => env.GIZZY_WHISPER_CACHE?.trim() || undefined;
 
 /** transformers' options for Whisper: q8 on the CPU, the pinned commit, progress as download progress, and the cache. */
 export function recognizerOptions({ onProgress, cacheDir }: RecognizerOptions): PretrainedModelOptions {

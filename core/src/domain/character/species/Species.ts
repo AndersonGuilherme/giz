@@ -44,7 +44,7 @@ const LARGEST_EYES = 1.5;
 const SHADOW_PER_UNIT = 0.006;
 const BUILT = new Map<string, readonly HeadPart[]>();
 
-/** The creatures of the giz rig: one body, so every pose, expression and viseme still works; the rules live here. */
+/** The creatures of the gizzy rig: one body, so every pose, expression and viseme still works; the rules live here. */
 export class Species {
   static readonly DEFAULT: SpeciesName = 'human';
 

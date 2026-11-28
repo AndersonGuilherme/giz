@@ -6,15 +6,15 @@ import { refuseAnotherFile } from '../download/verifiedFile.ts';
 import { loadRecognizer, whisperCacheOf, WHISPER_HASHES, WHISPER_MODEL, WHISPER_REVISION, type RecognizerOptions } from './whisperModel.ts';
 
 // transformers writes each file straight to its final name and cannot resume: a download stopped halfway would leave
-// a broken model that looks complete. So the explicit download (`giz models --whisper`, the Studio) goes to a partial
+// a broken model that looks complete. So the explicit download (`gizzy models --whisper`, the Studio) goes to a partial
 // folder, and only a model that loaded and whose weights match the pinned hashes is moved into the cache, with a
 // marker that says it is whole. With a pinned revision, transformers keeps the files in <model>/<revision>/.
-const DONE_MARKER = '.giz-complete';
-const PARTIAL = '.giz-partial';
+const DONE_MARKER = '.gizzy-complete';
+const PARTIAL = '.gizzy-partial';
 const WHISPER_FILES = ['config.json', 'onnx/encoder_model_quantized.onnx', 'onnx/decoder_model_merged_quantized.onnx'];
 
 // transformers' default cache: the .cache folder of its own package (where loadRecognizer reads from), unless
-// GIZ_WHISPER_CACHE names another. Its entry is <package>/dist/<file>; its package.json is not in its exports, so it
+// GIZZY_WHISPER_CACHE names another. Its entry is <package>/dist/<file>; its package.json is not in its exports, so it
 // cannot be resolved directly.
 const packageCache = () => join(dirname(dirname(createRequire(import.meta.url).resolve('@huggingface/transformers'))), '.cache');
 const transformersCache = () => whisperCacheOf(process.env) ?? packageCache();

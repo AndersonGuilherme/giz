@@ -1,4 +1,4 @@
-import { gizDefinition } from './giz/parameters.ts';
+import { gizzyDefinition } from './gizzy/parameters.ts';
 import { liaStyleDefinition } from './lia-style/parameters.ts';
 import type { RigDefinition } from './RigModel.ts';
 
@@ -31,4 +31,4 @@ export class RigRegistry<Rig extends RigDefinition> {
 }
 
 /** The definitions, in plain `.ts`: the CLI imports this module without loading React or `.tsx`. */
-export const rigRegistry = RigRegistry.with<RigDefinition>([gizDefinition, liaStyleDefinition]);
+export const rigRegistry = RigRegistry.with<RigDefinition>([gizzyDefinition, liaStyleDefinition]);

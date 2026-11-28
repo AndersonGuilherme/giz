@@ -3,14 +3,14 @@ import { resolve } from 'node:path';
 import type { SpellingTest } from '../composition/qa.ts';
 import { UsageError } from '../usage.ts';
 
-// `giz qa <tool>`: the quality tools of the motor (asr-check, asr-aggregate, pitch-check, voice-lab, lexicon-lab).
+// `gizzy qa <tool>`: the quality tools of the motor (asr-check, asr-aggregate, pitch-check, voice-lab, lexicon-lab).
 type Tool = (args: readonly string[]) => Promise<void>;
 
-const USAGE = `uso: giz qa asr <pasta-do-projeto>
-       giz qa asr-aggregate <pasta-com-os-projetos>
-       giz qa pitch <pasta-do-projeto>
-       giz qa voices [pasta-de-saida] [voz1,voz2,...] ["instrução de estilo (só 1.7B)"]
-       giz qa lexicon [testes.json] [voz]   (testes: [{"word":"deploy","frame":"Fiz o X ontem.","candidates":["deploy","diplói"]}])`;
+const USAGE = `uso: gizzy qa asr <pasta-do-projeto>
+       gizzy qa asr-aggregate <pasta-com-os-projetos>
+       gizzy qa pitch <pasta-do-projeto>
+       gizzy qa voices [pasta-de-saida] [voz1,voz2,...] ["instrução de estilo (só 1.7B)"]
+       gizzy qa lexicon [testes.json] [voz]   (testes: [{"word":"deploy","frame":"Fiz o X ontem.","candidates":["deploy","diplói"]}])`;
 
 const qa = async () => (await import('../composition/qa.ts')).qa;
 const print = (rows: readonly string[]) => rows.forEach((row) => console.log(row));

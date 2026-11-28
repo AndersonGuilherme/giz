@@ -3,35 +3,38 @@ import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { writeAtomicSync } from '../disk/atomicWrite.ts';
-import { mergedConfig, type Environment, type GizConfig } from './GizConfig.ts';
+import { mergedConfig, type Environment, type GizzyConfig } from './GizzyConfig.ts';
 
-/** giz.config.json at the repository root (the folder above core/), where the motor kept it. */
-export const CONFIG_PATH = fileURLToPath(new URL('../../../../giz.config.json', import.meta.url));
+/**
+ * gizzycera.config.json at the repository root (the folder above core/), where the motor kept its giz.config.json
+ * (copied once to the new name, see formerNames.ts).
+ */
+export const CONFIG_PATH = fileURLToPath(new URL('../../../../gizzycera.config.json', import.meta.url));
 
 /** How to look at this machine (tests replace it). */
 export type ConfigPlace = Readonly<{ exists: (path: string) => boolean; home: string }>;
 const THIS_MACHINE: ConfigPlace = { exists: existsSync, home: homedir() };
 
 /**
- * The file this process uses: GIZ_CONFIG when it names one (the installed Studio, whose package folder is read-only,
- * keeps it in ~/.config/giz); otherwise the repository one, or, when the repository has none, the installed
+ * The file this process uses: GIZZY_CONFIG when it names one (the installed Studio, whose package folder is read-only,
+ * keeps it in ~/.config/gizzycera); otherwise the repository one, or, when the repository has none, the installed
  * Studio's, so the CLI and the app share one configuration.
  */
 export function configPath(env: Environment = process.env, place: ConfigPlace = THIS_MACHINE): string {
-  const named = env.GIZ_CONFIG?.trim();
+  const named = env.GIZZY_CONFIG?.trim();
   return named || localPath(place);
 }
 
 function localPath(place: ConfigPlace): string {
-  const studio = join(place.home, '.config', 'giz', 'giz.config.json');
+  const studio = join(place.home, '.config', 'gizzycera', 'gizzycera.config.json');
   return !place.exists(CONFIG_PATH) && place.exists(studio) ? studio : CONFIG_PATH;
 }
 
 type Sources = Readonly<{ env: Environment; home: string; warn: (message: string) => void }>;
 
-function parsed(path: string): Partial<GizConfig> {
+function parsed(path: string): Partial<GizzyConfig> {
   try {
-    return JSON.parse(readFileSync(path, 'utf8')) as Partial<GizConfig>;
+    return JSON.parse(readFileSync(path, 'utf8')) as Partial<GizzyConfig>;
   } catch (error) {
     throw new Error(`não foi possível ler ${path}: ${(error as Error).message}`);
   }
@@ -51,14 +54,14 @@ export class ConfigFile {
     return existsSync(this.#path);
   }
 
-  load(): GizConfig {
+  load(): GizzyConfig {
     const { env, home, warn } = this.#sources;
     if (this.exists()) return mergedConfig(parsed(this.#path), { env, home });
-    if (!env.GIZ_QUIET) warn('giz.config.json não encontrado; usando os padrões (CPU). Rode `npx giz setup` para configurar.');
+    if (!env.GIZZY_QUIET) warn('gizzycera.config.json não encontrado; usando os padrões (CPU). Rode `npx gizzy setup` para configurar.');
     return mergedConfig({}, { env, home });
   }
 
-  save(config: GizConfig): void {
+  save(config: GizzyConfig): void {
     mkdirSync(dirname(this.#path), { recursive: true, mode: 0o700 });
     // Whole or not at all (the Studio and the CLI never read it half-written); a linked file stays a link.
     writeAtomicSync(existsSync(this.#path) ? realpathSync(this.#path) : this.#path, `${JSON.stringify(config, null, 2)}\n`);

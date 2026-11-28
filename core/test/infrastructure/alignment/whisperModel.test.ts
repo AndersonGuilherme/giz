@@ -19,16 +19,16 @@ function writeModel(folder: string, content = 'x'): void {
 }
 
 test('Whisper counts as downloaded only with its files AND the done marker (files left by a stopped download are not)', () => {
-  const cache = mkdtempSync(join(tmpdir(), 'giz-whisper-'));
+  const cache = mkdtempSync(join(tmpdir(), 'gizzy-whisper-'));
   assert.equal(whisperDownloaded(cache), false);
   writeModel(join(cache, MODEL));
   assert.equal(whisperDownloaded(cache), false);
-  writeFileSync(join(cache, MODEL, '.giz-complete'), 'x');
+  writeFileSync(join(cache, MODEL, '.gizzy-complete'), 'x');
   assert.equal(whisperDownloaded(cache), true);
 });
 
 test('the download goes to a partial folder and only a model that loaded moves into the cache, replacing a broken one', async () => {
-  const cache = mkdtempSync(join(tmpdir(), 'giz-whisper-'));
+  const cache = mkdtempSync(join(tmpdir(), 'gizzy-whisper-'));
   writeModel(join(cache, WHISPER_MODEL), 'old layout of main');
   const seen: string[] = [];
   const load = async ({ cacheDir }: { cacheDir?: string }) => {
@@ -36,15 +36,15 @@ test('the download goes to a partial folder and only a model that loaded moves i
     writeModel(join(cacheDir ?? '', MODEL), 'whole');
   };
   await downloadWhisperModel({ cache, load, hashes: hashesOf('whole') });
-  assert.deepEqual(seen, [join(cache, '.giz-partial')]);
+  assert.deepEqual(seen, [join(cache, '.gizzy-partial')]);
   assert.equal(readFileSync(join(cache, MODEL, 'config.json'), 'utf8'), 'whole');
   assert.equal(existsSync(join(cache, WHISPER_MODEL, 'config.json')), false, 'the unpinned files are gone');
   assert.equal(whisperDownloaded(cache), true);
-  assert.equal(existsSync(join(cache, '.giz-partial')), false);
+  assert.equal(existsSync(join(cache, '.gizzy-partial')), false);
 });
 
 test('a download that fails (or is stopped) leaves the cache as it was: no marker, nothing moved', async () => {
-  const cache = mkdtempSync(join(tmpdir(), 'giz-whisper-'));
+  const cache = mkdtempSync(join(tmpdir(), 'gizzy-whisper-'));
   const load = async ({ cacheDir }: { cacheDir?: string }) => {
     writeModel(join(cacheDir ?? '', MODEL), 'half');
     throw new Error('rede caiu');
@@ -66,19 +66,19 @@ test("transformers' progress events become download progress (file, bytes); othe
   assert.equal(whisperProgressOf({ status: 'ready' }), undefined);
 });
 
-test('GIZ_WHISPER_CACHE moves the Whisper cache out of the transformers package (read-only once installed)', async () => {
+test('GIZZY_WHISPER_CACHE moves the Whisper cache out of the transformers package (read-only once installed)', async () => {
   const { whisperCacheOf } = await import('../../../src/infrastructure/alignment/whisperModel.ts');
-  assert.equal(whisperCacheOf({ GIZ_WHISPER_CACHE: '/home/x/.config/giz-estudio/whisper' }), '/home/x/.config/giz-estudio/whisper');
-  assert.equal(whisperCacheOf({ GIZ_WHISPER_CACHE: ' ' }), undefined);
+  assert.equal(whisperCacheOf({ GIZZY_WHISPER_CACHE: '/home/x/.config/gizzycera/whisper' }), '/home/x/.config/gizzycera/whisper');
+  assert.equal(whisperCacheOf({ GIZZY_WHISPER_CACHE: ' ' }), undefined);
   assert.equal(whisperCacheOf({}), undefined);
 });
 
 test('a Whisper that loaded but whose weights do not match the pinned hashes never reaches the cache', async () => {
-  const cache = mkdtempSync(join(tmpdir(), 'giz-whisper-'));
+  const cache = mkdtempSync(join(tmpdir(), 'gizzy-whisper-'));
   const load = async ({ cacheDir }: { cacheDir?: string }) => writeModel(join(cacheDir ?? '', MODEL), 'tampered');
   await assert.rejects(downloadWhisperModel({ cache, load, hashes: hashesOf('whole') }), /encoder_model_quantized\.onnx baixado não confere/);
   assert.equal(existsSync(join(cache, WHISPER_MODEL)), false);
-  assert.equal(existsSync(join(cache, '.giz-partial')), false);
+  assert.equal(existsSync(join(cache, '.gizzy-partial')), false);
   assert.equal(whisperDownloaded(cache), false);
 });
 

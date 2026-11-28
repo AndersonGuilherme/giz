@@ -1,7 +1,7 @@
 {
   "id": "lua",
   "name": "Lua",
-  "rig": "giz",
+  "rig": "gizzy",
   "parameters": {
     "species": "vampire",
     "outfit": "victorian",

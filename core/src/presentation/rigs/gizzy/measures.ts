@@ -1,4 +1,4 @@
-// Drawing measures, in the giz SVG coordinate system (feet at y = 590).
+// Drawing measures, in the Gizzy SVG coordinate system (feet at y = 590).
 export const VIEW_BOX = { x: -60, y: -30, width: 520, height: 630 } as const;
 export const HEAD = { x: 200, y: 165, radius: 128 } as const;
 /** Face unit: the domain geometries use head radius = 100. */

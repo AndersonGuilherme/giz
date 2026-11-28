@@ -29,7 +29,7 @@ class FakeTranscriber implements Transcriber {
 }
 
 async function fixtureCopy(change?: (script: { lines: Array<Record<string, unknown>> }) => void) {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-qa-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-qa-'));
   cpSync(FIXTURE, folder, { recursive: true });
   const cast = JSON.parse(readFileSync(join(folder, 'cast', 'ana.json'), 'utf8'));
   writeFileSync(join(folder, 'cast', 'ana.json'), JSON.stringify({ ...cast, rig: 'test', parameters: { skin: '#f0c8a0' } }));
@@ -56,7 +56,7 @@ test('asr: WER against the caption text, the wrong lines, questions not heard as
 });
 
 test('asr-aggregate: only words missed in two or more projects, most spread first', () => {
-  const folder = mkdtempSync(join(tmpdir(), 'giz-aggregate-'));
+  const folder = mkdtempSync(join(tmpdir(), 'gizzy-aggregate-'));
   const write = (project: string, lines: object[]) => {
     mkdirSync(join(folder, project, 'output'), { recursive: true });
     writeFileSync(join(folder, project, 'output', 'asr.json'), JSON.stringify(lines));
@@ -83,7 +83,7 @@ test('voice and lexicon labs: one row per voice; ✔ when Whisper heard the word
     availableSpeakers: () => ['vivian', 'dylan'],
     generate: async () => new Float32Array(2400).fill(0.1),
   };
-  const output = mkdtempSync(join(tmpdir(), 'giz-lab-'));
+  const output = mkdtempSync(join(tmpdir(), 'gizzy-lab-'));
   const sentences = ['Três mil clientes receberam uma confirmação de compra, sem comprar absolutamente nada.',
     'Então como uma consulta de frete disparou três mil e-mails?', 'Código funcionando não quer dizer código fácil de mudar.',
     'Você acha que dá pra resolver isso sem reescrever tudo?'];

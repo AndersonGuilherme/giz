@@ -6,7 +6,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'night-sky'>;
 
-// A starry night on a hill, giz style: blue-slate sky, a chalk moon clear of the HUD, hills with chalk ridges, pines
+// A starry night on a hill, Gizzy style: blue-slate sky, a chalk moon clear of the HUD, hills with chalk ridges, pines
 // and a lit cabin.
 
 const Moon: FC<LayerProps<Colors>> = ({ colors, width, height, unit }) => {

@@ -6,11 +6,11 @@ import { RigCatalogFromRegistry } from '../../../src/presentation/rigs/RigCatalo
 
 const STANCE = { viewBox: { x: 0, y: 0, width: 100, height: 100 }, feet: { x: 50, y: 100 } };
 
-test('the registry refuses an unknown rig listing the valid ones', () => assert.throws(() => rigRegistry.get('robot'), /giz|lia-style/));
+test('the registry refuses an unknown rig listing the valid ones', () => assert.throws(() => rigRegistry.get('robot'), /gizzy|lia-style/));
 
-test('the giz rig comes registered with the house-style parameters: skin tones, head shapes, eyes and chalk', () => {
-  const { parameters, name } = rigRegistry.get('giz');
-  assert.equal(name['pt-BR'], 'Giz');
+test('the gizzy rig comes registered with the house-style parameters: skin tones, head shapes, eyes and chalk', () => {
+  const { parameters, name } = rigRegistry.get('gizzy');
+  assert.equal(name['pt-BR'], 'Gizzy');
   assert.deepEqual(parameters.skin, {
     type: 'option', defaultValue: 'medium',
     options: ['light', 'fair', 'medium', 'tan', 'brown', 'deep', 'grey-green', 'pale', 'fur', 'linen', 'mist', 'steel', 'green', 'lilac', 'lime', 'tangerine'],
@@ -43,8 +43,8 @@ test('the giz rig comes registered with the house-style parameters: skin tones, 
   ]);
 });
 
-test('the giz heads are not black by default: no color parameter defaults to black', () => {
-  const { parameters } = rigRegistry.get('giz');
+test('the Gizzy heads are not black by default: no color parameter defaults to black', () => {
+  const { parameters } = rigRegistry.get('gizzy');
   const colors = Object.values(parameters).filter(({ type }) => type === 'color').map(({ defaultValue }) => String(defaultValue));
   assert.ok(colors.every((color) => !['#000000', '#151515', '#101010'].includes(color)));
 });
@@ -78,19 +78,19 @@ test('the lia-style comes registered with the parameters, ranges and options fro
   ]);
 });
 
-test('every rig declares where its feet touch the ground, inside its view box (giz 590, lia-style 570)', () => {
+test('every rig declares where its feet touch the ground, inside its view box (gizzy 590, lia-style 570)', () => {
   for (const { id, stance } of rigRegistry.all()) {
     const { viewBox, feet } = stance;
     assert.ok(feet.y > viewBox.y && feet.y <= viewBox.y + viewBox.height, id);
     assert.ok(feet.x > viewBox.x && feet.x < viewBox.x + viewBox.width, id);
   }
-  assert.equal(rigRegistry.get('giz').stance.feet.y, 590);
+  assert.equal(rigRegistry.get('gizzy').stance.feet.y, 590);
   assert.equal(rigRegistry.get('lia-style').stance.feet.y, 570);
 });
 
-test('the catalog gives each giz character its reach: tall hats and a floating ghost rise above a bald head', () => {
+test('the catalog gives each Gizzy character its reach: tall hats and a floating ghost rise above a bald head', () => {
   const catalog = new RigCatalogFromRegistry(rigRegistry);
-  const top = (parameters: Record<string, string>) => catalog.stance('giz', parameters)!.top!;
+  const top = (parameters: Record<string, string>) => catalog.stance('gizzy', parameters)!.top!;
   const bald = top({ hair: 'bald' });
   assert.ok(top({ hair: 'bald', headwear: 'witch-hat' }) < bald - 50, `witch hat ${top({ hair: 'bald', headwear: 'witch-hat' })}`);
   assert.ok(top({ hair: 'bald', species: 'ghost' }) < bald - 53, 'the ghost floats up to 53 units');

@@ -24,11 +24,11 @@ async function changeFile(folder: string, file: string, change: (json: Json) => 
   await writeFile(path, JSON.stringify(change(json)));
 }
 
-// The fixture uses the production rig (giz); these tests use the fake catalog, so the copy switches Ana to the "test" rig.
+// The fixture uses the production rig (gizzy); these tests use the fake catalog, so the copy switches Ana to the "test" rig.
 const ANA_ON_TEST_RIG: Json = { rig: 'test', parameters: { skin: '#f0c8a0' } };
 
 async function changedCopy(file: string, change: (json: Json) => Json): Promise<string> {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-project-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-project-'));
   tempFolders.push(folder);
   await cp(fixture('minimal-project'), folder, { recursive: true });
   await changeFile(folder, 'cast/ana.json', (json) => ({ ...json, ...ANA_ON_TEST_RIG }));

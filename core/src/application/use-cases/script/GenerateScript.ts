@@ -16,7 +16,7 @@ import { repairRequest, scriptRequest } from './scriptPrompt.ts';
 
 /** After the first answer, at most this many rounds send the problems back for a corrected version. */
 export const MAX_REPAIRS = 3;
-// A new project speaks with the local voice; `giz script` keeps the voice the project already has.
+// A new project speaks with the local voice; `gizzy script` keeps the voice the project already has.
 const DEFAULT_VOICE: ProjectVoice = { provider: 'qwen' };
 
 type Dependencies = Reviewers & Readonly<{ text: TextProvider; materials: ScriptMaterials; rigs: RigCatalog }>;
@@ -60,7 +60,7 @@ function afterCut(answer: TextAnswer, limit: number, problems: readonly string[]
   return { problems: [cut, ...problems], maxTokens: grownOutputTokens(limit) };
 }
 
-/** Writes a project from an idea with a text AI: prompt, validation as `giz check` does, and up to 3 repairs. */
+/** Writes a project from an idea with a text AI: prompt, validation as `gizzy check` does, and up to 3 repairs. */
 export class GenerateScript {
   readonly #dependencies: Dependencies;
 

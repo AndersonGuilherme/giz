@@ -89,7 +89,7 @@ test('WhisperAligner limits the times to the audio duration', async () => {
 const downloadedModel = existsSync(join(env.cacheDir ?? '', WHISPER_MODEL, WHISPER_REVISION, 'config.json'));
 const fixtureWav = new URL('../../fixtures/minimal-project/voice/1.wav', import.meta.url);
 const withoutModel = `modelo ${WHISPER_MODEL} não está em ${env.cacheDir} (baixa sozinho na primeira voz gerada)`;
-const voiceless = 'the fixture has no voice/1.wav (generate it with: node src/presentation/cli/giz.ts voice test/fixtures/minimal-project)';
+const voiceless = 'the fixture has no voice/1.wav (generate it with: node src/presentation/cli/gizzy.ts voice test/fixtures/minimal-project)';
 const skipReason = !downloadedModel ? withoutModel : !existsSync(fixtureWav) && voiceless;
 
 test('WhisperListener hears the fixture line with the time of each word', { skip: skipReason || false, timeout: 120_000 }, async () => {

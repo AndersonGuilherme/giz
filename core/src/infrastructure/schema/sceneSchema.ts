@@ -57,7 +57,7 @@ const backgroundFields = {
 /** The background a beat switches to: an image or a vector background (images are generated per scene only). */
 export const backgroundSchema = z.object(backgroundFields).strict().superRefine(rejectUnknownColors);
 
-// `giz images` makes the image from the prompt; `style` overrides the project's `style` for this scene.
+// `gizzy images` makes the image from the prompt; `style` overrides the project's `style` for this scene.
 const generateSchema = z.object({ prompt: nonEmptyText, style: z.enum(IMAGE_STYLES).optional() }).strict();
 
 const sceneBackgroundSchema = z

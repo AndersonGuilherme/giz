@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 
 // Where ONNX Runtime's native library is. The CUDA provider must sit next to it (ONNX Runtime looks for it beside its
 // own library). In a checkout that is onnxruntime-node's own folder; the installed Studio's is read-only (deb, rpm,
-// AppImage), so the Studio names a writable folder (GIZ_ORT_DIR, in its userData): the GPU install copies the library
+// AppImage), so the Studio names a writable folder (GIZZY_ORT_DIR, in its userData): the GPU install copies the library
 // and the binding there and puts the provider beside them, and the processes that run the voice load the binding from
 // that copy (useWritableOrt), so ONNX Runtime finds the provider.
 const require = createRequire(import.meta.url);
@@ -28,9 +28,9 @@ export function ortPackageFolder(): string {
   return join(base, napi, process.platform, process.arch);
 }
 
-/** Where the library the voice loads is: the package's folder, or the writable copy GIZ_ORT_DIR names. */
+/** Where the library the voice loads is: the package's folder, or the writable copy GIZZY_ORT_DIR names. */
 export function ortRuntimeFolder(env: Environment = process.env): string {
-  const writable = env.GIZ_ORT_DIR?.trim();
+  const writable = env.GIZZY_ORT_DIR?.trim();
   if (!writable) return ortPackageFolder();
   return join(writable, ortVersion(), `${process.platform}-${process.arch}`);
 }
@@ -49,7 +49,7 @@ export async function copyOrtRuntime(from: string, to: string): Promise<void> {
  * provider present). Call it before anything loads onnxruntime-node. Returns whether it did.
  */
 export function useWritableOrt(env: Environment = process.env): boolean {
-  if (!env.GIZ_ORT_DIR?.trim()) return false;
+  if (!env.GIZZY_ORT_DIR?.trim()) return false;
   const folder = ortRuntimeFolder(env);
   if (!existsSync(join(folder, CUDA_PROVIDER)) || !existsSync(join(folder, BINDING))) return false;
   const copy = pathToFileURL(join(folder, BINDING)).href;

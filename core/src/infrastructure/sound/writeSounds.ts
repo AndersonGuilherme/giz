@@ -4,7 +4,7 @@ import { SOUND_RATE, synthesizedSounds } from '../../domain/sound/SynthesizedSou
 import { Audio } from '../../domain/speech/Audio.ts';
 import { toWav } from '../voice/wav.ts';
 
-/** `giz sounds`: writes `<folder>/<name>.wav` for each synthesized sound effect; returns the names. */
+/** `gizzy sounds`: writes `<folder>/<name>.wav` for each synthesized sound effect; returns the names. */
 export async function writeSounds(folder: string): Promise<string[]> {
   await mkdir(folder, { recursive: true });
   const sounds = Object.entries(synthesizedSounds());

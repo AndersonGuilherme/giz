@@ -14,19 +14,19 @@ import type { AiOverrides } from './aiOverrides.ts';
 const APIS: Readonly<Record<TextProviderName, TextApi>> = { anthropic: ANTHROPIC_API, openai: OPENAI_API, gemini: GEMINI_API };
 // The model of each provider can be changed without touching the code; empty means the default.
 const MODEL_VARIABLES: Readonly<Record<TextProviderName, string>> = {
-  anthropic: 'GIZ_ANTHROPIC_MODEL',
-  openai: 'GIZ_OPENAI_MODEL',
-  gemini: 'GIZ_GEMINI_MODEL',
+  anthropic: 'GIZZY_ANTHROPIC_MODEL',
+  openai: 'GIZZY_OPENAI_MODEL',
+  gemini: 'GIZZY_GEMINI_MODEL',
 };
 
-/** The CLI keys: environment variables or ~/.config/giz/<service>.key. */
+/** The CLI keys: environment variables or ~/.config/gizzycera/<service>.key. */
 export function cliKeyStore(): KeyStore {
   return new EnvironmentKeyStore({ env: process.env, home: homedir() });
 }
 
 const modelOf = (name: TextProviderName) => process.env[MODEL_VARIABLES[name]]?.trim() || undefined;
 
-/** The text provider, with the model of GIZ_<PROVIDER>_MODEL or the default; the key is read only when it is called. */
+/** The text provider, with the model of GIZZY_<PROVIDER>_MODEL or the default; the key is read only when it is called. */
 export function textProviderOf(name: TextProviderName, overrides: AiOverrides = {}): HttpTextProvider {
   const dependencies = { fetch, keys: cliKeyStore(), wait, ...overrides };
   return new HttpTextProvider(APIS[name], dependencies, modelOf(name));

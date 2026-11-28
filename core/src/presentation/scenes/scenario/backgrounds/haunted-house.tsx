@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'haunted-house'>;
 
-// The hall of an old haunted house, spooky but cute, giz style: striped plum wallpaper, a tall arched window with the
+// The hall of an old haunted house, spooky but cute, Gizzy style: striped plum wallpaper, a tall arched window with the
 // moon and curtains behind the characters, crooked portraits of a cat and of a round ghost, cobwebs, a grandfather
 // clock, a candelabra and a dusty rug; chalk lines on the furniture. Nothing gory.
 

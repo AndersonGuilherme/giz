@@ -11,7 +11,7 @@ const PROPS = { title: 'T', totalFrames: 30, segments: [] } as unknown as VideoP
 const SOURCES = { entryPoint: '/nowhere/index.ts', publicFolder: '/nowhere/public' };
 
 test('an already aborted signal stops the render before anything is bundled or written', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const controller = new AbortController();
   controller.abort();
   const renderer = new RemotionRenderer(SOURCES, folder, { signal: controller.signal });
@@ -24,7 +24,7 @@ test('an already aborted signal stops the render before anything is bundled or w
 });
 
 test('a cancel that arrives while the composition is being selected stops the render before renderMedia', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const controller = new AbortController();
   let rendered = false;
   const calls = {
@@ -56,7 +56,7 @@ test("Remotion's cancel signal fires even when the abort happened before it was 
 });
 
 test('a render limited to some frames renders only the first ones (never past the video)', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const ranges: unknown[] = [];
   const calls = {
     withBundle: async (_sources: unknown, _files: unknown, use: (serveUrl: string) => Promise<unknown>) => use('/bundle'),
@@ -77,7 +77,7 @@ test('a render limited to some frames renders only the first ones (never past th
 });
 
 test('a render limited to fewer than one frame still renders the first one', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const ranges: unknown[] = [];
   const calls = {
     withBundle: async (_sources: unknown, _files: unknown, use: (serveUrl: string) => Promise<unknown>) => use('/bundle'),
@@ -117,7 +117,7 @@ function writingCalls(bytes: string, fail?: () => Error) {
 }
 
 test('the video appears only once whole: rendered to a part file, then renamed over the old one', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const output = join(folder, 'output', 'video.mp4');
   const { calls, locations } = writingCalls('new video');
   try {
@@ -131,7 +131,7 @@ test('the video appears only once whole: rendered to a part file, then renamed o
 });
 
 test('a failed or cancelled render leaves the old video as it was and no part file', async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const output = join(folder, 'output', 'video.mp4');
   try {
     await new RemotionRenderer(SOURCES, folder, { calls: writingCalls('old video').calls }).render(PROPS, output, () => undefined);
@@ -145,7 +145,7 @@ test('a failed or cancelled render leaves the old video as it was and no part fi
 });
 
 test("a new render first removes the part files an earlier one left (a crash or a killed app), only that output's", async () => {
-  const folder = await mkdtemp(join(tmpdir(), 'giz-renderer-'));
+  const folder = await mkdtemp(join(tmpdir(), 'gizzy-renderer-'));
   const output = join(folder, 'output', 'video.mp4');
   const { mkdir } = await import('node:fs/promises');
   await mkdir(join(folder, 'output'));

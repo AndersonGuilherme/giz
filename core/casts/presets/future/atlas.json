@@ -1,7 +1,7 @@
 {
   "id": "atlas",
   "name": "Atlas",
-  "rig": "giz",
+  "rig": "gizzy",
   "parameters": {
     "outfit": "robot-armor",
     "outfitColor": "#c9a64b",

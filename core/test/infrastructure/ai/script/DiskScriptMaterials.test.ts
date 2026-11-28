@@ -30,7 +30,7 @@ test('every format has a guide in pt-BR and in English, with the pace, the hook 
 test('the cast presets come from their folders with name, personality, voice, rig and the whole file', async () => {
   const presets = await materials.castPresets();
   const bia = presets.find(({ id }) => id === 'bia');
-  assert.deepEqual({ ...bia, json: undefined }, { id: 'bia', name: 'Bia', personality: 'streamer animada que narra a própria vida em voz alta', voice: 'vivian', rig: 'giz', json: undefined });
+  assert.deepEqual({ ...bia, json: undefined }, { id: 'bia', name: 'Bia', personality: 'streamer animada que narra a própria vida em voz alta', voice: 'vivian', rig: 'gizzy', json: undefined });
   assert.equal(bia?.json.outfit, undefined);
   assert.equal((bia?.json.parameters as Record<string, unknown>).outfit, 'hoodie');
   assert.ok(presets.some(({ id, rig }) => id === 'teo' && rig === 'lia-style'));

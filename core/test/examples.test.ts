@@ -69,12 +69,12 @@ test('no example repeats its text in pronunciation only to drop the brackets', a
   }
 });
 
-test('the stories cast giz characters on at least 4 different backgrounds', async () => {
+test('the stories cast Gizzy characters on at least 4 different backgrounds', async () => {
   for (const example of ['internet-story/pt-BR', 'internet-story/en', 'sneeze-kite/pt-BR', 'sneeze-kite/en']) {
     const project = await readJson(example, 'project.json');
     const characters = await Promise.all(project.cast.map((id: string) => readJson(example, `cast/${id}.json`)));
     const rigs = new Set(characters.flatMap((character: { rig?: string }) => character.rig ?? []));
-    assert.deepEqual([...rigs], ['giz'], example);
+    assert.deepEqual([...rigs], ['gizzy'], example);
     const { lines } = await readJson(example, 'script.json');
     const backgrounds = new Set(
       lines.flatMap((line: { scene?: { background?: { vector?: string } } }) => line.scene?.background?.vector ?? []),

@@ -30,7 +30,7 @@ test('loadDownloadedQwen never downloads: a model not downloaded yet fails with 
   const realFetch = globalThis.fetch;
   globalThis.fetch = (async () => assert.fail('no download')) as typeof fetch;
   try {
-    const install = { model: '0.6b' as const, device: 'cpu' as const, threads: 1, modelsDir: mkdtempSync(join(tmpdir(), 'giz-no-model-')) };
+    const install = { model: '0.6b' as const, device: 'cpu' as const, threads: 1, modelsDir: mkdtempSync(join(tmpdir(), 'gizzy-no-model-')) };
     await assert.rejects(loadDownloadedQwen(install), /modelo de voz .* não foi baixado: baixe-o em Configurações/);
   } finally {
     globalThis.fetch = realFetch;

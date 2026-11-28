@@ -5,7 +5,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'fifties-diner'>;
 
-// A 1950s diner, giz style: a mint wall with a coral stripe, a neon milkshake sign behind the characters, menu boards,
+// A 1950s diner, Gizzy style: a mint wall with a coral stripe, a neon milkshake sign behind the characters, menu boards,
 // a long counter with stools, a checkered floor and a jukebox in each corner; chalk lines on the furniture.
 
 // The neon sign: a milkshake glass with a straw and a cherry, in pink tubes.

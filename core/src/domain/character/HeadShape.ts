@@ -17,7 +17,7 @@ const OUTLINES: Readonly<Record<HeadShapeName, () => Silhouette>> = {
   ),
 };
 
-/** The head shapes of the giz rig; every one holds the eyes, nose and mouth at the same face positions. */
+/** The head shapes of the gizzy rig; every one holds the eyes, nose and mouth at the same face positions. */
 export class HeadShape {
   static outline(shape: HeadShapeName): Silhouette {
     return OUTLINES[shape]();

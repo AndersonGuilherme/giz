@@ -153,12 +153,12 @@ test('an uploaded image wins: a scene pointing elsewhere is never generated nor 
   assert.equal(images.requests.length, 1);
 });
 
-test('a scenes/<id>.png that giz images did not make is refused before any paid call (typed error)', async () => {
+test('a scenes/<id>.png that gizzy images did not make is refused before any paid call (typed error)', async () => {
   const { images, store, generate } = build();
   store.foreign.add('3');
   await assert.rejects(generate.estimate(project()), ScenarioImageError);
   await assert.rejects(generate.run(project()), (error: Error) =>
-    error instanceof ScenarioImageError && /scenes\/3\.png já existe\(m\) e não foi\(ram\) feito\(s\) pelo giz images/.test(error.message));
+    error instanceof ScenarioImageError && /scenes\/3\.png já existe\(m\) e não foi\(ram\) feito\(s\) pelo gizzy images/.test(error.message));
   assert.equal(images.requests.length, 0);
   assert.equal(store.saved.size, 0);
 });

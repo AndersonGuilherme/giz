@@ -6,7 +6,7 @@ import type { ColorsOf, LayerProps, VectorBackgroundModel } from './VectorBackgr
 
 type Colors = ColorsOf<'classroom'>;
 
-// A classroom in the morning, giz style: a chalkboard with doodles behind the characters (our own chalk, on a board),
+// A classroom in the morning, Gizzy style: a chalkboard with doodles behind the characters (our own chalk, on a board),
 // sunny windows, a clock, desks on the sides and a wooden floor; chalk lines on the furniture.
 
 // The chalkboard is drawn 232 units to each side and scaled into the backdrop's focus radius.
