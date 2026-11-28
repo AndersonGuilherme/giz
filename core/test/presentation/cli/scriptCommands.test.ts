@@ -93,12 +93,15 @@ test('wrong usage exits with 2; a missing or invalid idea, or an existing projec
   const folderAsIdea = giz(['new', '--idea', parent, join(parent, 'p')]);
   assert.equal(folderAsIdea.status, 1);
   assert.match(folderAsIdea.stderr, /: é uma pasta, não um arquivo/);
-  const locked = join(parent, 'trancada.json');
-  writeFileSync(locked, '{}');
-  chmodSync(locked, 0o000);
-  const denied = giz(['new', '--idea', locked, join(parent, 'p')]);
-  // As root the file is readable anyway: then it is an invalid idea, never "not found".
-  assert.match(denied.stderr, process.getuid?.() === 0 ? /trancada\.json: ideia inválida/ : /trancada\.json: sem permissão para ler o arquivo/);
+  // POSIX modes only (chmod 000 does not lock a file on Windows).
+  if (process.platform !== 'win32') {
+    const locked = join(parent, 'trancada.json');
+    writeFileSync(locked, '{}');
+    chmodSync(locked, 0o000);
+    const denied = giz(['new', '--idea', locked, join(parent, 'p')]);
+    // As root the file is readable anyway: then it is an invalid idea, never "not found".
+    assert.match(denied.stderr, process.getuid?.() === 0 ? /trancada\.json: ideia inválida/ : /trancada\.json: sem permissão para ler o arquivo/);
+  }
 
   const wrong = join(parent, 'errada.json');
   writeFileSync(wrong, JSON.stringify({ format: 'podcast', aspect: '9:16', targetSeconds: 5 }));
