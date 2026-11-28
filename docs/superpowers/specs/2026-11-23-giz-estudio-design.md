@@ -1,5 +1,7 @@
 # giz Estúdio — design
 
+> **Note (2026-11-27):** the project was renamed before its first public release: giz → **Gizzycera**, giz Estúdio → **Gizzycera** (the app), the CLI `giz` → `gizzy`, the rig `giz` → `gizzy`, `giz.config.json` → `gizzycera.config.json`, `GIZ_*` → `GIZZY_*`. This document keeps the names of its time; the README's "Vindo do giz" section maps them.
+
 Data: 2026-11-23 · Status: rascunho para aprovação do Anderson
 
 ## 1. Intenção e porquê

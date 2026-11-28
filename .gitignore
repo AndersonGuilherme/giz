@@ -17,6 +17,8 @@ producao-stats.tsv
 !core/test/fixtures/**/voice/*.wav
 !core/examples/**/voice/*.wav
 *.mp4
+gizzycera.config.json
+# The name from before the rename to Gizzycera (the motor still reads it; core copies it to the new name once).
 giz.config.json
 amostras-de-voz/
 voice-samples/

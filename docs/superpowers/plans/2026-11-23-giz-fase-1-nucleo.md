@@ -1,5 +1,7 @@
 # giz Estúdio — Fase 1: Núcleo — Plano de implementação
 
+> **Note (2026-11-27):** the project was renamed before its first public release: giz → **Gizzycera**, giz Estúdio → **Gizzycera** (the app), the CLI `giz` → `gizzy`, the rig `giz` → `gizzy`, `giz.config.json` → `gizzycera.config.json`, `GIZ_*` → `GIZZY_*`. This document keeps the names of its time; the README's "Vindo do giz" section maps them.
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** criar o pacote `nucleo/`, um motor novo e organizado que transforma um projeto em JSON (roteiro v2 +

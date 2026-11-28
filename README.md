@@ -1,8 +1,10 @@
-# giz ✏️
+# Gizzycera ✏️
 
-**Transforme uma ideia em vídeo animado: uma história ou uma aula.** O **giz Estúdio** é um aplicativo de
+*Soa como "giz de cera". Antes deste lançamento o projeto se chamava **giz**; veja [Vindo do giz](#vindo-do-giz).*
+
+**Transforme uma ideia em vídeo animado: uma história ou uma aula.** O **Gizzycera** é um aplicativo de
 computador que leva você da ideia ao vídeo pronto, com personagens 2D que falam, gesticulam e reagem, legendas,
-cenários e efeitos sonoros. **[Conheça e baixe no site](https://andersonguilherme.github.io/gizzycera/)**.
+cenários e efeitos sonoros. **[Conheça e baixe no site](https://gizzycera.com/)**.
 
 - **História ou aula**, em **9:16** (vertical, para Reels, Shorts e TikTok) ou **16:9** (horizontal, para o YouTube);
   o mesmo projeto renderiza nas duas proporções.
@@ -12,11 +14,11 @@ cenários e efeitos sonoros. **[Conheça e baixe no site](https://andersonguilhe
   imagem gerada por IA.
 - **Vozes locais ou pagas:** a voz local roda no seu computador, de graça (CPU ou GPU NVIDIA); se preferir, use um
   serviço pago (ElevenLabs, Fish Audio) ou grave a sua própria voz no microfone.
-- **A animação segue o áudio:** o giz mede cada fala e anima a boca, os gestos e as cenas no tempo certo. Nada é
+- **A animação segue o áudio:** o Gizzycera mede cada fala e anima a boca, os gestos e as cenas no tempo certo. Nada é
   cronometrado à mão.
 
-O roteiro você escreve no Estúdio, à mão ou a partir de um rascunho de uma IA de textos. Para quem prefere o
-terminal, o mesmo motor também roda pela linha de comando (`npx giz`).
+O roteiro você escreve no aplicativo, à mão ou a partir de um rascunho de uma IA de textos. Para quem prefere o
+terminal, o mesmo motor também roda pela linha de comando (`npx gizzy`).
 
 > Exemplo completo no repositório: o curso **SOLID** (24 aulas) em [`courses/solid`](courses/solid), e os projetos de
 > exemplo de [`core/examples`](core/examples).
@@ -28,7 +30,7 @@ são opcionais: cada uma só é usada se você guardar a chave dela em **Configu
 
 | Parte | Grátis e local | Opcional, pago (com a sua chave) | Quanto custa o pago (estimativa) |
 |---|---|---|---|
-| **Roteiro** | você escreve no editor do Estúdio | rascunho por IA de textos: Claude (Anthropic), GPT (OpenAI) ou Gemini (Google) | de menos de um centavo a algumas dezenas de centavos de dólar por roteiro, conforme o modelo |
+| **Roteiro** | você escreve no editor do aplicativo | rascunho por IA de textos: Claude (Anthropic), GPT (OpenAI) ou Gemini (Google) | de menos de um centavo a algumas dezenas de centavos de dólar por roteiro, conforme o modelo |
 | **Cenários** | fundos vetoriais prontos, ou a sua imagem (enviar e recortar) | imagem gerada: gpt-image (OpenAI), Gemini ou FLUX (fal) | de ~US$ 0,03 a ~US$ 0,17 por imagem, conforme o modelo e o tamanho |
 | **Vozes** | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 0.6B ou 1.7B (modelo aberto da Alibaba, Apache-2.0) na CPU ou na GPU NVIDIA, ou a sua gravação | ElevenLabs ou Fish Audio | ElevenLabs: US$ 0,04 a 0,08 por mil caracteres; Fish Audio: US$ 0,015 a 0,05 por mil bytes de texto |
 | **Animação e vídeo** | [Remotion](https://remotion.dev): desenha cada quadro com código React (não é IA) | — | grátis para pessoa física e empresa de até 3 pessoas; acima disso, licença paga do Remotion |
@@ -36,7 +38,7 @@ são opcionais: cada uma só é usada se você guardar a chave dela em **Configu
 | **Alinhar as falas e conferir a pronúncia** (opcional) | Whisper small (modelo aberto da OpenAI, MIT), local | — | grátis |
 
 - **Você vê o custo antes e confirma.** Antes de cada chamada paga (gerar um roteiro, um cenário, as vozes ou uma
-  amostra de voz paga), o Estúdio mostra a estimativa e pede confirmação. Os preços das tabelas foram conferidos em
+  amostra de voz paga), o Gizzycera mostra a estimativa e pede confirmação. Os preços das tabelas foram conferidos em
   27/11/2026 nas páginas de cada serviço e podem mudar; a cobrança é sempre a do serviço, na sua conta.
 - **A animação não é gerada por IA.** Os personagens, as poses, as expressões e as cenas (código, terminal, gráficos,
   cartões, cenários) são componentes programados no motor ([`core/src/presentation/remotion`](core/src/presentation/remotion)).
@@ -45,31 +47,31 @@ são opcionais: cada uma só é usada se você guardar a chave dela em **Configu
 - **Voz e vídeo são etapas separadas.** A voz (local, paga ou gravada) vira um arquivo de áudio por fala; depois o
   Remotion monta o vídeo no ritmo desses áudios. O Remotion não gera voz.
 - **Os modelos de IA locais são baixados uma vez**, no assistente da primeira execução ou em **Configurações**
-  (5,9 GB ou 13,4 GB para a voz, conforme o modelo; ~250 MB para o Whisper). O Estúdio nunca baixa um modelo
+  (5,9 GB ou 13,4 GB para a voz, conforme o modelo; ~250 MB para o Whisper). O Gizzycera nunca baixa um modelo
   sozinho no meio do trabalho: se faltar o modelo de voz, ele avisa e leva você a Configurações. Depois disso, tudo
   funciona sem internet.
 
 ## Instalar
 
-O **giz Estúdio** é o aplicativo de computador do giz: você instala, abre e faz tudo pela janela (configuração,
+O **Gizzycera** é um aplicativo de computador: você instala, abre e faz tudo pela janela (configuração,
 contas de IA, roteiro, elenco, cenários, vozes, prévia e vídeo final), sem repositório, sem Node e sem terminal.
-O resto deste README (a partir de *Requisitos*) é para quem prefere usar o giz pela linha de comando.
+O resto deste README (a partir de *Requisitos*) é para quem prefere usar o Gizzycera pela linha de comando (o comando `gizzy`).
 
 ### Baixar
 
-No site, **[andersonguilherme.github.io/gizzycera](https://andersonguilherme.github.io/gizzycera/#download)**, o botão já
+No site, **[gizzycera.com](https://gizzycera.com/#download)**, o botão já
 escolhe o instalador do seu sistema. Ou, na página de **Releases** do repositório, baixe o arquivo do seu sistema:
 
 | Sistema | Arquivo | Como instalar |
 |---|---|---|
-| **Windows** 10/11 (64 bits) | `giz-estudio-<versão>-Setup.exe` | dê dois cliques; o app abre sozinho no fim e ganha atalho no menu Iniciar |
-| **macOS** (Apple Silicon) | `giz-estudio-<versão>-arm64.dmg` | abra o `.dmg` e arraste o **giz Estúdio** para **Aplicativos** |
-| **Linux** Ubuntu/Debian | `giz-estudio_<versão>_amd64.deb` | use o `.deb`: `sudo apt install ./giz-estudio_<versão>_amd64.deb` |
-| **Linux** Fedora/openSUSE | `giz-estudio-<versão>-1.x86_64.rpm` | `sudo dnf install ./giz-estudio-<versão>-1.x86_64.rpm` |
-| **Linux** outras distribuições | `giz-estudio-<versão>-x64.AppImage` | `chmod +x` no arquivo e abra com dois cliques (veja a nota abaixo) |
+| **Windows** 10/11 (64 bits) | `gizzycera-<versão>-Setup.exe` (ou `gizzycera-windows-x64-setup.exe`) | dê dois cliques; o app abre sozinho no fim e ganha atalho no menu Iniciar |
+| **macOS** (Apple Silicon) | `gizzycera-<versão>-arm64.dmg` | abra o `.dmg` e arraste o **Gizzycera** para **Aplicativos** |
+| **Linux** Ubuntu/Debian | `gizzycera_<versão>_amd64.deb` | use o `.deb`: `sudo apt install ./gizzycera_<versão>_amd64.deb` |
+| **Linux** Fedora/openSUSE | `gizzycera-<versão>-1.x86_64.rpm` | `sudo dnf install ./gizzycera-<versão>-1.x86_64.rpm` |
+| **Linux** outras distribuições | `gizzycera-<versão>-x64.AppImage` | `chmod +x` no arquivo e abra com dois cliques (veja a nota abaixo) |
 
-Também há um `.zip` de cada sistema (`giz-estudio-<sistema>-<arquitetura>-<versão>.zip`), que roda sem instalar:
-descompacte numa pasta sua e abra o programa `giz-estudio`.
+Também há um `.zip` de cada sistema (`gizzycera-<sistema>-<arquitetura>-<versão>.zip`), que roda sem instalar:
+descompacte numa pasta sua e abra o programa `gizzycera`.
 
 ### "Aplicativo não verificado": é esperado
 
@@ -80,25 +82,25 @@ Windows). Por isso o sistema avisa na primeira vez:
   em **Executar assim mesmo**.
 - **macOS (Gatekeeper):** na primeira vez, o macOS recusa abrir o app. Depois desse aviso:
   - **macOS 15 (Sequoia) ou mais novo:** abra **Ajustes do Sistema → Privacidade e Segurança**, role até o aviso
-    sobre o **giz Estúdio** e clique em **Abrir Mesmo Assim**; confirme com a sua senha. Nas próximas vezes ele abre
+    sobre o **Gizzycera** e clique em **Abrir Mesmo Assim**; confirme com a sua senha. Nas próximas vezes ele abre
     normalmente.
   - **macOS 14 ou mais antigo:** em **Aplicativos**, clique com o botão direito (ou Control+clique) no
-    **giz Estúdio**, escolha **Abrir** e confirme **Abrir** no aviso.
+    **Gizzycera**, escolha **Abrir** e confirme **Abrir** no aviso.
   - Se o macOS disser que o app "está danificado", ou se o render for bloqueado, rode uma vez no Terminal:
-    `xattr -dr com.apple.quarantine "/Applications/giz Estúdio.app"`.
+    `xattr -dr com.apple.quarantine "/Applications/Gizzycera.app"`.
 - **Linux:** não há aviso.
   - **Ubuntu e Debian: use o `.deb`.** Ele instala o app com tudo o que o Chromium precisa, inclusive no Ubuntu 24.04
     ou mais novo.
   - **Sobre o AppImage:** ele precisa de FUSE (`sudo apt install libfuse2`, ou abra com
-    `./giz-estudio-*.AppImage --appimage-extract-and-run`). No Ubuntu 24.04 ou mais novo, o AppArmor bloqueia os
+    `./gizzycera-*.AppImage --appimage-extract-and-run`). No Ubuntu 24.04 ou mais novo, o AppArmor bloqueia os
     *user namespaces* que a proteção (sandbox) do Chromium usa, e o AppImage fecha logo ao abrir: nesses sistemas, use
     o `.deb`.
 
 ### Primeira vez que abre
 
-Um assistente prepara o Estúdio em poucos passos:
+Um assistente prepara o Gizzycera em poucos passos:
 
-1. **Idioma** (português ou inglês) e **pasta dos projetos** (sugestão: `~/giz/projetos`).
+1. **Idioma** (português ou inglês) e **pasta dos projetos** (sugestão: `~/Gizzycera/projetos`, ou `~/Gizzycera/projects` em inglês).
 2. **Placa de vídeo (opcional):** com uma NVIDIA no Linux, o botão **Instalar** baixa o suporte à GPU
    (~245 MB do ONNX Runtime CUDA, conferido com o hash publicado, e ~1,8 GB de bibliotecas da NVIDIA) e a voz fica
    bem mais rápida. Funciona em todos os formatos (`.deb`, `.rpm`, AppImage e `.zip`): o suporte fica nos dados do app.
@@ -108,31 +110,31 @@ Um assistente prepara o Estúdio em poucos passos:
 4. **Contas de IA (opcional):** cole as chaves dos serviços que quiser usar (texto, imagem, voz) e teste cada uma.
 5. **Licença do Remotion:** grátis para pessoa física e empresas de até 3 pessoas.
 
-Depois disso o Estúdio funciona **sem internet** (o render de vídeo também), exceto as chamadas às IAs pagas que você
+Depois disso o Gizzycera funciona **sem internet** (o render de vídeo também), exceto as chamadas às IAs pagas que você
 escolher.
 
 ### Onde ficam as coisas
 
 | O quê | Onde |
 |---|---|
-| Projetos | a pasta escolhida no assistente (sugestão: `~/giz/projetos`) |
-| Modelos de voz e GPU | `~/.cache/giz` (dá para mudar em Configurações) |
-| Configuração compartilhada com a linha de comando | `~/.config/giz/giz.config.json` (a linha de comando também a usa quando o repositório não tem o seu `giz.config.json`) |
-| Chaves de API | no chaveiro do sistema (cifradas, no arquivo `keys.json` dos dados do app); sem chaveiro, em `~/.config/giz/<serviço>.key` (só você lê) |
-| Dados do app (preferências, Whisper, suporte à GPU, retratos) | Linux: `~/.config/giz-estudio` · Windows: `%APPDATA%\giz-estudio` · macOS: `~/Library/Application Support/giz-estudio` |
+| Projetos | a pasta escolhida no assistente (sugestão: `~/Gizzycera/projetos`) |
+| Modelos de voz e GPU | `~/.cache/gizzycera` (dá para mudar em Configurações) |
+| Configuração compartilhada com a linha de comando | `~/.config/gizzycera/gizzycera.config.json` (a linha de comando também a usa quando o repositório não tem o seu `gizzycera.config.json`) |
+| Chaves de API | no chaveiro do sistema (cifradas, no arquivo `keys.json` dos dados do app); sem chaveiro, em `~/.config/gizzycera/<serviço>.key` (só você lê) |
+| Dados do app (preferências, Whisper, suporte à GPU, retratos) | Linux: `~/.config/gizzycera` · Windows: `%APPDATA%\gizzycera` · macOS: `~/Library/Application Support/gizzycera` |
 
 ### Desinstalar
 
-- **Windows:** Configurações → Aplicativos → **giz Estúdio** → Desinstalar.
-- **macOS:** arraste o **giz Estúdio** de **Aplicativos** para o Lixo.
-- **Linux:** `sudo apt remove giz-estudio` (deb), `sudo dnf remove giz-estudio` (rpm) ou apague o AppImage.
+- **Windows:** Configurações → Aplicativos → **Gizzycera** → Desinstalar.
+- **macOS:** arraste o **Gizzycera** de **Aplicativos** para o Lixo.
+- **Linux:** `sudo apt remove gizzycera` (deb), `sudo dnf remove gizzycera` (rpm) ou apague o AppImage.
 
-Desinstalar não apaga seus projetos nem os modelos. Para liberar o espaço, apague também `~/.cache/giz`,
-`~/.config/giz` e a pasta de dados do app (tabela acima).
+Desinstalar não apaga seus projetos nem os modelos. Para liberar o espaço, apague também `~/.cache/gizzycera`,
+`~/.config/gizzycera` e a pasta de dados do app (tabela acima).
 
-## Usando o Estúdio
+## Usando o Gizzycera
 
-Depois do assistente da primeira execução, o Estúdio abre na lista de projetos. Cada projeto passa por etapas, na
+Depois do assistente da primeira execução, o Gizzycera abre na lista de projetos. Cada projeto passa por etapas, na
 barra do alto: **Roteiro → Elenco → Cenários → Vozes → Vídeo**. Cada mudança é verificada e salva sozinha.
 
 1. **Novo projeto.** Escolha o formato (**história** ou **aula**), a proporção (**9:16** ou **16:9**), o idioma, a
@@ -145,7 +147,7 @@ barra do alto: **Roteiro → Elenco → Cenários → Vozes → Vídeo**. Cada m
    capítulos organizam o vídeo. A verificação aponta na hora o que não cabe na tela ou falta. Na primeira vez, um
    **tutorial** guiado mostra o editor (dá para vê-lo de novo em Configurações).
 3. **Elenco.** Adicione personagens prontos ou novos e ajuste corpo, cores, expressão e a voz de cada um, com a
-   prévia animada ao lado. **Ouvir amostra** diz uma frase com a voz do projeto (com uma voz paga, o Estúdio
+   prévia animada ao lado. **Ouvir amostra** diz uma frase com a voz do projeto (com uma voz paga, o Gizzycera
    pergunta antes, porque cada amostra nova é cobrada).
 4. **Cenários.** Um cartão por cenário: use um **fundo vetorial**, **envie uma imagem** sua e **recorte o
    enquadramento**, ou **gere com IA** (com a estimativa antes de confirmar).
@@ -158,7 +160,7 @@ barra do alto: **Roteiro → Elenco → Cenários → Vozes → Vídeo**. Cada m
 
 ---
 
-**Daqui em diante, tudo é só para a linha de comando.** Quem usa o Estúdio não precisa de nada destas seções.
+**Daqui em diante, tudo é só para a linha de comando.** Quem usa o aplicativo não precisa de nada destas seções.
 
 ## Requisitos (linha de comando)
 
@@ -166,7 +168,7 @@ barra do alto: **Roteiro → Elenco → Cenários → Vozes → Vídeo**. Cada m
 - **Disco:** ≈2 GB de dependências + 5,9 GB (modelo 0.6b) ou 13,4 GB (modelo 1.7b); +1,8 GB com GPU
 - **Memória:** modelo 0.6b: 8 GB de RAM; modelo 1.7b: GPU com 16 GB de memória de vídeo, ou ~20 GB de RAM na CPU
 - Linux, macOS ou Windows com WSL
-- GPU é **opcional**: com uma NVIDIA (Linux ou WSL) a voz fica bem mais rápida. O `npm run setup` configura.
+- GPU é **opcional**: com uma NVIDIA (Linux ou WSL) a voz fica bem mais rápida. O `npx gizzy setup` configura.
 
 Tempo de máquina para cada 1 s de fala: modelo 0.6b ≈ 4 s na CPU (6 núcleos) e ≈ 2 s na GPU (RTX 5060 Ti); modelo 1.7b ≈ 3 s na GPU. Uma aula de 6 min leva de 12 a 25 min de voz,
 só na primeira vez; falas que não mudaram não são regravadas). O vídeo leva ~2 min.
@@ -176,13 +178,14 @@ só na primeira vez; falas que não mudaram não são regravadas). O vídeo leva
 ### 1. Instale e configure
 
 ```bash
-git clone https://github.com/AndersonGuilherme/giz.git
-cd giz/motor
-ONNXRUNTIME_NODE_INSTALL=skip npm install
-npm run setup
+git clone https://github.com/AndersonGuilherme/gizzycera.git
+cd gizzycera/core
+ONNXRUNTIME_NODE_INSTALL_CUDA=skip npm ci
+npx gizzy setup
+npx gizzy --help
 ```
 
-O `npm run setup` é um **onboarding guiado no terminal**. Ele pergunta e prepara tudo para a SUA máquina:
+O `npx gizzy setup` é um **onboarding guiado no terminal**. Ele pergunta e prepara tudo para a SUA máquina:
 
 1. confere a versão do Node;
 2. pergunta onde guardar os modelos de IA (e mostra o espaço livre);
@@ -196,9 +199,14 @@ O `npm run setup` é um **onboarding guiado no terminal**. Ele pergunta e prepar
 7. baixa o modelo de voz, gera uma fala de teste, mede a velocidade e, se você quiser, gera amostras de todas
    as vozes em `amostras-de-voz/` para você ouvir.
 
-As respostas ficam em `giz.config.json`, na raiz. Esse arquivo é **individual**: não vai para o git, então cada
-instalação tem a sua configuração. Para mudar algo, rode `npm run setup` de novo
-(ou `npm run setup -- --padrao` para aceitar todas as respostas padrão sem perguntar).
+As respostas ficam em `gizzycera.config.json`, na raiz. Esse arquivo é **individual**: não vai para o git, então
+cada instalação tem a sua configuração. Para mudar algo, rode `npx gizzy setup` de novo
+(ou `npx gizzy setup --defaults` para aceitar todas as respostas padrão sem perguntar). Os comandos de projeto
+(`npx gizzy check`, `produce`, `images`, `status`…) estão em [`core/README.md`](core/README.md).
+
+Os passos 2 a 7 abaixo são o fluxo de **cursos** do motor antigo, em `motor/`
+(`cd ../motor && ONNXRUNTIME_NODE_INSTALL=skip npm install`). O motor ainda lê o nome antigo, `giz.config.json`, e
+`~/.config/giz/` (YouTube): para usá-lo, copie a configuração (`cp gizzycera.config.json giz.config.json`).
 
 ### 2. Crie o curso
 
@@ -339,7 +347,7 @@ os vídeos travados como privados até passarem pela auditoria da API.
 
 | Quero… | Onde |
 |---|---|
-| trocar a voz, o idioma, a GPU ou a pasta dos modelos | `npm run setup` (grava no seu `giz.config.json`) |
+| trocar a voz, o idioma, a GPU ou a pasta dos modelos | `npx gizzy setup` (grava no seu `gizzycera.config.json`) |
 | mudar as cores dos personagens | `look` em [`motor/src/cast.ts`](motor/src/cast.ts) |
 | mudar as cores e fontes dos vídeos | [`motor/src/theme.ts`](motor/src/theme.ts) |
 | criar um tipo de cena novo | `motor/src/types.ts` → `motor/src/scenes.tsx` → `SCENES` em `motor/src/Lesson.tsx` → [`docs/guides/scene-catalog.md`](docs/guides/scene-catalog.md) |
@@ -350,10 +358,11 @@ Detalhes técnicos do motor: [`motor/README.md`](motor/README.md).
 ## Estrutura
 
 ```
-giz/
-├── studio/         o giz Estúdio (o aplicativo de computador, em Electron)
-├── core/           o motor (roteiro em JSON → vídeo) e a CLI `giz`; o elenco de exemplo (Lia e Téo) em core/casts/example/
+gizzycera/
+├── studio/         o Gizzycera (o aplicativo de computador, em Electron)
+├── core/           o motor (roteiro em JSON → vídeo) e a CLI `gizzy`; o elenco de exemplo (Lia e Téo) em core/casts/example/
 ├── motor/          o motor antigo das aulas (Remotion + voz Qwen3-TTS local), usado pelo passo a passo acima
+├── site/           a página gizzycera.com (estática; Dockerfile + nginx para hospedar)
 ├── docs/guides/    formato da aula, catálogo de cenas, guia de escrita, lições aprendidas
 ├── templates/      modelos usados por novo-curso e nova-aula (course/ e lesson/)
 └── courses/solid/  curso de exemplo (24 aulas em lessons/)
@@ -361,11 +370,32 @@ giz/
 
 Áudios e vídeos gerados não vão para o git: o `render` gera tudo de novo.
 
+## Vindo do giz
+
+Até este lançamento o projeto se chamava **giz** (o app, **giz Estúdio**; a CLI, `giz`). Tudo o que você já tinha
+continua valendo, sem baixar nada de novo:
+
+| Antes | Agora | O que acontece |
+|---|---|---|
+| `npx giz <comando>` (core) | `npx gizzy <comando>` (em `core/`) | o comando `giz` não existe mais; os subcomandos são os mesmos (`setup`, `check`, `build`, `render`, `produce`, `images`, `status`, `keys`, `qa`…) |
+| no `motor/` (e nas filas `.fila` que o chamam): `npm run setup`, `npm run check -- <aula>`, `npm run render -- <aula>`, `npm run produce -- <aula>` | `npx gizzy setup`, `npx gizzy check <projeto>`, `npx gizzy render <projeto>`, `npx gizzy produce <projeto>` | o motor continua com os nomes dele (lê `giz.config.json`); os mesmos passos num projeto do core usam o `gizzy` |
+| `~/.config/giz/` (`giz.config.json`, chaves `*.key`) | `~/.config/gizzycera/` (`gizzycera.config.json`) | na primeira execução, a pasta é **copiada** (as chaves continuam modo 600); a antiga fica onde está |
+| `giz.config.json` na raiz do repositório | `gizzycera.config.json` | copiado na primeira execução da CLI ou do app |
+| variáveis `GIZ_*` (`GIZ_CONFIG`, `GIZ_DEVICE`, `GIZ_MODELS_DIR`…) | `GIZZY_*` | a `GIZ_*` ainda vale quando a `GIZZY_*` não está definida |
+| `~/.cache/giz` (modelos de voz, CUDA) | `~/.cache/gizzycera` | quem já tem `~/.cache/giz` continua usando essa pasta (a configuração copiada aponta para ela) |
+| dados do giz Estúdio (`giz-estudio`) | dados do Gizzycera (`gizzycera`) | preferências, chaves cifradas, projetos abertos e retratos são copiados; o Whisper e o suporte à GPU são lidos da pasta antiga |
+| `"rig": "giz"` nos personagens | `"rig": "gizzy"` | o nome antigo continua funcionando; o app grava `gizzy` ao salvar |
+| pasta de projetos `~/giz/projetos` | sugestão nova: `~/Gizzycera/projetos` | quem já escolheu uma pasta continua com ela |
+
+Com um chaveiro do sistema (macOS, Linux com GNOME/KDE), as chaves cifradas pelo giz Estúdio podem não abrir no
+Gizzycera, porque o chaveiro as guarda pelo nome do app: nesse caso o app as trata como ausentes, e basta colá-las de
+novo em **Configurações › Contas de IA**.
+
 ## Limitações conhecidas
 
 - As vozes prontas do Qwen3-TTS são nativas de outros idiomas (chinês, inglês, japonês, coreano). Elas falam
-  português, mas podem ter um leve sotaque. Na linha de comando, use o `pronuncia.json` e o Whisper
-  (`npm run produce`) para achar e corrigir palavras problemáticas.
+  português, mas podem ter um leve sotaque. Na linha de comando, use o `pronunciation.json` (no motor, `pronuncia.json`) e o Whisper
+  (`npx gizzy qa`) para achar e corrigir palavras problemáticas.
 - Gerar voz local na CPU é lento (veja "Requisitos"); com uma GPU NVIDIA fica bem mais rápido. Fica rápido nas
   rodadas seguintes, porque só as falas alteradas são regravadas.
 - Personagens 2D não demonstram movimentos físicos com fidelidade (para isso, grave vídeo real).

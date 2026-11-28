@@ -1,5 +1,7 @@
 # giz Estúdio — Phases 2–4 (AI providers, Electron app, installers) — Implementation Plan
 
+> **Note (2026-11-27):** the project was renamed before its first public release: giz → **Gizzycera**, giz Estúdio → **Gizzycera** (the app), the CLI `giz` → `gizzy`, the rig `giz` → `gizzy`, `giz.config.json` → `gizzycera.config.json`, `GIZ_*` → `GIZZY_*`. This document keeps the names of its time; the README's "Vindo do giz" section maps them.
+
 > **For agentic workers:** executed with superpowers:subagent-driven-development (one implementer + one reviewer per task). Briefs are extracted per task.
 
 **Goal:** a desktop app (Electron, Mac/Windows/Linux) where anyone installs, configures their own AI accounts, writes (or generates) a script, picks/creates characters, generates or uploads scenarios, records voices, reviews each stage and renders the final video — on top of the existing `core/` engine.
