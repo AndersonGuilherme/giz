@@ -1,11 +1,9 @@
 # Publishes the landing page (site/, static files, no build step) to GitHub Pages.
-# Runs when site/ changes on main, or by hand. Pages must use "GitHub Actions" as its source (Settings → Pages).
+# By hand only: the site is served at gizzycera.com from its own host (site/Dockerfile). To use Pages instead, set
+# Settings → Pages → Source to "GitHub Actions" and run this workflow (or add a push trigger on site/**).
 name: pages
 
 on:
-  push:
-    branches: [main]
-    paths: ['site/**', '.github/workflows/pages.yml']
   workflow_dispatch:
 
 permissions:
