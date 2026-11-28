@@ -24,7 +24,7 @@ class CountingListener {
   }
 }
 
-function workshopWithFakes() {
+function workshopWithFakes(whisperReady = () => true) {
   const made: string[] = [];
   const voices = new Map<string, FakeVoice>();
   const qwen = (model: '0.6b' | '1.7b') => {
@@ -34,7 +34,7 @@ function workshopWithFakes() {
     return voice;
   };
   const listener = new CountingListener();
-  return { workshop: voiceWorkshop({ qwen, listener, configured: () => '1.7b' }), made, voices, listener };
+  return { workshop: voiceWorkshop({ qwen, listener, configured: () => '1.7b', whisperReady }), made, voices, listener };
 }
 
 test('the voice workshop keeps one local voice per model size for every run, and one Whisper', async () => {
@@ -77,4 +77,25 @@ test('no model named is the configured size: it shares the one voice of that siz
   await workshop.sampler({ provider: 'qwen', model: '1.7b', keys: () => '' })(request);
   assert.deepEqual(made, ['1.7b']);
   assert.equal(voices.get('1.7b')!.calls, 2);
+});
+
+test('without Whisper downloaded the lines are aligned by the envelope, with the warning, and Whisper is never loaded', async (context) => {
+  const folder = await copyOfFixture();
+  const project = await projectRepository().load(folder);
+  const { workshop, listener } = workshopWithFakes(() => false);
+  const logged: string[] = [];
+  context.mock.method(console, 'log', (message: string) => logged.push(message));
+  const result = await workshop.lines(folder, project, {}).run(project);
+  assert.deepEqual(result.generated, ['1', '2']);
+  assert.equal(listener.calls, 0, 'the loaded listener is not asked');
+  assert.ok(logged.some((line) => /Whisper não foi baixado.*usando o envelope da voz/.test(line)), logged.join('\n'));
+});
+
+test('the real local voice of the workshop opens only a model already downloaded (no implicit download)', async (context) => {
+  const { localQwen } = await import('../../../src/presentation/cli/composition/voiceWorkshop.ts');
+  context.mock.method(globalThis, 'fetch', async () => assert.fail('no download'));
+  const modelsDir = await mkdtemp(join(tmpdir(), 'giz-no-model-'));
+  const voice = localQwen('0.6b', { model: '1.7b', device: 'cpu', threads: 1, modelsDir });
+  const request = { lineId: '1', text: 'Oi.', voice: 'vivian', style: '', language: Language.PORTUGUESE };
+  await assert.rejects(voice.generate(request), /modelo de voz .*0\.6B.* não foi baixado: baixe-o em Configurações/);
 });

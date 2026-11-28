@@ -1,9 +1,10 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { voiceFile, type VoiceStore, type RecordedVoice } from '../../application/ports/VoiceStore.ts';
 import type { Audio } from '../../domain/speech/Audio.ts';
 import { toWav } from '../voice/wav.ts';
+import { writeInside } from './atomicWrite.ts';
 
 const voiceRecordFile = (lineId: string) => `voice/${lineId}.json`;
 
@@ -29,10 +30,11 @@ export class DiskVoiceStore implements VoiceStore {
     return fileHash(join(this.#folder, voiceRecordFile(lineId)));
   }
 
+  // Each file whole or not at all (a quit or a cancel mid-line never leaves half a wav); the record goes last.
   async save(lineId: string, record: RecordedVoice, audio: Audio): Promise<void> {
     await mkdir(join(this.#folder, 'voice'), { recursive: true });
-    await writeFile(join(this.#folder, voiceFile(lineId)), toWav(audio));
-    await writeFile(join(this.#folder, voiceRecordFile(lineId)), JSON.stringify(record));
+    await writeInside(this.#folder, voiceFile(lineId), toWav(audio));
+    await writeInside(this.#folder, voiceRecordFile(lineId), JSON.stringify(record));
   }
 
   async read(lineId: string): Promise<RecordedVoice> {

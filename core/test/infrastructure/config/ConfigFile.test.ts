@@ -71,6 +71,17 @@ test('save writes indented JSON with a final newline, and keeps every key', () =
   assert.deepEqual(file.load(), config);
 });
 
+test('save replaces the file whole through a temp file and a rename (a read-only old file is replaced, nothing else is left)', { skip: process.platform === 'win32' }, async () => {
+  const { chmodSync, readdirSync, writeFileSync } = await import('node:fs');
+  const where = folder();
+  const path = join(where, 'giz.config.json');
+  writeFileSync(path, '{"model":"0.6b"}');
+  chmodSync(path, 0o444);
+  new ConfigFile(path, quiet).save({ ...defaultConfig('/h'), model: '1.7b' });
+  assert.equal(new ConfigFile(path, quiet).load().model, '1.7b');
+  assert.deepEqual(readdirSync(where), ['giz.config.json']);
+});
+
 test('a file that is not JSON gives a readable error with the path', () => {
   const path = join(folder(), 'giz.config.json');
   writeFileSync(path, '{ quebrado');

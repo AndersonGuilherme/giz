@@ -1,7 +1,8 @@
-import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, mkdirSync, readFileSync, realpathSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { writeAtomicSync } from '../disk/atomicWrite.ts';
 import { mergedConfig, type Environment, type GizConfig } from './GizConfig.ts';
 
 /** giz.config.json at the repository root (the folder above core/), where the motor kept it. */
@@ -59,6 +60,7 @@ export class ConfigFile {
 
   save(config: GizConfig): void {
     mkdirSync(dirname(this.#path), { recursive: true, mode: 0o700 });
-    writeFileSync(this.#path, `${JSON.stringify(config, null, 2)}\n`);
+    // Whole or not at all (the Studio and the CLI never read it half-written); a linked file stays a link.
+    writeAtomicSync(existsSync(this.#path) ? realpathSync(this.#path) : this.#path, `${JSON.stringify(config, null, 2)}\n`);
   }
 }

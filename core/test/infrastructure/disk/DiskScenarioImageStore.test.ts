@@ -146,3 +146,21 @@ test('end to end: an edited generated image is refused readably when the prompt 
   await assert.rejects(new GenerateScenarioImages({ images, store: new DiskScenarioImageStore(folder) }).run(project), /scenes\/1\.png já existe/);
   assert.equal(images.requests.length, 1);
 });
+
+test('link rewrites script.json through a temp file, and never through a link that leads out of the project', async () => {
+  const { readdir, symlink } = await import('node:fs/promises');
+  const folder = await projectFolder();
+  const store = new DiskScenarioImageStore(folder);
+  await store.save({ lineId: '1', image, hash: 'abc', madeBy });
+  await store.link(['1']);
+  assert.deepEqual((await readdir(join(folder, 'scenes'))).sort(), ['1.json', '1.png'], 'no temp file left');
+  const outside = await mkdtemp(join(tmpdir(), 'giz-outside-'));
+  tempFolders.push(outside);
+  const script = await readJson(join(folder, 'script.json'));
+  ((script.lines as Json[])[0]!.scene as Json).background = { generate: { prompt: 'outra' } };
+  await writeFile(join(outside, 'script.json'), JSON.stringify(script));
+  await rm(join(folder, 'script.json'));
+  await symlink(join(outside, 'script.json'), join(folder, 'script.json'));
+  await assert.rejects(store.link(['1']), /fora da pasta do projeto/);
+  assert.equal(JSON.stringify(await readJson(join(outside, 'script.json'))), JSON.stringify(script), 'the file outside is untouched');
+});

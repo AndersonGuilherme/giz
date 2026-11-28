@@ -21,3 +21,18 @@ test('a model load that failed is not kept for the life of the process: the next
   await voice.generate(request);
   assert.equal(loads, 2, 'loaded once it worked, then kept');
 });
+
+test('loadDownloadedQwen never downloads: a model not downloaded yet fails with a readable error and no network', async () => {
+  const { mkdtempSync } = await import('node:fs');
+  const { tmpdir } = await import('node:os');
+  const { join } = await import('node:path');
+  const { loadDownloadedQwen } = await import('../../../src/infrastructure/voice/QwenVoice.ts');
+  const realFetch = globalThis.fetch;
+  globalThis.fetch = (async () => assert.fail('no download')) as typeof fetch;
+  try {
+    const install = { model: '0.6b' as const, device: 'cpu' as const, threads: 1, modelsDir: mkdtempSync(join(tmpdir(), 'giz-no-model-')) };
+    await assert.rejects(loadDownloadedQwen(install), /modelo de voz .* não foi baixado: baixe-o em Configurações/);
+  } finally {
+    globalThis.fetch = realFetch;
+  }
+});

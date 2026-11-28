@@ -2,7 +2,7 @@ import { createHash } from 'node:crypto';
 import type { VoiceRequest, VoiceProvider } from '../../application/ports/VoiceProvider.ts';
 import { Audio } from '../../domain/speech/Audio.ts';
 import type { GizConfig } from '../config/GizConfig.ts';
-import { ensureModel } from './qwen/modelDownload.ts';
+import { ensureModel, openDownloadedModel } from './qwen/modelDownload.ts';
 import { Qwen3Tts } from './qwen/Qwen3Tts.ts';
 import { QWEN_RATE, repositoryOf, type QwenModel } from './qwen/qwenModels.ts';
 
@@ -20,9 +20,15 @@ function seedOf(request: VoiceRequest): number {
   return parseInt(digest.slice(0, 8), 16);
 }
 
-/** Downloads the model on the first use and opens it on the configured device. */
+/** Downloads the model on the first use (the CLI) and opens it on the configured device. */
 export async function loadQwen(install: Install, model: QwenModel = install.model): Promise<Qwen3Tts> {
   const folder = await ensureModel(repositoryOf(model), install.modelsDir);
+  return Qwen3Tts.load(folder, { device: install.device, threads: install.threads, modelsDir: install.modelsDir });
+}
+
+/** Opens a model already downloaded, never downloading it (the Studio downloads only from Settings). */
+export async function loadDownloadedQwen(install: Install, model: QwenModel = install.model): Promise<Qwen3Tts> {
+  const folder = openDownloadedModel(repositoryOf(model), install.modelsDir);
   return Qwen3Tts.load(folder, { device: install.device, threads: install.threads, modelsDir: install.modelsDir });
 }
 

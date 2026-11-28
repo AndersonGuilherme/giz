@@ -30,3 +30,15 @@ test('without the wav, the record does not count', async () => {
   await rm(join(folder, 'voice', '2.wav'));
   assert.equal(store.savedHash('2'), undefined);
 });
+
+test('a saved line replaces its files whole (temp file, then rename) and leaves only its wav and json', { skip: process.platform === 'win32' }, async () => {
+  const { chmod, mkdir, mkdtemp: fresh, readdir, writeFile } = await import('node:fs/promises');
+  const project = await fresh(join(tmpdir(), 'giz-voices-'));
+  await mkdir(join(project, 'voice'));
+  await writeFile(join(project, 'voice', '7.wav'), 'old take');
+  await chmod(join(project, 'voice', '7.wav'), 0o444);
+  await new DiskVoiceStore(project).save('7', record, Audio.of(new Float32Array(10), 24000));
+  assert.equal(fromWav(await readFile(join(project, 'voice', '7.wav'))).rate(), 24000);
+  assert.deepEqual((await readdir(join(project, 'voice'))).sort(), ['7.json', '7.wav']);
+  await rm(project, { recursive: true, force: true });
+});
