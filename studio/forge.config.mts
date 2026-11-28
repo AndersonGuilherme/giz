@@ -74,7 +74,7 @@ const config: ForgeConfig = {
     postMake: (_config, results) => renameArtifacts(results),
   },
   makers: [
-    new MakerSquirrel({ name: 'gizzycera', setupIcon: 'assets/icon/icon.ico' }),
+    new MakerSquirrel({ name: 'gizzycera', authors: 'Gizzycera', description: 'Gizzycera: vídeos animados a partir de um roteiro', setupIcon: 'assets/icon/icon.ico' }),
     new MakerZIP({}, ['darwin', 'linux', 'win32']),
     new MakerDMG({ icon: 'assets/icon/icon.icns', format: 'ULFO' }),
     new MakerDeb({ options: { ...LINUX_ENTRY, desktopTemplate: DESKTOP_TEMPLATE, maintainer: MAINTAINER, section: 'video', description: DESCRIPTION, productDescription: LONG_DESCRIPTION } }),

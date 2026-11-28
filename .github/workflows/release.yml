@@ -42,7 +42,7 @@ jobs:
       fail-fast: false
       matrix:
         # The oldest supported Ubuntu: the Linux packages then run on older glibc too. macOS 14 is Apple Silicon.
-        os: [ubuntu-22.04, windows-2022, macos-14]
+        os: [ubuntu-22.04, windows-2022, macos-15]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
     steps:
