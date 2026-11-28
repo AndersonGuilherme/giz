@@ -1,6 +1,7 @@
-test/fixtures/**/voice/
 output/
-examples/**/voice/
 # The voice records of a project made inside core/ (the .wav are ignored at the root). Only the .json: voice/ is
 # also the name of source folders (src/infrastructure/voice/), so the folder itself cannot be ignored.
 **/voice/*.json
+# Except the test fixtures' and the examples' voices, which ship: the tests read them and the examples play as they are.
+!test/fixtures/**/voice/*.json
+!examples/**/voice/*.json

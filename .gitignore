@@ -14,6 +14,8 @@ producao-stats.tsv
 *.wav
 !motor/assets/sfx/*.wav
 !core/public/sounds/*.wav
+!core/test/fixtures/**/voice/*.wav
+!core/examples/**/voice/*.wav
 *.mp4
 giz.config.json
 amostras-de-voz/
