@@ -10,6 +10,7 @@ Os exemplos completos estão em [`examples/`](examples/):
 | Pasta | O que é |
 |---|---|
 | `examples/internet-story/pt-BR` e `en` | História 9:16 de ~60 s, "E se a internet parasse por 24 horas?", com narrador e cinco personagens prontos do estilo giz (`casts/presets/present/`), 5 fundos vetoriais (quarto, rua, lanchonete, sala de aula e cidade à noite, três deles a partir de `presets/scenes/`), 6 movimentos de câmera, chuva, HUD com barra e texto grande |
+| `examples/sneeze-kite/pt-BR` e `en` | História infantil 16:9 de ~80 s, "O Atchim do Fofo" ("Fofo's Big Sneeze"), com narradora e três personagens novos do estilo giz (um monstrinho peludo, uma menina e um robô juiz de cartola), 4 fundos vetoriais (quarto, vila, campo e céu estrelado), câmera que segue, treme e afasta, partículas, fogueira, HUD com barra e texto grande no espirro |
 | `examples/coupon-lesson/pt-BR` e `en` | Aula 16:9 sobre um bug de cupom de desconto, com Lia e Téo, escritório e sala de aula na abertura e no fim, cartão, título, código, terminal, pausa "Ache o bug" com contagem, citação e desafio |
 
 Use qualquer uma dessas pastas como ponto de partida: copie a pasta, troque os textos e rode `produce`.

@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "title": "O Atchim do Fofo",
+  "format": "story",
+  "language": "pt-BR",
+  "aspect": "16:9",
+  "captionStyle": "words",
+  "cast": [
+    "narrator",
+    "fofo",
+    "nina",
+    "pino"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
+}

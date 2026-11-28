@@ -1,0 +1,629 @@
+{
+  "chapters": [
+    "The secret",
+    "Kite Day",
+    "The big sneeze",
+    "Kites at night"
+  ],
+  "lines": [
+    {
+      "id": "01",
+      "chapter": 1,
+      "speaker": "narrator",
+      "text": "This is Fofo. He has a secret.",
+      "sfx": "whoosh",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "room"
+        },
+        "characters": [],
+        "camera": {
+          "type": "zoom-in"
+        },
+        "effects": [
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ],
+        "highlight": {
+          "text": "FOFO'S BIG SECRET",
+          "color": "#ffd166",
+          "entrance": "pop"
+        }
+      }
+    },
+    {
+      "id": "02",
+      "chapter": 1,
+      "speaker": "fofo",
+      "text": "Shhh! My sneezes are so strong, they knock everything over.",
+      "pose": "hands-on-mouth",
+      "expression": "worried",
+      "look": "camera",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "room"
+        },
+        "characters": [
+          {
+            "character": "fofo",
+            "position": "center"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "fofo"
+        },
+        "effects": [
+          {
+            "type": "vignette",
+            "intensity": 0.4
+          }
+        ]
+      }
+    },
+    {
+      "id": "03",
+      "chapter": 1,
+      "speaker": "narrator",
+      "text": "One day, at the market, he sneezed... and the apples went flying!",
+      "sfx": "pop",
+      "reaction": {
+        "expression": "scared",
+        "pose": "hand-on-head"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "village"
+        },
+        "characters": [
+          {
+            "character": "fofo",
+            "position": "center"
+          }
+        ],
+        "camera": {
+          "type": "shake",
+          "intensity": 0.8
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 1.2
+          },
+          {
+            "type": "tint",
+            "color": "#f2b134",
+            "intensity": 0.25
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.6
+          }
+        ]
+      }
+    },
+    {
+      "id": "04",
+      "chapter": 1,
+      "speaker": "fofo",
+      "text": "So now I hold in every sneeze. Every single one.",
+      "pose": "shrug",
+      "expression": "thinking",
+      "look": "camera"
+    },
+    {
+      "id": "05",
+      "chapter": 2,
+      "speaker": "narrator",
+      "text": "Today is Kite Day. But there's a tiny problem.",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "pino",
+            "position": "center"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "pan"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "WIND",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "kites up",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "06",
+      "chapter": 2,
+      "speaker": "pino",
+      "text": "Measuring the wind... Wind: zero. No kite will fly today.",
+      "pose": "explain",
+      "expression": "neutral",
+      "look": "camera",
+      "sfx": "error",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "pino",
+            "position": "center"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "pino"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "WIND",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "kites up",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "07",
+      "chapter": 2,
+      "speaker": "nina",
+      "text": "Zero? But I worked on my kite all week long!",
+      "pose": "hand-on-head",
+      "expression": "worried",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      }
+    },
+    {
+      "id": "08",
+      "chapter": 2,
+      "speaker": "fofo",
+      "text": "I could help... but what if I knock everything over?",
+      "pose": "think",
+      "expression": "worried",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "fofo"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "WIND",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "kites up",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "09",
+      "chapter": 2,
+      "speaker": "nina",
+      "text": "Fofo, what if your sneeze is a superpower?",
+      "pose": "point",
+      "expression": "excited",
+      "look": "other",
+      "sfx": "ding",
+      "reaction": {
+        "expression": "surprised"
+      }
+    },
+    {
+      "id": "10",
+      "chapter": 3,
+      "speaker": "narrator",
+      "text": "Nina picked a tiny flower and tickled Fofo's nose.",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-in",
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 0.8,
+            "color": "#fff1c1"
+          },
+          {
+            "type": "glow",
+            "color": "#fff1c1",
+            "intensity": 0.3
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "WIND",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "kites up",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "11",
+      "chapter": 3,
+      "speaker": "fofo",
+      "text": "Oh no... oh no... here it comes!",
+      "pose": "raise",
+      "expression": "surprised",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      }
+    },
+    {
+      "id": "12",
+      "chapter": 3,
+      "speaker": "fofo",
+      "text": "ACHOOO!",
+      "pronunciation": "Ah-choo!",
+      "pose": "hands-on-mouth",
+      "expression": "surprised",
+      "sfx": "whoosh",
+      "reaction": {
+        "expression": "surprised",
+        "pose": "hand-on-head"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": {
+              "x": 0.62,
+              "y": 0.915
+            },
+            "direction": "right"
+          },
+          {
+            "character": "fofo",
+            "position": {
+              "x": 0.87,
+              "y": 0.915
+            },
+            "direction": "left"
+          }
+        ],
+        "camera": {
+          "type": "shake",
+          "intensity": 2
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 3
+          }
+        ],
+        "highlight": {
+          "text": "ACHOOO!",
+          "color": "#7ee0ff",
+          "entrance": "pop"
+        }
+      }
+    },
+    {
+      "id": "13",
+      "chapter": 3,
+      "speaker": "narrator",
+      "text": "Then came a great big gust of wind, and every kite flew up at once!",
+      "sfx": "success",
+      "reaction": {
+        "expression": "excited",
+        "pose": "celebrate"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "pino",
+            "position": "center"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "from": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1.12
+          },
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 2.5
+          },
+          {
+            "type": "glow",
+            "color": "#fff1c1",
+            "intensity": 0.3
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "WIND",
+              "value": "99"
+            }
+          ],
+          "bar": {
+            "label": "kites up",
+            "value": 100
+          }
+        }
+      }
+    },
+    {
+      "id": "14",
+      "chapter": 3,
+      "speaker": "pino",
+      "text": "Wind: tons! A brand new Kite Day record!",
+      "pose": "celebrate",
+      "expression": "excited",
+      "look": "camera",
+      "sfx": "dings",
+      "reaction": {
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "15",
+      "chapter": 3,
+      "speaker": "nina",
+      "text": "See, Fofo? Nobody in the world sneezes like you.",
+      "pose": "explain",
+      "expression": "happy",
+      "look": "other",
+      "reaction": {
+        "expression": "happy",
+        "look": "other"
+      }
+    },
+    {
+      "id": "16",
+      "chapter": 4,
+      "speaker": "narrator",
+      "text": "That night, the kites were still dancing, way up near the stars.",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "intensity": 0.8
+          },
+          {
+            "type": "particles",
+            "intensity": 0.6,
+            "color": "#fff1a8"
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "17",
+      "chapter": 4,
+      "speaker": "nina",
+      "text": "Will you play with us again tomorrow?",
+      "pose": "explain",
+      "expression": "happy",
+      "look": "other",
+      "reaction": {
+        "expression": "happy",
+        "look": "other"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "nina"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "intensity": 0.8
+          },
+          {
+            "type": "particles",
+            "intensity": 0.6,
+            "color": "#fff1a8"
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "18",
+      "chapter": 4,
+      "speaker": "fofo",
+      "text": "Sure! But can somebody lend me a tissue?",
+      "pose": "shrug",
+      "expression": "excited",
+      "look": "camera",
+      "sfx": "pop",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "fofo"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "intensity": 0.8
+          },
+          {
+            "type": "particles",
+            "intensity": 0.6,
+            "color": "#fff1a8"
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ]
+      }
+    }
+  ]
+}

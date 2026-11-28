@@ -1,0 +1,18 @@
+{
+  "version": 2,
+  "title": "Fofo's Big Sneeze",
+  "format": "story",
+  "language": "en",
+  "aspect": "16:9",
+  "captionStyle": "words",
+  "cast": [
+    "narrator",
+    "fofo",
+    "nina",
+    "pino"
+  ],
+  "voice": {
+    "provider": "qwen",
+    "model": "1.7b"
+  }
+}

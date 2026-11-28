@@ -1,0 +1,23 @@
+{
+  "id": "pino",
+  "name": "Pino",
+  "rig": "giz",
+  "parameters": {
+    "species": "robot",
+    "outfit": "robot-armor",
+    "outfitColor": "#e8735a",
+    "hair": "bald",
+    "headShape": "soft-square",
+    "headwear": "top-hat",
+    "headwearColor": "#3d6fb0",
+    "eyeColor": "#4fe6ff",
+    "cheeks": false,
+    "hairColor": "#3f4a55"
+  },
+  "voice": {
+    "id": "eric",
+    "style": "Speak in natural American English, funny and very precise, like a serious robot judge who gets excited easily"
+  },
+  "personality": "the festival robot judge, who measures everything and loves any record",
+  "defaultExpression": "neutral"
+}

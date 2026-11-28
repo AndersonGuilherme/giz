@@ -1,0 +1,630 @@
+{
+  "chapters": [
+    "O segredo",
+    "A festa das pipas",
+    "O grande atchim",
+    "Noite de pipas"
+  ],
+  "lines": [
+    {
+      "id": "01",
+      "chapter": 1,
+      "speaker": "narrator",
+      "text": "O Fofo tem um segredo.",
+      "sfx": "whoosh",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "room"
+        },
+        "characters": [],
+        "camera": {
+          "type": "zoom-in"
+        },
+        "effects": [
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ],
+        "highlight": {
+          "text": "O SEGREDO DO FOFO",
+          "color": "#ffd166",
+          "entrance": "pop"
+        }
+      }
+    },
+    {
+      "id": "02",
+      "chapter": 1,
+      "speaker": "fofo",
+      "text": "Psiu! O meu espirro é tão forte que derruba tudo.",
+      "pose": "hands-on-mouth",
+      "expression": "worried",
+      "look": "camera",
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "room"
+        },
+        "characters": [
+          {
+            "character": "fofo",
+            "position": "center"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "fofo"
+        },
+        "effects": [
+          {
+            "type": "vignette",
+            "intensity": 0.4
+          }
+        ]
+      }
+    },
+    {
+      "id": "03",
+      "chapter": 1,
+      "speaker": "narrator",
+      "text": "Uma vez, ele espirrou na feira, e as frutas voaram longe!",
+      "sfx": "pop",
+      "reaction": {
+        "expression": "scared",
+        "pose": "hand-on-head"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "village"
+        },
+        "characters": [
+          {
+            "character": "fofo",
+            "position": "center"
+          }
+        ],
+        "camera": {
+          "type": "shake",
+          "intensity": 0.8
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 1.2
+          },
+          {
+            "type": "tint",
+            "color": "#f2b134",
+            "intensity": 0.25
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.6
+          }
+        ]
+      }
+    },
+    {
+      "id": "04",
+      "chapter": 1,
+      "speaker": "fofo",
+      "text": "Desde aquele dia, eu prendo todos os espirros. Todos mesmo.",
+      "pose": "shrug",
+      "expression": "thinking",
+      "look": "camera"
+    },
+    {
+      "id": "05",
+      "chapter": 2,
+      "speaker": "narrator",
+      "text": "Hoje é a Festa das Pipas. Mas tem um probleminha.",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "pino",
+            "position": "center"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "pan"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "VENTO",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "pipas no céu",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "06",
+      "chapter": 2,
+      "speaker": "pino",
+      "text": "Medindo o vento... Vento: zero. Nenhuma pipa vai subir.",
+      "pose": "explain",
+      "expression": "neutral",
+      "look": "camera",
+      "sfx": "error",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "pino",
+            "position": "center"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "pino"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "VENTO",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "pipas no céu",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "07",
+      "chapter": 2,
+      "speaker": "nina",
+      "text": "Zero? Mas eu passei a semana inteira fazendo a minha pipa!",
+      "pose": "hand-on-head",
+      "expression": "worried",
+      "look": "camera",
+      "reaction": {
+        "expression": "worried"
+      }
+    },
+    {
+      "id": "08",
+      "chapter": 2,
+      "speaker": "fofo",
+      "text": "Eu até podia ajudar... mas e se eu derrubar tudo?",
+      "pose": "think",
+      "expression": "worried",
+      "look": "camera",
+      "reaction": {
+        "expression": "thinking"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "fofo"
+        },
+        "hud": {
+          "fields": [
+            {
+              "label": "VENTO",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "pipas no céu",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "09",
+      "chapter": 2,
+      "speaker": "nina",
+      "text": "Fofo, e se esse espirro for um superpoder?",
+      "pronunciation": "Fôfo, e se esse espirro for um superpoder?",
+      "pose": "point",
+      "expression": "excited",
+      "look": "other",
+      "sfx": "ding",
+      "reaction": {
+        "expression": "surprised"
+      }
+    },
+    {
+      "id": "10",
+      "chapter": 3,
+      "speaker": "narrator",
+      "text": "A Nina pegou uma florzinha e fez cosquinha no nariz dele.",
+      "reaction": {
+        "expression": "surprised"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-in",
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 0.8,
+            "color": "#fff1c1"
+          },
+          {
+            "type": "glow",
+            "color": "#fff1c1",
+            "intensity": 0.3
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "VENTO",
+              "value": "0"
+            }
+          ],
+          "bar": {
+            "label": "pipas no céu",
+            "value": 0
+          }
+        }
+      }
+    },
+    {
+      "id": "11",
+      "chapter": 3,
+      "speaker": "fofo",
+      "text": "Ai, ai, ai... não aguento!",
+      "pose": "raise",
+      "expression": "surprised",
+      "look": "camera",
+      "reaction": {
+        "expression": "excited"
+      }
+    },
+    {
+      "id": "12",
+      "chapter": 3,
+      "speaker": "fofo",
+      "text": "ATCHIIIM!",
+      "pronunciation": "Atchiiim!",
+      "pose": "hands-on-mouth",
+      "expression": "surprised",
+      "sfx": "whoosh",
+      "reaction": {
+        "expression": "surprised",
+        "pose": "hand-on-head"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": {
+              "x": 0.62,
+              "y": 0.915
+            },
+            "direction": "right"
+          },
+          {
+            "character": "fofo",
+            "position": {
+              "x": 0.87,
+              "y": 0.915
+            },
+            "direction": "left"
+          }
+        ],
+        "camera": {
+          "type": "shake",
+          "intensity": 2
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 3
+          }
+        ],
+        "highlight": {
+          "text": "ATCHIIIM!",
+          "color": "#7ee0ff",
+          "entrance": "pop"
+        }
+      }
+    },
+    {
+      "id": "13",
+      "chapter": 3,
+      "speaker": "narrator",
+      "text": "Aí veio um ventão! E todas as pipas subiram de uma vez só!",
+      "sfx": "success",
+      "reaction": {
+        "expression": "excited",
+        "pose": "celebrate"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "field"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "pino",
+            "position": "center"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "from": {
+            "x": 0,
+            "y": 0,
+            "zoom": 1.12
+          },
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "particles",
+            "intensity": 2.5
+          },
+          {
+            "type": "glow",
+            "color": "#fff1c1",
+            "intensity": 0.3
+          }
+        ],
+        "hud": {
+          "fields": [
+            {
+              "label": "VENTO",
+              "value": "99"
+            }
+          ],
+          "bar": {
+            "label": "pipas no céu",
+            "value": 100
+          }
+        }
+      }
+    },
+    {
+      "id": "14",
+      "chapter": 3,
+      "speaker": "pino",
+      "text": "Vento: muitíssimo! É o recorde da festa!",
+      "pose": "celebrate",
+      "expression": "excited",
+      "look": "camera",
+      "sfx": "dings",
+      "reaction": {
+        "expression": "happy"
+      }
+    },
+    {
+      "id": "15",
+      "chapter": 3,
+      "speaker": "nina",
+      "text": "Viu, Fofo? Ninguém no mundo espirra igual a você.",
+      "pose": "explain",
+      "expression": "happy",
+      "look": "other",
+      "reaction": {
+        "expression": "happy",
+        "look": "other"
+      }
+    },
+    {
+      "id": "16",
+      "chapter": 4,
+      "speaker": "narrator",
+      "text": "De noite, as pipas ainda dançavam no céu, pertinho das estrelas.",
+      "reaction": {
+        "expression": "happy"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "zoom-out",
+          "easing": "smooth"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "intensity": 0.8
+          },
+          {
+            "type": "particles",
+            "intensity": 0.6,
+            "color": "#fff1a8"
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "17",
+      "chapter": 4,
+      "speaker": "nina",
+      "text": "Amanhã você brinca com a gente de novo?",
+      "pose": "explain",
+      "expression": "happy",
+      "look": "other",
+      "reaction": {
+        "expression": "happy",
+        "look": "other"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "nina"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "intensity": 0.8
+          },
+          {
+            "type": "particles",
+            "intensity": 0.6,
+            "color": "#fff1a8"
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ]
+      }
+    },
+    {
+      "id": "18",
+      "chapter": 4,
+      "speaker": "fofo",
+      "text": "Claro! Mas antes... alguém aí tem um lencinho?",
+      "pose": "shrug",
+      "expression": "excited",
+      "look": "camera",
+      "sfx": "pop",
+      "reaction": {
+        "expression": "excited"
+      },
+      "scene": {
+        "type": "scenario",
+        "background": {
+          "vector": "night-sky"
+        },
+        "characters": [
+          {
+            "character": "nina",
+            "position": "left"
+          },
+          {
+            "character": "fofo",
+            "position": "right"
+          }
+        ],
+        "camera": {
+          "type": "follow",
+          "target": "fofo"
+        },
+        "effects": [
+          {
+            "type": "fire",
+            "intensity": 0.8
+          },
+          {
+            "type": "particles",
+            "intensity": 0.6,
+            "color": "#fff1a8"
+          },
+          {
+            "type": "vignette",
+            "intensity": 0.5
+          }
+        ]
+      }
+    }
+  ]
+}

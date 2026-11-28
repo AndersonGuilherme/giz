@@ -1,0 +1,10 @@
+{
+  "id": "narrator",
+  "name": "Narradora",
+  "voice": {
+    "id": "serena",
+    "style": "Fale em português do Brasil, com sotaque brasileiro, com calma e carinho, devagar, como quem conta uma história para crianças antes de dormir"
+  },
+  "personality": "narradora calma e carinhosa, sem corpo",
+  "defaultExpression": "neutral"
+}

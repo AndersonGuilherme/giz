@@ -9,11 +9,18 @@ import { DiskProjectRepository } from '../src/infrastructure/disk/DiskProjectRep
 import { RigCatalogFromRegistry } from '../src/presentation/rigs/RigCatalogFromRegistry.ts';
 import { rigRegistry } from '../src/presentation/rigs/rigRegistry.ts';
 
-const EXAMPLES = ['internet-story/pt-BR', 'internet-story/en', 'coupon-lesson/pt-BR', 'coupon-lesson/en'];
+const EXAMPLES = [
+  'internet-story/pt-BR',
+  'internet-story/en',
+  'sneeze-kite/pt-BR',
+  'sneeze-kite/en',
+  'coupon-lesson/pt-BR',
+  'coupon-lesson/en',
+];
 
 const folderOf = (example: string) => fileURLToPath(new URL(`../examples/${example}`, import.meta.url));
 
-test('the 4 examples load and pass the check without errors', async () => {
+test('the examples load and pass the check without errors', async () => {
   const rigs = new RigCatalogFromRegistry(rigRegistry);
   const repository = new DiskProjectRepository({ catalog: rigs });
   const check = new CheckProject({ layouts: createLayoutRegistry(), captions: CAPTION_LAYOUTS, rigs });
@@ -30,6 +37,8 @@ test('each example speaks its own language and keeps the format of its kind', as
   const expected = [
     { example: 'internet-story/pt-BR', language: 'pt-BR', aspect: '9:16', format: 'story', captionStyle: 'words' },
     { example: 'internet-story/en', language: 'en', aspect: '9:16', format: 'story', captionStyle: 'words' },
+    { example: 'sneeze-kite/pt-BR', language: 'pt-BR', aspect: '16:9', format: 'story', captionStyle: 'words' },
+    { example: 'sneeze-kite/en', language: 'en', aspect: '16:9', format: 'story', captionStyle: 'words' },
     { example: 'coupon-lesson/pt-BR', language: 'pt-BR', aspect: '16:9', format: 'lesson', captionStyle: 'blocks' },
     { example: 'coupon-lesson/en', language: 'en', aspect: '16:9', format: 'lesson', captionStyle: 'blocks' },
   ];
@@ -61,7 +70,7 @@ test('no example repeats its text in pronunciation only to drop the brackets', a
 });
 
 test('the stories cast giz characters on at least 4 different backgrounds', async () => {
-  for (const example of ['internet-story/pt-BR', 'internet-story/en']) {
+  for (const example of ['internet-story/pt-BR', 'internet-story/en', 'sneeze-kite/pt-BR', 'sneeze-kite/en']) {
     const project = await readJson(example, 'project.json');
     const characters = await Promise.all(project.cast.map((id: string) => readJson(example, `cast/${id}.json`)));
     const rigs = new Set(characters.flatMap((character: { rig?: string }) => character.rig ?? []));
