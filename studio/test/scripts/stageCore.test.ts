@@ -48,3 +48,10 @@ test("pruned: maps, links, nested modules, other machines' ONNX Runtime, the CUD
   assert.equal(moduleLeftOut('node_modules/@remotion/compositor-linux-x64-musl'), true);
   assert.equal(moduleLeftOut('node_modules/@remotion/compositor-linux-x64-gnu'), false);
 });
+
+test("pruned too: tests, examples, docs, Markdown and type declarations inside the modules; licenses stay", () => {
+  for (const path of ['test', 'lib/tests', 'example', 'examples', 'docs', 'README.md', 'docs/guide.md', 'dist/index.d.ts', 'dist/index.d.mts', 'dist/index.d.cts']) {
+    assert.equal(leftOut('node_modules/zod', path), true, path);
+  }
+  for (const path of ['LICENSE', 'LICENSE.md', 'NOTICE.md', 'dist/index.js', 'dist/testing.js', 'package.json']) assert.equal(leftOut('node_modules/zod', path), false, path);
+});

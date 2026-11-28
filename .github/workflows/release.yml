@@ -1,5 +1,6 @@
 # Builds the giz Estúdio installers on each OS (the packages are not signed: see the README, "Instalar") and puts them
 # in a draft GitHub release. Runs on a v* tag or by hand (then it only keeps the files as workflow artifacts).
+# Verify runs once, on Linux, before any installer is made; the Linux make also runs the packaged smoke with no network.
 name: release
 
 on:
@@ -10,8 +11,33 @@ on:
 permissions:
   contents: read
 
+env:
+  # The CUDA provider is downloaded by the app's GPU setup, never packaged.
+  ONNXRUNTIME_NODE_INSTALL_CUDA: skip
+
 jobs:
-  build:
+  verify:
+    runs-on: ubuntu-22.04
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
+        with:
+          node-version: 24
+
+      - name: Verify core
+        working-directory: core
+        run: npm ci && npm run verify
+
+      - name: Verify studio
+        working-directory: studio
+        run: npm ci && npm run verify
+
+  make:
+    needs: verify
     strategy:
       fail-fast: false
       matrix:
@@ -19,19 +45,15 @@ jobs:
         os: [ubuntu-22.04, windows-2022, macos-14]
     runs-on: ${{ matrix.os }}
     timeout-minutes: 90
-    env:
-      # The CUDA provider is downloaded by the app's GPU setup, never packaged.
-      ONNXRUNTIME_NODE_INSTALL_CUDA: skip
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
 
+      # No dependency cache: what goes into a release is installed fresh from the lockfiles.
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
-          cache: npm
-          cache-dependency-path: |
-            core/package-lock.json
-            studio/package-lock.json
 
       - name: Linux packaging tools (rpm, AppImage)
         if: runner.os == 'Linux'
@@ -45,17 +67,18 @@ jobs:
         working-directory: studio
         run: npm ci
 
-      - name: Verify core
-        working-directory: core
-        run: npm run verify
-
-      - name: Verify studio
-        working-directory: studio
-        run: npm run verify
-
       - name: Make the installers
         working-directory: studio
         run: npm run make
+
+      # The whole smoke walk on the packaged app, in a network namespace with loopback only (renders need no network).
+      - name: Packaged smoke, offline
+        if: runner.os == 'Linux'
+        working-directory: studio
+        env:
+          SMOKE_OFFLINE: '1'
+          SMOKE_HEADLESS: '1'
+        run: node smoke/packaged.ts
 
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -73,7 +96,7 @@ jobs:
 
   release:
     if: startsWith(github.ref, 'refs/tags/v')
-    needs: build
+    needs: make
     runs-on: ubuntu-22.04
     permissions:
       contents: write

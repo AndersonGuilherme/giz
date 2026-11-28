@@ -32,7 +32,7 @@ import { ScriptService } from './services/ScriptService.ts';
 import { FolderQueue } from './services/FolderQueue.ts';
 import { SettingsService } from './services/SettingsService.ts';
 import { SetupService } from './services/SetupService.ts';
-import { defaultProjectsFolderIn, keyFolderIn, studioPathsOf, systemLanguageOf } from './studioPaths.ts';
+import { defaultProjectsFolderIn, keyFolderIn, studioPathsOf, systemLanguageOf, userDataIn } from './studioPaths.ts';
 import { setInterfaceLanguage } from './text.ts';
 import type { WindowSlot } from './WindowSlot.ts';
 import type { SharedConfigStore } from './ports/SettingsStores.ts';
@@ -42,9 +42,9 @@ import { videoServicesOf } from './composition/video.ts';
 
 export const STUDIO_PATHS = studioPathsOf(process.env, homedir());
 
-/** Before the app is ready: an isolated Studio home gets its own userData. */
+/** Before the app is ready and before anything reads it: userData is giz-estudio, or an isolated home's own. */
 export function preparePaths(): void {
-  if (STUDIO_PATHS.userData) app.setPath('userData', STUDIO_PATHS.userData);
+  app.setPath('userData', userDataIn(STUDIO_PATHS, app.getPath('appData')));
 }
 
 function sendTo<Payload>(slot: WindowSlot<BrowserWindow>, event: string): (payload: Payload) => void {

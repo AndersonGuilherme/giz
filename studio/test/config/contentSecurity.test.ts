@@ -42,3 +42,12 @@ test("the Player's silent shared audio (a data: mp3 it plays to unlock sound) ma
   assert.match(policy, /media-src 'self' giz-media: blob: data:;/);
   assert.match(policy, /script-src 'self';/);
 });
+
+test("the installed @remotion/player still injects exactly the style the hash is for (one injectCSS, the default class, #fff)", async () => {
+  const { checkPlayerStyleSource, playerSource } = await import('../../config/playerStyle.ts');
+  const source = await playerSource();
+  assert.doesNotThrow(() => checkPlayerStyleSource(source));
+  assert.throws(() => checkPlayerStyleSource(source.replace('"#fff"));', '"#000"));')), /update config\/playerStyle\.ts/);
+  assert.throws(() => checkPlayerStyleSource(source.replace('override ?? "__remotion-player"', 'override ?? "__player"')), /update config\/playerStyle\.ts/);
+  assert.throws(() => checkPlayerStyleSource(`${source}\nInternals.CSSUtils.injectCSS(other);`), /update config\/playerStyle\.ts/);
+});

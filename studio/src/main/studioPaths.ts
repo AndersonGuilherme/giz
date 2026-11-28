@@ -35,11 +35,19 @@ export type RunKind = Readonly<{ packaged: boolean; userData: string; env: Envir
 
 /**
  * The variables that tell core (here and in the workers, which inherit them) where its writable files go: the
- * installed app keeps giz.config.json in ~/.config/giz (beside the CLI's keys) and Whisper in userData; an isolated
- * home has its own giz.config.json. A checkout keeps core's own places. What is already set is left as it is.
+ * installed app keeps giz.config.json in ~/.config/giz (beside the CLI's keys), Whisper and the ONNX Runtime copy that
+ * gets the GPU provider in userData (its own folder is read-only). An isolated home's giz.config.json always wins. A
+ * checkout keeps core's own places. Otherwise what is already set is left as it is.
  */
 export function coreEnvironmentOf(paths: StudioPaths, { packaged, userData, env }: RunKind): Record<string, string> {
-  const config = paths.gizConfig ?? (packaged ? join(keyFolderIn(paths.home), 'giz.config.json') : undefined);
-  const wanted = { GIZ_CONFIG: config, GIZ_WHISPER_CACHE: packaged ? join(userData, 'whisper') : undefined };
-  return Object.fromEntries(Object.entries(wanted).filter((entry): entry is [string, string] => entry[1] !== undefined && !env[entry[0]]));
+  const installed = packaged ? { GIZ_WHISPER_CACHE: join(userData, 'whisper'), GIZ_ORT_DIR: join(userData, 'onnxruntime') } : {};
+  const config = packaged ? { GIZ_CONFIG: join(keyFolderIn(paths.home), 'giz.config.json') } : {};
+  const kept = Object.entries({ ...config, ...installed }).filter(([name]) => !env[name]);
+  return { ...Object.fromEntries(kept), ...(paths.gizConfig ? { GIZ_CONFIG: paths.gizConfig } : {}) };
 }
+
+/** The app's own folder in the system's app data folder: an ASCII name (no space or accent in any path). */
+const USER_DATA_FOLDER = 'giz-estudio';
+
+/** userData: an isolated home's own, or giz-estudio in the system's app data folder (`appData`). */
+export const userDataIn = (paths: StudioPaths, appData: string): string => paths.userData ?? join(appData, USER_DATA_FOLDER);

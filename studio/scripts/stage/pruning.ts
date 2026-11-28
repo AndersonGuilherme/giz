@@ -13,8 +13,13 @@ function otherMachine(inPackage: string): boolean {
   return !machine.startsWith(found[2] ? `${found[1]}/${found[2]}` : `${found[1]}/`);
 }
 
-// Inside any module: maps, executables' links and nested modules (staged on their own).
-const anywhere = (inPackage: string, name: string): boolean => name.endsWith('.map') || name === '.bin' || inPackage.startsWith('node_modules');
+// Inside any module: maps, executables' links, nested modules (staged on their own), tests, examples, docs, Markdown
+// (licenses stay) and type declarations: nothing the app runs.
+const UNUSED_FOLDERS = new Set(['.bin', 'test', 'tests', 'example', 'examples', 'docs']);
+const UNUSED_FILES = /\.(map|md|d\.ts|d\.mts|d\.cts)$/;
+const LICENSES = /^(LICEN[CS]E|NOTICE|COPYING)/i;
+const unusedFile = (name: string): boolean => UNUSED_FILES.test(name) && !LICENSES.test(name);
+const anywhere = (inPackage: string, name: string): boolean => UNUSED_FOLDERS.has(name) || unusedFile(name) || inPackage.startsWith('node_modules');
 
 const IN_MODULE: ReadonlyArray<readonly [string, (inPackage: string, name: string) => boolean]> = [
   ['@huggingface/transformers', (inPackage) => inPackage === '.cache'],

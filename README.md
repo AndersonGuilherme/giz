@@ -43,14 +43,14 @@ Na página de **Releases** do repositório, baixe o arquivo do seu sistema:
 
 | Sistema | Arquivo | Como instalar |
 |---|---|---|
-| **Windows** 10/11 (64 bits) | `giz_estudio-<versão> Setup.exe` | dê dois cliques; o app abre sozinho no fim e ganha atalho no menu Iniciar |
-| **macOS** (Apple Silicon) | `giz Estúdio-<versão>-arm64.dmg` | abra o `.dmg` e arraste o **giz Estúdio** para **Aplicativos** |
-| **Linux** Ubuntu/Debian | `giz-estudio_<versão>_amd64.deb` | `sudo apt install ./giz-estudio_<versão>_amd64.deb` |
+| **Windows** 10/11 (64 bits) | `giz-estudio-<versão>-Setup.exe` | dê dois cliques; o app abre sozinho no fim e ganha atalho no menu Iniciar |
+| **macOS** (Apple Silicon) | `giz-estudio-<versão>-arm64.dmg` | abra o `.dmg` e arraste o **giz Estúdio** para **Aplicativos** |
+| **Linux** Ubuntu/Debian | `giz-estudio_<versão>_amd64.deb` | use o `.deb`: `sudo apt install ./giz-estudio_<versão>_amd64.deb` |
 | **Linux** Fedora/openSUSE | `giz-estudio-<versão>-1.x86_64.rpm` | `sudo dnf install ./giz-estudio-<versão>-1.x86_64.rpm` |
-| **Linux** qualquer distribuição | `giz Estúdio-<versão>-x64.AppImage` | `chmod +x` no arquivo e abra com dois cliques |
+| **Linux** outras distribuições | `giz-estudio-<versão>-x64.AppImage` | `chmod +x` no arquivo e abra com dois cliques (veja a nota abaixo) |
 
-Também há um `.zip` de cada sistema, que roda sem instalar (descompacte numa pasta sua e abra o programa
-`giz-estudio`).
+Também há um `.zip` de cada sistema (`giz-estudio-<sistema>-<arquitetura>-<versão>.zip`), que roda sem instalar:
+descompacte numa pasta sua e abra o programa `giz-estudio`.
 
 ### "Aplicativo não verificado": é esperado
 
@@ -59,12 +59,21 @@ Windows). Por isso o sistema avisa na primeira vez:
 
 - **Windows (SmartScreen):** na tela azul "O Windows protegeu o computador", clique em **Mais informações** e depois
   em **Executar assim mesmo**.
-- **macOS (Gatekeeper):** na primeira vez, **não** dê dois cliques. Em **Aplicativos**, clique com o botão direito
-  (ou Control+clique) no **giz Estúdio**, escolha **Abrir** e confirme **Abrir** no aviso. Nas próximas vezes ele abre
-  normalmente. Se o macOS disser que o app "está danificado" ou bloquear o render, rode uma vez no Terminal:
-  `xattr -dr com.apple.quarantine "/Applications/giz Estúdio.app"`.
-- **Linux:** não há aviso. O AppImage precisa de FUSE (no Ubuntu 22.04 ou mais novo: `sudo apt install libfuse2`);
-  sem FUSE, abra com `./giz-Estúdio-*.AppImage --appimage-extract-and-run`.
+- **macOS (Gatekeeper):** na primeira vez, o macOS recusa abrir o app. Depois desse aviso:
+  - **macOS 15 (Sequoia) ou mais novo:** abra **Ajustes do Sistema → Privacidade e Segurança**, role até o aviso
+    sobre o **giz Estúdio** e clique em **Abrir Mesmo Assim**; confirme com a sua senha. Nas próximas vezes ele abre
+    normalmente.
+  - **macOS 14 ou mais antigo:** em **Aplicativos**, clique com o botão direito (ou Control+clique) no
+    **giz Estúdio**, escolha **Abrir** e confirme **Abrir** no aviso.
+  - Se o macOS disser que o app "está danificado", ou se o render for bloqueado, rode uma vez no Terminal:
+    `xattr -dr com.apple.quarantine "/Applications/giz Estúdio.app"`.
+- **Linux:** não há aviso.
+  - **Ubuntu e Debian: use o `.deb`.** Ele instala o app com tudo o que o Chromium precisa, inclusive no Ubuntu 24.04
+    ou mais novo.
+  - **Sobre o AppImage:** ele precisa de FUSE (`sudo apt install libfuse2`, ou abra com
+    `./giz-estudio-*.AppImage --appimage-extract-and-run`). No Ubuntu 24.04 ou mais novo, o AppArmor bloqueia os
+    *user namespaces* que a proteção (sandbox) do Chromium usa, e o AppImage fecha logo ao abrir: nesses sistemas, use
+    o `.deb`.
 
 ### Primeira vez que abre
 
@@ -72,9 +81,9 @@ Um assistente prepara o Estúdio em poucos passos:
 
 1. **Idioma** (português ou inglês) e **pasta dos projetos** (sugestão: `~/giz/projetos`).
 2. **Placa de vídeo (opcional):** com uma NVIDIA no Linux, o botão **Instalar** baixa o suporte à GPU
-   (~245 MB do ONNX Runtime CUDA e ~1,8 GB de bibliotecas da NVIDIA) e a voz fica bem mais rápida. Sem GPU, tudo
-   funciona na CPU. No `.deb`, no `.rpm` e no AppImage a pasta do app é só de leitura: para usar a GPU, use o `.zip`
-   descompactado numa pasta sua.
+   (~245 MB do ONNX Runtime CUDA, conferido com o hash publicado, e ~1,8 GB de bibliotecas da NVIDIA) e a voz fica
+   bem mais rápida. Funciona em todos os formatos (`.deb`, `.rpm`, AppImage e `.zip`): o suporte fica nos dados do app.
+   Sem GPU, tudo funciona na CPU.
 3. **Modelos de voz:** baixe o Qwen3-TTS 0.6B (5,9 GB) ou 1.7B (13,4 GB) e, se quiser alinhar as falas com
    precisão, o Whisper (~250 MB). Os downloads podem ser pausados e continuam de onde pararam.
 4. **Contas de IA (opcional):** cole as chaves dos serviços que quiser usar (texto, imagem, voz) e teste cada uma.
@@ -89,9 +98,9 @@ escolher.
 |---|---|
 | Projetos | a pasta escolhida no assistente (sugestão: `~/giz/projetos`) |
 | Modelos de voz e GPU | `~/.cache/giz` (dá para mudar em Configurações) |
-| Configuração compartilhada com a linha de comando | `~/.config/giz/giz.config.json` |
+| Configuração compartilhada com a linha de comando | `~/.config/giz/giz.config.json` (a linha de comando também a usa quando o repositório não tem o seu `giz.config.json`) |
 | Chaves de API | no chaveiro do sistema (cifradas, no arquivo `keys.json` dos dados do app); sem chaveiro, em `~/.config/giz/<serviço>.key` (só você lê) |
-| Dados do app (preferências, Whisper, retratos) | Linux: `~/.config/giz Estúdio` · Windows: `%APPDATA%\giz Estúdio` · macOS: `~/Library/Application Support/giz Estúdio` |
+| Dados do app (preferências, Whisper, suporte à GPU, retratos) | Linux: `~/.config/giz-estudio` · Windows: `%APPDATA%\giz-estudio` · macOS: `~/Library/Application Support/giz-estudio` |
 
 ### Desinstalar
 

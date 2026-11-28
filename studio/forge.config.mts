@@ -9,6 +9,9 @@ import { MakerAppImage } from '@reforged/maker-appimage';
 import { VitePlugin } from '@electron-forge/plugin-vite';
 import { FusesPlugin } from '@electron-forge/plugin-fuses';
 import { FuseV1Options, FuseVersion } from '@electron/fuses';
+import { fileURLToPath } from 'node:url';
+import { APPIMAGE_RUNTIMES, ensureAppImageRuntime } from './scripts/appImageRuntime.ts';
+import { renameArtifacts } from './scripts/artifactNames.ts';
 import { STAGED_CORE, stageCore } from './scripts/stageCore.ts';
 
 // The Linux menus' entry (deb, rpm and AppImage).
@@ -20,6 +23,23 @@ const LINUX_ENTRY = {
   icon: 'assets/icon/icon.png',
   categories: ['AudioVideo' as const, 'Video' as const],
 };
+// The deb and rpm menu entry: their default names the window class after the product name, but Electron's window
+// class on Linux is the program's name (WM_CLASS "giz-estudio", checked with xprop), which links the window to its entry.
+const DESKTOP_TEMPLATE = 'assets/linux/desktop.ejs';
+// electron-installer-redhat reads desktopTemplate too (the common installer does), but Forge's rpm options type omits it.
+const RPM_DESKTOP = { desktopTemplate: DESKTOP_TEMPLATE } as unknown as Record<string, never>;
+// The package's own text, in both languages of the app.
+const DESCRIPTION = 'Vídeos animados a partir de um roteiro / Animated videos from a script';
+const LONG_DESCRIPTION = [
+  'giz Estúdio: escreva (ou gere) um roteiro, escolha personagens e cenários, grave as vozes e renderize o vídeo animado.',
+  'giz Estúdio: write (or generate) a script, pick characters and scenarios, record the voices and render the animated video.',
+].join('\n');
+// A placeholder that names no one (the package format asks for an e-mail).
+const MAINTAINER = 'giz <noreply@users.noreply.github.com>';
+
+// The AppImage runtime of the machine making the package, from a pinned release (see scripts/appImageRuntime.ts).
+const APPIMAGE_ARCH = process.arch === 'arm64' ? 'arm64' : 'x64';
+const APPIMAGE_RUNTIME = fileURLToPath(new URL(`./out/appimage-runtime/runtime-${APPIMAGE_ARCH}`, import.meta.url));
 
 // The rpm needs rpmbuild (the release workflow installs it; a machine without it makes the other packages only).
 const hasRpmbuild = (() => {
@@ -47,14 +67,19 @@ const config: ForgeConfig = {
     prePackage: async () => {
       await stageCore();
     },
+    preMake: async () => {
+      await ensureAppImageRuntime(APPIMAGE_RUNTIME, APPIMAGE_RUNTIMES[APPIMAGE_ARCH]);
+    },
+    // ASCII file names for the installers (see scripts/artifactNames.ts).
+    postMake: (_config, results) => renameArtifacts(results),
   },
   makers: [
     new MakerSquirrel({ name: 'giz_estudio', setupIcon: 'assets/icon/icon.ico' }),
     new MakerZIP({}, ['darwin', 'linux', 'win32']),
     new MakerDMG({ icon: 'assets/icon/icon.icns', format: 'ULFO' }),
-    new MakerDeb({ options: { ...LINUX_ENTRY, maintainer: 'giz', section: 'video' } }),
-    ...(hasRpmbuild ? [new MakerRpm({ options: { ...LINUX_ENTRY, license: 'MIT' } })] : []),
-    new MakerAppImage({ options: LINUX_ENTRY }),
+    new MakerDeb({ options: { ...LINUX_ENTRY, desktopTemplate: DESKTOP_TEMPLATE, maintainer: MAINTAINER, section: 'video', description: DESCRIPTION, productDescription: LONG_DESCRIPTION } }),
+    ...(hasRpmbuild ? [new MakerRpm({ options: { ...LINUX_ENTRY, license: 'MIT', description: DESCRIPTION, productDescription: LONG_DESCRIPTION, ...RPM_DESKTOP } })] : []),
+    new MakerAppImage({ options: { ...LINUX_ENTRY, runtime: APPIMAGE_RUNTIME } }),
   ],
   plugins: [
     new VitePlugin({
@@ -104,6 +129,7 @@ const config: ForgeConfig = {
       // not signed (spec ruling), so whoever can change files there could change the binary as well.
       [FuseV1Options.EnableEmbeddedAsarIntegrityValidation]: true,
       [FuseV1Options.OnlyLoadAppFromAsar]: true,
+      // Backlog: GrantFileProtocolExtraPrivileges (the page loads from file://, so turning it off needs a custom protocol).
     }),
   ],
 };

@@ -21,8 +21,9 @@ test('a key goes to <folder>/<service>.key, mode 600, in a 700 folder the Studio
   assert.equal(await files.read('fish'), undefined);
   await files.write('fish', 'fk-123');
   assert.equal(await readFile(join(folder, 'fish.key'), 'utf8'), 'fk-123\n');
-  assert.equal((await stat(join(folder, 'fish.key'))).mode & 0o777, 0o600);
-  assert.equal((await stat(folder)).mode & 0o777, 0o700);
+  // POSIX modes only: Windows has no owner-only mode bits (its user folder is already private).
+  if (process.platform !== 'win32') assert.equal((await stat(join(folder, 'fish.key'))).mode & 0o777, 0o600);
+  if (process.platform !== 'win32') assert.equal((await stat(folder)).mode & 0o777, 0o700);
   assert.deepEqual(await readdir(folder), ['fish.key']);
   assert.deepEqual(warnings, []);
   assert.equal(await files.read('fish'), 'fk-123');
