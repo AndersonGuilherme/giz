@@ -492,3 +492,6 @@ a { color: inherit; }
   .cast-grid li { border-radius: 14px; }
   .era { left: 50%; top: auto; bottom: 4px; transform: translateX(-50%); font-size: 0.6rem; padding: 1px 6px; letter-spacing: 0.02em; }
 }
+
+.name-note { color: var(--chalk-dim); font-size: 0.98rem; margin-top: -8px; max-width: 52ch; }
+.name-note b { color: var(--yellow); font-weight: 800; }

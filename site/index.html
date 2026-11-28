@@ -5,13 +5,13 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self'; img-src 'self'; media-src 'self'; font-src 'self'; connect-src https://api.github.com; base-uri 'none'; form-action 'none'">
   <meta name="referrer" content="strict-origin-when-cross-origin">
-  <title>giz Estúdio — vídeos animados a partir de um roteiro</title>
-  <meta name="description" content="giz Estúdio: aplicativo grátis e de código aberto que transforma um roteiro em vídeo animado, com personagens que falam, cenários, vozes e legendas. Windows, macOS e Linux.">
+  <title>Gizzycera — vídeos animados a partir de um roteiro</title>
+  <meta name="description" content="Gizzycera: aplicativo grátis e de código aberto que transforma um roteiro em vídeo animado, com personagens que falam, cenários, vozes e legendas. Windows, macOS e Linux.">
   <meta name="theme-color" content="#1d2523">
   <meta property="og:type" content="website">
-  <meta property="og:title" content="giz Estúdio">
+  <meta property="og:title" content="Gizzycera">
   <meta property="og:description" content="Vídeos animados a partir de um roteiro. Grátis, de código aberto, para Windows, macOS e Linux.">
-  <meta property="og:image" content="https://andersonguilherme.github.io/giz/assets/img/og.jpg">
+  <meta property="og:image" content="https://andersonguilherme.github.io/gizzycera/assets/img/og.jpg">
   <meta name="twitter:card" content="summary_large_image">
   <link rel="icon" href="assets/icon.svg" type="image/svg+xml">
   <link rel="preload" href="assets/fonts/nunito-latin.woff2" as="font" type="font/woff2" crossorigin>
@@ -19,7 +19,7 @@
   <script src="main.js" defer></script>
 </head>
 <body>
-  <!-- Shared drawing defs: the chalk edge (a little noise nudges each stroke) and the giz mark. -->
+  <!-- Shared drawing defs: the chalk edge (a little noise nudges each stroke) and the Gizzycera mark. -->
   <svg class="defs" aria-hidden="true" focusable="false">
     <defs>
       <filter id="chalk" x="-10%" y="-10%" width="120%" height="120%">
@@ -49,14 +49,14 @@
 
   <header class="topbar">
     <div class="wrap topbar-inner">
-      <a class="brand" href="#top" aria-label="giz Estúdio">
+      <a class="brand" href="#top" aria-label="Gizzycera">
         <svg class="brand-mark" width="36" height="36" aria-hidden="true"><use href="#mark"/></svg>
-        <span class="brand-name">giz</span>
+        <span class="brand-name">Gizzycera</span>
       </a>
       <nav class="topnav" aria-label="Seções" data-i18n-attr="aria-label:nav.label">
         <a href="#flow" data-i18n="nav.flow">Como funciona</a>
         <a href="#cast" data-i18n="nav.cast">Personagens</a>
-        <a href="https://github.com/AndersonGuilherme/giz" rel="noopener">GitHub</a>
+        <a href="https://github.com/AndersonGuilherme/gizzycera" rel="noopener">GitHub</a>
         <a class="topnav-download" href="#download" data-i18n="nav.download">Baixar</a>
       </nav>
       <button class="lang" type="button" id="lang-toggle" lang="en" aria-label="Read in English">EN</button>
@@ -72,13 +72,14 @@
           <svg class="hero-mark" width="96" height="96" aria-hidden="true"><use href="#mark"/></svg>
           <p class="eyebrow" data-i18n="hero.eyebrow">Aplicativo grátis e de código aberto</p>
         </div>
-        <h1 id="hero-title">giz <span class="accent">Estúdio</span></h1>
+        <h1 id="hero-title">Gizzy<span class="accent">cera</span></h1>
+        <p class="name-note" data-i18n-html="hero.name">Soa como <b>“giz de cera”</b>. É de propósito: aqui o vídeo sai rabiscado com carinho.</p>
         <p class="tagline" data-i18n="hero.tagline">Vídeos animados a partir de um roteiro</p>
-        <p class="lead" data-i18n="hero.lead">Escreva uma história ou uma aula, escolha quem fala e onde, e o giz anima tudo no ritmo das vozes: boca, gestos, cenas e legendas.</p>
+        <p class="lead" data-i18n="hero.lead">Escreva uma história ou uma aula, escolha quem fala e onde, e o Gizzycera anima tudo no ritmo das vozes: boca, gestos, cenas e legendas.</p>
         <div class="hero-cta">
           <a class="btn btn-primary" id="hero-download" href="#download">
             <svg class="btn-icon" viewBox="0 0 24 24" width="22" height="22" aria-hidden="true"><path d="M12 3.5v11.5m0 0-4.5-4.5M12 15l4.5-4.5M4.5 19.5h15" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            <span id="hero-download-label" data-i18n="hero.download">Baixar o giz Estúdio</span>
+            <span id="hero-download-label" data-i18n="hero.download">Baixar o Gizzycera</span>
           </a>
           <div class="hero-cta-meta">
             <span id="hero-download-file" class="mono">Windows · macOS · Linux</span>
@@ -94,7 +95,7 @@
 
       <!-- 2. Example clip -->
       <section class="tile tile-video" aria-labelledby="video-title">
-        <h2 id="video-title" class="sr-only" data-i18n="video.title">Um vídeo feito no giz</h2>
+        <h2 id="video-title" class="sr-only" data-i18n="video.title">Um vídeo feito no Gizzycera</h2>
         <div class="phone">
           <video id="story-loop" muted loop playsinline preload="metadata" poster="assets/img/story-poster.webp"
                  width="540" height="960" aria-describedby="video-caption">
@@ -108,7 +109,7 @@
             <span class="sr-only" id="video-toggle-label">Pausar o vídeo</span>
           </button>
         </div>
-        <p class="video-caption" id="video-caption" data-i18n-html="video.caption">Feito no giz: <b>“24 horas sem internet”</b>, uma história em 9:16 com legenda palavra a palavra.</p>
+        <p class="video-caption" id="video-caption" data-i18n-html="video.caption">Feito no Gizzycera: <b>“24 horas sem internet”</b>, uma história em 9:16 com legenda palavra a palavra.</p>
       </section>
 
       <!-- 3. Script to video -->
@@ -203,7 +204,7 @@
           </li>
           <li>
             <span class="tag tag-mic" data-i18n="tag.mic">microfone</span>
-            <span><b data-i18n="voice.rec">Sua voz</b> <span data-i18n="voice.rec.text">Grave cada fala direto no Estúdio.</span></span>
+            <span><b data-i18n="voice.rec">Sua voz</b> <span data-i18n="voice.rec.text">Grave cada fala direto no app.</span></span>
           </li>
         </ul>
         <img class="shot" src="assets/img/app-voices.webp" width="760" height="258" loading="lazy" decoding="async" alt="Etapa Vozes: falas pendentes com os botões Gerar e Gravar minha voz, e Gerar todas as pendentes." data-i18n-attr="alt:voice.alt">
@@ -212,7 +213,7 @@
       <!-- 7. Optional AI -->
       <section class="tile tile-ai" aria-labelledby="ai-title">
         <h2 id="ai-title" data-i18n="ai.title">IA é opcional</h2>
-        <p class="sub" data-i18n="ai.sub">Traga a sua chave (Claude, OpenAI, Gemini ou fal) para rascunhar roteiros e gerar cenários. Antes de cada gasto, o Estúdio mostra a estimativa e pede confirmação.</p>
+        <p class="sub" data-i18n="ai.sub">Traga a sua chave (Claude, OpenAI, Gemini ou fal) para rascunhar roteiros e gerar cenários. Antes de cada gasto, o app mostra a estimativa e pede confirmação.</p>
         <img class="shot" src="assets/img/app-estimate.webp" width="640" height="330" loading="lazy" decoding="async" alt="Janela Gerar o roteiro com IA: estimativa de até US$ 0,30 na primeira chamada, com os botões Cancelar e Gerar roteiro." data-i18n-attr="alt:ai.alt">
         <p class="stamp" data-i18n="ai.free">Tudo grátis e local é possível.</p>
       </section>
@@ -243,17 +244,18 @@
           <h2 id="oss-title" data-i18n="oss.title">Código aberto, licença MIT</h2>
           <p class="sub" data-i18n="oss.sub">Leia, mude e compartilhe. O mesmo motor também roda pela linha de comando, para quem prefere o terminal.</p>
           <div class="oss-links">
-            <a class="btn btn-ghost" href="https://github.com/AndersonGuilherme/giz" rel="noopener">
+            <a class="btn btn-ghost" href="https://github.com/AndersonGuilherme/gizzycera" rel="noopener">
               <svg class="btn-icon" viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path d="M8.5 7 3.5 12l5 5M15.5 7l5 5-5 5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
               <span data-i18n="oss.repo">Ver o código no GitHub</span>
             </a>
-            <a class="link" href="https://github.com/AndersonGuilherme/giz#requisitos-linha-de-comando" rel="noopener" data-i18n="oss.cli">Guia da linha de comando</a>
+            <a class="link" href="https://github.com/AndersonGuilherme/gizzycera#requisitos-linha-de-comando" rel="noopener" data-i18n="oss.cli">Guia da linha de comando</a>
           </div>
         </div>
-        <pre class="terminal" aria-label="Comandos para instalar pela linha de comando" data-i18n-attr="aria-label:oss.term"><code><span class="prompt" aria-hidden="true">$ </span>git clone https://github.com/AndersonGuilherme/giz.git
-<span class="prompt" aria-hidden="true">$ </span>cd giz/motor
+        <pre class="terminal" aria-label="Comandos para instalar pela linha de comando" data-i18n-attr="aria-label:oss.term"><code><span class="prompt" aria-hidden="true">$ </span>git clone https://github.com/AndersonGuilherme/gizzycera.git
+<span class="prompt" aria-hidden="true">$ </span>cd gizzycera/motor
 <span class="prompt" aria-hidden="true">$ </span>ONNXRUNTIME_NODE_INSTALL=skip npm install
-<span class="prompt" aria-hidden="true">$ </span>npm run setup</code></pre>
+<span class="prompt" aria-hidden="true">$ </span>npm run setup
+<span class="prompt" aria-hidden="true">$ </span>npx gizzy --help</code></pre>
       </section>
     </div>
 
@@ -261,74 +263,74 @@
     <section class="downloads" id="download" aria-labelledby="download-title">
       <div class="wrap">
         <div class="downloads-head">
-          <h2 id="download-title" data-i18n="dl.title">Baixar o giz Estúdio</h2>
+          <h2 id="download-title" data-i18n="dl.title">Baixar o Gizzycera</h2>
           <p class="sub" data-i18n="dl.sub">Escolha o arquivo do seu sistema. Na primeira execução, um assistente baixa o modelo de voz (5,9 GB, uma vez só); depois tudo funciona sem internet.</p>
           <p class="release-status" id="release-status" role="status" aria-live="polite"></p>
         </div>
 
         <ul class="dl-grid">
-          <li class="dl-card" data-os="windows" data-file="giz-estudio-windows-x64-setup.exe">
+          <li class="dl-card" data-os="windows" data-file="gizzycera-windows-x64-setup.exe">
             <div class="dl-top">
               <span class="dl-ext mono">.exe</span>
               <span class="dl-recommended" data-i18n="dl.yours">Seu sistema</span>
             </div>
             <h3>Windows</h3>
             <p class="dl-req" data-i18n="dl.win.req">Windows 10 ou 11, 64 bits</p>
-            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-windows-x64-setup.exe">
+            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/gizzycera/releases/latest/download/gizzycera-windows-x64-setup.exe">
               <span data-i18n="dl.win.btn">Baixar o instalador</span> <span class="dl-size"></span>
             </a>
             <p class="dl-note" data-i18n-html="dl.win.note">Na tela “O Windows protegeu o computador”, clique em <b>Mais informações → Executar assim mesmo</b>.</p>
           </li>
-          <li class="dl-card" data-os="macos" data-file="giz-estudio-macos-arm64.dmg">
+          <li class="dl-card" data-os="macos" data-file="gizzycera-macos-arm64.dmg">
             <div class="dl-top">
               <span class="dl-ext mono">.dmg</span>
               <span class="dl-recommended" data-i18n="dl.yours">Seu sistema</span>
             </div>
             <h3>macOS</h3>
             <p class="dl-req" data-i18n="dl.mac.req">Apple Silicon (M1 ou mais novo)</p>
-            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-macos-arm64.dmg">
+            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/gizzycera/releases/latest/download/gizzycera-macos-arm64.dmg">
               <span data-i18n="dl.mac.btn">Baixar o .dmg</span> <span class="dl-size"></span>
             </a>
             <p class="dl-note" data-i18n-html="dl.mac.note">Arraste para Aplicativos. No macOS 15 (Sequoia), se ele não abrir: <b>Ajustes do Sistema → Privacidade e Segurança → Abrir Mesmo Assim</b>.</p>
           </li>
-          <li class="dl-card" data-os="linux" data-file="giz-estudio-linux-amd64.deb">
+          <li class="dl-card" data-os="linux" data-file="gizzycera-linux-amd64.deb">
             <div class="dl-top">
               <span class="dl-ext mono">.deb</span>
               <span class="dl-recommended" data-i18n="dl.yours">Seu sistema</span>
             </div>
             <h3>Linux <span class="h3-sub">Ubuntu · Debian</span></h3>
             <p class="dl-req" data-i18n="dl.deb.req">64 bits (amd64)</p>
-            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-linux-amd64.deb">
+            <a class="btn btn-primary btn-block dl-link" href="https://github.com/AndersonGuilherme/gizzycera/releases/latest/download/gizzycera-linux-amd64.deb">
               <span data-i18n="dl.deb.btn">Baixar o .deb</span> <span class="dl-size"></span>
             </a>
-            <p class="dl-note" data-i18n-html="dl.deb.note">Instale com <code>sudo apt install ./giz-estudio-linux-amd64.deb</code>. No Ubuntu 24.04 ou mais novo, <b>use o .deb</b>.</p>
+            <p class="dl-note" data-i18n-html="dl.deb.note">Instale com <code>sudo apt install ./gizzycera-linux-amd64.deb</code>. No Ubuntu 24.04 ou mais novo, <b>use o .deb</b>.</p>
           </li>
-          <li class="dl-card" data-os="linux-other" data-file="giz-estudio-linux-x64.AppImage">
+          <li class="dl-card" data-os="linux-other" data-file="gizzycera-linux-x64.AppImage">
             <div class="dl-top"><span class="dl-ext mono">AppImage</span></div>
             <h3>Linux <span class="h3-sub" data-i18n="dl.app.distros">outras distribuições</span></h3>
             <p class="dl-req" data-i18n="dl.app.req">64 bits (x64), com FUSE</p>
-            <a class="btn btn-secondary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-linux-x64.AppImage">
+            <a class="btn btn-secondary btn-block dl-link" href="https://github.com/AndersonGuilherme/gizzycera/releases/latest/download/gizzycera-linux-x64.AppImage">
               <span data-i18n="dl.app.btn">Baixar o AppImage</span> <span class="dl-size"></span>
             </a>
             <p class="dl-note" data-i18n-html="dl.app.note">Dê <code>chmod +x</code> e abra. Precisa de <code>libfuse2</code>. No Ubuntu 24.04 ou mais novo, use o .deb.</p>
           </li>
-          <li class="dl-card" data-os="linux-zip" data-file="giz-estudio-linux-x64.zip">
+          <li class="dl-card" data-os="linux-zip" data-file="gizzycera-linux-x64.zip">
             <div class="dl-top"><span class="dl-ext mono">.zip</span></div>
             <h3>Linux <span class="h3-sub" data-i18n="dl.zip.sub">sem instalar</span></h3>
             <p class="dl-req" data-i18n="dl.zip.req">64 bits (x64), portátil</p>
-            <a class="btn btn-secondary btn-block dl-link" href="https://github.com/AndersonGuilherme/giz/releases/latest/download/giz-estudio-linux-x64.zip">
+            <a class="btn btn-secondary btn-block dl-link" href="https://github.com/AndersonGuilherme/gizzycera/releases/latest/download/gizzycera-linux-x64.zip">
               <span data-i18n="dl.zip.btn">Baixar o .zip</span> <span class="dl-size"></span>
             </a>
-            <p class="dl-note" data-i18n-html="dl.zip.note">Descompacte numa pasta sua e abra o programa <code>giz-estudio</code>.</p>
+            <p class="dl-note" data-i18n-html="dl.zip.note">Descompacte numa pasta sua e abra o programa <code>gizzycera</code>.</p>
           </li>
         </ul>
 
         <div class="dl-foot">
           <p data-i18n-html="dl.unsigned">Os instaladores <b>ainda não são assinados</b>, então o sistema avisa na primeira vez. É esperado.</p>
           <p>
-            <a class="link" href="https://github.com/AndersonGuilherme/giz#instalar" rel="noopener" data-i18n="dl.readme">Passo a passo no README, seção Instalar</a>
+            <a class="link" href="https://github.com/AndersonGuilherme/gizzycera#instalar" rel="noopener" data-i18n="dl.readme">Passo a passo no README, seção Instalar</a>
             <span aria-hidden="true">·</span>
-            <a class="link" href="https://github.com/AndersonGuilherme/giz/releases" rel="noopener" data-i18n="dl.all">Todas as versões</a>
+            <a class="link" href="https://github.com/AndersonGuilherme/gizzycera/releases" rel="noopener" data-i18n="dl.all">Todas as versões</a>
           </p>
         </div>
       </div>
@@ -337,12 +339,12 @@
 
   <footer class="footer">
     <div class="wrap footer-inner">
-      <a class="brand" href="#top" aria-label="giz Estúdio">
+      <a class="brand" href="#top" aria-label="Gizzycera">
         <svg class="brand-mark" width="28" height="28" aria-hidden="true"><use href="#mark"/></svg>
-        <span class="brand-name">giz</span>
+        <span class="brand-name">Gizzycera</span>
       </a>
       <p data-i18n-html="footer.text">Código aberto sob a licença MIT. Os vídeos são renderizados com o <a class="link" href="https://www.remotion.dev/license" rel="noopener">Remotion</a>, grátis para pessoas e empresas de até 3 pessoas.</p>
-      <p><a class="link" href="https://github.com/AndersonGuilherme/giz" rel="noopener">github.com/AndersonGuilherme/giz</a></p>
+      <p><a class="link" href="https://github.com/AndersonGuilherme/gizzycera" rel="noopener">github.com/AndersonGuilherme/gizzycera</a></p>
     </div>
   </footer>
 </body>

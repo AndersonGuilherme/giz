@@ -126,13 +126,13 @@ jobs:
               exit 1
             fi
           }
-          copy required '*setup.exe' giz-estudio-windows-x64-setup.exe
-          copy required '*-arm64.dmg' giz-estudio-macos-arm64.dmg
-          copy required '*_amd64.deb' giz-estudio-linux-amd64.deb
-          copy required '*-x64.AppImage' giz-estudio-linux-x64.AppImage
-          copy required 'giz-estudio-linux-x64-*.zip' giz-estudio-linux-x64.zip
-          copy optional 'giz-estudio-darwin-arm64-*.zip' giz-estudio-macos-arm64.zip
-          copy optional 'giz-estudio-win32-x64-*.zip' giz-estudio-windows-x64.zip
+          copy required '*setup.exe' gizzycera-windows-x64-setup.exe
+          copy required '*-arm64.dmg' gizzycera-macos-arm64.dmg
+          copy required '*_amd64.deb' gizzycera-linux-amd64.deb
+          copy required '*-x64.AppImage' gizzycera-linux-x64.AppImage
+          copy required '*-linux-x64-*.zip' gizzycera-linux-x64.zip
+          copy optional '*-darwin-arm64-*.zip' gizzycera-macos-arm64.zip
+          copy optional '*-win32-x64-*.zip' gizzycera-windows-x64.zip
 
       - uses: softprops/action-gh-release@8a0cd651e5b2365bd640854a3fa5dfc70e4875f3 # v3.0.4
         with:

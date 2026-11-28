@@ -1,14 +1,14 @@
-// giz Estúdio landing page: language toggle (pt-BR in the HTML, English here), the visitor's installer in the hero,
+// Gizzycera landing page: language toggle (pt-BR in the HTML, English here), the visitor's installer in the hero,
 // the latest release's version and file sizes from the GitHub API, and the example clip's play/pause.
 // No dependencies, no trackers; the page works without this file (pt-BR, every download link in place).
 'use strict';
 
-const REPO = 'AndersonGuilherme/giz';
+const REPO = 'AndersonGuilherme/gizzycera';
 const RELEASES_URL = `https://github.com/${REPO}/releases`;
 const API_LATEST = `https://api.github.com/repos/${REPO}/releases/latest`;
-const CACHE_KEY = 'giz-release-v1';
+const CACHE_KEY = 'gizzycera-release-v1';
 const CACHE_MS = 10 * 60 * 1000;
-const LANG_KEY = 'giz-lang';
+const LANG_KEY = 'gizzycera-lang';
 
 // The English text. The Portuguese text is the HTML itself, read once at start.
 const EN = {
@@ -18,16 +18,17 @@ const EN = {
   'nav.cast': 'Characters',
   'nav.download': 'Download',
   'hero.eyebrow': 'A free, open-source app',
+  'hero.name': 'Say it like <b>“giz de cera”</b>, Portuguese for crayon. On purpose: your videos come out doodled with love.',
   'hero.tagline': 'Animated videos from a script',
-  'hero.lead': 'Write a story or a lesson, pick who speaks and where, and giz animates it all to the rhythm of the voices: mouths, gestures, scenes and captions.',
-  'hero.download': 'Download giz Estúdio',
+  'hero.lead': 'Write a story or a lesson, pick who speaks and where, and Gizzycera animates it all to the rhythm of the voices: mouths, gestures, scenes and captions.',
+  'hero.download': 'Download Gizzycera',
   'hero.other': 'Other platforms',
   'hero.highlights': 'Highlights',
   'hero.chip.free': 'Free',
   'hero.chip.offline': 'Works offline',
   'hero.chip.os': 'Windows · macOS · Linux',
-  'video.title': 'A video made with giz',
-  'video.caption': 'Made with giz: <b>“24 hours without internet”</b>, a 9:16 story with word-by-word captions.',
+  'video.title': 'A video made with Gizzycera',
+  'video.caption': 'Made with Gizzycera: <b>“24 hours without internet”</b>, a 9:16 story with word-by-word captions.',
   'flow.title': 'From script to video',
   'flow.sub': 'Six steps along the top bar. Every change is checked and saved on its own, and the animation follows the audio: nothing is timed by hand.',
   'flow.idea': 'Idea',
@@ -83,10 +84,10 @@ const EN = {
   'voice.paid': 'Paid',
   'voice.paid.text': 'ElevenLabs or Fish Audio, with your own key.',
   'voice.rec': 'Your voice',
-  'voice.rec.text': 'Record each line right in the Studio.',
+  'voice.rec.text': 'Record each line right in the app.',
   'voice.alt': 'Voices step: pending lines with the Generate and Record my voice buttons, and Generate all pending.',
   'ai.title': 'AI is optional',
-  'ai.sub': 'Bring your own key (Claude, OpenAI, Gemini or fal) to draft scripts and generate scenarios. Before anything is spent, the Studio shows the estimate and asks you to confirm.',
+  'ai.sub': 'Bring your own key (Claude, OpenAI, Gemini or fal) to draft scripts and generate scenarios. Before anything is spent, the app shows the estimate and asks you to confirm.',
   'ai.alt': 'Generate the script with AI window: an estimate of up to US$ 0.30 for the first call, with the Cancel and Generate script buttons.',
   'ai.free': 'All free and local is possible.',
   'fmt.title': 'Vertical or horizontal',
@@ -102,7 +103,7 @@ const EN = {
   'oss.repo': 'See the code on GitHub',
   'oss.cli': 'Command-line guide',
   'oss.term': 'Commands to install from the command line',
-  'dl.title': 'Download giz Estúdio',
+  'dl.title': 'Download Gizzycera',
   'dl.sub': 'Pick the file for your system. On first run, a wizard downloads the voice model (5.9 GB, only once); after that everything works offline.',
   'dl.yours': 'Your system',
   'dl.win.req': 'Windows 10 or 11, 64-bit',
@@ -113,7 +114,7 @@ const EN = {
   'dl.mac.note': 'Drag it to Applications. On macOS 15 (Sequoia), if it won’t open: <b>System Settings → Privacy &amp; Security → Open Anyway</b>.',
   'dl.deb.req': '64-bit (amd64)',
   'dl.deb.btn': 'Download the .deb',
-  'dl.deb.note': 'Install with <code>sudo apt install ./giz-estudio-linux-amd64.deb</code>. On Ubuntu 24.04 or newer, <b>use the .deb</b>.',
+  'dl.deb.note': 'Install with <code>sudo apt install ./gizzycera-linux-amd64.deb</code>. On Ubuntu 24.04 or newer, <b>use the .deb</b>.',
   'dl.app.distros': 'other distributions',
   'dl.app.req': '64-bit (x64), with FUSE',
   'dl.app.btn': 'Download the AppImage',
@@ -121,7 +122,7 @@ const EN = {
   'dl.zip.sub': 'no install',
   'dl.zip.req': '64-bit (x64), portable',
   'dl.zip.btn': 'Download the .zip',
-  'dl.zip.note': 'Unzip it into a folder of yours and open the <code>giz-estudio</code> program.',
+  'dl.zip.note': 'Unzip it into a folder of yours and open the <code>gizzycera</code> program.',
   'dl.unsigned': 'The installers <b>are not signed yet</b>, so your system warns you the first time. That is expected.',
   'dl.readme': 'Step by step in the README, Install section',
   'dl.all': 'All versions',
@@ -131,7 +132,7 @@ const EN = {
 // Text built at run time, in both languages.
 const DYN = {
   'pt-BR': {
-    title: 'giz Estúdio — vídeos animados a partir de um roteiro',
+    title: 'Gizzycera — vídeos animados a partir de um roteiro',
     downloadFor: (os) => `Baixar para ${os}`,
     mobile: 'Disponível para Windows, macOS e Linux',
     version: (tag, date) => `Versão ${tag}${date ? `, de ${date}` : ''}`,
@@ -148,7 +149,7 @@ const DYN = {
     toggleLang: 'en',
   },
   en: {
-    title: 'giz Estúdio — animated videos from a script',
+    title: 'Gizzycera — animated videos from a script',
     downloadFor: (os) => `Download for ${os}`,
     mobile: 'Available for Windows, macOS and Linux',
     version: (tag, date) => `Version ${tag}${date ? `, released ${date}` : ''}`,
@@ -167,9 +168,9 @@ const DYN = {
 };
 
 const OS_INFO = {
-  windows: { name: 'Windows', file: 'giz-estudio-windows-x64-setup.exe', card: 'windows' },
-  macos: { name: 'macOS', file: 'giz-estudio-macos-arm64.dmg', card: 'macos' },
-  linux: { name: 'Linux', file: 'giz-estudio-linux-amd64.deb', card: 'linux' },
+  windows: { name: 'Windows', file: 'gizzycera-windows-x64-setup.exe', card: 'windows' },
+  macos: { name: 'macOS', file: 'gizzycera-macos-arm64.dmg', card: 'macos' },
+  linux: { name: 'Linux', file: 'gizzycera-linux-amd64.deb', card: 'linux' },
 };
 
 const storage = {
