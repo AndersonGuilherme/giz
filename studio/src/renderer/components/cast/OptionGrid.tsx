@@ -3,6 +3,7 @@ import { RigStill } from 'giz-core/src/presentation/studio/index.ts';
 import type { ParameterValue } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
 import { labelOf } from '../../labels.ts';
+import { DrawingBoundary } from './DrawingBoundary.tsx';
 import type { FieldProps, OptionLook } from './ParameterField.tsx';
 
 type Drawing = Readonly<{ id: string; rig: string; parameters: Readonly<Record<string, ParameterValue>>; head: boolean }>;
@@ -13,7 +14,7 @@ type Drawing = Readonly<{ id: string; rig: string; parameters: Readonly<Record<s
  */
 const OptionDrawing = memo(function OptionDrawing({ id, rig, parameters, head }: Drawing) {
   const still = head ? <RigStill id={id} rig={rig} parameters={parameters} height={74} framing="head" /> : <RigStill id={id} rig={rig} parameters={parameters} height={118} />;
-  return <span className={`option-drawing${head ? ' head' : ''}`} aria-hidden="true">{still}</span>;
+  return <span className={`option-drawing${head ? ' head' : ''}`} aria-hidden="true"><DrawingBoundary look={JSON.stringify(parameters)} fallback="⚠">{still}</DrawingBoundary></span>;
 });
 
 type GridProps = FieldProps & Readonly<{ preview: (option: string) => OptionLook }>;

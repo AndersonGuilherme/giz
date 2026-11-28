@@ -3,7 +3,7 @@ import type { CastCatalog, CastDocument, CastMember, CharacterFile, ProjectVoice
 import type { GizApi } from '../../../shared/GizApi.ts';
 import { useTranslate } from '../../i18n.ts';
 import { useCharacterDraft } from '../../state/useCharacterDraft.ts';
-import { parametersOf } from '../../cast/characterDraft.ts';
+import { drawableParameters } from '../../cast/characterDraft.ts';
 import { FailurePanel } from '../FailurePanel.tsx';
 import { BodyFields } from './BodyFields.tsx';
 import { IdentityFields } from './IdentityFields.tsx';
@@ -30,7 +30,8 @@ function Preview({ file, catalog, gestures, sentence, sample }: Readonly<{ file:
   const translate = useTranslate();
   const rig = rigOf(catalog, file);
   if (!rig) return <section className="live-preview card voice-only" data-testid="live-preview"><p>{translate('cast.voiceOnly')}</p></section>;
-  return <LivePreview id={file.id} rig={rig.id} parameters={parametersOf(file, rig)} expression={file.defaultExpression} gestures={gestures} sentence={sentence} speech={sample.sample} said={sample.said} />;
+  const { parameters, wrong } = drawableParameters(file, rig);
+  return <LivePreview id={file.id} rig={rig.id} parameters={parameters} wrong={wrong} expression={file.defaultExpression} gestures={gestures} sentence={sentence} speech={sample.sample} said={sample.said} />;
 }
 
 /** One character: who it is, its body (rig and parameters), its voice, and the live preview beside them. */
@@ -39,7 +40,7 @@ export function CharacterEditor({ api, folder, member, catalog, gestures, voice,
   const { draft, setDraft, state, problems, failure, sample, listen } = useCharacterDraft({ api, folder, onSaved }, member.file);
   const [sentence, setSentence] = useState(translate('cast.defaultSentence', { name: member.file.name }));
   const paid = usePaidSample(voice, () => listen(draft.voice, sentence));
-  const head = <SaveStatus state={state} problems={problems} failure={failure} />;
+  const head = <SaveStatus state={state} problems={problems} failure={failure} file={draft} rig={rigOf(catalog, draft)} />;
   return (
     <div className="character-editor" data-testid={`character-${member.file.id}`}>
       <div className="character-fields">

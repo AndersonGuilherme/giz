@@ -2,6 +2,7 @@ import type { ParameterInfo, ParameterValue } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
 import { labelOf } from '../../labels.ts';
 import { Picker } from '../common/Picker.tsx';
+import { numberStep } from '../../cast/characterDraft.ts';
 import { OptionGrid } from './OptionGrid.tsx';
 
 /** One rig parameter: its name, definition and value, how to change it and how to draw a preview of an option. */
@@ -36,7 +37,7 @@ function ColorField({ name, info, value, onChange }: FieldProps) {
 function NumberField({ name, info, value, onChange }: FieldProps) {
   const translate = useTranslate();
   const [min, max] = [info.min ?? 0, info.max ?? 1];
-  const step = max - min > 5 ? 1 : 0.05;
+  const step = numberStep(info);
   return (
     <label className="field number-field">
       <span className="field-label">{labelOf(translate, 'param', name)} <b>{Number(value).toFixed(step < 1 ? 2 : 0)}</b></span>

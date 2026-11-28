@@ -1,6 +1,6 @@
 import type { CastCatalog, CharacterFile, ParameterInfo, RigInfo } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
-import { isPreviewed, parametersOf, PREVIEWED, withParameter, withRig } from '../../cast/characterDraft.ts';
+import { drawableParameters, isPreviewed, parametersOf, PREVIEWED, withParameter, withRig } from '../../cast/characterDraft.ts';
 import { languageOf } from '../../media/money.ts';
 import { Segmented } from '../common/Segmented.tsx';
 import { ParameterField } from './ParameterField.tsx';
@@ -14,7 +14,8 @@ const orderOf = ([name, info]: readonly [string, ParameterInfo]) => (isPreviewed
 function Parameters({ file, rig, onChange }: Readonly<{ file: CharacterFile; rig: RigInfo; onChange: (file: CharacterFile) => void }>) {
   const values = parametersOf(file, rig);
   const entries = Object.entries(rig.parameters).sort((one, other) => orderOf(one) - orderOf(other));
-  const preview = (name: string) => (option: string) => ({ rig: rig.id, parameters: { ...values, [name]: option } });
+  const drawable = drawableParameters(file, rig).parameters;
+  const preview = (name: string) => (option: string) => ({ rig: rig.id, parameters: { ...drawable, [name]: option } });
   return (
     <div className="parameter-grid">
       {entries.map(([name, info]) => (

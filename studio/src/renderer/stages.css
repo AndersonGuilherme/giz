@@ -65,6 +65,8 @@
 .live-preview { display: flex; flex-direction: column; gap: 10px; padding: 14px; }
 .live-preview h4 { margin: 6px 0 0; font-size: 12px; text-transform: uppercase; letter-spacing: 0.8px; color: var(--chalk-dim); }
 .player-frame { border-radius: 12px; overflow: hidden; background: radial-gradient(ellipse at 50% 30%, #3e504c, #2a3634 70%); border: 1px solid var(--line); }
+/* Inside the Player, drawn at the composition's size (520 wide) and scaled down with it. */
+.preview-problem { margin: 0; padding: 40px; max-width: 460px; text-align: center; color: var(--chalk); font-size: 24px; line-height: 1.45; }
 .small-chips .chip-button { font-size: 12px; padding: 3px 9px; }
 .voice-only { min-height: 200px; display: grid; place-items: center; text-align: center; color: var(--chalk-dim); }
 

@@ -1,7 +1,8 @@
 import { RigStill } from 'giz-core/src/presentation/studio/index.ts';
 import type { CastCatalog, CastDocument, CastMember } from '../../../shared/cast.ts';
 import { useTranslate } from '../../i18n.ts';
-import { parametersOf } from '../../cast/characterDraft.ts';
+import { drawableParameters } from '../../cast/characterDraft.ts';
+import { DrawingBoundary } from './DrawingBoundary.tsx';
 
 type Props = Readonly<{ document: CastDocument; catalog: CastCatalog; selected: string; select: (id: string) => void }>;
 
@@ -12,7 +13,9 @@ type Props = Readonly<{ document: CastDocument; catalog: CastCatalog; selected: 
 export function Face({ member, catalog, size = 56 }: Readonly<{ member: Pick<CastMember, 'file'>; catalog: CastCatalog; size?: number }>) {
   const rig = catalog.rigs.find(({ id }) => id === member.file.rig);
   if (!rig) return <span className="cast-face voice" aria-hidden="true">♪</span>;
-  return <span className="cast-face" aria-hidden="true"><RigStill id={member.file.id} rig={rig.id} parameters={parametersOf(member.file, rig)} height={size} framing="head" expression={member.file.defaultExpression as never} /></span>;
+  const { parameters } = drawableParameters(member.file, rig);
+  const look = JSON.stringify([parameters, member.file.defaultExpression]);
+  return <span className="cast-face" aria-hidden="true"><DrawingBoundary look={look} fallback="⚠"><RigStill id={member.file.id} rig={rig.id} parameters={parameters} height={size} framing="head" expression={member.file.defaultExpression as never} /></DrawingBoundary></span>;
 }
 
 function Member({ member, catalog, chosen, select }: Readonly<{ member: CastMember; catalog: CastCatalog; chosen: boolean; select: () => void }>) {

@@ -14,6 +14,7 @@ import { fileURLToPath } from 'node:url';
 import assert from 'node:assert/strict';
 import { devtools, poll, type Page } from './devtools.ts';
 import { castStage, scenariosStage, storyProject, voicesStage } from './mediaSteps.ts';
+import { castRepairs } from './bugs1Steps.ts';
 import { videoStage } from './videoSteps.ts';
 import { firstTour, foldedLines, tourAgain, tourInEnglish } from './s6Steps.ts';
 import { brokenScript, duplicateAndTrash, editLines, failAndCancel, generateWithAi, inEnglish, projectsList, undoMoveAndScene, writeByHand } from './scriptSteps.ts';
@@ -53,7 +54,7 @@ const S3_VIEW = { width: 1280, height: 860 };
 
 async function shoot(page: Page, name: string): Promise<void> {
   const file = join(SHOTS, `${name}.png`);
-  await page.screenshot(file, /^s[3456]b?-/.test(name) ? S3_VIEW : undefined);
+  await page.screenshot(file, /^(s[3456]b?|bugs1)-/.test(name) ? S3_VIEW : undefined);
   shots.push(file);
 }
 
@@ -221,6 +222,7 @@ async function mediaStages(page: Page): Promise<void> {
   const context = { page, shoot, home: HOME };
   const folder = await storyProject(context);
   await castStage(context, folder);
+  await castRepairs(context, folder);
   await scenariosStage(context, folder);
   await voicesStage(context, folder);
   // The sample and every voice job (all pending, one line again, a take) ran in one long-lived voice worker.
