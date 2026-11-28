@@ -96,7 +96,7 @@ test('the prebuilt bundle is <package>/remotion-bundle when the package ships on
   assert.equal(prebuiltBundleIn('/repo/core', () => false), undefined);
 });
 
-test('a read-only prebuilt bundle (an app installed by the system) is copied into a writable folder and removed after use', { skip: process.getuid?.() === 0 }, async () => {
+test('a read-only prebuilt bundle (an app installed by the system) is copied into a writable folder and removed after use', { skip: process.platform === 'win32' ? 'POSIX folder modes' : process.getuid?.() === 0 }, async () => {
   const { root, sources, scratch, cleanup } = await setup();
   const prebuilt = join(root, 'remotion-bundle');
   await mkdir(join(prebuilt, 'public', 'fonts'), { recursive: true });
@@ -106,5 +106,15 @@ test('a read-only prebuilt bundle (an app installed by the system) is copied int
   assert.equal(voice, 'voz');
   assert.deepEqual(await readdir(scratch), []);
   for (const path of [prebuilt, join(prebuilt, 'public'), join(prebuilt, 'public', 'fonts')]) chmodSync(path, 0o755);
+  await cleanup();
+});
+
+test("each render copies only the bundle's own source map (the renderer reads bundle.js.map), not the chunks' maps", async () => {
+  const { root, sources, cleanup } = await setup();
+  const prebuilt = join(root, 'remotion-bundle');
+  await mkdir(join(prebuilt, 'public'), { recursive: true });
+  for (const name of ['index.html', 'bundle.js', 'bundle.js.map', '12.bundle.js', '12.bundle.js.map']) await writeFile(join(prebuilt, name), name);
+  const copied = await withBundle({ ...sources, prebuilt }, [], (serveUrl) => readdir(serveUrl));
+  assert.deepEqual(copied.sort(), ['12.bundle.js', 'bundle.js', 'bundle.js.map', 'index.html', 'public']);
   await cleanup();
 });

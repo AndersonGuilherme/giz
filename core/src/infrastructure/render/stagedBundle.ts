@@ -1,7 +1,7 @@
 import { existsSync } from 'node:fs';
 import { chmod, cp, mkdir, mkdtemp, readdir, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { dirname, isAbsolute, join, relative, resolve } from 'node:path';
+import { basename, dirname, isAbsolute, join, relative, resolve } from 'node:path';
 
 /**
  * Where the Remotion entry point and the package public folder (`sounds/`) are; given by the composition point.
@@ -72,12 +72,15 @@ async function writable(folder: string): Promise<void> {
   await Promise.all(entries.filter((entry) => entry.isDirectory()).map((entry) => writable(join(folder, entry.name))));
 }
 
+// The chunks' source maps (~20 MB) only help a person debugging; the renderer reads bundle.js.map when it serves.
+const neededByRender = (path: string): boolean => !path.endsWith('.map') || basename(path) === 'bundle.js.map';
+
 // A copy of the prebuilt bundle with the staged files in its public folder (where `staticFile` asks for them).
 async function withPrebuilt<T>(sources: RemotionSources & { prebuilt: string }, files: readonly StagedFile[], use: (serveUrl: string) => Promise<T>): Promise<T> {
   files.forEach(refuseEscape);
   const folder = await mkdtemp(join(sources.scratch ?? tmpdir(), 'giz-bundle-'));
   try {
-    await cp(sources.prebuilt, folder, { recursive: true });
+    await cp(sources.prebuilt, folder, { recursive: true, filter: neededByRender });
     await writable(folder);
     await copyFiles(join(folder, 'public'), files);
     return await use(folder);

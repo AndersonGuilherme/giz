@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { mkdtempSync, readFileSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readFileSync, statSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -15,9 +15,16 @@ test('the file is giz.config.json at the repository root, the same one the motor
 });
 
 test('GIZ_CONFIG names another file (the installed Studio keeps it in ~/.config/giz); blank or absent: the repository one', () => {
-  assert.equal(configPath({ GIZ_CONFIG: '/home/x/.config/giz/giz.config.json' }), '/home/x/.config/giz/giz.config.json');
-  assert.equal(configPath({ GIZ_CONFIG: '  ' }), CONFIG_PATH);
-  assert.equal(configPath({}), CONFIG_PATH);
+  const none = { exists: () => false, home: '/home/x' };
+  assert.equal(configPath({ GIZ_CONFIG: '/home/x/.config/giz/giz.config.json' }, none), '/home/x/.config/giz/giz.config.json');
+  assert.equal(configPath({ GIZ_CONFIG: '  ' }, none), CONFIG_PATH);
+  assert.equal(configPath({}, none), CONFIG_PATH);
+});
+
+test("without a repository file, the CLI reads the installed Studio's (~/.config/giz/giz.config.json): one configuration for both", () => {
+  const studioFile = join('/home/x', '.config', 'giz', 'giz.config.json');
+  assert.equal(configPath({}, { exists: (path) => path === studioFile, home: '/home/x' }), studioFile);
+  assert.equal(configPath({}, { exists: () => true, home: '/home/x' }), CONFIG_PATH, 'the repository file wins when there is one');
 });
 
 test('without the file the defaults apply (CPU, ~/.cache/giz, 0.6b) and a warning says how to configure', () => {
@@ -74,4 +81,5 @@ test('saving creates the folder of the file (~/.config/giz may not exist yet on 
   const path = join(folder(), 'new', 'giz', 'giz.config.json');
   new ConfigFile(path, quiet).save(defaultConfig('/home/test'));
   assert.equal(JSON.parse(readFileSync(path, 'utf8')).device, 'cpu');
+  if (process.platform !== 'win32') assert.equal(statSync(join(path, '..')).mode & 0o777, 0o700, 'a new folder only its owner reads (it sits beside the key files)');
 });
