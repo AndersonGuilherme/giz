@@ -1,7 +1,8 @@
 // Smoke test: boots the real app (electron-forge start) in an isolated Studio home (GIZ_STUDIO_HOME) with the rehearsal
 // machine tools (GIZ_STUDIO_REHEARSAL=1: a pretend GPU and pretend downloads, no network), walks the whole first-run
 // wizard through Chrome DevTools Protocol taking a screenshot of every step, then checks the bridge on core's coupon
-// lesson (and that a folder never granted is refused) and opens Settings.
+// lesson (and that a folder never granted is refused), launches the app a second time (it opens that project in the
+// first window) and opens Settings.
 // Run: npm run smoke   (SMOKE_HEADLESS=1 for no display: Chromium's headless Ozone platform).
 // SMOKE_APP=<program>: the same walk on the packaged app (npm run package, out/<name>-<platform>-<arch>/giz-estudio)
 // instead of the dev server: `npm run smoke:packaged` packages and runs it.
@@ -231,6 +232,23 @@ async function mediaStages(page: Page): Promise<void> {
   await page.until('[data-testid="check-report"]');
 }
 
+// A second launch of the app (its own process, the same isolated home) hands its --project folder to this one and
+// quits at once; this window opens that project (the single-instance lock).
+async function launchAgain(page: Page, folder: string, title: RegExp): Promise<void> {
+  const [again, base] = PACKAGED ? [PACKAGED, []] : ['npx', ['electron', '.']];
+  const second = spawn(again, [...base, `--project=${folder}`, ...headless], { cwd: STUDIO, stdio: 'ignore', env });
+  const code = await Promise.race([new Promise((done) => second.once('exit', done)), new Promise((done) => setTimeout(() => done('still running'), 60_000))]);
+  assert.equal(code, 0, 'the second launch quits: one Studio at a time');
+  await page.untilText('.editor-title h2', title);
+}
+
+async function secondLaunch(page: Page): Promise<void> {
+  await launchAgain(page, resolve(STUDIO, '../core/examples/internet-story/en'), /What if the internet stopped/);
+  await shoot(page, 's7-01-segunda-abertura');
+  await launchAgain(page, FOLDER, /O cupom que deixava mais caro/);
+  await page.until('[data-testid="check-report"]');
+}
+
 let lastPage: Page | undefined;
 
 async function smoke(): Promise<void> {
@@ -247,6 +265,7 @@ async function smoke(): Promise<void> {
   await foldedLines(context);
   await mediaStages(page);
   await videoStage({ page, shoot, home: HOME }, FOLDER);
+  await secondLaunch(page);
   await settings(page);
   await tourInEnglish(context);
   await inEnglish({ page, shoot, home: HOME });
