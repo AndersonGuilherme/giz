@@ -1,35 +1,53 @@
 # giz ✏️
 
-**Transforme um roteiro em videoaula animada.** O giz gera aulas de 5 a 10 minutos apresentadas por dois
-personagens 2D, **Lia** (mentora) e **Téo** (dev curioso), com voz sintética, legendas, código na tela e
-animação sincronizada com a fala.
+**Transforme uma ideia em vídeo animado: uma história ou uma aula.** O **giz Estúdio** é um aplicativo de
+computador que leva você da ideia ao vídeo pronto, com personagens 2D que falam, gesticulam e reagem, legendas,
+cenários e efeitos sonoros.
 
-Você escreve o roteiro (um arquivo com as falas e as cenas). O giz grava as vozes, mede quanto dura cada fala
-e anima as cenas no tempo certo. A animação nunca é cronometrada à mão: ela segue o áudio.
+- **História ou aula**, em **9:16** (vertical, para Reels, Shorts e TikTok) ou **16:9** (horizontal, para o YouTube);
+  o mesmo projeto renderiza nas duas proporções.
+- **Qualquer elenco:** escolha personagens prontos ou monte os seus (corpo, cores, expressão e voz de cada um).
+  Lia e Téo, a dupla das aulas de exemplo, são só um elenco entre outros.
+- **Cenários do seu jeito:** fundos vetoriais prontos, uma imagem sua (enviada e recortada no enquadramento) ou uma
+  imagem gerada por IA.
+- **Vozes locais ou pagas:** a voz local roda no seu computador, de graça (CPU ou GPU NVIDIA); se preferir, use um
+  serviço pago (ElevenLabs, Fish Audio) ou grave a sua própria voz no microfone.
+- **A animação segue o áudio:** o giz mede cada fala e anima a boca, os gestos e as cenas no tempo certo. Nada é
+  cronometrado à mão.
 
-> Exemplo completo no repositório: o curso **SOLID** (24 aulas) em [`courses/solid`](courses/solid).
+O roteiro você escreve no Estúdio, à mão ou a partir de um rascunho de uma IA de textos. Para quem prefere o
+terminal, o mesmo motor também roda pela linha de comando (`npx giz`).
+
+> Exemplo completo no repositório: o curso **SOLID** (24 aulas) em [`courses/solid`](courses/solid), e os projetos de
+> exemplo de [`core/examples`](core/examples).
 
 ## Preciso pagar alguma IA?
 
-**Não.** Tudo roda no seu computador, sem GPU, sem conta e sem chave de API. Veja o que cada parte usa:
+**Não: tudo grátis e local é possível.** Sem conta, sem chave de API e sem internet depois de instalar. As IAs pagas
+são opcionais: cada uma só é usada se você guardar a chave dela em **Configurações › Contas de IA** e escolher usá-la.
 
-| Parte | O que usa | É IA? | Custo |
+| Parte | Grátis e local | Opcional, pago (com a sua chave) | Quanto custa o pago (estimativa) |
 |---|---|---|---|
-| **Escrever o roteiro** | Você. Opcionalmente, uma IA de texto (Claude, ChatGPT, Gemini…) | opcional | o da IA que você escolher, se escolher |
-| **Voz** | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 0.6B ou 1.7B, modelo aberto da Alibaba, na CPU ou na GPU NVIDIA | sim | grátis (Apache-2.0, uso comercial livre) |
-| **Animação e vídeo** | [Remotion](https://remotion.dev): desenha cada quadro com código React | **não** | grátis para pessoa física e empresa de até 3 pessoas; acima disso, licença paga do Remotion |
-| **Boca dos personagens** | espeak-ng: converte o texto em fonemas e cada fonema vira uma forma de boca | não | grátis |
-| **Conferir a pronúncia** (opcional) | Whisper small, modelo aberto da OpenAI, roda local | sim | grátis (MIT) |
+| **Roteiro** | você escreve no editor do Estúdio | rascunho por IA de textos: Claude (Anthropic), GPT (OpenAI) ou Gemini (Google) | de menos de um centavo a algumas dezenas de centavos de dólar por roteiro, conforme o modelo |
+| **Cenários** | fundos vetoriais prontos, ou a sua imagem (enviar e recortar) | imagem gerada: gpt-image (OpenAI), Gemini ou FLUX (fal) | de ~US$ 0,03 a ~US$ 0,17 por imagem, conforme o modelo e o tamanho |
+| **Vozes** | [Qwen3-TTS](https://github.com/QwenLM/Qwen3-TTS) 0.6B ou 1.7B (modelo aberto da Alibaba, Apache-2.0) na CPU ou na GPU NVIDIA, ou a sua gravação | ElevenLabs ou Fish Audio | ElevenLabs: US$ 0,04 a 0,08 por mil caracteres; Fish Audio: US$ 0,015 a 0,05 por mil bytes de texto |
+| **Animação e vídeo** | [Remotion](https://remotion.dev): desenha cada quadro com código React (não é IA) | — | grátis para pessoa física e empresa de até 3 pessoas; acima disso, licença paga do Remotion |
+| **Boca dos personagens** | espeak-ng: o texto vira fonemas, e cada fonema vira uma forma de boca | — | grátis |
+| **Alinhar as falas e conferir a pronúncia** (opcional) | Whisper small (modelo aberto da OpenAI, MIT), local | — | grátis |
 
-- **A animação não é gerada por IA.** Os personagens, as poses, as expressões e as cenas (código, terminal,
-  gráficos, cartões) são componentes programados em [`motor/src`](motor/src). O roteiro diz *o que* acontece; o motor
-  desenha sempre do mesmo jeito. Por isso o visual é consistente e não "alucina".
-- **Voz e vídeo são etapas separadas.** O Qwen3-TTS gera os arquivos de áudio de cada fala; depois o Remotion
-  monta o vídeo, desenhando os personagens e as cenas no ritmo desses áudios. O Remotion não gera voz.
-- **Os modelos de IA são baixados sozinhos** do Hugging Face no `npm run setup` (5,9 GB ou 13,4 GB para a voz, conforme o modelo escolhido; ~250 MB
-  para o Whisper, se usar). Depois disso, tudo funciona offline.
-- **Você não precisa do Claude** nem de nenhuma IA paga. O roteiro é um arquivo TypeScript que você pode
-  escrever à mão a partir do modelo. Uma IA de texto só acelera essa etapa (veja a dica no passo 4).
+- **Você vê o custo antes e confirma.** Antes de cada chamada paga (gerar um roteiro, um cenário, as vozes ou uma
+  amostra de voz paga), o Estúdio mostra a estimativa e pede confirmação. Os preços das tabelas foram conferidos em
+  27/11/2026 nas páginas de cada serviço e podem mudar; a cobrança é sempre a do serviço, na sua conta.
+- **A animação não é gerada por IA.** Os personagens, as poses, as expressões e as cenas (código, terminal, gráficos,
+  cartões, cenários) são componentes programados no motor ([`core/src/presentation/remotion`](core/src/presentation/remotion)).
+  O roteiro diz *o que* acontece; o motor desenha sempre do mesmo jeito. Por isso o visual é consistente e não
+  "alucina".
+- **Voz e vídeo são etapas separadas.** A voz (local, paga ou gravada) vira um arquivo de áudio por fala; depois o
+  Remotion monta o vídeo no ritmo desses áudios. O Remotion não gera voz.
+- **Os modelos de IA locais são baixados uma vez**, no assistente da primeira execução ou em **Configurações**
+  (5,9 GB ou 13,4 GB para a voz, conforme o modelo; ~250 MB para o Whisper). O Estúdio nunca baixa um modelo
+  sozinho no meio do trabalho: se faltar o modelo de voz, ele avisa e leva você a Configurações. Depois disso, tudo
+  funciona sem internet.
 
 ## Instalar
 
@@ -111,7 +129,37 @@ escolher.
 Desinstalar não apaga seus projetos nem os modelos. Para liberar o espaço, apague também `~/.cache/giz`,
 `~/.config/giz` e a pasta de dados do app (tabela acima).
 
-## Requisitos
+## Usando o Estúdio
+
+Depois do assistente da primeira execução, o Estúdio abre na lista de projetos. Cada projeto passa por etapas, na
+barra do alto: **Roteiro → Elenco → Cenários → Vozes → Vídeo**. Cada mudança é verificada e salva sozinha.
+
+1. **Novo projeto.** Escolha o formato (**história** ou **aula**), a proporção (**9:16** ou **16:9**), o idioma, a
+   duração, o tema, o público e o tom, e escolha personagens e cenários prontos (ou deixe a escolha para a IA). Depois:
+   - **Gerar com IA:** a IA de textos escolhida em Configurações escreve um rascunho do roteiro; você vê o custo
+     antes de confirmar.
+   - **Escrever eu mesmo:** o projeto nasce com o elenco escolhido, um narrador e uma primeira fala para completar.
+2. **Roteiro.** Cada fala tem quem fala, o texto da legenda, a pose, a expressão e a cena. As falas ficam
+   **recolhidas** num resumo de uma linha e abrem com um clique (**Expandir todas** / **Recolher todas**); os
+   capítulos organizam o vídeo. A verificação aponta na hora o que não cabe na tela ou falta. Na primeira vez, um
+   **tutorial** guiado mostra o editor (dá para vê-lo de novo em Configurações).
+3. **Elenco.** Adicione personagens prontos ou novos e ajuste corpo, cores, expressão e a voz de cada um, com a
+   prévia animada ao lado. **Ouvir amostra** diz uma frase com a voz do projeto (com uma voz paga, o Estúdio
+   pergunta antes, porque cada amostra nova é cobrada).
+4. **Cenários.** Um cartão por cenário: use um **fundo vetorial**, **envie uma imagem** sua e **recorte o
+   enquadramento**, ou **gere com IA** (com a estimativa antes de confirmar).
+5. **Vozes.** Cada fala com a sua voz: a **local** (Qwen3-TTS, na GPU ou na CPU, grátis), uma **paga** (ElevenLabs
+   ou Fish Audio; **Gerar todas as pendentes** mostra o custo e pede confirmação) ou **gravar minha voz** no
+   microfone. Ouça, gere de novo só uma fala ou volte à voz do projeto. Só as falas que mudaram são refeitas.
+6. **Vídeo.** A **prévia** do vídeo inteiro, montada com as vozes e os cenários de agora; a **verificação** na
+   proporção escolhida; o **render** em **9:16** ou **16:9** (cada proporção tem o seu arquivo); e a **legenda SRT**
+   para copiar ou exportar. O vídeo fica na pasta `output/` do projeto.
+
+---
+
+**Daqui em diante, tudo é só para a linha de comando.** Quem usa o Estúdio não precisa de nada destas seções.
+
+## Requisitos (linha de comando)
 
 - **Node.js 22.18 ou mais novo** (roda TypeScript direto, sem build)
 - **Disco:** ≈2 GB de dependências + 5,9 GB (modelo 0.6b) ou 13,4 GB (modelo 1.7b); +1,8 GB com GPU
@@ -122,7 +170,7 @@ Desinstalar não apaga seus projetos nem os modelos. Para liberar o espaço, apa
 Tempo de máquina para cada 1 s de fala: modelo 0.6b ≈ 4 s na CPU (6 núcleos) e ≈ 2 s na GPU (RTX 5060 Ti); modelo 1.7b ≈ 3 s na GPU. Uma aula de 6 min leva de 12 a 25 min de voz,
 só na primeira vez; falas que não mudaram não são regravadas). O vídeo leva ~2 min.
 
-## Passo a passo: criando seu curso
+## Passo a passo: criando seu curso (linha de comando)
 
 ### 1. Instale e configure
 
@@ -286,7 +334,7 @@ As capas ficam em `courses/<curso>/capas/` (ou na pasta `capas:` do `curso.yaml`
 Atenção: a cota padrão da API permite umas 4 aulas por dia, e projetos de API não verificados pelo Google têm
 os vídeos travados como privados até passarem pela auditoria da API.
 
-## Personalizando
+## Personalizando (linha de comando)
 
 | Quero… | Onde |
 |---|---|
@@ -302,8 +350,9 @@ Detalhes técnicos do motor: [`motor/README.md`](motor/README.md).
 
 ```
 giz/
-├── core/           motor novo (roteiro em JSON → vídeo); Lia e Téo em core/casts/example/ (guia editorial e ficha)
-├── motor/          motor antigo das aulas (Remotion + voz Qwen3-TTS local)
+├── studio/         o giz Estúdio (o aplicativo de computador, em Electron)
+├── core/           o motor (roteiro em JSON → vídeo) e a CLI `giz`; o elenco de exemplo (Lia e Téo) em core/casts/example/
+├── motor/          o motor antigo das aulas (Remotion + voz Qwen3-TTS local), usado pelo passo a passo acima
 ├── docs/guides/    formato da aula, catálogo de cenas, guia de escrita, lições aprendidas
 ├── templates/      modelos usados por novo-curso e nova-aula (course/ e lesson/)
 └── courses/solid/  curso de exemplo (24 aulas em lessons/)
@@ -314,9 +363,10 @@ giz/
 ## Limitações conhecidas
 
 - As vozes prontas do Qwen3-TTS são nativas de outros idiomas (chinês, inglês, japonês, coreano). Elas falam
-  português, mas podem ter um leve sotaque. Use o `pronuncia.json` e o Whisper (`npm run produce`) para achar e
-  corrigir palavras problemáticas.
-- Gerar voz em CPU é lento (veja "Requisitos"). Fica rápido nas rodadas seguintes, porque só as falas alteradas são regravadas.
+  português, mas podem ter um leve sotaque. Na linha de comando, use o `pronuncia.json` e o Whisper
+  (`npm run produce`) para achar e corrigir palavras problemáticas.
+- Gerar voz local na CPU é lento (veja "Requisitos"); com uma GPU NVIDIA fica bem mais rápido. Fica rápido nas
+  rodadas seguintes, porque só as falas alteradas são regravadas.
 - Personagens 2D não demonstram movimentos físicos com fidelidade (para isso, grave vídeo real).
 
 ## Licença
