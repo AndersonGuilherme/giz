@@ -10,9 +10,11 @@ import { join } from 'node:path';
 export const QWEN_RATE = 24000;
 export const SAMPLES_PER_FRAME = 1920;
 
+// `revision`: the commit each model is downloaded from (its HEAD on 2026-11-27), so a later push to the repository
+// never changes what is installed; every file is checked against that commit's tree (see modelDownload.ts).
 export const QWEN_MODELS = {
-  '0.6b': { repo: 'elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX', gigabytes: 5.9, instruct: false },
-  '1.7b': { repo: 'elbruno/Qwen3-TTS-12Hz-1.7B-CustomVoice-ONNX', gigabytes: 13.4, instruct: true },
+  '0.6b': { repo: 'elbruno/Qwen3-TTS-12Hz-0.6B-CustomVoice-ONNX', revision: 'bbf4181ac201ef617b35158113e21ab7f42e9731', gigabytes: 5.9, instruct: false },
+  '1.7b': { repo: 'elbruno/Qwen3-TTS-12Hz-1.7B-CustomVoice-ONNX', revision: '2b23680b0c792d31771b6be0a4f92d842b82b278', gigabytes: 13.4, instruct: true },
 } as const;
 export type QwenModel = keyof typeof QWEN_MODELS;
 
@@ -26,6 +28,14 @@ export const isQwenVoice = (id: string): id is QwenVoiceId => (QWEN_VOICES as re
 /** The Hugging Face repository of the model; QWEN_TTS_REPO points to another export (tests of a new one). */
 export const repositoryOf = (model: QwenModel, env: Readonly<Record<string, string | undefined>> = process.env): string =>
   env.QWEN_TTS_REPO ?? QWEN_MODELS[model].repo;
+
+type Environment = Readonly<Record<string, string | undefined>>;
+
+/** The pinned commit of a known repository; another one (QWEN_TTS_REPO) follows QWEN_TTS_REVISION, or main. */
+export function revisionOf(repository: string, env: Environment = process.env): string {
+  const known = Object.values(QWEN_MODELS).find(({ repo }) => repo === repository);
+  return known?.revision ?? (env.QWEN_TTS_REVISION || 'main');
+}
 
 /** <modelsDir>/<owner>__<name>: the folder of a downloaded model (the motor's layout). */
 export const modelFolder = (repository: string, modelsDir: string): string => join(modelsDir, repository.replace('/', '__'));

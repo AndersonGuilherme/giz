@@ -6,6 +6,13 @@ import type { DownloadProgress } from '../download/resumableDownload.ts';
 // time; this is the same network exported with them, used for the alignment and for `giz qa`. It downloads once
 // (~250 MB, q8) into the transformers cache.
 export const WHISPER_MODEL = 'onnx-community/whisper-small_timestamped';
+/** The commit Whisper is downloaded from (the repository's HEAD on 2026-11-27): a later push never changes it. */
+export const WHISPER_REVISION = '65caa70f294b46e1c33ff820aae6b16d048ab818';
+/** The sha256 of its weights at that commit (Hugging Face's LFS ids), checked before a download counts as done. */
+export const WHISPER_HASHES: Readonly<Record<string, string>> = {
+  'onnx/encoder_model_quantized.onnx': '9f5635b596e6084045c7426ca6f6f99db8ce606ea895397c3b4a3c0aa3f9b070',
+  'onnx/decoder_model_merged_quantized.onnx': 'c831996a6d5a535cf17447b0d7ecc36da6b72696e6fb906852ba6136b9199abb',
+};
 const WHISPER_RATE = 16000;
 /** Whisper language names, by project language code. */
 export const WHISPER_LANGUAGES: Readonly<Record<string, string>> = { 'pt-BR': 'portuguese', en: 'english' };
@@ -43,14 +50,19 @@ export type RecognizerOptions = Readonly<{ onProgress?: (progress: DownloadProgr
  */
 export const whisperCacheOf = (env: Readonly<Record<string, string | undefined>>): string | undefined => env.GIZ_WHISPER_CACHE?.trim() || undefined;
 
-// Late import: commands that do not listen never load transformers (and its onnxruntime session).
-export async function loadRecognizer({ onProgress, cacheDir = whisperCacheOf(process.env) }: RecognizerOptions = {}): Promise<AutomaticSpeechRecognitionPipeline> {
-  const transformers = await import('@huggingface/transformers');
-  const create = transformers.pipeline as CreateRecognizer;
+/** transformers' options for Whisper: q8 on the CPU, the pinned commit, progress as download progress, and the cache. */
+export function recognizerOptions({ onProgress, cacheDir }: RecognizerOptions): PretrainedModelOptions {
   const progress_callback = (event: TransformersEvent) => {
     const progress = whisperProgressOf(event);
     if (progress) onProgress?.(progress);
   };
   const cache = cacheDir ? { cache_dir: cacheDir } : {};
-  return create('automatic-speech-recognition', WHISPER_MODEL, { dtype: 'q8', device: 'cpu', progress_callback, ...cache });
+  return { dtype: 'q8', device: 'cpu', revision: WHISPER_REVISION, progress_callback, ...cache };
+}
+
+// Late import: commands that do not listen never load transformers (and its onnxruntime session).
+export async function loadRecognizer({ onProgress, cacheDir = whisperCacheOf(process.env) }: RecognizerOptions = {}): Promise<AutomaticSpeechRecognitionPipeline> {
+  const transformers = await import('@huggingface/transformers');
+  const create = transformers.pipeline as CreateRecognizer;
+  return create('automatic-speech-recognition', WHISPER_MODEL, recognizerOptions({ onProgress, cacheDir }));
 }
