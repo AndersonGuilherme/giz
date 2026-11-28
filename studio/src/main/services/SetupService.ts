@@ -1,4 +1,5 @@
 import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from '../../shared/setup.ts';
+import type { VoiceModel } from '../../shared/settings.ts';
 import type { SharedConfigStore } from '../ports/SettingsStores.ts';
 import type { ByteProgress, SetupTools } from '../ports/SetupTools.ts';
 import { translate } from '../text.ts';
@@ -42,6 +43,13 @@ export class SetupService {
   async models(): Promise<ModelsStatus> {
     const { tools, shared } = this.#dependencies;
     return tools.models((await shared.read()).modelsDir);
+  }
+
+  /** Whether the local voice of that size (none named: the one giz.config.json names) is downloaded. */
+  async localVoiceReady(model?: VoiceModel): Promise<boolean> {
+    const { tools, shared } = this.#dependencies;
+    const settings = await shared.read();
+    return (await tools.models(settings.modelsDir)).voice[model ?? settings.model].ready;
   }
 
   async run(task: SetupTask): Promise<true> {

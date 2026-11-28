@@ -9,7 +9,7 @@ import { MemoryDisk } from '../../../doubles/scriptFakes.ts';
 const FOLDER = '/projects/cats';
 const ANA = { id: 'ana', name: 'Ana', rig: 'giz', parameters: { skin: 'light' }, voice: { id: 'vivian' }, defaultExpression: 'happy' };
 
-function build(voicesBusy = () => false) {
+function build(voicesBusy = () => false, ready = true) {
   const disk = new MemoryDisk();
   disk.put(FOLDER, 'project.json', { version: 2, title: 'Gatos', language: 'pt-BR', aspect: '9:16', cast: ['ana', 'narrator'], voice: { provider: 'qwen', model: '0.6b' } });
   disk.put(FOLDER, 'script.json', { chapters: ['Começo'], lines: [{ id: '1', chapter: 1, speaker: 'ana', text: 'Oi.' }, { id: '2', chapter: 1, speaker: 'ana', text: 'Tchau.' }] });
@@ -21,7 +21,7 @@ function build(voicesBusy = () => false) {
   const files = new MemoryMediaFiles();
   const keys: string[] = [];
   const saves = new FolderQueue();
-  const service = new CastService({ core, disk, files, grants, saves, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples', voicesBusy });
+  const service = new CastService({ core, disk, files, grants, saves, keyOf: async (name) => (keys.push(name), 'secret'), samples: '/user/samples', voicesBusy, localVoiceReady: async () => ready });
   return { disk, core, files, service, keys, saves };
 }
 
@@ -121,4 +121,10 @@ test('read tells whether the voices are being made now (a sample asked then wait
   assert.equal((await service.read('/projects/cats')).voicesGenerating, false);
   busy = true;
   assert.equal((await service.read('/projects/cats')).voicesGenerating, true);
+});
+
+test('a local voice sample without its model is refused with a way to Settings (never downloaded here)', async () => {
+  const { service, core } = build(() => false, false);
+  await assert.rejects(service.sample(FOLDER, { id: 'vivian' }, 'Olá!'), { code: 'needs-setup', message: /Baixe o modelo de voz em Configurações/ });
+  assert.equal(core.samples.length, 0);
 });

@@ -45,8 +45,6 @@ export function handlersOf(services: Services): Handlers {
     ...mediaHandlers(services),
     ...projectHandlers(projects, listing),
     ...scriptHandlers(ideas, script),
-    'projects.open': ({ folder }) => projects.open(folder),
-    'projects.check': ({ folder }) => projects.check(folder),
     ...videoHandlers(video, services.videoStage),
     ...keyHandlers(keys),
     ...settingsHandlers(settings),
@@ -57,10 +55,9 @@ export function handlersOf(services: Services): Handlers {
   }, new FolderJobs(), { voices: () => services.voices.ended() });
 }
 
-function keyHandlers(keys: KeyService): Pick<Handlers, 'keys.set' | 'keys.has' | 'keys.remove' | 'keys.status' | 'keys.test'> {
+function keyHandlers(keys: KeyService): Pick<Handlers, 'keys.set' | 'keys.remove' | 'keys.status' | 'keys.test'> {
   return {
     'keys.set': ({ provider, key }) => keys.set(provider, key),
-    'keys.has': ({ provider }) => keys.has(provider),
     'keys.remove': ({ provider }) => keys.remove(provider),
     'keys.status': () => keys.status(),
     'keys.test': ({ provider }) => keys.test(provider),

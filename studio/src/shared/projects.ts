@@ -63,3 +63,5 @@ export type GeneratedScript = Readonly<{ folder: string; repairs: number; calls:
 
 /** The event the main process pushes before each call of a script generation. */
 export const SCRIPT_PROGRESS_EVENT = 'script.progress';
+/** A later launch of the app named a project (`--project=`): the window asks `projects.launched` again and opens it. */
+export const PROJECT_LAUNCHED_EVENT = 'projects.launched';

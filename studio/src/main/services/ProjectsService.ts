@@ -99,10 +99,6 @@ export class ProjectsService {
     return true;
   }
 
-  stages(folder: string) {
-    return this.#dependencies.core.stages(this.#dependencies.grants.require(folder));
-  }
-
   async #root(): Promise<string> {
     const root = await this.#dependencies.projectsFolder();
     if (root === null) throw new StudioError('invalid-request', translate('errors.noProjectsFolder'));

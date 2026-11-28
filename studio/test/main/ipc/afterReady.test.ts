@@ -12,7 +12,7 @@ test('no channel answers before the start is done (the projects folder is grante
   let finishStart = () => undefined as void;
   const ready = new Promise<void>((done) => (finishStart = done)).then(() => void order.push('restored'));
   const handlers = afterReady(handlersThat(async () => order.push('call')), ready);
-  const call = handlers['projects.check']({ folder: '/p' });
+  const call = handlers['script.check']({ folder: '/p' });
   await new Promise((done) => setTimeout(done, 10));
   assert.deepEqual(order, []);
   finishStart();

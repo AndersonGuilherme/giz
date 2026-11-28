@@ -1,7 +1,7 @@
 import { contextBridge, ipcRenderer, type IpcRendererEvent } from 'electron';
 import { RENDER_PROGRESS_EVENT, type ChannelName, type RequestOf, type ResponseOf, type Result } from '../shared/contract.ts';
 import type { GizApi } from '../shared/GizApi.ts';
-import { SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
+import { PROJECT_LAUNCHED_EVENT, SCRIPT_PROGRESS_EVENT } from '../shared/projects.ts';
 import { SETUP_PROGRESS_EVENT } from '../shared/setup.ts';
 import { mediaBridge } from './mediaBridge.ts';
 
@@ -22,14 +22,12 @@ const giz: GizApi = {
   projects: {
     pick: () => call('projects.pick', {}),
     launched: () => call('projects.launched', {}),
-    open: (folder) => call('projects.open', { folder }),
-    check: (folder) => call('projects.check', { folder }),
+    onLaunched: listen<void>(PROJECT_LAUNCHED_EVENT),
     list: () => call('projects.list', {}),
     create: (idea) => call('projects.create', { idea }),
     duplicate: (folder) => call('projects.duplicate', { folder }),
     trash: (folder) => call('projects.trash', { folder }),
     forget: (folder) => call('projects.forget', { folder }),
-    stages: (folder) => call('projects.stages', { folder }),
   },
   ideas: {
     presets: () => call('ideas.presets', {}),
@@ -58,7 +56,6 @@ const giz: GizApi = {
   },
   keys: {
     set: (provider, key) => call('keys.set', { provider, key }),
-    has: (provider) => call('keys.has', { provider }),
     remove: (provider) => call('keys.remove', { provider }),
     status: () => call('keys.status', {}),
     test: (provider) => call('keys.test', { provider }),

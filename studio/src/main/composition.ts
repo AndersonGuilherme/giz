@@ -11,7 +11,6 @@ import { CoreSetupTools } from './adapters/CoreSetupTools.ts';
 import { DialogFolderPicker } from './adapters/DialogFolderPicker.ts';
 import { DiskProjects } from './adapters/DiskProjects.ts';
 import { GizConfigStore } from './adapters/GizConfigStore.ts';
-import { GizCore } from './adapters/GizCore.ts';
 import { GizScriptCore } from './adapters/GizScriptCore.ts';
 import { JsonAppConfig } from './adapters/JsonAppConfig.ts';
 import { JsonKeyVault } from './adapters/JsonKeyVault.ts';
@@ -36,6 +35,7 @@ import { defaultProjectsFolderIn, keyFolderIn, studioPathsOf, systemLanguageOf, 
 import { setInterfaceLanguage } from './text.ts';
 import type { WindowSlot } from './WindowSlot.ts';
 import type { SharedConfigStore } from './ports/SettingsStores.ts';
+import type { VoiceModel } from '../shared/settings.ts';
 import { mediaServicesOf, voiceWorkOf } from './composition/media.ts';
 import { restartingAfterConfig, restartingAfterSetup } from './adapters/media/voiceRestarts.ts';
 import { videoServicesOf } from './composition/video.ts';
@@ -78,7 +78,7 @@ function keysOf(): KeyService {
 }
 
 // Rehearsal mode moves a deleted project into the isolated home, never into the system trash.
-const trashOf = () => (STUDIO_PATHS.rehearsal ? new RehearsalTrash(join(STUDIO_PATHS.home, '.lixeira')) : new ShellTrash());
+const trashOf = () => (STUDIO_PATHS.rehearsal ? new RehearsalTrash(join(STUDIO_PATHS.home, '.trash')) : new ShellTrash());
 
 type ScriptParts = Readonly<{ grants: FolderGrants; settings: SettingsService; keys: KeyService; slot: WindowSlot<BrowserWindow>; saves: FolderQueue }>;
 
@@ -105,22 +105,26 @@ function machineOf(restartVoices: () => void) {
   return { shared, tools };
 }
 
+// The rehearsal voice needs no model; the real one is never downloaded by a voice job (only from Settings).
+const localVoiceOf = (setup: SetupService) => (STUDIO_PATHS.rehearsal ? async () => true : (model?: VoiceModel) => setup.localVoiceReady(model));
+
 /** The services the IPC channels call, wired to core and to Electron; they reach the window through the slot. */
 export function createServices(slot: WindowSlot<BrowserWindow>): Services {
-  const [core, grants, voices] = [new GizCore(), new FolderGrants(), voiceWorkOf(STUDIO_PATHS.rehearsal)];
+  const [grants, voices] = [new FolderGrants(), voiceWorkOf(STUDIO_PATHS.rehearsal)];
   const { shared, tools } = machineOf(() => voices.restart());
-  const picker = new DialogFolderPicker(() => slot.current());
-  const keys = keysOf();
+  const [picker, keys] = [new DialogFolderPicker(() => slot.current()), keysOf()];
   const settings = settingsOf(grants, picker, shared);
   const saves = new FolderQueue(); // each folder's writes in turn: the script editor's and the media stages'
-  const media = mediaServicesOf({ grants, settings, keys, slot, saves, voices, rehearsal: STUDIO_PATHS.rehearsal });
+  const setup = new SetupService({ tools, shared, progress: sendTo(slot, SETUP_PROGRESS_EVENT) });
+  const localVoiceReady = localVoiceOf(setup);
+  const media = mediaServicesOf({ grants, settings, keys, slot, saves, voices, localVoiceReady, rehearsal: STUDIO_PATHS.rehearsal });
   return {
-    projects: new ProjectService({ core, picker, grants, launchFolder: launchFolderIn(grants) }),
+    projects: new ProjectService({ picker, grants, launchFolder: launchFolderIn(grants) }),
     ...scriptServicesOf({ grants, settings, keys, slot, saves }),
     ...videoServicesOf({ grants, served: media.served, slot, rehearsal: STUDIO_PATHS.rehearsal, home: STUDIO_PATHS.home }),
     keys,
     settings,
-    setup: new SetupService({ tools, shared, progress: sendTo(slot, SETUP_PROGRESS_EVENT) }),
+    setup,
     ...media,
     grants,
   };

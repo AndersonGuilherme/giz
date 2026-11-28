@@ -8,6 +8,7 @@ import { FailurePanel } from '../FailurePanel.tsx';
 import { BodyFields } from './BodyFields.tsx';
 import { IdentityFields } from './IdentityFields.tsx';
 import { LivePreview, type Gestures } from './LivePreview.tsx';
+import { usePaidSample } from './PaidSample.tsx';
 import { SaveStatus } from './SaveStatus.tsx';
 import { VoiceFields } from './VoiceFields.tsx';
 
@@ -37,17 +38,16 @@ export function CharacterEditor({ api, folder, member, catalog, gestures, voice,
   const translate = useTranslate();
   const { draft, setDraft, state, problems, failure, sample, listen } = useCharacterDraft({ api, folder, onSaved }, member.file);
   const [sentence, setSentence] = useState(translate('cast.defaultSentence', { name: member.file.name }));
+  const paid = usePaidSample(voice, () => listen(draft.voice, sentence));
+  const head = <SaveStatus state={state} problems={problems} failure={failure} />;
   return (
     <div className="character-editor" data-testid={`character-${member.file.id}`}>
       <div className="character-fields">
-        <div className="character-head">
-          <SaveStatus state={state} problems={problems} failure={failure} />
-          <button type="button" className="chalk-button quiet small" data-testid="member-remove" onClick={onRemove}>{translate('cast.remove')}</button>
-        </div>
+        <div className="character-head">{head}<button type="button" className="chalk-button quiet small" data-testid="member-remove" onClick={onRemove}>{translate('cast.remove')}</button></div>
         <IdentityFields file={draft} gestures={gestures} onChange={setDraft} />
         <BodyFields file={draft} catalog={catalog} onChange={setDraft} />
-        <VoiceFields voice={draft.voice} project={voice} catalog={catalog} sentence={sentence} sampling={sample.busy} voicesBusy={voicesBusy} onVoice={(next) => setDraft({ ...draft, voice: next })} onSentence={setSentence} onSample={() => listen(draft.voice, sentence)} />
-        {sample.failure && <FailurePanel failure={sample.failure} />}
+        <VoiceFields voice={draft.voice} project={voice} catalog={catalog} sentence={sentence} sampling={sample.busy} voicesBusy={voicesBusy} onVoice={(next) => setDraft({ ...draft, voice: next })} onSentence={setSentence} onSample={paid.onSample} />
+        {sample.failure && <FailurePanel failure={sample.failure} />}{paid.dialog}
       </div>
       <aside className="character-side"><Preview file={draft} catalog={catalog} gestures={gestures} sentence={sentence} sample={sample} /></aside>
     </div>

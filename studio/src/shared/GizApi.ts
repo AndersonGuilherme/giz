@@ -1,8 +1,8 @@
 import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
-import type { Aspect, CheckReport, ProjectSummary, RenderedFiles, RenderJobStatus, RenderProgress, Result } from './contract.ts';
+import type { Aspect, RenderedFiles, RenderJobStatus, RenderProgress, Result } from './contract.ts';
 import type { FolderSource, Settings, SettingsPatch, TourId } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask, TaskProgress } from './setup.ts';
-import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, ScriptProgress, StageBrief } from './projects.ts';
+import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, ScriptProgress } from './projects.ts';
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
 import type { MediaApi } from './mediaApi.ts';
@@ -15,14 +15,13 @@ export type GizApi = MediaApi & Readonly<{
   projects: Readonly<{
     pick(): Reply<string | null>;
     launched(): Reply<string | null>;
-    open(folder: string): Reply<ProjectSummary>;
-    check(folder: string): Reply<CheckReport>;
+    /** Calls `listener` when a later launch of the app names a project (ask `launched` again); returns the stop function. */
+    onLaunched(listener: () => void): () => void;
     list(): Reply<readonly ProjectListing[]>;
     create(idea: IdeaFields): Reply<string>;
     duplicate(folder: string): Reply<string>;
     trash(folder: string): Reply<true>;
     forget(folder: string): Reply<true>;
-    stages(folder: string): Reply<readonly StageBrief[]>;
   }>;
   ideas: Readonly<{
     presets(): Reply<Presets>;
@@ -57,7 +56,6 @@ export type GizApi = MediaApi & Readonly<{
   /** The key goes in and never comes back out: there is no call that reads it. */
   keys: Readonly<{
     set(provider: KeyProvider, key: string): Reply<KeyStorage>;
-    has(provider: KeyProvider): Reply<boolean>;
     remove(provider: KeyProvider): Reply<boolean>;
     status(): Reply<KeysStatus>;
     test(provider: KeyProvider): Reply<KeyCheck>;

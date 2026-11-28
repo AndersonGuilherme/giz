@@ -1,5 +1,8 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
+import { mkdtemp, rm, symlink } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { join } from 'node:path';
 import { FolderJobs } from '../../../src/main/services/FolderJobs.ts';
 import { folderJobsGuard } from '../../../src/main/ipc/folderJobsGuard.ts';
 import type { Handlers } from '../../../src/main/ipc/registry.ts';
@@ -86,4 +89,17 @@ test("a voice call refused at once (another folder's job is busy, an unknown lin
   assert.equal(ask, 0, 'the global voice job is never waited for');
   assert.deepEqual(await guarded['video.render']!({ folder: '/b', aspect: '16:9' }), { video: 'v', captions: 'c' });
   otherJob.finish();
+});
+
+test('a folder reached through a link is the same folder: a render there clashes with voices through the link', async () => {
+  const real = await mkdtemp(join(tmpdir(), 'giz-jobs-'));
+  const alias = `${real}-alias`;
+  await symlink(real, alias);
+  const jobs = new FolderJobs();
+  const release = jobs.claim(real, 'render');
+  assert.throws(() => jobs.claim(alias, 'voices'), { code: 'busy' });
+  release();
+  jobs.claim(alias, 'voices')();
+  await rm(alias);
+  await rm(real, { recursive: true });
 });

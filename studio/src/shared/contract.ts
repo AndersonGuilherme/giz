@@ -3,7 +3,7 @@
 import type { KeyCheck, KeyProvider, KeysStatus, KeyStorage } from './accounts.ts';
 import type { FolderSource, Settings, SettingsPatch, TourId } from './settings.ts';
 import type { GpuStatus, ModelsStatus, SetupTask } from './setup.ts';
-import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate, StageBrief } from './projects.ts';
+import type { GeneratedScript, IdeaFields, Portraits, Presets, ProjectListing, ScriptEstimate } from './projects.ts';
 import type { EditorReport, SceneProblem, ScriptDocument, ScriptJson, Vocabulary } from './script.ts';
 
 import type { CastChannels } from './cast.ts';
@@ -19,23 +19,12 @@ export type Aspect = (typeof ASPECTS)[number];
 
 /**
  * `details`: one readable line per problem (for example, each invalid field of a project); `path`: a file or folder
- * the failure left for the person (the draft of a script generation that never became valid).
+ * the failure left for the person (the draft of a script generation that never became valid). `needs-setup`: something
+ * is missing that only Settings installs (the window offers a button to it).
  */
-export type FailureCode = 'invalid-request' | 'invalid-project' | 'busy' | 'cancelled' | 'unavailable' | 'failed';
+export type FailureCode = 'invalid-request' | 'invalid-project' | 'needs-setup' | 'busy' | 'cancelled' | 'unavailable' | 'failed';
 export type Failure = Readonly<{ code: FailureCode; message: string; details: readonly string[]; path?: string }>;
 export type Result<T> = Readonly<{ ok: true; value: T }> | Readonly<{ ok: false; failure: Failure }>;
-
-export type ProjectSummary = Readonly<{
-  folder: string;
-  title: string;
-  format: string;
-  language: string;
-  aspect: Aspect;
-  cast: readonly string[];
-  chapters: number;
-  lines: number;
-  warnings: readonly string[];
-}>;
 
 /** A problem of the check: `line` is the line id (empty for the whole project). */
 export type CheckProblem = Readonly<{ line: string; message: string }>;
@@ -58,10 +47,8 @@ type IdeaRequest = Readonly<{ idea: IdeaFields }>;
 /** Every channel the window may invoke: what it sends and what it gets back (always wrapped in a `Result`). */
 export type Channels = CastChannels & ScenarioChannels & VoiceChannels & VideoChannels & Readonly<{
   'projects.pick': Channel<Nothing, string | null>;
-  /** The folder given on the command line (`--project=<folder>`), or null. */
+  /** The folder given on the command line (`--project=<folder>`, of this launch or of a later one), or null. */
   'projects.launched': Channel<Nothing, string | null>;
-  'projects.open': Channel<FolderRequest, ProjectSummary>;
-  'projects.check': Channel<FolderRequest, CheckReport>;
   /** Renders in that aspect (the other one gets its own files) after "montar" and the check; progress on `video.progress`. */
   'video.render': Channel<FolderRequest & Readonly<{ aspect: Aspect }>, RenderedFiles>;
   /** Cancels the render of that folder (false when it is not rendering). */
@@ -70,7 +57,6 @@ export type Channels = CastChannels & ScenarioChannels & VoiceChannels & VideoCh
   'video.status': Channel<Nothing, RenderJobStatus | null>;
   /** Where the key went: the system keychain, or the 600-mode file when there is none. */
   'keys.set': Channel<ProviderRequest & Readonly<{ key: string }>, KeyStorage>;
-  'keys.has': Channel<ProviderRequest, boolean>;
   'keys.remove': Channel<ProviderRequest, boolean>;
   'keys.status': Channel<Nothing, KeysStatus>;
   /** One tiny real call with the saved key (a single attempt); services without a check answer `unavailable`. */
@@ -100,7 +86,6 @@ export type Channels = CastChannels & ScenarioChannels & VoiceChannels & VideoCh
   'projects.trash': Channel<FolderRequest, true>;
   /** "Remover da lista": a folder opened from elsewhere leaves the list; nothing is deleted. */
   'projects.forget': Channel<FolderRequest, true>;
-  'projects.stages': Channel<FolderRequest, readonly StageBrief[]>;
   'ideas.presets': Channel<Nothing, Presets>;
   /** The ready characters' portraits (drawn once, then kept); null when they cannot be drawn. */
   'ideas.portraits': Channel<Nothing, Portraits | null>;

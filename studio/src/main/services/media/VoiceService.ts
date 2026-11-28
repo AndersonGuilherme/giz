@@ -7,19 +7,17 @@ import type { FolderGrants } from '../FolderGrants.ts';
 import type { FolderQueue } from '../FolderQueue.ts';
 import { StudioError } from '../StudioError.ts';
 import { characterOf, projectVoiceOf } from './castFiles.ts';
+import { refuseWithoutModel, type LocalVoiceReady } from './localVoice.ts';
 import { mediaUrlOf } from './mediaUrls.ts';
 import { OneJob } from './OneJob.ts';
 import { castIdsOf, lineIn, projectOf, scriptOf, type ScriptLine } from './projectJson.ts';
 
 /** `saves`: each folder's writes in turn (shared with the script editor); `keyOf` reads a paid voice's key in main. */
 type Dependencies = Readonly<{
-  core: MediaCore;
-  disk: ProjectDisk;
-  files: MediaFiles;
-  grants: FolderGrants;
-  saves: FolderQueue;
+  core: MediaCore; disk: ProjectDisk; files: MediaFiles; grants: FolderGrants; saves: FolderQueue;
   keyOf: (service: 'elevenlabs' | 'fish') => Promise<string | undefined>;
   needsKey: boolean;
+  localVoiceReady: LocalVoiceReady;
   progress: (progress: VoiceProgress) => void;
 }>;
 
@@ -58,12 +56,18 @@ export class VoiceService {
     const path = this.#dependencies.grants.require(folder);
     return this.#job.run(async (signal) => {
       if (lineId !== undefined) lineIn((await scriptOf(this.#dependencies.disk, path)).lines, lineId);
+      await refuseWithoutModel(this.#dependencies, path, { ids: lineId === undefined ? await this.#pending(path) : [lineId], takes: true });
       return this.#made(path, lineId, signal);
     });
   }
 
   cancel(): boolean {
     return this.#job.cancel();
+  }
+
+  /** On quit: the job in flight is cancelled and waited for, at most `milliseconds`. */
+  stop(milliseconds: number): Promise<void> {
+    return this.#job.stop(milliseconds);
   }
 
   /** Whether a voice job (all pending, one line, a take) is running now. */
@@ -97,6 +101,7 @@ export class VoiceService {
     const path = grants.require(folder);
     return this.#job.run(async (signal) => {
       lineIn((await scriptOf(disk, path)).lines, lineId);
+      await refuseWithoutModel(this.#dependencies, path, { ids: [lineId], takes: false });
       await saves.run(path, () => files.remove(path, takeOf(lineId)));
       return this.#made(path, lineId, signal);
     });
@@ -113,6 +118,11 @@ export class VoiceService {
     } finally {
       this.#dependencies.progress({ ...last, ended: true });
     }
+  }
+
+  async #pending(folder: string): Promise<readonly string[]> {
+    const { voices } = await this.#dependencies.core.items(folder);
+    return [...voices.stale, ...voices.missing];
   }
 
   async #lineOf(folder: string, context: Readonly<{ line: ScriptLine; number: number; names: ReadonlyMap<string, string>; items: StageItems['voices'] }>): Promise<VoiceLine> {

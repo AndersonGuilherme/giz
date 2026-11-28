@@ -25,10 +25,6 @@ export class KeyService {
     return this.#exclusive(() => this.#store(provider, key.trim()));
   }
 
-  async has(provider: KeyProvider): Promise<boolean> {
-    return (await this.#storageOf(provider)) !== null;
-  }
-
   remove(provider: KeyProvider): Promise<boolean> {
     return this.#exclusive(() => this.#forget(provider));
   }

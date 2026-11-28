@@ -42,4 +42,13 @@ export class OneJob {
     this.#running?.controller.abort();
     return this.#running !== undefined;
   }
+
+  /** On quit: cancels the job and waits for its work to end (its files written whole or not at all), at most `milliseconds`. */
+  async stop(milliseconds: number): Promise<void> {
+    const work = this.#running?.work;
+    this.cancel();
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const waited = new Promise<void>((done) => (timer = setTimeout(done, milliseconds)));
+    await Promise.race([work, waited]).finally(() => clearTimeout(timer));
+  }
 }

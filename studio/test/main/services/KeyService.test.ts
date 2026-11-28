@@ -14,15 +14,16 @@ function keyService(options: { secure?: boolean; vault?: InMemoryVault } = {}) {
   return { service, vault, files, checker };
 }
 
-test('set keeps the key encrypted in the keychain vault, has sees it, remove forgets it', async () => {
+test('set keeps the key encrypted in the keychain vault, the status sees it, remove forgets it', async () => {
   const { service: keys, vault, files } = keyService();
-  assert.equal(await keys.has('openai'), false);
+  const stored = async () => (await keys.status()).keys.openai;
+  assert.equal(await stored(), null);
   assert.equal(await keys.set('openai', SECRET), 'keychain');
-  assert.equal(await keys.has('openai'), true);
+  assert.equal(await stored(), 'keychain');
   assert.equal(JSON.stringify(vault.keys).includes(SECRET), false);
   assert.equal(files.files.size, 0);
   assert.equal(await keys.remove('openai'), true);
-  assert.equal(await keys.has('openai'), false);
+  assert.equal(await stored(), null);
   assert.equal(await keys.remove('openai'), false);
 });
 
@@ -85,7 +86,7 @@ test('the key is never logged and no answer carries it', async () => {
   const methods = ['log', 'info', 'warn', 'error', 'debug'] as const;
   const spies = methods.map((method) => mock.method(console, method, () => undefined));
   const { service: keys } = keyService();
-  const answers = [await keys.set('gemini', SECRET), await keys.has('gemini'), await keys.status(), await keys.remove('gemini')];
+  const answers = [await keys.set('gemini', SECRET), await keys.status(), await keys.remove('gemini')];
   assert.equal(spies.reduce((calls, spy) => calls + spy.mock.callCount(), 0), 0);
   assert.equal(JSON.stringify(answers).includes(SECRET), false);
   spies.forEach((spy) => spy.mock.restore());

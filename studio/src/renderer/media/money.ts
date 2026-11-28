@@ -10,3 +10,6 @@ export function costText(dollars: number | null, translate: Translate): string {
   if (dollars === 0) return translate('media.free');
   return translate('media.upTo', { cost: formatDollars(dollars, languageOf(translate)) });
 }
+
+/** The voice services that charge the person's account: a sample or "Gerar vozes" with them is confirmed first. */
+export const isPaidVoice = (provider: string): boolean => provider === 'elevenlabs' || provider === 'fish';

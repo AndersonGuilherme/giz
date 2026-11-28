@@ -2,9 +2,10 @@ import { useCallback, useEffect, useState } from 'react';
 import type { GizApi } from '../../../shared/GizApi.ts';
 import type { VoiceProgress, VoicesDocument } from '../../../shared/voices.ts';
 import { useTranslate } from '../../i18n.ts';
-import { costText } from '../../media/money.ts';
+import { costText, isPaidVoice } from '../../media/money.ts';
 import { useRecorder } from '../../media/useRecorder.ts';
 import { useStageDocument } from '../../state/useStageDocument.ts';
+import { ConfirmDialog } from '../common/ConfirmDialog.tsx';
 import { ScreenHead } from '../common/ScreenHead.tsx';
 import { FailurePanel } from '../FailurePanel.tsx';
 import { VoiceRow, type LineActions } from './VoiceRow.tsx';
@@ -34,16 +35,32 @@ function Progress({ progress }: Readonly<{ progress: VoiceProgress }>) {
 
 type PendingProps = Readonly<{ document: VoicesDocument; stage: Stage; api: GizApi; working: boolean; progress: VoiceProgress | null }>;
 
+// A paid voice asks first, with what the pending lines cost; the local voice and a recording start at once.
+function PaidConfirm({ open, document, onYes, onNo }: Readonly<{ open: boolean; document: VoicesDocument; onYes: () => void; onNo: () => void }>) {
+  const translate = useTranslate();
+  if (!open) return null;
+  const provider = translate(`voiceProvider.${document.provider}`);
+  return (
+    <ConfirmDialog title={translate('voices.paidTitle', { provider })} confirm={translate('voices.paidConfirm')} onConfirm={onYes} onCancel={onNo}>
+      <p data-testid="voices-paid-cost">{translate('voices.paidBody', { provider, cost: costText(document.dollars, translate) })}</p>
+    </ConfirmDialog>
+  );
+}
+
 function Pending({ document, stage, api, working, progress }: PendingProps) {
   const translate = useTranslate();
+  const [asking, setAsking] = useState(false);
+  const generate = () => void stage.apply(api.voices.generate(document.folder));
+  const onGenerate = () => (isPaidVoice(document.provider) ? setAsking(true) : generate());
   return (
     <section className="card voices-pending" data-testid="voices-pending">
       <p><b>{translate(document.pending > 0 ? 'voices.pending' : 'voices.allDone', { count: document.pending })}</b> · {translate(`voiceProvider.${document.provider}`)} · <span data-testid="voices-cost">{costText(document.dollars, translate)}</span></p>
       {working && progress && <Progress progress={progress} />}
       <div className="dialog-actions">
         {working && <button type="button" className="chalk-button" data-testid="voices-cancel" onClick={() => void api.voices.cancel()}>{translate('common.cancel')}</button>}
-        <button type="button" className="chalk-button primary" data-testid="voices-generate-all" disabled={working || document.pending === 0} onClick={() => void stage.apply(api.voices.generate(document.folder))}>{translate('voices.generateAll')}</button>
+        <button type="button" className="chalk-button primary" data-testid="voices-generate-all" disabled={working || document.pending === 0} onClick={onGenerate}>{translate('voices.generateAll')}</button>
       </div>
+      <PaidConfirm open={asking} document={document} onYes={() => (setAsking(false), generate())} onNo={() => setAsking(false)} />
     </section>
   );
 }

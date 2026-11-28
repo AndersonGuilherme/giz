@@ -7,6 +7,7 @@ import type { FolderQueue } from '../FolderQueue.ts';
 import { StudioError } from '../StudioError.ts';
 import { languageOf, memberOf, presetFile, presetsOf, projectVoiceOf, savedFile } from './castFiles.ts';
 import { castIdsOf, PLAIN_ID, projectOf, scriptOf, type Json } from './projectJson.ts';
+import { modelNeeded, type LocalVoiceReady } from './localVoice.ts';
 import { SampleShelf } from './samples.ts';
 
 /**
@@ -14,15 +15,12 @@ import { SampleShelf } from './samples.ts';
  * key, read in main; `samples`: where the samples are kept (a folder the media scheme serves).
  */
 type Dependencies = Readonly<{
-  core: MediaCore;
-  disk: ProjectDisk;
-  files: MediaFiles;
-  grants: FolderGrants;
-  saves: FolderQueue;
+  core: MediaCore; disk: ProjectDisk; files: MediaFiles; grants: FolderGrants; saves: FolderQueue;
   keyOf: (service: 'elevenlabs' | 'fish') => Promise<string | undefined>;
   samples: string;
   /** Whether the voices are being made now: the voice worker runs one job at a time, so a sample waits for it. */
   voicesBusy: () => boolean;
+  localVoiceReady: LocalVoiceReady;
 }>;
 
 /** The Cast stage: the project's characters, checked by core's rig catalog before each save, and their voice samples. */
@@ -112,6 +110,7 @@ export class CastService {
 
   async #sampleVoice({ provider, model }: ProjectVoice): Promise<SampleVoice> {
     if (provider === 'recording') throw new StudioError('unavailable', translate('cast.sampleOfRecording'));
+    if (provider === 'qwen' && !(await this.#dependencies.localVoiceReady(model))) throw modelNeeded();
     if (provider === 'qwen') return { provider, model };
     return { provider, key: await this.#dependencies.keyOf(provider) };
   }

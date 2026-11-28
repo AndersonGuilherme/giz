@@ -13,13 +13,8 @@ import { cardOf, croppedBackground, fileViewOf, generatedFile, scenarioLines, sc
 
 /** `saves`: each folder's writes in turn (shared with the script editor); `provider`: the Settings image AI; `keyOf` reads its key in main. */
 type Dependencies = Readonly<{
-  core: MediaCore;
-  disk: ProjectDisk;
-  files: MediaFiles;
-  grants: FolderGrants;
-  saves: FolderQueue;
-  vectors: () => Promise<readonly string[]>;
-  provider: () => Promise<SceneImageProvider>;
+  core: MediaCore; disk: ProjectDisk; files: MediaFiles; grants: FolderGrants; saves: FolderQueue;
+  vectors: () => Promise<readonly string[]>; provider: () => Promise<SceneImageProvider>;
   keyOf: (provider: SceneImageProvider) => Promise<string | undefined>;
   needsKey: boolean;
   progress: (progress: ImageProgress) => void;
@@ -93,6 +88,11 @@ export class ScenarioService {
 
   cancel(): boolean {
     return this.#job.cancel();
+  }
+
+  /** On quit: the image job in flight is cancelled and waited for, at most `milliseconds`. */
+  stop(milliseconds: number): Promise<void> {
+    return this.#job.stop(milliseconds);
   }
 
   /** "Usar a gerada": back to scenes/<id>.png when giz made it; otherwise no picture, so the image AI makes it. */

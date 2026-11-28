@@ -19,16 +19,16 @@ test('a payload that fails the channel schema never reaches the handler', async 
 });
 
 test('the schemas refuse extra fields, an empty folder, an unknown provider and an empty key', () => {
-  assert.equal(REQUEST_SCHEMAS['projects.check'].safeParse({ folder: '/p', extra: 1 }).success, false);
-  assert.equal(REQUEST_SCHEMAS['projects.open'].safeParse({ folder: '  ' }).success, false);
-  assert.equal(REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'acme' }).success, false);
-  assert.equal(REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'google' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['script.check'].safeParse({ folder: '/p', extra: 1 }).success, false);
+  assert.equal(REQUEST_SCHEMAS['script.read'].safeParse({ folder: '  ' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['keys.remove'].safeParse({ provider: 'acme' }).success, false);
+  assert.equal(REQUEST_SCHEMAS['keys.remove'].safeParse({ provider: 'google' }).success, false);
   assert.equal(REQUEST_SCHEMAS['keys.set'].safeParse({ provider: 'openai', key: '' }).success, false);
   assert.equal(REQUEST_SCHEMAS['keys.set'].safeParse({ provider: 'openai', key: 'sk-1' }).success, true);
 });
 
 test('a valid payload runs the handler and its answer comes back as ok', async () => {
-  const run = guarded<'keys.has'>(REQUEST_SCHEMAS['keys.has'], async ({ provider }) => provider === 'openai');
+  const run = guarded<'keys.remove'>(REQUEST_SCHEMAS['keys.remove'], async ({ provider }) => provider === 'openai');
   assert.deepEqual(await run({ provider: 'openai' }), { ok: true, value: true });
 });
 
@@ -46,7 +46,7 @@ test('a StudioError keeps its code and message; any other error says it failed, 
 
 test("core's ProjectError becomes invalid-project with one line per problem (file › field: message)", async () => {
   const error = Object.assign(new Error('projeto inválido'), { problems: [{ file: 'cast/lia.json', path: 'parameters.skin', message: 'cor "roxo" inválida' }] });
-  const run = guarded<'projects.open'>(REQUEST_SCHEMAS['projects.open'], async () => {
+  const run = guarded<'script.check'>(REQUEST_SCHEMAS['script.check'], async () => {
     throw error;
   });
   const result = await run({ folder: '/p' });
@@ -57,7 +57,7 @@ test("core's ProjectError becomes invalid-project with one line per problem (fil
 });
 
 test('zod messages come in pt-BR', () => {
-  const result = REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'acme' });
+  const result = REQUEST_SCHEMAS['keys.remove'].safeParse({ provider: 'acme' });
   assert.match(result.error?.issues[0]?.message ?? '', /^Opção inválida: esperava uma das seguintes opções/);
 });
 

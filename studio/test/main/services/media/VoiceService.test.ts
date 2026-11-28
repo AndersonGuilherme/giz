@@ -10,7 +10,7 @@ import { MemoryDisk } from '../../../doubles/scriptFakes.ts';
 const FOLDER = '/projects/cats';
 const WAV = new Uint8Array([82, 73, 70, 70, 0, 0, 0, 0, 87, 65, 86, 69]);
 
-function build(provider = 'qwen', key?: string) {
+function build(provider = 'qwen', key?: string, ready = true) {
   const disk = new MemoryDisk();
   disk.put(FOLDER, 'project.json', { version: 2, aspect: '9:16', cast: ['ana', 'narrator'], voice: { provider } });
   disk.put(FOLDER, 'cast/ana.json', { id: 'ana', name: 'Ana', rig: 'giz', voice: { id: 'vivian' } });
@@ -26,8 +26,10 @@ function build(provider = 'qwen', key?: string) {
   const files = new MemoryMediaFiles();
   const progress: VoiceProgress[] = [];
   const saves = new FolderQueue();
-  const service = new VoiceService({ core, disk, files, grants, saves, keyOf: async () => key, needsKey: true, progress: (step) => progress.push(step) });
-  return { disk, core, files, service, progress, saves };
+  const asked: Array<string | undefined> = [];
+  const localVoiceReady = async (model?: string) => (asked.push(model), ready);
+  const service = new VoiceService({ core, disk, files, grants, saves, keyOf: async () => key, needsKey: true, localVoiceReady, progress: (step) => progress.push(step) });
+  return { disk, core, files, service, progress, saves, asked };
 }
 
 test('every line with its speaker, its state (done, stale, missing), its audio and whether it is the person\'s own take', async () => {
@@ -134,4 +136,31 @@ test("the take is written in the folder's queue (after the folder's other writes
   await held;
   await recording;
   assert.equal(files.files.has(`${FOLDER}/recordings/3.wav`), true);
+});
+
+test('the local voice is never downloaded here: without its model, the lines it would make are refused with a way to Settings', async () => {
+  const { service, core, files, asked, disk } = build('qwen', undefined, false);
+  await assert.rejects(service.generate(FOLDER), { code: 'needs-setup', message: /Baixe o modelo de voz em Configurações/ });
+  await assert.rejects(service.generate(FOLDER, '2'), { code: 'needs-setup' });
+  assert.equal(core.voiceJobs.length, 0);
+  assert.deepEqual(asked, [undefined, undefined], 'the project names no model: the configured one');
+  await files.write(FOLDER, 'recordings/2.wav', WAV);
+  await service.generate(FOLDER, '2');
+  await service.record(FOLDER, '3', WAV);
+  assert.deepEqual(core.voiceJobs.map(({ only }) => only), ['2', '3'], 'a line from the person\'s own take needs no model');
+  await assert.rejects(service.unrecord(FOLDER, '3'), { code: 'needs-setup' }, 'without the take the line goes back to the local voice');
+  disk.put(FOLDER, 'project.json', { version: 2, aspect: '9:16', cast: ['ana', 'narrator'], voice: { provider: 'qwen', model: '1.7b' } });
+  await assert.rejects(service.generate(FOLDER, '1'), { code: 'needs-setup' });
+  assert.equal(asked.at(-1), '1.7b');
+  await service.generate(FOLDER);
+  assert.equal(core.voiceJobs.length, 3, 'every pending line has a take: nothing needs the model');
+});
+
+test('a paid voice or a recording project never asks for the local model', async () => {
+  const paid = build('elevenlabs', 'k', false);
+  await paid.service.generate(FOLDER);
+  assert.deepEqual(paid.asked, []);
+  const recording = build('recording', undefined, false);
+  await recording.service.generate(FOLDER);
+  assert.deepEqual(recording.asked, []);
 });

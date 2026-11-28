@@ -1,13 +1,6 @@
-import { realPathOf } from '../realPaths.ts';
+import { folderKeyOf as keyOf } from '../realPaths.ts';
 
 // The same folder reached through a link is one queue (its real path); a path that cannot be resolved keeps its own.
-function keyOf(folder: string): string {
-  try {
-    return realPathOf(folder);
-  } catch {
-    return folder;
-  }
-}
 
 /**
  * The writes of each project folder, one after the other (the newest always lands last): the script editor's saves and

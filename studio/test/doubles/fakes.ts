@@ -1,41 +1,5 @@
 import { FolderGrants } from '../../src/main/services/FolderGrants.ts';
-import type { CheckReport } from '../../src/shared/contract.ts';
 import type { Cipher, KeyVault, SealedKeys } from '../../src/main/ports/KeyVault.ts';
-import type { Project, StudioCore } from '../../src/main/ports/StudioCore.ts';
-
-/** A core Project with only what the Studio reads (title, profile, cast, script). */
-export function fakeProject(aspect: '9:16' | '16:9' = '16:9'): Project {
-  return {
-    title: () => 'O cupom',
-    format: () => 'lesson',
-    language: () => ({ code: () => 'pt-BR' }),
-    aspect: () => ({ text: () => aspect }),
-    cast: () => ({ ids: () => ['lia', 'teo'] }),
-    script: () => ({ chapters: () => ['Abertura', 'Fim'], lines: () => ({ count: () => 12 }) }),
-    warnings: () => ['imagem ausente'],
-  } as unknown as Project;
-}
-
-/** A core that loads `project` and reports `report`. */
-export class FakeCore implements StudioCore {
-  readonly loads: string[] = [];
-  readonly #project: Project;
-  readonly #report: CheckReport;
-
-  constructor(project: Project, report: CheckReport = { errors: [], warnings: [] }) {
-    this.#project = project;
-    this.#report = report;
-  }
-
-  async load(folder: string): Promise<Project> {
-    this.loads.push(folder);
-    return this.#project;
-  }
-
-  async check(): Promise<CheckReport> {
-    return this.#report;
-  }
-}
 
 /** Reversible "encryption" that is visibly not the plain text. */
 export class FakeCipher implements Cipher {

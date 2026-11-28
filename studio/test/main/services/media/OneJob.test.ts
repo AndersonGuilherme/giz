@@ -31,3 +31,21 @@ test('a job that ends on its own or fails frees the slot; ended() waits for the 
   assert.equal(job.running(), false);
   await job.ended();
 });
+
+test('stop (on quit) cancels the job and waits for its work to really end, but never longer than the given time', async () => {
+  const job = new OneJob();
+  let ended = false;
+  const work = job.run((signal) => new Promise<void>((done) => signal.addEventListener('abort', () => setTimeout(() => {
+    ended = true;
+    done();
+  }, 20))));
+  work.catch(() => undefined);
+  await job.stop(1000);
+  assert.equal(ended, true, 'the work ended before stop answered');
+  const stuck = new OneJob();
+  stuck.run(() => new Promise(() => undefined)).catch(() => undefined);
+  const started = Date.now();
+  await stuck.stop(30);
+  assert.ok(Date.now() - started < 500);
+  await new OneJob().stop(10);
+});

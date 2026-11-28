@@ -7,7 +7,8 @@ import type { VoiceChannel } from './WorkerVoiceWork.ts';
 // Built by Vite next to main.cjs (see forge.config.mts), like the setup worker.
 const WORKER = () => join(__dirname, 'voiceWorker.cjs');
 
-// The worker and what it started (espeak) go when it is closed, and when the app quits.
+// The worker goes when it is closed and when the app quits, with any process it started (espeak is not one: it runs
+// inside the worker, as WASM).
 function killerOf(child: Electron.UtilityProcess): () => void {
   const kill = () => {
     if (child.pid !== undefined) killDescendantsNow(child.pid);

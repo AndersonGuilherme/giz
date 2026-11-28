@@ -1,4 +1,4 @@
-import { resolve } from 'node:path';
+import { folderKeyOf } from '../realPaths.ts';
 import { translate } from '../text.ts';
 import { StudioError } from './StudioError.ts';
 
@@ -25,7 +25,7 @@ export class FolderJobs {
 
   /** Takes the folder for `job` (refused as `busy` when it clashes with one running there); answers its release. */
   claim(folder: string, job: FolderJob): () => void {
-    const entry = { folder: resolve(folder), job };
+    const entry = { folder: folderKeyOf(folder), job }; // a folder reached through a link is the folder it leads to
     const clash = this.#running.find((other) => other.folder === entry.folder && CLASHES[job].includes(other.job));
     if (clash) throw new StudioError('busy', translate(BUSY[clash.job]));
     this.#running.push(entry);

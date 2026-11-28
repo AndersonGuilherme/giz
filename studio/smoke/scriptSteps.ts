@@ -148,7 +148,7 @@ export async function duplicateAndTrash({ page, shoot, home }: Context, folder: 
   await shoot(page, 's3-07-excluir');
   await page.click('[data-testid="confirm-yes"]');
   await until(async () => (await count(page, copy)) === 0, 'the copy to leave the list');
-  const trashed = await readdir(join(home, '.lixeira'));
+  const trashed = await readdir(join(home, '.trash'));
   assert.equal(trashed.length, 1);
   assert.match(trashed[0] ?? '', /^e-se-os-gatos-acordassem-falando-copia-\d+$/);
   await shoot(page, 's3-08-projetos');

@@ -61,3 +61,15 @@ test('progress steps: at most one event per half percent of a file, and one when
   assert.equal(sent.length, 202);
   assert.deepEqual(sent.at(-1), { task: 'gpu', label: 'libcublas', receivedBytes: 0, totalBytes: 0 });
 });
+
+test('the local voice is ready when that model size (or the configured one) is downloaded in the models folder', async () => {
+  const tools = new FakeSetupTools();
+  const { service, shared } = setupService(tools);
+  shared.values = { ...shared.values, modelsDir: '/m/ready', model: '1.7b' };
+  assert.equal(await service.localVoiceReady(), false);
+  tools.readyModels = ['1.7b'];
+  assert.equal(await service.localVoiceReady(), true, 'no size named: the configured one');
+  assert.equal(await service.localVoiceReady('0.6b'), false);
+  shared.values = { ...shared.values, modelsDir: '/m/elsewhere' };
+  assert.equal(await service.localVoiceReady('1.7b'), false);
+});

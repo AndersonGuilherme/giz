@@ -26,6 +26,7 @@
   "render.done": "Vídeo pronto: {video}",
   "render.cancelled": "Render cancelado.",
   "errors.title": "Algo deu errado",
+  "errors.openSettings": "Abrir Configurações",
   "errors.busy": "Já existe um vídeo sendo renderizado.",
   "errors.cancelled": "render cancelado",
   "errors.noVault": "Este sistema não oferece um cofre para guardar a chave com segurança.",

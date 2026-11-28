@@ -1,6 +1,8 @@
 import type { Aspect, CheckReport, RenderedFiles } from '../../shared/contract.ts';
 import type { StageItems } from './MediaCore.ts';
-import type { RenderJob } from './StudioCore.ts';
+
+/** `signal` cancels the render; `onProgress` receives the done fraction (0 to 1). */
+export type RenderJob = Readonly<{ signal: AbortSignal; onProgress: (fraction: number) => void }>;
 
 /** The project seen in an aspect: its own aspect and title, its lines (in order) and core's check in that aspect. */
 export type VideoInspection = Readonly<{

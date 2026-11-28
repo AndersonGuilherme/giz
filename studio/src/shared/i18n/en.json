@@ -26,6 +26,7 @@
   "render.done": "Video ready: {video}",
   "render.cancelled": "Render cancelled.",
   "errors.title": "Something went wrong",
+  "errors.openSettings": "Open Settings",
   "errors.busy": "A video is already being rendered.",
   "errors.cancelled": "render cancelled",
   "errors.noVault": "This system offers no vault to keep the key safely.",

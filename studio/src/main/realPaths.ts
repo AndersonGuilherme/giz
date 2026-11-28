@@ -44,3 +44,12 @@ export function reallyWithin(folder: string, path: string): boolean {
     return false;
   }
 }
+
+/** The key of a project folder for the per-folder queues and jobs: its real path (a link is the folder it leads to), or itself when it cannot be resolved. */
+export function folderKeyOf(folder: string): string {
+  try {
+    return realPathOf(folder);
+  } catch {
+    return resolve(folder);
+  }
+}

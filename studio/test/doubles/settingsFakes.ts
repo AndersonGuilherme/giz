@@ -103,9 +103,13 @@ export class FakeSetupTools implements SetupTools {
     return { gpu: { name: 'RTX', memoryMiB: 8192, driver: '1' }, supported: true, ready: modelsDir.endsWith('ready'), bytes: 2 };
   }
 
+  /** The voice models downloaded in a models folder ending in `ready` (none elsewhere). */
+  readyModels: ReadonlyArray<'0.6b' | '1.7b'> = [];
+
   async models(modelsDir: string): Promise<ModelsStatus> {
     const model = { ready: false, bytes: 1, onDiskBytes: 0 };
-    return { modelsDir, freeBytes: 10, voice: { '0.6b': model, '1.7b': model }, whisper: model };
+    const voice = (size: '0.6b' | '1.7b') => ({ ...model, ready: modelsDir.endsWith('ready') && this.readyModels.includes(size) });
+    return { modelsDir, freeBytes: 10, voice: { '0.6b': voice('0.6b'), '1.7b': voice('1.7b') }, whisper: model };
   }
 
   run(task: SetupTask, job: SetupJob): Promise<void> {

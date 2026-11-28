@@ -167,12 +167,12 @@ async function licenseStep(page: Page): Promise<void> {
 
 async function studio(page: Page): Promise<Record<string, unknown>> {
   await page.until('[data-testid="check-report"]');
-  const check = (await page.evaluate(`window.giz.projects.check(${JSON.stringify(FOLDER)})`)) as { ok: boolean; value: { errors: unknown[]; warnings: unknown[] } };
+  const check = (await page.evaluate(`window.giz.script.check(${JSON.stringify(FOLDER)})`)) as { ok: boolean; value: { errors: unknown[]; warnings: unknown[] } };
   assert.equal(check.ok, true);
   assert.deepEqual(check.value.errors, []);
-  const refused = (await page.evaluate(`window.giz.projects.check('')`)) as { failure: { code: string } };
+  const refused = (await page.evaluate(`window.giz.script.check('')`)) as { failure: { code: string } };
   assert.equal(refused.failure.code, 'invalid-request');
-  const ungranted = (await page.evaluate(`window.giz.projects.check('/tmp')`)) as { failure: { code: string } };
+  const ungranted = (await page.evaluate(`window.giz.script.check('/tmp')`)) as { failure: { code: string } };
   assert.equal(ungranted.failure.code, 'invalid-request');
   const named = (await page.evaluate(`window.giz.settings.update({ modelsDir: '/etc' })`)) as { failure: { code: string } };
   assert.equal(named.failure.code, 'invalid-request', 'the window cannot name a folder');

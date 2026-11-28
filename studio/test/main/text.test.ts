@@ -8,9 +8,9 @@ test('the main process texts and zod messages follow the chosen interface langua
   try {
     assert.equal(interfaceLanguage(), 'en');
     assert.equal(translate('errors.failed'), 'The operation failed.');
-    const issue = REQUEST_SCHEMAS['keys.has'].safeParse({ provider: 'acme' }).error?.issues[0]?.message ?? '';
+    const issue = REQUEST_SCHEMAS['keys.remove'].safeParse({ provider: 'acme' }).error?.issues[0]?.message ?? '';
     assert.match(issue, /^Invalid option/);
-    const empty = REQUEST_SCHEMAS['projects.check'].safeParse({ folder: ' ' }).error?.issues[0]?.message;
+    const empty = REQUEST_SCHEMAS['script.check'].safeParse({ folder: ' ' }).error?.issues[0]?.message;
     assert.equal(empty, 'enter the project folder');
   } finally {
     setInterfaceLanguage('pt-BR');

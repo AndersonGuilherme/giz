@@ -72,9 +72,9 @@ test('the rehearsal trash moves the folder into its own folder', async () => {
   await withFolder(async (folder) => {
     await mkdir(join(folder, 'gatos'));
     await writeFile(join(folder, 'gatos', 'project.json'), '{}');
-    await new RehearsalTrash(join(folder, '.lixeira')).trash(join(folder, 'gatos'));
-    assert.deepEqual(await readdir(folder), ['.lixeira']);
-    const [moved] = await readdir(join(folder, '.lixeira'));
+    await new RehearsalTrash(join(folder, '.trash')).trash(join(folder, 'gatos'));
+    assert.deepEqual(await readdir(folder), ['.trash']);
+    const [moved] = await readdir(join(folder, '.trash'));
     assert.match(moved ?? '', /^gatos-\d+$/);
   });
 });

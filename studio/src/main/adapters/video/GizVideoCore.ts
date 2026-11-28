@@ -4,6 +4,8 @@ import type { StageItems } from '../../ports/MediaCore.ts';
 import type { OutputFiles, VideoBuild, VideoCore, VideoInspection, VideoRenderJob } from '../../ports/VideoCore.ts';
 import { stageItemsOf } from '../media/coreJobs.ts';
 import { coreAspect, coreMain } from '../media/mediaModules.ts';
+import { StudioError } from '../../services/StudioError.ts';
+import { translate } from '../../text.ts';
 
 type CoreVideo = typeof import('giz-core/src/presentation/cli/composition/video.ts');
 type CoreClock = typeof import('giz-core/src/domain/video/VideoClock.ts');
@@ -23,6 +25,14 @@ async function loaded(folder: string, aspect: Aspect | undefined): Promise<Reado
   const [video, { AspectRatio }] = await Promise.all([coreVideo(), coreAspect()]);
   const own = await video.projectInAspect(folder);
   return { own, project: aspect === undefined ? own : own.inAspect(AspectRatio.of(aspect)) };
+}
+
+// Core's CheckFailed as the Studio's readable failure (the same one the montage's check gives); other errors as they are.
+function checkFailure(error: unknown, aspect: Aspect): unknown {
+  const problems = error instanceof Error && error.name === 'CheckFailed' ? (error as Error & { problems: readonly Readonly<{ line: string; message: string }>[] }).problems : undefined;
+  if (!problems) return error;
+  const lines = problems.map(({ line, message }) => (line ? translate('video.lineProblem', { number: line, message }) : message));
+  return new StudioError('invalid-project', translate('video.checkErrors', { count: problems.length, aspect }), lines);
 }
 
 /**
@@ -66,10 +76,14 @@ export class GizVideoCore implements VideoCore {
     return (await coreVideo()).outputFilesOf(variant);
   }
 
+  // The project is checked again as it is rendered (the same loaded project): a change saved after the montage's check
+  // and before this load cannot reach the video unchecked.
   async render(folder: string, aspect: Aspect, job: VideoRenderJob): Promise<RenderedFiles & Readonly<{ frames?: number }>> {
     const [{ project }, main] = await Promise.all([loaded(folder, aspect), coreMain()]);
-    const output = { ...(job.variant === undefined ? {} : { variant: job.variant }), ...(this.#frames === undefined ? {} : { frames: this.#frames }) };
-    const files = await main.renderVideo(folder, job.signal, output).run(folder, project, job.onProgress);
+    const output = { checked: true, ...(job.variant === undefined ? {} : { variant: job.variant }), ...(this.#frames === undefined ? {} : { frames: this.#frames }) };
+    const files = await main.renderVideo(folder, job.signal, output).run(folder, project, job.onProgress).catch((error: unknown) => {
+      throw checkFailure(error, aspect);
+    });
     return this.#frames === undefined ? files : { ...files, frames: this.#frames };
   }
 }
